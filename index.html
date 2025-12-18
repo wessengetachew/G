@@ -2,132 +2,161 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>RH Boundary Audit: Power-Law Growth Analysis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Unified Secret: RH & Goldbach Deep Audit</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background: #050505; color: #00ff41; font-family: 'Courier New', monospace; padding: 20px; }
-        .dashboard { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
-        .chart-box { background: #111; border: 1px solid #00ff41; padding: 15px; border-radius: 8px; }
-        .stats-panel { background: #1a1a1a; border: 1px solid #00ff41; padding: 15px; font-size: 0.9rem; }
-        .secret-alert { color: #ff0055; font-weight: bold; border: 1px solid #ff0055; padding: 10px; margin-bottom: 20px; text-align: center; }
-        button { background: #00ff41; color: #000; border: none; padding: 10px; cursor: pointer; width: 100%; font-weight: bold; }
-        .highlight { color: #fff; text-shadow: 0 0 5px #00ff41; }
+        body { background: #050505; color: #00ff41; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; }
+        .header { text-align: center; border-bottom: 2px solid #00ff41; padding-bottom: 10px; margin-bottom: 20px; }
+        .control-panel { background: #111; border: 1px solid #00ff41; padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .main-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+        .chart-container { background: #000; border: 1px solid #00ff41; padding: 10px; position: relative; height: 500px; }
+        .stats-panel { background: #111; border: 1px solid #00ff41; padding: 15px; font-size: 0.85rem; }
+        input, select { background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 5px; width: 100%; box-sizing: border-box; }
+        button { background: #00ff41; color: #000; border: none; padding: 10px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; margin-top: 5px; }
+        button:hover { background: #fff; }
+        .export-btn { background: #ff0055; color: white; margin-top: 15px; }
+        .highlight { color: #fff; text-shadow: 0 0 5px #00ff41; font-weight: bold; }
+        .alert { color: #ff0055; text-align: center; font-size: 0.7rem; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-    <div class="secret-alert">
-        CRITICAL ANALYSIS MODE: MONITORING GROWTH EXPONENT (&alpha;)
+<div class="container">
+    <div class="header">
+        <h1>PRIME SYMMETRY ENGINE</h1>
+        <div class="alert">MONITORING GROWTH EXPONENT (&alpha;) AND GOLDBACH COMET</div>
     </div>
 
-    <div class="dashboard">
-        <div class="chart-box">
-            <canvas id="growthChart" height="400"></canvas>
+    <div class="control-panel">
+        <div><label>Start Radius:</label><input type="number" id="startR" value="1"></div>
+        <div><label>End Radius:</label><input type="number" id="endR" value="10000"></div>
+        <div>
+            <label>Dimension (k):</label>
+            <select id="dimK">
+                <option value="2">2D (Density 6/π²)</option>
+                <option value="3">3D (Density 1/ζ(3))</option>
+            </select>
         </div>
+        <div><label>&nbsp;</label><button onclick="runDeepAudit()">EXECUTE AUDIT</button></div>
+    </div>
+
+    <div class="main-layout">
+        <div class="chart-container"><canvas id="mainChart"></canvas></div>
 
         <div class="stats-panel">
-            <h3>Boundary Stats</h3>
-            <p>Radius (R): <span id="valR" class="highlight">0</span></p>
-            <p>Mertens M(R): <span id="valM" class="highlight">0</span></p>
-            <hr>
-            <h3>The "Secret" Metric</h3>
-            <p>Actual Error &Delta;: <span id="valErr" class="highlight">0</span></p>
-            <p>Growth Exponent &alpha;: <span id="valAlpha" class="highlight">0.00</span></p>
-            <p>Status: <span id="valStatus" class="highlight">WAITING</span></p>
-            <br>
-            <button onclick="runAudit()">RUN DEEP AUDIT (R=10,000)</button>
-            <p style="font-size: 0.7rem; margin-top: 10px;">
-                *Note: If &alpha; stays below 0.50, the Riemann Hypothesis is visually confirmed for this range.
-            </p>
+            <h3>Lattice Stats (RH)</h3>
+            <p>Current R: <span id="statR" class="highlight">-</span></p>
+            <p>Error (&Delta;): <span id="statErr" class="highlight">-</span></p>
+            <p>Growth (&alpha;): <span id="statAlpha" class="highlight">-</span></p>
+            <hr style="border: 0.5px solid #222;">
+            <h3>Goldbach Stats</h3>
+            <p>Prime Pairs: <span id="statPairs" class="highlight">-</span></p>
+            <p>Min Symmetry: <span id="statMinSym" class="highlight">-</span></p>
+            <hr style="border: 0.5px solid #222;">
+            <button class="export-btn" onclick="exportToCSV()">EXPORT CSV DATA</button>
+            <div id="loadingBar" style="height: 5px; background: #222; margin-top: 10px;">
+                <div id="progress" style="height: 100%; background: #00ff41; width: 0%;"></div>
+            </div>
         </div>
     </div>
+</div>
 
 <script>
-const ctx = document.getElementById('growthChart').getContext('2d');
-let chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: [],
-        datasets: [{
-            label: 'Normalized Error (Error / R^0.5)',
-            data: [],
-            borderColor: '#00ff41',
-            borderWidth: 1,
-            pointRadius: 0
-        }]
-    },
-    options: {
-        scales: {
-            y: { grid: { color: '#222' } },
-            x: { grid: { color: '#222' } }
+let chart;
+let auditResults = [];
+
+function initChart() {
+    if (chart) chart.destroy();
+    chart = new Chart(document.getElementById('mainChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                { label: 'Normalized Error (RH)', borderColor: '#00ff41', data: [], yAxisID: 'y', pointRadius: 0 },
+                { label: 'Goldbach Pairs', borderColor: '#ff0055', data: [], yAxisID: 'y1', showLine: false, pointRadius: 1.5 }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { position: 'left', grid: { color: '#222' }, title: { display: true, text: 'Error / R^((k-1)/2)', color: '#00ff41' } },
+                y1: { position: 'right', grid: { display: false }, title: { display: true, text: 'Goldbach Pairs', color: '#ff0055' } }
+            }
         }
-    }
-});
+    });
+}
 
-function runAudit() {
-    const limit = 10000;
-    const mu = new Int8Array(limit + 1);
-    const isPrime = new Uint8Array(limit + 1).fill(1);
+async function runDeepAudit() {
+    initChart();
+    auditResults = [];
+    const startR = parseInt(document.getElementById('startR').value);
+    const endR = parseInt(document.getElementById('endR').value);
+    const k = parseInt(document.getElementById('dimK').value);
+    const zeta_k = k === 2 ? (Math.PI**2 / 6) : 1.2020569;
+
+    const mu = new Int8Array(endR + 1);
+    const isPrime = new Uint8Array(endR + 1).fill(1);
     const primes = [];
-    mu[1] = 1;
+    mu[1] = 1; isPrime[0] = isPrime[1] = 0;
 
-    // Linear Sieve (Fast Möbius Calculation)
-    for (let i = 2; i <= limit; i++) {
+    // Linear Sieve
+    for (let i = 2; i <= endR; i++) {
         if (isPrime[i]) { primes.push(i); mu[i] = -1; }
         for (let p of primes) {
-            if (i * p > limit) break;
+            if (i * p > endR) break;
             isPrime[i * p] = 0;
             if (i % p === 0) { mu[i * p] = 0; break; }
             else { mu[i * p] = -mu[i]; }
         }
     }
 
-    let rs = [];
-    let norms = [];
-    let zeta2 = Math.PI * Math.PI / 6;
-
-    for (let R = 1; R <= limit; R++) {
-        let actual = 0;
-        // Analytical Boundary Sum
+    let minSym = Infinity;
+    for (let R = startR; R <= endR; R++) {
+        let actual = 0n;
         for (let d = 1; d <= R; d++) {
             if (mu[d] === 0) continue;
-            actual += mu[d] * Math.pow(Math.floor(R/d), 2);
+            let term = BigInt(Math.floor(R/d)) ** BigInt(k);
+            if (mu[d] === 1) actual += term; else actual -= term;
         }
 
-        let expected = (R * R) / zeta2;
-        let error = actual - expected;
-        
-        // THE SECRET LOGIC: Calculation of the Growth Exponent
-        // We solve: |Error| = R^alpha  =>  alpha = ln(|Error|) / ln(R)
-        let alpha = R > 1 ? Math.log(Math.abs(error) + 1) / Math.log(R) : 0;
-        let normalized = error / Math.sqrt(R);
-
-        if (R % 50 === 0) {
-            updateUI(R, error, alpha, normalized);
+        let error = Number(actual) - (Math.pow(R, k) / zeta_k);
+        let alpha = Math.log(Math.abs(error) + 1) / Math.log(R);
+        let pairs = 0;
+        if (R % 2 === 0 && R > 2) {
+            for (let p of primes) { if (p > R/2) break; if (isPrime[R-p]) pairs++; }
+            if (pairs < minSym) minSym = pairs;
         }
 
-        rs.push(R);
-        norms.push(normalized);
+        auditResults.push({ R, error, alpha, pairs });
+
+        if (R % 100 === 0 || R === endR) {
+            document.getElementById('statR').innerText = R;
+            document.getElementById('statErr').innerText = error.toFixed(2);
+            document.getElementById('statAlpha').innerText = alpha.toFixed(4);
+            document.getElementById('statPairs').innerText = pairs;
+            document.getElementById('statMinSym').innerText = minSym === Infinity ? 0 : minSym;
+            document.getElementById('progress').style.width = ((R/endR)*100) + "%";
+        }
+        if (R % 500 === 0) await new Promise(r => setTimeout(r, 1));
     }
 
-    chart.data.labels = rs;
-    chart.data.datasets[0].data = norms;
+    chart.data.labels = auditResults.map(d => d.R);
+    chart.data.datasets[0].data = auditResults.map(d => d.error / Math.pow(d.R, (k-1)/2));
+    chart.data.datasets[1].data = auditResults.map(d => d.pairs);
     chart.update();
 }
 
-function updateUI(R, err, alpha, norm) {
-    document.getElementById('valR').innerText = R;
-    document.getElementById('valErr').innerText = err.toFixed(2);
-    document.getElementById('valAlpha').innerText = alpha.toFixed(4);
-    
-    const status = document.getElementById('valStatus');
-    if (alpha < 0.5) {
-        status.innerText = "RH PASS";
-        status.style.color = "#00ff41";
-    } else {
-        status.innerText = "CRITICAL BOUNDARY";
-        status.style.color = "#ff0055";
-    }
+function exportToCSV() {
+    let csv = "Radius,Actual_Error,Growth_Alpha,Goldbach_Pairs\n";
+    auditResults.forEach(row => { csv += `${row.R},${row.error},${row.alpha},${row.pairs}\n`; });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'Lattice_Symmetry_Audit.csv';
+    a.click();
 }
 </script>
 </body>
