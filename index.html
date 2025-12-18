@@ -2,107 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Unified Secret: RH & Goldbach Deep Audit</title>
+    <title>The Millennium Engine: Pure Integer Audit</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background: #050505; color: #00ff41; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: auto; }
-        .header { text-align: center; border-bottom: 2px solid #00ff41; padding-bottom: 10px; margin-bottom: 20px; }
-        .control-panel { background: #111; border: 1px solid #00ff41; padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .main-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
-        .chart-container { background: #000; border: 1px solid #00ff41; padding: 10px; position: relative; height: 500px; }
-        .stats-panel { background: #111; border: 1px solid #00ff41; padding: 15px; font-size: 0.85rem; }
-        input, select { background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 5px; width: 100%; box-sizing: border-box; }
-        button { background: #00ff41; color: #000; border: none; padding: 10px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; margin-top: 5px; }
-        button:hover { background: #fff; }
-        .export-btn { background: #ff0055; color: white; margin-top: 15px; }
-        .highlight { color: #fff; text-shadow: 0 0 5px #00ff41; font-weight: bold; }
-        .alert { color: #ff0055; text-align: center; font-size: 0.7rem; margin-top: 5px; }
+        body { background: #050505; color: #00ff41; font-family: 'Courier New', monospace; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; border: 1px solid #00ff41; padding: 20px; background: #111; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; text-align: center; }
+        input, button { background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 10px; font-family: inherit; }
+        button { background: #00ff41; color: #000; font-weight: bold; cursor: pointer; }
+        .highlight { color: #fff; text-shadow: 0 0 5px #00ff41; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
-        <h1>PRIME SYMMETRY ENGINE</h1>
-        <div class="alert">MONITORING GROWTH EXPONENT (&alpha;) AND GOLDBACH COMET</div>
+    <h2 style="text-align: center;">LEAK-PROOF PRIME AUDIT</h2>
+    <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
+        <input type="number" id="targetR" value="10000" style="width: 150px;">
+        <button onclick="runAudit()">RUN BIGINT AUDIT</button>
+        <button onclick="exportCSV()" style="background: #ff0055; color: white;">EXPORT CSV</button>
     </div>
 
-    <div class="control-panel">
-        <div><label>Start Radius:</label><input type="number" id="startR" value="1"></div>
-        <div><label>End Radius:</label><input type="number" id="endR" value="10000"></div>
-        <div>
-            <label>Dimension (k):</label>
-            <select id="dimK">
-                <option value="2">2D (Density 6/π²)</option>
-                <option value="3">3D (Density 1/ζ(3))</option>
-            </select>
-        </div>
-        <div><label>&nbsp;</label><button onclick="runDeepAudit()">EXECUTE AUDIT</button></div>
-    </div>
+    <canvas id="chart" height="400"></canvas>
 
-    <div class="main-layout">
-        <div class="chart-container"><canvas id="mainChart"></canvas></div>
-
-        <div class="stats-panel">
-            <h3>Lattice Stats (RH)</h3>
-            <p>Current R: <span id="statR" class="highlight">-</span></p>
-            <p>Error (&Delta;): <span id="statErr" class="highlight">-</span></p>
-            <p>Growth (&alpha;): <span id="statAlpha" class="highlight">-</span></p>
-            <hr style="border: 0.5px solid #222;">
-            <h3>Goldbach Stats</h3>
-            <p>Prime Pairs: <span id="statPairs" class="highlight">-</span></p>
-            <p>Min Symmetry: <span id="statMinSym" class="highlight">-</span></p>
-            <hr style="border: 0.5px solid #222;">
-            <button class="export-btn" onclick="exportToCSV()">EXPORT CSV DATA</button>
-            <div id="loadingBar" style="height: 5px; background: #222; margin-top: 10px;">
-                <div id="progress" style="height: 100%; background: #00ff41; width: 0%;"></div>
-            </div>
-        </div>
+    <div class="stats">
+        <div>Radius: <span id="statR" class="highlight">-</span></div>
+        <div>Error: <span id="statErr" class="highlight">-</span></div>
+        <div>Alpha (&alpha;): <span id="statAlpha" class="highlight">-</span></div>
     </div>
 </div>
 
 <script>
+let results = [];
 let chart;
-let auditResults = [];
 
-function initChart() {
-    if (chart) chart.destroy();
-    chart = new Chart(document.getElementById('mainChart').getContext('2d'), {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [
-                { label: 'Normalized Error (RH)', borderColor: '#00ff41', data: [], yAxisID: 'y', pointRadius: 0 },
-                { label: 'Goldbach Pairs', borderColor: '#ff0055', data: [], yAxisID: 'y1', showLine: false, pointRadius: 1.5 }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: { position: 'left', grid: { color: '#222' }, title: { display: true, text: 'Error / R^((k-1)/2)', color: '#00ff41' } },
-                y1: { position: 'right', grid: { display: false }, title: { display: true, text: 'Goldbach Pairs', color: '#ff0055' } }
-            }
-        }
-    });
-}
+async function runAudit() {
+    const endR = parseInt(document.getElementById('targetR').value);
+    const zeta2 = Math.PI * Math.PI / 6;
+    results = [];
 
-async function runDeepAudit() {
-    initChart();
-    auditResults = [];
-    const startR = parseInt(document.getElementById('startR').value);
-    const endR = parseInt(document.getElementById('endR').value);
-    const k = parseInt(document.getElementById('dimK').value);
-    const zeta_k = k === 2 ? (Math.PI**2 / 6) : 1.2020569;
-
+    // 1. FAST SIEVE
     const mu = new Int8Array(endR + 1);
     const isPrime = new Uint8Array(endR + 1).fill(1);
     const primes = [];
-    mu[1] = 1; isPrime[0] = isPrime[1] = 0;
+    mu[1] = 1; 
 
-    // Linear Sieve
     for (let i = 2; i <= endR; i++) {
         if (isPrime[i]) { primes.push(i); mu[i] = -1; }
         for (let p of primes) {
@@ -113,51 +57,70 @@ async function runDeepAudit() {
         }
     }
 
-    let minSym = Infinity;
-    for (let R = startR; R <= endR; R++) {
+    // 2. BIGINT SUMMATION (LEAK-PROOF)
+    for (let R = 1; R <= endR; R++) {
         let actual = 0n;
+        let BigR = BigInt(R);
+
         for (let d = 1; d <= R; d++) {
             if (mu[d] === 0) continue;
-            let term = BigInt(Math.floor(R/d)) ** BigInt(k);
+            let floorDiv = BigR / BigInt(d);
+            let term = floorDiv * floorDiv; // Square for 2D
             if (mu[d] === 1) actual += term; else actual -= term;
         }
 
-        let error = Number(actual) - (Math.pow(R, k) / zeta_k);
-        let alpha = Math.log(Math.abs(error) + 1) / Math.log(R);
+        let expected = (R * R) / zeta2;
+        let error = Number(actual) - expected;
+        let alpha = R > 1 ? Math.log(Math.abs(error) + 1) / Math.log(R) : 0;
+        
+        // Goldbach check
         let pairs = 0;
         if (R % 2 === 0 && R > 2) {
-            for (let p of primes) { if (p > R/2) break; if (isPrime[R-p]) pairs++; }
-            if (pairs < minSym) minSym = pairs;
+            for (let p of primes) {
+                if (p > R/2) break;
+                if (isPrime[R-p]) pairs++;
+            }
         }
 
-        auditResults.push({ R, error, alpha, pairs });
+        results.push({ R, error, alpha, pairs });
 
-        if (R % 100 === 0 || R === endR) {
+        if (R % 500 === 0) {
             document.getElementById('statR').innerText = R;
-            document.getElementById('statErr').innerText = error.toFixed(2);
             document.getElementById('statAlpha').innerText = alpha.toFixed(4);
-            document.getElementById('statPairs').innerText = pairs;
-            document.getElementById('statMinSym').innerText = minSym === Infinity ? 0 : minSym;
-            document.getElementById('progress').style.width = ((R/endR)*100) + "%";
+            await new Promise(r => setTimeout(r, 1));
         }
-        if (R % 500 === 0) await new Promise(r => setTimeout(r, 1));
     }
-
-    chart.data.labels = auditResults.map(d => d.R);
-    chart.data.datasets[0].data = auditResults.map(d => d.error / Math.pow(d.R, (k-1)/2));
-    chart.data.datasets[1].data = auditResults.map(d => d.pairs);
-    chart.update();
+    updateUI();
 }
 
-function exportToCSV() {
-    let csv = "Radius,Actual_Error,Growth_Alpha,Goldbach_Pairs\n";
-    auditResults.forEach(row => { csv += `${row.R},${row.error},${row.alpha},${row.pairs}\n`; });
+function updateUI() {
+    const ctx = document.getElementById('chart').getContext('2d');
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: results.map(d => d.R),
+            datasets: [{
+                label: 'Normalized Error (Error / R^0.5)',
+                borderColor: '#00ff41',
+                data: results.map(d => d.error / Math.sqrt(d.R)),
+                pointRadius: 0
+            }]
+        },
+        options: { scales: { y: { grid: { color: '#222' } } } }
+    });
+}
+
+function exportCSV() {
+    let csv = "Radius,Error,Alpha,GoldbachPairs\n";
+    results.forEach(r => csv += `${r.R},${r.error},${r.alpha},${r.pairs}\n`);
     const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'Lattice_Symmetry_Audit.csv';
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Millennium_Audit.csv';
     a.click();
 }
 </script>
 </body>
 </html>
+
