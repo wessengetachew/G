@@ -808,34 +808,6 @@
         }
         
         /* =============================
-           MÖBIUS WAVE VISUALIZATION
-        ============================= */
-        .mobius-wave-container {
-            width: 100%;
-            height: 300px;
-            position: relative;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            margin-top: 1rem;
-        }
-        
-        .mobius-wave-canvas {
-            width: 100%;
-            height: 100%;
-            border-radius: 8px;
-        }
-        
-        .mobius-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 1rem;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-        }
-        
-        /* =============================
            RESPONSIVE DESIGN
         ============================= */
         @media (max-width: 1024px) {
@@ -1026,42 +998,24 @@
                             <div class="section-subtitle">Click on points to inspect GCD values</div>
                         </div>
                         
-                        <!-- Color Scheme Selector -->
-                        <div class="control-group">
-                            <h4 class="control-group-title">Color Scheme</h4>
-                            <div class="checkbox-group" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
-                                <label class="checkbox-label">
-                                    <input type="radio" name="colorScheme" value="gcd" checked> GCD Value Spectrum
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="radio" name="colorScheme" value="mod"> Modulo Coloring
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="radio" name="colorScheme" value="lcf"> Lowest Common Factor
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="radio" name="colorScheme" value="radical"> Radical (Square-free)
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="radio" name="colorScheme" value="distance"> Distance from Origin
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="radio" name="colorScheme" value="prime"> Prime Factorization
-                                </label>
-                            </div>
-                            
-                            <!-- Modulo Input (only shown for mod coloring) -->
-                            <div id="modInputContainer" style="display: none; margin-top: 1rem;">
-                                <div class="input-group">
-                                    <input type="number" id="modValue" placeholder="Modulo value" min="2" max="100" value="3">
-                                    <button id="applyMod">Apply</button>
-                                </div>
-                            </div>
-                        </div>
-                        
                         <!-- Legend -->
-                        <div class="legend" id="dynamicLegend">
-                            <!-- Legend will be populated by JavaScript -->
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: var(--primary-green);"></div>
+                                <span class="legend-text">Coprime Points (GCD = 1)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: var(--primary-red);"></div>
+                                <span class="legend-text">Non-coprime Points</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="border: 2px solid var(--primary-orange); background: transparent;"></div>
+                                <span class="legend-text">Boundary Points</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: var(--primary-blue);"></div>
+                                <span class="legend-text">Origin (1,1)</span>
+                            </div>
                         </div>
                         
                         <!-- Canvas Container -->
@@ -1122,9 +1076,6 @@
                                     </label>
                                     <label class="checkbox-label">
                                         <input type="checkbox" id="animate2D"> Animate
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" id="showMobiusWave2D"> Möbius Wave Overlay
                                     </label>
                                 </div>
                             </div>
@@ -1199,12 +1150,6 @@
                                     <label class="checkbox-label">
                                         <input type="checkbox" id="showAxes3D" checked> Show Axes
                                     </label>
-                                    <label class="checkbox-label">
-                                        <input type="radio" name="colorScheme3D" value="gcd" checked> GCD Colors
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="radio" name="colorScheme3D" value="mod"> Mod Colors
-                                    </label>
                                 </div>
                             </div>
                             
@@ -1241,70 +1186,6 @@
                                         <div class="stat-label">Boundary Points</div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- NEW: Möbius Wave Analysis Section -->
-                    <div class="section">
-                        <div class="section-header">
-                            <h2 class="section-title">
-                                <span class="icon">🌊</span> Möbius Wave Analysis
-                            </h2>
-                            <div class="section-subtitle">Visualization of M(R) = Σ μ(d) from d=1 to R</div>
-                        </div>
-                        
-                        <div class="mobius-wave-container">
-                            <canvas id="mobiusWaveCanvas"></canvas>
-                        </div>
-                        
-                        <div class="mobius-controls">
-                            <div class="slider-container" style="flex: 1;">
-                                <div class="slider-label">
-                                    Wave Intensity: <span id="waveIntensityValue">1.0</span>
-                                </div>
-                                <input type="range" id="waveIntensitySlider" min="0" max="2" value="1" step="0.1">
-                            </div>
-                            
-                            <div class="slider-container" style="flex: 1;">
-                                <div class="slider-label">
-                                    Max R: <span id="mobiusMaxRValue">100</span>
-                                </div>
-                                <input type="range" id="mobiusMaxRSlider" min="10" max="1000" value="100" step="10">
-                            </div>
-                            
-                            <div class="checkbox-group" style="flex: 2;">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="showMobiusWave" checked> Show Möbius Wave
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="showCumulativeSum" checked> Show Cumulative Sum (M(R))
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="showZeroCrossings"> Highlight Zero Crossings
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="animateWave"> Animate Wave
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="stats-grid" style="margin-top: 1rem;">
-                            <div class="stat-card">
-                                <div class="stat-value" id="mobiusCurrentValue">0</div>
-                                <div class="stat-label">Current M(R)</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value" id="mobiusMaxValue">0</div>
-                                <div class="stat-label">Max |M(R)|</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value" id="mobiusZeroCrossings">0</div>
-                                <div class="stat-label">Zero Crossings</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value" id="mobiusAverage">0.00</div>
-                                <div class="stat-label">Average |μ(d)|</div>
                             </div>
                         </div>
                     </div>
@@ -1414,16 +1295,16 @@
                                 </div>
                                 <div class="slider-container">
                                     <div class="slider-label">
-                                        Wave Intensity: <span id="waveIntensityValue2">1.0</span>
+                                        Wave Intensity: <span id="waveIntensityValue">1.0</span>
                                     </div>
-                                    <input type="range" id="waveIntensitySlider2" min="0" max="2" value="1" step="0.1">
+                                    <input type="range" id="waveIntensitySlider" min="0" max="2" value="1" step="0.1">
                                 </div>
                                 <div class="checkbox-group">
                                     <label class="checkbox-label">
-                                        <input type="checkbox" id="showMobiusWaveChart"> Show Möbius Wave on Chart
+                                        <input type="checkbox" id="showMobiusWave"> Show Möbius Wave
                                     </label>
                                     <label class="checkbox-label">
-                                        <input type="checkbox" id="showCumulativeOnChart"> Show Cumulative Sum on Chart
+                                        <input type="checkbox" id="showCumulative"> Show Cumulative Sum
                                     </label>
                                 </div>
                             </div>
@@ -1593,19 +1474,13 @@
                         
                         <div class="export-grid">
                             <button class="export-btn png" id="export2DPNG">
-                                <span>🖼️</span> 2D Lattice (8K PNG)
+                                <span>📷</span> 2D Visualization (4K PNG)
                             </button>
                             <button class="export-btn png" id="export3DPNG">
-                                <span>🖼️</span> 3D Lattice (8K PNG)
+                                <span>📷</span> 3D Visualization (4K PNG)
                             </button>
                             <button class="export-btn png" id="exportChartPNG">
-                                <span>📊</span> Error Chart (8K PNG)
-                            </button>
-                            <button class="export-btn png" id="exportMobiusWavePNG">
-                                <span>🌊</span> Möbius Wave (8K PNG)
-                            </button>
-                            <button class="export-btn png" id="exportAllCanvasesPNG">
-                                <span>🎨</span> All 3 Canvases Combined (8K PNG)
+                                <span>📊</span> Error Chart (4K PNG)
                             </button>
                             <button class="export-btn csv" id="exportErrorCSV">
                                 <span>📄</span> Error Data (CSV)
@@ -1656,12 +1531,6 @@
                                     <label class="checkbox-label">
                                         <input type="checkbox" id="includeMetadata"> Include Metadata
                                     </label>
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" id="includeLegend" checked> Include Legend
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" id="includeStatistics" checked> Include Statistics
-                                    </label>
                                 </div>
                             </div>
                             
@@ -1679,30 +1548,28 @@
                                         <input type="checkbox" id="includeFormulas" checked> Include Formulas
                                     </label>
                                     <label class="checkbox-label">
-                                        <input type="checkbox" id="includeColorKey" checked> Include Color Key
+                                        <input type="checkbox" id="includeStatistics" checked> Include Statistics
                                     </label>
                                 </div>
                             </div>
                             
                             <div class="control-group">
-                                <h4 class="control-group-title">Combined Export Layout</h4>
-                                <div class="checkbox-group" style="flex-direction: column; gap: 8px;">
-                                    <label class="checkbox-label">
-                                        <input type="radio" name="layoutStyle" value="grid" checked> Grid Layout (2x2)
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="radio" name="layoutStyle" value="vertical"> Vertical Layout
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="radio" name="layoutStyle" value="horizontal"> Horizontal Layout
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="radio" name="layoutStyle" value="collage"> Collage Style
-                                    </label>
+                                <h4 class="control-group-title">Batch Export</h4>
+                                <div class="input-group">
+                                    <input type="number" id="batchStart" placeholder="Start R" min="1" value="1">
+                                    <input type="number" id="batchEnd" placeholder="End R" min="1" value="100">
+                                    <input type="number" id="batchStep" placeholder="Step" min="1" value="10">
                                 </div>
-                                <div style="margin-top: 1rem;">
-                                    <label style="font-size: 0.9rem; color: var(--medium-text);">Background Color:</label>
-                                    <input type="color" id="exportBgColor" value="#1a1a2e" style="width: 100%; margin-top: 5px; height: 40px; border-radius: 6px; border: none;">
+                                <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                                    <button id="exportBatch" style="flex: 1; padding: 10px; background: var(--primary-orange); color: white; border: none; border-radius: 6px; cursor: pointer;">
+                                        Export Batch Data
+                                    </button>
+                                    <button id="previewBatch" style="flex: 1; padding: 10px; background: var(--primary-blue); color: white; border: none; border-radius: 6px; cursor: pointer;">
+                                        Preview Batch
+                                    </button>
+                                </div>
+                                <div id="batchPreview" style="margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.3); border-radius: 6px; font-family: monospace; font-size: 0.9rem; display: none;">
+                                    Batch preview will appear here
                                 </div>
                             </div>
                         </div>
@@ -1849,145 +1716,6 @@
                 datasets: []
             },
             
-            // Möbius Wave State
-            mobiusWave: {
-                canvas: null,
-                ctx: null,
-                animationId: null,
-                isAnimating: false,
-                currentR: 0,
-                maxR: 100,
-                intensity: 1.0,
-                showWave: true,
-                showCumulative: true,
-                showZeroCrossings: false,
-                data: [],
-                cumulativeData: []
-            },
-            
-            // Color Schemes
-            colorSchemes: {
-                gcd: {
-                    name: 'GCD Value Spectrum',
-                    colors: [
-                        '#4CAF50', // 1 (coprime)
-                        '#FF9800', // 2
-                        '#2196F3', // 3
-                        '#9C27B0', // 4
-                        '#E91E63', // 5
-                        '#00BCD4', // 6
-                        '#8BC34A', // 7
-                        '#FF5722', // 8
-                        '#795548', // 9
-                        '#607D8B'  // 10+
-                    ],
-                    getColor: function(gcdValue) {
-                        if (gcdValue === 1) return this.colors[0];
-                        if (gcdValue <= 10) return this.colors[gcdValue - 1];
-                        // For larger GCDs, use a gradient
-                        const hue = (gcdValue * 137.508) % 360; // Golden angle distribution
-                        return `hsl(${hue}, 70%, 50%)`;
-                    }
-                },
-                mod: {
-                    name: 'Modulo Coloring',
-                    modValue: 3,
-                    colors: [
-                        '#FF5252', // 0 mod n
-                        '#FF9800', // 1 mod n
-                        '#4CAF50', // 2 mod n
-                        '#2196F3', // 3 mod n
-                        '#9C27B0', // 4 mod n
-                        '#00BCD4', // 5 mod n
-                    ],
-                    getColor: function(x, y) {
-                        const modX = x % this.modValue;
-                        const modY = y % this.modValue;
-                        const index = (modX * this.modValue + modY) % this.colors.length;
-                        return this.colors[index];
-                    }
-                },
-                lcf: {
-                    name: 'Lowest Common Factor',
-                    getColor: function(x, y) {
-                        const gcdVal = gcd(x, y);
-                        if (gcdVal === 1) return '#4CAF50';
-                        
-                        // Find lowest common factor (first prime divisor)
-                        for (let i = 2; i <= Math.sqrt(gcdVal); i++) {
-                            if (gcdVal % i === 0) {
-                                const colors = ['#FF9800', '#2196F3', '#9C27B0', '#E91E63', '#00BCD4'];
-                                return colors[(i - 2) % colors.length];
-                            }
-                        }
-                        return '#FF5722'; // gcdVal is prime
-                    }
-                },
-                radical: {
-                    name: 'Radical (Square-free)',
-                    getColor: function(x, y) {
-                        const g = gcd(x, y);
-                        if (g === 1) return '#4CAF50';
-                        
-                        // Calculate radical (product of distinct primes)
-                        let radical = 1;
-                        let n = g;
-                        for (let i = 2; i <= Math.sqrt(n); i++) {
-                            if (n % i === 0) {
-                                radical *= i;
-                                while (n % i === 0) n /= i;
-                            }
-                        }
-                        if (n > 1) radical *= n;
-                        
-                        // Color based on radical value
-                        const colors = ['#FF9800', '#2196F3', '#9C27B0', '#E91E63', '#00BCD4', '#8BC34A'];
-                        return colors[radical % colors.length];
-                    }
-                },
-                distance: {
-                    name: 'Distance from Origin',
-                    getColor: function(x, y) {
-                        const dist = Math.sqrt(x*x + y*y);
-                        const maxDist = Math.sqrt(2) * state.currentR;
-                        const ratio = dist / maxDist;
-                        
-                        // Gradient from green (close) to red (far)
-                        const hue = 120 - (ratio * 120); // 120° (green) to 0° (red)
-                        return `hsl(${hue}, 70%, 50%)`;
-                    }
-                },
-                prime: {
-                    name: 'Prime Factorization',
-                    getColor: function(x, y) {
-                        const g = gcd(x, y);
-                        if (g === 1) return '#4CAF50';
-                        
-                        // Count distinct prime factors
-                        let distinctPrimes = 0;
-                        let n = g;
-                        for (let i = 2; i <= Math.sqrt(n); i++) {
-                            if (n % i === 0) {
-                                distinctPrimes++;
-                                while (n % i === 0) n /= i;
-                            }
-                        }
-                        if (n > 1) distinctPrimes++;
-                        
-                        const colors = [
-                            '#4CAF50', // 0 (shouldn't happen)
-                            '#FF9800', // 1 prime factor
-                            '#2196F3', // 2 prime factors
-                            '#9C27B0', // 3 prime factors
-                            '#E91E63', // 4+ prime factors
-                        ];
-                        return colors[Math.min(distinctPrimes, 4)];
-                    }
-                }
-            },
-            
-            currentColorScheme: 'gcd',
-            
             // Research State
             research: {
                 highPrecision: false,
@@ -2020,6 +1748,20 @@
             6: Math.PI**6 / 945,
             7: 1.008349277381922826839797549849796759599863560,
             8: Math.PI**8 / 9450
+        };
+        
+        // Color Schemes
+        const COLOR_SCHEMES = {
+            default: {
+                coprime: '#4CAF50',
+                nonCoprime: '#f44336',
+                boundary: '#FF9800',
+                origin: '#1a5fb4',
+                grid: 'rgba(255, 255, 255, 0.1)',
+                axis: 'rgba(255, 255, 255, 0.5)',
+                background: '#1a1a2e'
+            },
+            spectral: ['#9e0142', '#d53e4f', '#f46d43', '#fdae61', '#fee08b', '#ffffbf', '#e6f598', '#abdda4', '#66c2a5', '#3288bd', '#5e4fa2']
         };
         
         // ===========================================
@@ -2152,8 +1894,26 @@
             return count;
         }
         
+        // High precision version using Decimal.js
+        function computeNHighPrecision(R, k) {
+            if (!state.research.highPrecision) return computeN(R, k);
+            
+            Decimal.set({ precision: state.research.precisionDigits });
+            let count = new Decimal(0);
+            
+            for (let d = 1; d <= R; d++) {
+                const mu = mobius(d);
+                if (mu !== 0) {
+                    const term = new Decimal(Math.floor(R / d)).pow(k).times(mu);
+                    count = count.plus(term);
+                }
+            }
+            
+            return count.toNumber();
+        }
+        
         // ===========================================
-        // ENHANCED 2D VISUALIZATION WITH COLOR SCHEMES
+        // 2D VISUALIZATION WITH CANVAS CLEARING FIXES
         // ===========================================
         
         function init2DVisualization() {
@@ -2173,7 +1933,7 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             // Fill with background color
-            ctx.fillStyle = '#1a1a2e';
+            ctx.fillStyle = COLOR_SCHEMES.default.background;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             ctx.scale(dpr, dpr);
@@ -2186,9 +1946,6 @@
             
             // Setup controls
             setup2DControls();
-            
-            // Initialize dynamic legend
-            updateDynamicLegend();
         }
         
         function draw2DLattice() {
@@ -2204,10 +1961,10 @@
                     const gridOpacity = parseFloat(document.getElementById('gridOpacitySlider').value);
                     const showGrid = document.getElementById('showGrid').checked;
                     const showBoundary = document.getElementById('showBoundary').checked;
-                    const showMobiusWave = document.getElementById('showMobiusWave2D').checked;
                     
                     // PROPER CANVAS CLEARING
                     const dpr = window.devicePixelRatio || 1;
+                    const rect = canvas.getBoundingClientRect();
                     
                     // Clear entire canvas
                     ctx.save();
@@ -2216,7 +1973,7 @@
                     ctx.restore();
                     
                     // Fill with background color
-                    ctx.fillStyle = '#1a1a2e';
+                    ctx.fillStyle = COLOR_SCHEMES.default.background;
                     ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
                     
                     // Reset transformation
@@ -2253,7 +2010,6 @@
                     // Draw points and collect statistics
                     let coprimeCount = 0;
                     let boundaryCount = 0;
-                    const colorScheme = state.colorSchemes[state.currentColorScheme];
                     
                     for (let x = 1; x <= R; x++) {
                         for (let y = 1; y <= R; y++) {
@@ -2266,43 +2022,21 @@
                             const px = padding + (x - 1) * cellSize + cellSize / 2;
                             const py = padding + (y - 1) * cellSize + cellSize / 2;
                             
-                            // Get color based on selected scheme
-                            let pointColor;
+                            // Set color
                             if (x === 1 && y === 1) {
-                                pointColor = '#1a5fb4'; // Origin special color
+                                ctx.fillStyle = COLOR_SCHEMES.default.origin;
                             } else {
-                                switch(state.currentColorScheme) {
-                                    case 'mod':
-                                        pointColor = colorScheme.getColor(x, y);
-                                        break;
-                                    case 'lcf':
-                                        pointColor = colorScheme.getColor(x, y);
-                                        break;
-                                    case 'radical':
-                                        pointColor = colorScheme.getColor(x, y);
-                                        break;
-                                    case 'distance':
-                                        pointColor = colorScheme.getColor(x, y);
-                                        break;
-                                    case 'prime':
-                                        pointColor = colorScheme.getColor(x, y);
-                                        break;
-                                    case 'gcd':
-                                    default:
-                                        pointColor = colorScheme.getColor(gcd(x, y));
-                                        break;
-                                }
+                                ctx.fillStyle = isCoprime ? COLOR_SCHEMES.default.coprime : COLOR_SCHEMES.default.nonCoprime;
                             }
                             
                             // Draw point
-                            ctx.fillStyle = pointColor;
                             ctx.beginPath();
                             ctx.arc(px, py, pointSize / 2, 0, Math.PI * 2);
                             ctx.fill();
                             
                             // Draw boundary highlight
                             if (showBoundary && isBoundary) {
-                                ctx.strokeStyle = '#FF9800';
+                                ctx.strokeStyle = COLOR_SCHEMES.default.boundary;
                                 ctx.lineWidth = 2;
                                 ctx.stroke();
                             }
@@ -2322,13 +2056,10 @@
                     // Update current R for other functions
                     state.currentR = R;
                     
-                    // Draw Möbius wave overlay if enabled
-                    if (showMobiusWave) {
-                        drawMobiusWaveOverlay(ctx, R, padding, cellSize);
+                    // Draw Möbius wave if enabled
+                    if (state.research.mobiusWave) {
+                        drawMobiusWave(ctx, R, padding, cellSize);
                     }
-                    
-                    // Update dynamic legend
-                    updateDynamicLegend();
                     
                 } catch (error) {
                     console.error('Error drawing 2D lattice:', error);
@@ -2338,7 +2069,7 @@
             }, 10);
         }
         
-        function drawMobiusWaveOverlay(ctx, R, padding, cellSize) {
+        function drawMobiusWave(ctx, R, padding, cellSize) {
             // Calculate Mertens function values
             const mertensValues = [];
             let currentSum = 0;
@@ -2353,9 +2084,8 @@
             
             const range = max - min || 1;
             
-            // Draw wave overlay with intensity control
-            const intensity = parseFloat(document.getElementById('waveIntensitySlider').value);
-            ctx.globalAlpha = 0.3 * intensity;
+            // Draw wave overlay
+            ctx.globalAlpha = 0.3 * state.research.waveIntensity;
             
             for (let x = 1; x <= R; x++) {
                 for (let y = 1; y <= R; y++) {
@@ -2363,9 +2093,9 @@
                     const mertensValue = mertensValues[d];
                     const normalized = (mertensValue - min) / range;
                     
-                    // Create gradient color from blue (negative) to red (positive)
-                    const hue = normalized * 240; // 0° (red) to 240° (blue)
-                    const color = `hsla(${240 - hue}, 70%, 50%, 0.5)`;
+                    // Get color from spectral scheme
+                    const colorIndex = Math.floor(normalized * (COLOR_SCHEMES.spectral.length - 1));
+                    const color = COLOR_SCHEMES.spectral[colorIndex];
                     
                     const px = padding + (x - 1) * cellSize;
                     const py = padding + (y - 1) * cellSize;
@@ -2376,132 +2106,11 @@
             }
             
             ctx.globalAlpha = 1.0;
-        }
-        
-        function updateDynamicLegend() {
-            const legend = document.getElementById('dynamicLegend');
-            const colorScheme = state.colorSchemes[state.currentColorScheme];
-            const R = parseInt(document.getElementById('radius2DSlider').value);
             
-            let html = '';
-            
-            switch(state.currentColorScheme) {
-                case 'gcd':
-                    html = `
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #4CAF50;"></div>
-                            <span class="legend-text">Coprime (GCD = 1)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #FF9800;"></div>
-                            <span class="legend-text">GCD = 2</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #2196F3;"></div>
-                            <span class="legend-text">GCD = 3</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #9C27B0;"></div>
-                            <span class="legend-text">GCD = 4</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #1a5fb4;"></div>
-                            <span class="legend-text">Origin (1,1)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="border: 2px solid #FF9800; background: transparent;"></div>
-                            <span class="legend-text">Boundary Points</span>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'mod':
-                    const modValue = state.colorSchemes.mod.modValue;
-                    html = `
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #4CAF50;"></div>
-                            <span class="legend-text">Coprime (GCD = 1)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #FF5252;"></div>
-                            <span class="legend-text">x mod ${modValue} = 0</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #FF9800;"></div>
-                            <span class="legend-text">x mod ${modValue} = 1</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #2196F3;"></div>
-                            <span class="legend-text">x mod ${modValue} = 2</span>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'lcf':
-                    html = `
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #4CAF50;"></div>
-                            <span class="legend-text">Coprime (no common factors)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #FF9800;"></div>
-                            <span class="legend-text">Lowest Common Factor = 2</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #2196F3;"></div>
-                            <span class="legend-text">Lowest Common Factor = 3</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #9C27B0;"></div>
-                            <span class="legend-text">Lowest Common Factor = 5</span>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'distance':
-                    html = `
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #4CAF50;"></div>
-                            <span class="legend-text">Close to Origin</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #FF9800;"></div>
-                            <span class="legend-text">Medium Distance</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #f44336;"></div>
-                            <span class="legend-text">Far from Origin</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #1a5fb4;"></div>
-                            <span class="legend-text">Origin (1,1)</span>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'prime':
-                    html = `
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #4CAF50;"></div>
-                            <span class="legend-text">Coprime (GCD = 1)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #FF9800;"></div>
-                            <span class="legend-text">1 Distinct Prime Factor</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #2196F3;"></div>
-                            <span class="legend-text">2 Distinct Prime Factors</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: #9C27B0;"></div>
-                            <span class="legend-text">3+ Distinct Prime Factors</span>
-                        </div>
-                    `;
-                    break;
-            }
-            
-            legend.innerHTML = html;
+            // Update research display
+            document.getElementById('mertensValueDisplay').textContent = mertensValues[R];
+            document.getElementById('mertensMin').textContent = min;
+            document.getElementById('mertensMax').textContent = max;
         }
         
         function handle2DClick(event) {
@@ -2587,780 +2196,486 @@
                 draw2DLattice();
             });
             
-            // Color scheme radio buttons
-            document.querySelectorAll('input[name="colorScheme"]').forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    state.currentColorScheme = e.target.value;
-                    
-                    // Show/hide mod input
-                    const modInputContainer = document.getElementById('modInputContainer');
-                    modInputContainer.style.display = e.target.value === 'mod' ? 'block' : 'none';
-                    
-                    draw2DLattice();
-                });
-            });
-            
-            // Mod value input
-            document.getElementById('applyMod').addEventListener('click', () => {
-                const modValue = parseInt(document.getElementById('modValue').value);
-                if (modValue >= 2 && modValue <= 100) {
-                    state.colorSchemes.mod.modValue = modValue;
-                    draw2DLattice();
-                }
-            });
-            
             // Checkboxes
             document.getElementById('showGrid').addEventListener('change', draw2DLattice);
             document.getElementById('showBoundary').addEventListener('change', draw2DLattice);
-            document.getElementById('showMobiusWave2D').addEventListener('change', draw2DLattice);
             document.getElementById('animate2D').addEventListener('change', toggle2DAnimation);
         }
         
+        function toggle2DAnimation() {
+            const animate = document.getElementById('animate2D').checked;
+            
+            if (animate && !state.animationId) {
+                let R = 1;
+                const maxR = 100;
+                
+                function animateStep() {
+                    document.getElementById('radius2DSlider').value = R;
+                    document.getElementById('radius2DValue').textContent = R;
+                    document.getElementById('radius2DInput').value = R;
+                    draw2DLattice();
+                    
+                    R = R >= maxR ? 1 : R + 1;
+                    state.animationId = setTimeout(animateStep, 300);
+                }
+                
+                animateStep();
+            } else if (state.animationId) {
+                clearTimeout(state.animationId);
+                state.animationId = null;
+            }
+        }
+        
         // ===========================================
-        // MÖBIUS WAVE VISUALIZATION
+        // 3D VISUALIZATION WITH CANVAS CLEARING FIXES
         // ===========================================
         
-        function initMobiusWave() {
-            const canvas = document.getElementById('mobiusWaveCanvas');
-            const ctx = canvas.getContext('2d');
+        function init3DVisualization() {
+            if (state.is3DInitialized) return;
+            
+            const canvas = document.getElementById('latticeCanvas3D');
+            const container = canvas.parentElement;
             
             // Set canvas size
-            const container = canvas.parentElement;
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight;
             
-            state.mobiusWave.canvas = canvas;
-            state.mobiusWave.ctx = ctx;
+            // Create Three.js scene
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
             
-            // Draw initial wave
-            drawMobiusWave();
+            // Camera
+            const camera = new THREE.PerspectiveCamera(
+                75,
+                canvas.width / canvas.height,
+                0.1,
+                1000
+            );
+            camera.position.set(20, 20, 20);
+            
+            // Renderer
+            const renderer = new THREE.WebGLRenderer({ 
+                canvas: canvas,
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(canvas.width, canvas.height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            // Controls
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 15);
+            scene.add(directionalLight);
+            
+            // Store in state
+            state.threeScene = scene;
+            state.threeRenderer = renderer;
+            state.threeCamera = camera;
+            state.threeControls = controls;
+            state.is3DInitialized = true;
+            
+            // Draw initial lattice
+            draw3DLattice();
+            
+            // Animation loop
+            function animate() {
+                if (!state.is3DInitialized) return;
+                
+                state.animationFrameId = requestAnimationFrame(animate);
+                
+                if (document.getElementById('autoRotate3D').checked) {
+                    scene.rotation.y += 0.005;
+                }
+                
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            
+            animate();
             
             // Setup controls
-            setupMobiusWaveControls();
+            setup3DControls();
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                if (!state.is3DInitialized) return;
+                
+                const container = canvas.parentElement;
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+                
+                camera.aspect = canvas.width / canvas.height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(canvas.width, canvas.height);
+            });
         }
         
-        function drawMobiusWave() {
-            const canvas = state.mobiusWave.canvas;
-            const ctx = state.mobiusWave.ctx;
-            const maxR = state.mobiusWave.maxR;
-            const intensity = state.mobiusWave.intensity;
-            const showWave = state.mobiusWave.showWave;
-            const showCumulative = state.mobiusWave.showCumulative;
-            const showZeroCrossings = state.mobiusWave.showZeroCrossings;
+        function draw3DLattice() {
+            const loading = document.getElementById('loading3D');
+            loading.style.display = 'flex';
             
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw background
-            ctx.fillStyle = 'rgba(26, 26, 46, 0.8)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Calculate data
-            const data = [];
-            const cumulativeData = [];
-            let currentSum = 0;
-            let zeroCrossings = 0;
-            let maxAbs = 0;
-            
-            for (let r = 1; r <= maxR; r++) {
-                const mu = mobius(r);
-                currentSum += mu;
-                data.push(mu);
-                cumulativeData.push(currentSum);
-                maxAbs = Math.max(maxAbs, Math.abs(mu), Math.abs(currentSum));
-                
-                if (r > 1 && currentSum * cumulativeData[r-2] <= 0 && cumulativeData[r-2] !== 0) {
-                    zeroCrossings++;
-                }
-            }
-            
-            // Draw grid
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-            ctx.lineWidth = 1;
-            
-            // Vertical grid lines
-            for (let i = 0; i <= 10; i++) {
-                const x = (i / 10) * canvas.width;
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvas.height);
-                ctx.stroke();
-            }
-            
-            // Horizontal grid lines (zero line emphasized)
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.beginPath();
-            ctx.moveTo(0, canvas.height / 2);
-            ctx.lineTo(canvas.width, canvas.height / 2);
-            ctx.stroke();
-            
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-            for (let i = 1; i <= 4; i++) {
-                const y = (i / 8) * canvas.height;
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
-                ctx.stroke();
-                
-                ctx.beginPath();
-                ctx.moveTo(0, canvas.height - y);
-                ctx.lineTo(canvas.width, canvas.height - y);
-                ctx.stroke();
-            }
-            
-            // Draw Möbius function values (μ(n))
-            if (showWave) {
-                ctx.strokeStyle = `rgba(76, 175, 80, ${0.7 * intensity})`;
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                
-                for (let i = 0; i < data.length; i++) {
-                    const x = (i / (data.length - 1)) * canvas.width;
-                    const y = canvas.height / 2 - (data[i] / (maxAbs || 1)) * (canvas.height / 2.5);
+            setTimeout(() => {
+                try {
+                    const scene = state.threeScene;
+                    const R = parseInt(document.getElementById('radius3DSlider').value) || 15;
+                    const cubeSize = parseFloat(document.getElementById('cubeSizeSlider').value) || 0.7;
+                    const showAxes = document.getElementById('showAxes3D').checked;
                     
-                    if (i === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
-                    }
-                }
-                ctx.stroke();
-                
-                // Draw points at each integer
-                for (let i = 0; i < data.length; i++) {
-                    const x = (i / (data.length - 1)) * canvas.width;
-                    const y = canvas.height / 2 - (data[i] / (maxAbs || 1)) * (canvas.height / 2.5);
-                    
-                    if (data[i] === 1) {
-                        ctx.fillStyle = '#4CAF50';
-                    } else if (data[i] === -1) {
-                        ctx.fillStyle = '#f44336';
-                    } else {
-                        ctx.fillStyle = '#FF9800';
+                    // PROPERLY CLEAR PREVIOUS OBJECTS
+                    while(state.threeObjects.length) {
+                        const obj = state.threeObjects.pop();
+                        if (obj.geometry) obj.geometry.dispose();
+                        if (obj.material) {
+                            if (Array.isArray(obj.material)) {
+                                obj.material.forEach(material => material.dispose());
+                            } else {
+                                obj.material.dispose();
+                            }
+                        }
+                        scene.remove(obj);
                     }
                     
-                    ctx.beginPath();
-                    ctx.arc(x, y, 4, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-            
-            // Draw cumulative sum (Mertens function)
-            if (showCumulative) {
-                ctx.strokeStyle = `rgba(26, 95, 180, ${0.9 * intensity})`;
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                
-                for (let i = 0; i < cumulativeData.length; i++) {
-                    const x = (i / (cumulativeData.length - 1)) * canvas.width;
-                    const y = canvas.height / 2 - (cumulativeData[i] / (maxAbs || 1)) * (canvas.height / 2.5);
+                    // Clear any remaining children (except lights and camera)
+                    scene.children.forEach(child => {
+                        if (child.type !== 'AmbientLight' && 
+                            child.type !== 'DirectionalLight' && 
+                            child.type !== 'PerspectiveCamera') {
+                            scene.remove(child);
+                        }
+                    });
                     
-                    if (i === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
+                    // Add axes if enabled (after clearing)
+                    if (showAxes) {
+                        const axesHelper = new THREE.AxesHelper(R * 1.5);
+                        scene.add(axesHelper);
+                        state.threeObjects.push(axesHelper);
                     }
-                }
-                ctx.stroke();
-            }
-            
-            // Highlight zero crossings
-            if (showZeroCrossings && showCumulative) {
-                for (let i = 1; i < cumulativeData.length; i++) {
-                    if (cumulativeData[i] * cumulativeData[i-1] <= 0 && cumulativeData[i-1] !== 0) {
-                        const x = (i / (cumulativeData.length - 1)) * canvas.width;
-                        const y = canvas.height / 2;
-                        
-                        ctx.fillStyle = '#FFD700';
-                        ctx.beginPath();
-                        ctx.arc(x, y, 6, 0, Math.PI * 2);
-                        ctx.fill();
-                        
-                        ctx.strokeStyle = '#FFD700';
-                        ctx.lineWidth = 2;
-                        ctx.beginPath();
-                        ctx.moveTo(x, y - 10);
-                        ctx.lineTo(x, y + 10);
-                        ctx.stroke();
+                    
+                    // Create materials
+                    const coprimeMaterial = new THREE.MeshLambertMaterial({ color: 0x4CAF50 });
+                    const nonCoprimeMaterial = new THREE.MeshLambertMaterial({ color: 0xf44336 });
+                    const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+                    
+                    // Add cubes (with sampling for performance)
+                    let coprimeCount = 0;
+                    const sampleStep = R > 10 ? Math.ceil(R / 10) : 1;
+                    
+                    for (let x = 1; x <= R; x += sampleStep) {
+                        for (let y = 1; y <= R; y += sampleStep) {
+                            for (let z = 1; z <= R; z += sampleStep) {
+                                const isCoprime = gcdArray([x, y, z]) === 1;
+                                if (isCoprime) coprimeCount++;
+                                
+                                const material = isCoprime ? coprimeMaterial : nonCoprimeMaterial;
+                                const cube = new THREE.Mesh(geometry, material);
+                                
+                                cube.position.set(
+                                    (x - R/2 - 0.5) * (cubeSize + 0.1),
+                                    (y - R/2 - 0.5) * (cubeSize + 0.1),
+                                    (z - R/2 - 0.5) * (cubeSize + 0.1)
+                                );
+                                
+                                scene.add(cube);
+                                state.threeObjects.push(cube);
+                            }
+                        }
                     }
+                    
+                    // Scale counts for statistics
+                    const scaleFactor = Math.pow(R / sampleStep, 3);
+                    const totalPoints = Math.pow(R, 3);
+                    const estimatedCoprime = Math.round(coprimeCount * scaleFactor);
+                    const expected = totalPoints / ZETA_VALUES[3];
+                    const error = estimatedCoprime - expected;
+                    const boundaryCount = 6 * R * R - 12 * R + 8;
+                    
+                    // Update display
+                    document.getElementById('totalPoints3D').textContent = totalPoints.toLocaleString();
+                    document.getElementById('coprimeCount3D').textContent = estimatedCoprime.toLocaleString();
+                    document.getElementById('error3D').textContent = error.toFixed(2);
+                    document.getElementById('boundaryCount3D').textContent = boundaryCount.toLocaleString();
+                    
+                } catch (error) {
+                    console.error('Error drawing 3D lattice:', error);
+                } finally {
+                    loading.style.display = 'none';
                 }
-            }
-            
-            // Draw axis labels
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.font = '12px Arial';
-            ctx.textAlign = 'center';
-            
-            // X-axis labels
-            for (let i = 0; i <= 10; i++) {
-                const x = (i / 10) * canvas.width;
-                const rValue = Math.round((i / 10) * maxR);
-                ctx.fillText(rValue, x, canvas.height - 5);
-            }
-            
-            // Y-axis labels
-            ctx.textAlign = 'right';
-            ctx.fillText(`${maxAbs}`, 40, 15);
-            ctx.fillText(`-${maxAbs}`, 40, canvas.height - 5);
-            ctx.fillText('0', 40, canvas.height / 2 + 5);
-            
-            // Update statistics display
-            document.getElementById('mobiusCurrentValue').textContent = currentSum;
-            document.getElementById('mobiusMaxValue').textContent = Math.max(...cumulativeData.map(Math.abs));
-            document.getElementById('mobiusZeroCrossings').textContent = zeroCrossings;
-            document.getElementById('mobiusAverage').textContent = (data.reduce((a, b) => a + Math.abs(b), 0) / data.length).toFixed(2);
-            
-            // Store data for export
-            state.mobiusWave.data = data;
-            state.mobiusWave.cumulativeData = cumulativeData;
+            }, 10);
         }
         
-        function setupMobiusWaveControls() {
-            // Intensity slider
-            document.getElementById('waveIntensitySlider').addEventListener('input', (e) => {
-                const value = parseFloat(e.target.value);
-                document.getElementById('waveIntensityValue').textContent = value.toFixed(1);
-                state.mobiusWave.intensity = value;
-                drawMobiusWave();
+        function setup3DControls() {
+            // Radius slider
+            const radiusSlider = document.getElementById('radius3DSlider');
+            const radiusInput = document.getElementById('radius3DInput');
+            const setRadiusBtn = document.getElementById('setRadius3D');
+            
+            radiusSlider.addEventListener('input', () => {
+                const value = radiusSlider.value;
+                document.getElementById('radius3DValue').textContent = value;
+                radiusInput.value = value;
+                draw3DLattice();
             });
             
-            // Max R slider
-            document.getElementById('mobiusMaxRSlider').addEventListener('input', (e) => {
-                const value = parseInt(e.target.value);
-                document.getElementById('mobiusMaxRValue').textContent = value;
-                state.mobiusWave.maxR = value;
-                drawMobiusWave();
+            setRadiusBtn.addEventListener('click', () => {
+                const value = parseInt(radiusInput.value);
+                if (value >= 1 && value <= 30) {
+                    radiusSlider.value = value;
+                    document.getElementById('radius3DValue').textContent = value;
+                    draw3DLattice();
+                }
+            });
+            
+            // Cube size slider
+            document.getElementById('cubeSizeSlider').addEventListener('input', () => {
+                document.getElementById('cubeSizeValue').textContent = document.getElementById('cubeSizeSlider').value;
+                draw3DLattice();
             });
             
             // Checkboxes
-            document.getElementById('showMobiusWave').addEventListener('change', (e) => {
-                state.mobiusWave.showWave = e.target.checked;
-                drawMobiusWave();
+            document.getElementById('autoRotate3D').addEventListener('change', () => {
+                // Handled in animation loop
             });
             
-            document.getElementById('showCumulativeSum').addEventListener('change', (e) => {
-                state.mobiusWave.showCumulative = e.target.checked;
-                drawMobiusWave();
-            });
+            document.getElementById('showAxes3D').addEventListener('change', draw3DLattice);
             
-            document.getElementById('showZeroCrossings').addEventListener('change', (e) => {
-                state.mobiusWave.showZeroCrossings = e.target.checked;
-                drawMobiusWave();
-            });
-            
-            document.getElementById('animateWave').addEventListener('change', (e) => {
-                if (e.target.checked) {
-                    startMobiusWaveAnimation();
-                } else {
-                    stopMobiusWaveAnimation();
-                }
-            });
-        }
-        
-        function startMobiusWaveAnimation() {
-            state.mobiusWave.isAnimating = true;
-            let currentMaxR = 10;
-            
-            function animateStep() {
-                if (!state.mobiusWave.isAnimating) return;
+            // Point inspector
+            document.getElementById('inspect3DPoint').addEventListener('click', () => {
+                const x = parseInt(document.getElementById('inspectX').value) || 1;
+                const y = parseInt(document.getElementById('inspectY').value) || 1;
+                const z = parseInt(document.getElementById('inspectZ').value) || 1;
+                const R = parseInt(document.getElementById('radius3DSlider').value) || 15;
                 
-                currentMaxR = (currentMaxR >= state.mobiusWave.maxR) ? 10 : currentMaxR + 1;
-                document.getElementById('mobiusMaxRSlider').value = currentMaxR;
-                document.getElementById('mobiusMaxRValue').textContent = currentMaxR;
-                state.mobiusWave.maxR = currentMaxR;
-                
-                drawMobiusWave();
-                
-                state.mobiusWave.animationId = setTimeout(animateStep, 100);
-            }
-            
-            animateStep();
-        }
-        
-        function stopMobiusWaveAnimation() {
-            state.mobiusWave.isAnimating = false;
-            if (state.mobiusWave.animationId) {
-                clearTimeout(state.mobiusWave.animationId);
-                state.mobiusWave.animationId = null;
-            }
-        }
-        
-        // ===========================================
-        // ENHANCED PNG EXPORT FUNCTIONS
-        // ===========================================
-        
-        function export2DPNGWithLegend() {
-            const canvas = document.getElementById('latticeCanvas2D');
-            const R = parseInt(document.getElementById('radius2DSlider').value);
-            
-            // Create export canvas (full size, not cropped)
-            const exportCanvas = document.createElement('canvas');
-            const exportCtx = exportCanvas.getContext('2d');
-            
-            const dpr = 4; // 8K resolution (4x scaling)
-            exportCanvas.width = canvas.width * dpr;
-            exportCanvas.height = canvas.height * dpr;
-            
-            // Clear export canvas
-            exportCtx.fillStyle = '#1a1a2e';
-            exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-            
-            // Draw the original canvas (scaled up)
-            exportCtx.drawImage(canvas, 0, 0, exportCanvas.width, exportCanvas.height);
-            
-            // Add watermark and metadata
-            addExportMetadata(exportCtx, exportCanvas, `2D Lattice (R=${R})`);
-            
-            // Export
-            downloadCanvasAsPNG(exportCanvas, `2d_lattice_R${R}_${Date.now()}.png`);
-            showExportStatus(`Exported 2D lattice at 8K resolution (R=${R})`, 'success');
-        }
-        
-        function export3DPNGWithLegend() {
-            if (!state.is3DInitialized) {
-                showExportStatus('Please initialize 3D visualization first', 'error');
-                return;
-            }
-            
-            const R = parseInt(document.getElementById('radius3DSlider').value);
-            
-            // Capture current 3D view at high resolution
-            const originalCanvas = state.threeRenderer.domElement;
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = originalCanvas.width * 4; // 4x for 8K
-            tempCanvas.height = originalCanvas.height * 4;
-            const tempCtx = tempCanvas.getContext('2d');
-            
-            // Render 3D scene at higher resolution
-            const originalSize = {
-                width: state.threeRenderer.domElement.width,
-                height: state.threeRenderer.domElement.height
-            };
-            
-            state.threeRenderer.setSize(tempCanvas.width, tempCanvas.height);
-            state.threeRenderer.render(state.threeScene, state.threeCamera);
-            
-            // Draw to temp canvas
-            tempCtx.fillStyle = '#1a1a2e';
-            tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-            tempCtx.drawImage(state.threeRenderer.domElement, 0, 0);
-            
-            // Restore original size
-            state.threeRenderer.setSize(originalSize.width, originalSize.height);
-            state.threeRenderer.render(state.threeScene, state.threeCamera);
-            
-            // Create final export canvas with metadata
-            const exportCanvas = document.createElement('canvas');
-            const exportCtx = exportCanvas.getContext('2d');
-            exportCanvas.width = tempCanvas.width;
-            exportCanvas.height = tempCanvas.height;
-            
-            exportCtx.drawImage(tempCanvas, 0, 0);
-            
-            // Add metadata
-            addExportMetadata(exportCtx, exportCanvas, `3D Lattice (R=${R})`);
-            
-            // Export
-            downloadCanvasAsPNG(exportCanvas, `3d_lattice_R${R}_${Date.now()}.png`);
-            showExportStatus(`Exported 3D lattice at 8K resolution (R=${R})`, 'success');
-        }
-        
-        function exportChartPNGWithLegend() {
-            if (!state.chart) {
-                showExportStatus('Chart not initialized', 'error');
-                return;
-            }
-            
-            const chartCanvas = document.getElementById('errorChart');
-            
-            // Create high-resolution export canvas
-            const exportCanvas = document.createElement('canvas');
-            const exportCtx = exportCanvas.getContext('2d');
-            
-            const dpr = 4;
-            exportCanvas.width = chartCanvas.width * dpr;
-            exportCanvas.height = chartCanvas.height * dpr;
-            
-            // Clear and draw chart
-            exportCtx.fillStyle = '#1a1a2e';
-            exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-            
-            // Draw chart at high resolution
-            const chartImage = new Image();
-            chartImage.src = chartCanvas.toDataURL('image/png');
-            chartImage.onload = function() {
-                exportCtx.drawImage(chartImage, 0, 0, exportCanvas.width, exportCanvas.height);
-                
-                // Add metadata
-                addExportMetadata(exportCtx, exportCanvas, 'Error Analysis Chart');
-                
-                // Export
-                downloadCanvasAsPNG(exportCanvas, `error_chart_${Date.now()}.png`);
-                showExportStatus('Exported error chart at 8K resolution', 'success');
-            };
-        }
-        
-        function exportMobiusWavePNG() {
-            const canvas = state.mobiusWave.canvas;
-            
-            // Create high-resolution export canvas
-            const exportCanvas = document.createElement('canvas');
-            const exportCtx = exportCanvas.getContext('2d');
-            
-            const dpr = 4;
-            exportCanvas.width = canvas.width * dpr;
-            exportCanvas.height = canvas.height * dpr;
-            
-            // Clear and draw at high resolution
-            exportCtx.fillStyle = '#1a1a2e';
-            exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-            
-            // Redraw wave at high resolution
-            const originalWidth = canvas.width;
-            const originalHeight = canvas.height;
-            
-            canvas.width = exportCanvas.width;
-            canvas.height = exportCanvas.height;
-            drawMobiusWave();
-            
-            exportCtx.drawImage(canvas, 0, 0);
-            
-            // Restore original size
-            canvas.width = originalWidth;
-            canvas.height = originalHeight;
-            drawMobiusWave();
-            
-            // Add metadata
-            addExportMetadata(exportCtx, exportCanvas, `Möbius Wave (M(R), R=${state.mobiusWave.maxR})`);
-            
-            // Export
-            downloadCanvasAsPNG(exportCanvas, `mobius_wave_${Date.now()}.png`);
-            showExportStatus('Exported Möbius wave at 8K resolution', 'success');
-        }
-        
-        function exportAllCanvasesPNG() {
-            const layoutStyle = document.querySelector('input[name="layoutStyle"]:checked').value;
-            const bgColor = document.getElementById('exportBgColor').value;
-            
-            // Create a large canvas (8K resolution)
-            const exportCanvas = document.createElement('canvas');
-            const exportCtx = exportCanvas.getContext('2d');
-            
-            // 8K resolution (7680x4320)
-            const width = 7680;
-            const height = 4320;
-            exportCanvas.width = width;
-            exportCanvas.height = height;
-            
-            // Fill background
-            exportCtx.fillStyle = bgColor;
-            exportCtx.fillRect(0, 0, width, height);
-            
-            let promises = [];
-            
-            // Capture 2D lattice
-            promises.push(captureCanvasAsImage('latticeCanvas2D', width, height));
-            
-            // Capture 3D view
-            promises.push(new Promise((resolve) => {
-                if (state.is3DInitialized) {
-                    const originalSize = {
-                        width: state.threeRenderer.domElement.width,
-                        height: state.threeRenderer.domElement.height
-                    };
-                    
-                    // Render at high resolution
-                    state.threeRenderer.setSize(width/2, height/2);
-                    state.threeRenderer.render(state.threeScene, state.threeCamera);
-                    
-                    const img = new Image();
-                    img.onload = function() {
-                        resolve({type: '3d', image: img});
-                        state.threeRenderer.setSize(originalSize.width, originalSize.height);
-                        state.threeRenderer.render(state.threeScene, state.threeCamera);
-                    };
-                    img.src = state.threeRenderer.domElement.toDataURL('image/png');
-                } else {
-                    resolve({type: '3d', image: null});
-                }
-            }));
-            
-            // Capture chart
-            promises.push(captureCanvasAsImage('errorChart', width, height));
-            
-            // Capture Möbius wave
-            promises.push(captureCanvasAsImage('mobiusWaveCanvas', width, height));
-            
-            Promise.all(promises).then((results) => {
-                const [img2D, img3D, imgChart, imgMobius] = results;
-                
-                // Arrange images based on layout style
-                switch(layoutStyle) {
-                    case 'grid':
-                        // 2x2 grid
-                        const cellWidth = width / 2;
-                        const cellHeight = height / 2;
-                        
-                        // Top-left: 2D lattice
-                        if (img2D.image) {
-                            exportCtx.drawImage(img2D.image, 0, 0, cellWidth, cellHeight);
-                        }
-                        
-                        // Top-right: 3D lattice
-                        if (img3D.image) {
-                            exportCtx.drawImage(img3D.image, cellWidth, 0, cellWidth, cellHeight);
-                        }
-                        
-                        // Bottom-left: Error chart
-                        if (imgChart.image) {
-                            exportCtx.drawImage(imgChart.image, 0, cellHeight, cellWidth, cellHeight);
-                        }
-                        
-                        // Bottom-right: Möbius wave
-                        if (imgMobius.image) {
-                            exportCtx.drawImage(imgMobius.image, cellWidth, cellHeight, cellWidth, cellHeight);
-                        }
-                        break;
-                        
-                    case 'vertical':
-                        // Vertical stack
-                        const vHeight = height / 4;
-                        
-                        if (img2D.image) exportCtx.drawImage(img2D.image, 0, 0, width, vHeight);
-                        if (img3D.image) exportCtx.drawImage(img3D.image, 0, vHeight, width, vHeight);
-                        if (imgChart.image) exportCtx.drawImage(imgChart.image, 0, vHeight*2, width, vHeight);
-                        if (imgMobius.image) exportCtx.drawImage(imgMobius.image, 0, vHeight*3, width, vHeight);
-                        break;
-                        
-                    case 'horizontal':
-                        // Horizontal stack
-                        const hWidth = width / 4;
-                        
-                        if (img2D.image) exportCtx.drawImage(img2D.image, 0, 0, hWidth, height);
-                        if (img3D.image) exportCtx.drawImage(img3D.image, hWidth, 0, hWidth, height);
-                        if (imgChart.image) exportCtx.drawImage(imgChart.image, hWidth*2, 0, hWidth, height);
-                        if (imgMobius.image) exportCtx.drawImage(imgMobius.image, hWidth*3, 0, hWidth, height);
-                        break;
-                        
-                    case 'collage':
-                        // Collage style (overlapping)
-                        if (img2D.image) exportCtx.drawImage(img2D.image, 0, 0, width*0.6, height*0.6);
-                        if (img3D.image) exportCtx.drawImage(img3D.image, width*0.4, height*0.1, width*0.6, height*0.6);
-                        if (imgChart.image) exportCtx.drawImage(imgChart.image, width*0.1, height*0.4, width*0.8, height*0.6);
-                        if (imgMobius.image) exportCtx.drawImage(imgMobius.image, width*0.3, height*0.7, width*0.4, height*0.3);
-                        break;
-                }
-                
-                // Add comprehensive metadata
-                addAllCanvasesMetadata(exportCtx, exportCanvas);
-                
-                // Export
-                downloadCanvasAsPNG(exportCanvas, `all_canvases_${Date.now()}.png`);
-                showExportStatus('Exported all 4 canvases combined at 8K resolution', 'success');
-            }).catch(error => {
-                console.error('Error capturing canvases:', error);
-                showExportStatus('Error exporting combined image', 'error');
-            });
-        }
-        
-        function captureCanvasAsImage(canvasId, targetWidth, targetHeight) {
-            return new Promise((resolve) => {
-                const canvas = document.getElementById(canvasId);
-                if (!canvas) {
-                    resolve({type: canvasId, image: null});
+                if (x < 1 || x > R || y < 1 || y > R || z < 1 || z > R) {
+                    document.getElementById('inspectResult').innerHTML = 
+                        `Error: Coordinates must be between 1 and ${R}`;
                     return;
                 }
                 
-                // Create a temporary canvas at target resolution
-                const tempCanvas = document.createElement('canvas');
-                const tempCtx = tempCanvas.getContext('2d');
-                tempCanvas.width = targetWidth;
-                tempCanvas.height = targetHeight;
+                const gcdVal = gcdArray([x, y, z]);
+                const isCoprime = gcdVal === 1;
                 
-                // For regular canvases, just draw scaled
-                if (canvasId !== 'latticeCanvas3D') {
-                    const img = new Image();
-                    img.onload = function() {
-                        // Scale to fit while maintaining aspect ratio
-                        const scale = Math.min(targetWidth / canvas.width, targetHeight / canvas.height);
-                        const scaledWidth = canvas.width * scale;
-                        const scaledHeight = canvas.height * scale;
-                        const x = (targetWidth - scaledWidth) / 2;
-                        const y = (targetHeight - scaledHeight) / 2;
-                        
-                        tempCtx.drawImage(img, x, y, scaledWidth, scaledHeight);
-                        
-                        const finalImg = new Image();
-                        finalImg.onload = function() {
-                            resolve({type: canvasId, image: finalImg});
-                        };
-                        finalImg.src = tempCanvas.toDataURL('image/png');
-                    };
-                    img.src = canvas.toDataURL('image/png');
-                } else {
-                    resolve({type: canvasId, image: null});
-                }
+                document.getElementById('inspectResult').innerHTML = 
+                    `Point (${x}, ${y}, ${z}): GCD = ${gcdVal}, Coprime = ${isCoprime ? 'Yes ✓' : 'No'}`;
+                
+                // Update GCD calculator
+                document.getElementById('gcd1').value = x;
+                document.getElementById('gcd2').value = y;
+                document.getElementById('gcd3').value = z;
+                calculateGCD();
             });
         }
         
-        function addExportMetadata(ctx, canvas, title) {
-            const includeWatermark = document.getElementById('includeWatermark').checked;
-            const includeTimestamp = document.getElementById('includeTimestamp').checked;
-            const includeMetadata = document.getElementById('includeMetadata').checked;
-            const includeLegend = document.getElementById('includeLegend').checked;
-            const includeStatistics = document.getElementById('includeStatistics').checked;
+        // ===========================================
+        // CHART VISUALIZATION WITH CLEARING FIXES
+        // ===========================================
+        
+        function initChart() {
+            const ctx = document.getElementById('errorChart').getContext('2d');
             
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
-            
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 40px Arial';
-            ctx.textAlign = 'left';
-            ctx.fillText(title, 20, canvas.height - 60);
-            
-            if (includeTimestamp) {
-                ctx.font = '24px Arial';
-                ctx.fillText(new Date().toLocaleString(), 20, canvas.height - 20);
+            // Clear any existing chart
+            if (state.chart) {
+                state.chart.destroy();
             }
             
-            if (includeWatermark) {
-                ctx.globalAlpha = 0.3;
-                ctx.font = 'italic 60px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('Boundary Cancellation Principle', canvas.width / 2, 80);
-                ctx.globalAlpha = 1.0;
+            state.chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#f0f0f0',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#f0f0f0',
+                            bodyColor: '#f0f0f0',
+                            borderColor: '#1a5fb4',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: {
+                                display: true,
+                                text: 'Radius R',
+                                color: '#f0f0f0'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#f0f0f0'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            title: {
+                                display: true,
+                                text: 'Error Δ(R)',
+                                color: '#f0f0f0'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#f0f0f0'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            updateChart();
+        }
+        
+        function updateChart() {
+            const maxR = parseInt(document.getElementById('maxRadiusSlider').value);
+            const step = parseInt(document.getElementById('stepSizeSlider').value);
+            const showAbsolute = document.getElementById('showAbsoluteError').checked;
+            const showRelative = document.getElementById('showRelativeError').checked;
+            const showRunning = document.getElementById('showRunningAverage').checked;
+            
+            // Get selected dimensions
+            const selectedDims = Array.from(document.querySelectorAll('.dimension-checkbox:checked'))
+                .map(cb => parseInt(cb.value))
+                .sort((a, b) => a - b);
+            
+            if (selectedDims.length === 0) return;
+            
+            // Generate labels
+            const labels = [];
+            for (let R = step; R <= maxR; R += step) {
+                labels.push(R);
             }
-        }
-        
-        function addAllCanvasesMetadata(ctx, canvas) {
-            const R2D = parseInt(document.getElementById('radius2DSlider').value);
-            const R3D = parseInt(document.getElementById('radius3DSlider').value);
-            const mobiusMaxR = state.mobiusWave.maxR;
             
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-            ctx.fillRect(0, canvas.height - 150, canvas.width, 150);
+            // Clear existing datasets
+            if (state.chart.data.datasets) {
+                state.chart.data.datasets = [];
+            }
             
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 48px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Boundary Cancellation Principle - All Visualizations', canvas.width / 2, canvas.height - 90);
+            // Generate datasets
+            const datasets = [];
+            const colors = ['#1a5fb4', '#4CAF50', '#FF9800', '#9C27B0', '#E91E63'];
             
-            ctx.font = '28px Arial';
-            ctx.fillText(`2D: R=${R2D} | 3D: R=${R3D} | Möbius: R=${mobiusMaxR}`, canvas.width / 2, canvas.height - 40);
+            selectedDims.forEach((k, index) => {
+                // Absolute error
+                if (showAbsolute) {
+                    const data = [];
+                    for (let R = step; R <= maxR; R += step) {
+                        const N = state.research.highPrecision ? computeNHighPrecision(R, k) : computeN(R, k);
+                        const expected = Math.pow(R, k) / ZETA_VALUES[k];
+                        data.push(N - expected);
+                    }
+                    
+                    datasets.push({
+                        label: `k=${k}: Absolute Error`,
+                        data: data,
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        tension: 0.1
+                    });
+                }
+                
+                // Relative error
+                if (showRelative) {
+                    const data = [];
+                    for (let R = step; R <= maxR; R += step) {
+                        const N = state.research.highPrecision ? computeNHighPrecision(R, k) : computeN(R, k);
+                        const expected = Math.pow(R, k) / ZETA_VALUES[k];
+                        const error = N - expected;
+                        data.push((error / expected) * 100);
+                    }
+                    
+                    datasets.push({
+                        label: `k=${k}: Relative Error (%)`,
+                        data: data,
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        tension: 0.1
+                    });
+                }
+                
+                // Running average
+                if (showRunning && k === selectedDims[0]) {
+                    const runningAvg = [];
+                    let cumulativeSum = 0;
+                    let count = 0;
+                    
+                    for (let R = step; R <= maxR; R += step) {
+                        const N = state.research.highPrecision ? computeNHighPrecision(R, k) : computeN(R, k);
+                        const expected = Math.pow(R, k) / ZETA_VALUES[k];
+                        cumulativeSum += N - expected;
+                        count++;
+                        runningAvg.push(cumulativeSum / count);
+                    }
+                    
+                    datasets.push({
+                        label: 'Running Average',
+                        data: runningAvg,
+                        borderColor: '#FFD700',
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderDash: [5, 5],
+                        tension: 0.2
+                    });
+                }
+            });
             
-            ctx.font = '24px Arial';
-            ctx.fillText(new Date().toLocaleString(), canvas.width / 2, canvas.height - 10);
+            // Update chart
+            state.chart.data.labels = labels;
+            state.chart.data.datasets = datasets;
             
-            // Add color scheme info
-            const colorScheme = state.colorSchemes[state.currentColorScheme];
-            ctx.textAlign = 'left';
-            ctx.font = '20px Arial';
-            ctx.fillText(`Color Scheme: ${colorScheme.name}`, 20, 40);
-        }
-        
-        function downloadCanvasAsPNG(canvas, filename) {
-            const link = document.createElement('a');
-            link.download = filename;
-            link.href = canvas.toDataURL('image/png', 1.0);
-            link.click();
-        }
-        
-        function showExportStatus(message, type = 'info') {
-            const statusEl = document.getElementById('exportStatus');
-            statusEl.textContent = message;
-            
-            if (type === 'success') {
-                statusEl.style.color = '#10b981';
-                statusEl.style.borderLeft = '4px solid #10b981';
-            } else if (type === 'error') {
-                statusEl.style.color = '#ef4444';
-                statusEl.style.borderLeft = '4px solid #ef4444';
-            } else if (type === 'warning') {
-                statusEl.style.color = '#f59e0b';
-                statusEl.style.borderLeft = '4px solid #f59e0b';
+            // Apply log-log scale if enabled
+            if (state.research.logLogPlot) {
+                state.chart.options.scales.x.type = 'logarithmic';
+                state.chart.options.scales.y.type = 'logarithmic';
+                state.chart.options.scales.x.title.text = 'log(R)';
+                state.chart.options.scales.y.title.text = 'log(Δ(R))';
             } else {
-                statusEl.style.color = '#f0f0f0';
-                statusEl.style.borderLeft = '4px solid #1a5fb4';
+                state.chart.options.scales.x.type = 'linear';
+                state.chart.options.scales.y.type = 'linear';
+                state.chart.options.scales.x.title.text = 'Radius R';
+                state.chart.options.scales.y.title.text = 'Error Δ(R)';
             }
             
-            setTimeout(() => {
-                statusEl.textContent = 'Ready to export. Select an option above.';
-                statusEl.style.color = '#f0f0f0';
-                statusEl.style.borderLeft = '4px solid var(--border-color)';
-            }, 5000);
+            state.chart.update('none');
+            
+            // Update critical strip if research mode is active
+            if (state.researchMode) {
+                updateCriticalStrip(maxR, selectedDims[0]);
+            }
         }
         
         // ===========================================
-        // INITIALIZATION
+        // GCD CALCULATOR
         // ===========================================
-        
-        function init() {
-            // Initialize tabs
-            initTabs();
-            
-            // Initialize 2D visualization
-            init2DVisualization();
-            
-            // Initialize Möbius wave visualization
-            initMobiusWave();
-            
-            // Initialize GCD calculator
-            document.getElementById('calculateGCD').addEventListener('click', calculateGCD);
-            document.getElementById('addGCDInput').addEventListener('click', addGCDInput);
-            document.getElementById('showFactors').addEventListener('click', showPrimeFactors);
-            
-            // Initialize number theory tools
-            document.getElementById('calculateMobius').addEventListener('click', () => {
-                const n = parseInt(document.getElementById('mobiusInput').value) || 1;
-                const mu = mobius(n);
-                document.getElementById('mobiusResult').innerHTML = `μ(${n}) = ${mu}`;
-            });
-            
-            document.getElementById('testPrime').addEventListener('click', () => {
-                const n = parseInt(document.getElementById('primeTestInput').value) || 1;
-                const isPrimeResult = isPrime(n);
-                document.getElementById('primeResult').innerHTML = 
-                    `${n} is ${isPrimeResult ? 'prime ✓' : 'composite'}`;
-            });
-            
-            document.getElementById('calculateTotient').addEventListener('click', () => {
-                const n = parseInt(document.getElementById('totientInput').value) || 1;
-                const phi = totient(n);
-                document.getElementById('totientResult').innerHTML = `φ(${n}) = ${phi}`;
-            });
-            
-            // Initialize export functions
-            initExport();
-            
-            // Show welcome message
-            setTimeout(() => {
-                logToConsole('Welcome to the Boundary Cancellation Principle Discovery Engine!', 'info');
-                logToConsole('Use Research Mode (Ctrl+R) for advanced diagnostics', 'info');
-            }, 1000);
-            
-            // Keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                if (e.ctrlKey && e.key === 'r') {
-                    e.preventDefault();
-                    document.getElementById('researchToggle').click();
-                }
-            });
-        }
-        
-        // Initialize export functionality
-        function initExport() {
-            // Enhanced PNG exports
-            document.getElementById('export2DPNG').addEventListener('click', export2DPNGWithLegend);
-            document.getElementById('export3DPNG').addEventListener('click', export3DPNGWithLegend);
-            document.getElementById('exportChartPNG').addEventListener('click', exportChartPNGWithLegend);
-            document.getElementById('exportMobiusWavePNG').addEventListener('click', exportMobiusWavePNG);
-            document.getElementById('exportAllCanvasesPNG').addEventListener('click', exportAllCanvasesPNG);
-            
-            // Settings controls
-            document.getElementById('qualitySlider').addEventListener('input', function() {
-                document.getElementById('qualityValue').textContent = this.value;
-            });
-        }
         
         function calculateGCD() {
             const inputs = [];
@@ -3436,6 +2751,866 @@
             calculateGCD();
         }
         
+        // ===========================================
+        // ENHANCED PNG EXPORT WITH LEGEND
+        // ===========================================
+        
+        function export2DPNGWithLegend() {
+            const canvas = document.getElementById('latticeCanvas2D');
+            const R = parseInt(document.getElementById('radius2DSlider').value);
+            const pointSize = parseInt(document.getElementById('pointSizeSlider').value);
+            
+            // Get statistics
+            const totalPoints = R * R;
+            const coprimeCount = parseInt(document.getElementById('coprimeCount2D').textContent.replace(/,/g, ''));
+            const error = parseFloat(document.getElementById('error2D').textContent);
+            const boundaryCount = parseInt(document.getElementById('boundaryCount2D').textContent.replace(/,/g, ''));
+            
+            // Create export canvas (wider to include legend)
+            const exportCanvas = document.createElement('canvas');
+            const exportCtx = exportCanvas.getContext('2d');
+            
+            const dpr = 2; // High resolution for export
+            const legendWidth = 400;
+            exportCanvas.width = (canvas.width + legendWidth * dpr);
+            exportCanvas.height = canvas.height * dpr;
+            
+            // Clear export canvas
+            exportCtx.fillStyle = COLOR_SCHEMES.default.background;
+            exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+            
+            // Draw the original canvas (scaled up)
+            exportCtx.drawImage(canvas, 0, 0, canvas.width * dpr, canvas.height * dpr);
+            
+            // Draw legend background
+            const legendX = canvas.width * dpr;
+            exportCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            exportCtx.fillRect(legendX, 0, legendWidth * dpr, exportCanvas.height);
+            
+            // Draw legend content
+            exportCtx.fillStyle = 'white';
+            exportCtx.font = `bold ${20 * dpr}px Arial`;
+            exportCtx.textBaseline = 'top';
+            
+            let yPos = 30 * dpr;
+            const lineHeight = 30 * dpr;
+            
+            // Title
+            exportCtx.fillText('2D Coprime Lattice Analysis', legendX + 20 * dpr, yPos);
+            yPos += lineHeight * 1.5;
+            
+            // Statistics
+            exportCtx.font = `${16 * dpr}px Arial`;
+            const stats = [
+                `Radius R: ${R}`,
+                `Total Points: ${totalPoints.toLocaleString()}`,
+                `Coprime Points: ${coprimeCount.toLocaleString()}`,
+                `Non-coprime Points: ${(totalPoints - coprimeCount).toLocaleString()}`,
+                `Coprime Density: ${(coprimeCount/totalPoints).toFixed(4)}`,
+                `Expected Density: ${(1/ZETA_VALUES[2]).toFixed(4)}`,
+                `Error Δ(R): ${error.toFixed(2)}`,
+                `Boundary Points: ${boundaryCount.toLocaleString()}`,
+                `Boundary Fraction: ${(boundaryCount/totalPoints).toFixed(4)}`,
+                `Date: ${new Date().toLocaleDateString()}`,
+                `Time: ${new Date().toLocaleTimeString()}`
+            ];
+            
+            stats.forEach(stat => {
+                exportCtx.fillText(stat, legendX + 20 * dpr, yPos);
+                yPos += lineHeight;
+            });
+            
+            // Draw color legend
+            yPos += 20 * dpr;
+            const colors = [
+                { color: COLOR_SCHEMES.default.coprime, label: 'Coprime (GCD=1)' },
+                { color: COLOR_SCHEMES.default.nonCoprime, label: 'Non-coprime' },
+                { color: COLOR_SCHEMES.default.boundary, label: 'Boundary Point' },
+                { color: COLOR_SCHEMES.default.origin, label: 'Origin (1,1)' }
+            ];
+            
+            colors.forEach(item => {
+                exportCtx.fillStyle = item.color;
+                exportCtx.fillRect(legendX + 20 * dpr, yPos, 20 * dpr, 20 * dpr);
+                exportCtx.fillStyle = 'white';
+                exportCtx.fillText(item.label, legendX + 50 * dpr, yPos + 5 * dpr);
+                yPos += 30 * dpr;
+            });
+            
+            // Add watermark
+            exportCtx.globalAlpha = 0.3;
+            exportCtx.font = `italic ${30 * dpr}px Arial`;
+            exportCtx.fillStyle = 'white';
+            exportCtx.fillText('Boundary Cancellation Principle', legendX + 20 * dpr, exportCanvas.height - 50 * dpr);
+            exportCtx.globalAlpha = 1.0;
+            
+            // Export
+            const link = document.createElement('a');
+            link.download = `2d_coprime_lattice_R${R}_${Date.now()}.png`;
+            link.href = exportCanvas.toDataURL('image/png', 1.0);
+            link.click();
+            
+            showExportStatus(`Exported 2D visualization with detailed legend (R=${R})`, 'success');
+        }
+        
+        function export3DPNGWithLegend() {
+            if (!state.is3DInitialized) {
+                showExportStatus('Please initialize 3D visualization first', 'error');
+                return;
+            }
+            
+            const R = parseInt(document.getElementById('radius3DSlider').value) || 15;
+            const cubeSize = parseFloat(document.getElementById('cubeSizeSlider').value) || 0.7;
+            
+            // Get statistics
+            const totalPoints = Math.pow(R, 3);
+            const coprimeCount = parseInt(document.getElementById('coprimeCount3D').textContent.replace(/,/g, ''));
+            const error = parseFloat(document.getElementById('error3D').textContent);
+            const boundaryCount = 6 * R * R - 12 * R + 8;
+            
+            // Capture current 3D view
+            const originalCanvas = state.threeRenderer.domElement;
+            
+            // Create a temporary canvas for 3D render
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = originalCanvas.width;
+            tempCanvas.height = originalCanvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // Draw the 3D canvas onto temp canvas with background
+            tempCtx.fillStyle = COLOR_SCHEMES.default.background;
+            tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            tempCtx.drawImage(originalCanvas, 0, 0);
+            
+            // Create export canvas with legend
+            const exportCanvas = document.createElement('canvas');
+            const exportCtx = exportCanvas.getContext('2d');
+            
+            const dpr = 2;
+            const legendWidth = 400;
+            exportCanvas.width = (tempCanvas.width + legendWidth * dpr);
+            exportCanvas.height = tempCanvas.height * dpr;
+            
+            // Clear export canvas
+            exportCtx.fillStyle = COLOR_SCHEMES.default.background;
+            exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+            
+            // Draw the 3D image
+            exportCtx.drawImage(tempCanvas, 0, 0, tempCanvas.width * dpr, tempCanvas.height * dpr);
+            
+            // Draw legend background
+            const legendX = tempCanvas.width * dpr;
+            exportCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            exportCtx.fillRect(legendX, 0, legendWidth * dpr, exportCanvas.height);
+            
+            // Draw legend content
+            exportCtx.fillStyle = 'white';
+            exportCtx.font = `bold ${20 * dpr}px Arial`;
+            exportCtx.textBaseline = 'top';
+            
+            let yPos = 30 * dpr;
+            const lineHeight = 30 * dpr;
+            
+            // Title
+            exportCtx.fillText('3D Coprime Lattice Analysis', legendX + 20 * dpr, yPos);
+            yPos += lineHeight * 1.5;
+            
+            // Statistics
+            exportCtx.font = `${16 * dpr}px Arial`;
+            const stats = [
+                `Radius R: ${R}`,
+                `Total Points: ${totalPoints.toLocaleString()}`,
+                `Coprime Points: ${coprimeCount.toLocaleString()}`,
+                `Non-coprime Points: ${(totalPoints - coprimeCount).toLocaleString()}`,
+                `Coprime Density: ${(coprimeCount/totalPoints).toFixed(4)}`,
+                `Expected Density: ${(1/ZETA_VALUES[3]).toFixed(4)}`,
+                `Error Δ(R): ${error.toFixed(2)}`,
+                `Boundary Points: ${boundaryCount.toLocaleString()}`,
+                `Boundary Fraction: ${(boundaryCount/totalPoints).toFixed(4)}`,
+                `Cube Size: ${cubeSize}`,
+                `Date: ${new Date().toLocaleDateString()}`,
+                `Time: ${new Date().toLocaleTimeString()}`
+            ];
+            
+            stats.forEach(stat => {
+                exportCtx.fillText(stat, legendX + 20 * dpr, yPos);
+                yPos += lineHeight;
+            });
+            
+            // Draw color legend
+            yPos += 20 * dpr;
+            const colors = [
+                { color: '#4CAF50', label: 'Coprime (GCD=1)' },
+                { color: '#f44336', label: 'Non-coprime' }
+            ];
+            
+            colors.forEach(item => {
+                exportCtx.fillStyle = item.color;
+                exportCtx.fillRect(legendX + 20 * dpr, yPos, 20 * dpr, 20 * dpr);
+                exportCtx.fillStyle = 'white';
+                exportCtx.fillText(item.label, legendX + 50 * dpr, yPos + 5 * dpr);
+                yPos += 30 * dpr;
+            });
+            
+            // Add mathematical formula
+            yPos += 20 * dpr;
+            exportCtx.font = `italic ${14 * dpr}px Arial`;
+            exportCtx.fillText('N(R) = Σ μ(d) ⌊R/d⌋³', legendX + 20 * dpr, yPos);
+            yPos += lineHeight;
+            exportCtx.fillText('Δ(R) = N(R) - R³/ζ(3)', legendX + 20 * dpr, yPos);
+            
+            // Add watermark
+            exportCtx.globalAlpha = 0.3;
+            exportCtx.font = `italic ${30 * dpr}px Arial`;
+            exportCtx.fillStyle = 'white';
+            exportCtx.fillText('Boundary Cancellation Principle', legendX + 20 * dpr, exportCanvas.height - 50 * dpr);
+            exportCtx.globalAlpha = 1.0;
+            
+            // Export
+            const link = document.createElement('a');
+            link.download = `3d_coprime_lattice_R${R}_${Date.now()}.png`;
+            link.href = exportCanvas.toDataURL('image/png', 1.0);
+            link.click();
+            
+            showExportStatus(`Exported 3D visualization with detailed legend (R=${R})`, 'success');
+        }
+        
+        function exportChartPNGWithLegend() {
+            if (!state.chart) {
+                showExportStatus('Chart not initialized', 'error');
+                return;
+            }
+            
+            const chartCanvas = document.getElementById('errorChart');
+            const maxR = parseInt(document.getElementById('maxRadiusSlider').value);
+            const step = parseInt(document.getElementById('stepSizeSlider').value);
+            
+            // Get selected dimensions
+            const selectedDims = Array.from(document.querySelectorAll('.dimension-checkbox:checked'))
+                .map(cb => parseInt(cb.value))
+                .sort((a, b) => a - b);
+            
+            // Create export canvas with legend
+            const exportCanvas = document.createElement('canvas');
+            const exportCtx = exportCanvas.getContext('2d');
+            
+            const dpr = 2;
+            const legendWidth = 500;
+            exportCanvas.width = (chartCanvas.width + legendWidth * dpr);
+            exportCanvas.height = chartCanvas.height * dpr;
+            
+            // Clear export canvas
+            exportCtx.fillStyle = COLOR_SCHEMES.default.background;
+            exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+            
+            // Draw the chart
+            exportCtx.drawImage(chartCanvas, 0, 0, chartCanvas.width * dpr, chartCanvas.height * dpr);
+            
+            // Draw legend background
+            const legendX = chartCanvas.width * dpr;
+            exportCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            exportCtx.fillRect(legendX, 0, legendWidth * dpr, exportCanvas.height);
+            
+            // Draw legend content
+            exportCtx.fillStyle = 'white';
+            exportCtx.font = `bold ${20 * dpr}px Arial`;
+            exportCtx.textBaseline = 'top';
+            
+            let yPos = 30 * dpr;
+            const lineHeight = 25 * dpr;
+            
+            // Title
+            exportCtx.fillText('Error Analysis Chart', legendX + 20 * dpr, yPos);
+            yPos += lineHeight * 1.5;
+            
+            // Parameters
+            exportCtx.font = `${16 * dpr}px Arial`;
+            const params = [
+                `Analysis Range: R = 1 to ${maxR}`,
+                `Step Size: ${step}`,
+                `Dimensions: k = ${selectedDims.join(', ')}`,
+                `Date: ${new Date().toLocaleDateString()}`,
+                `Time: ${new Date().toLocaleTimeString()}`
+            ];
+            
+            params.forEach(param => {
+                exportCtx.fillText(param, legendX + 20 * dpr, yPos);
+                yPos += lineHeight;
+            });
+            
+            // Mathematical formulas
+            yPos += 20 * dpr;
+            exportCtx.font = `italic ${14 * dpr}px Arial`;
+            const formulas = [
+                'N(R) = Σ μ(d) ⌊R/d⌋ᵏ',
+                'Δ(R) = N(R) - Rᵏ/ζ(k)',
+                'ζ(2) = π²/6 ≈ 1.6449',
+                'ζ(3) ≈ 1.2020569',
+                'ζ(4) = π⁴/90 ≈ 1.0823'
+            ];
+            
+            formulas.forEach(formula => {
+                exportCtx.fillText(formula, legendX + 20 * dpr, yPos);
+                yPos += lineHeight;
+            });
+            
+            // Analysis results
+            yPos += 20 * dpr;
+            exportCtx.font = `bold ${16 * dpr}px Arial`;
+            exportCtx.fillText('Current Analysis:', legendX + 20 * dpr, yPos);
+            yPos += lineHeight;
+            
+            exportCtx.font = `${14 * dpr}px Arial`;
+            const currentR = state.currentR;
+            selectedDims.forEach(k => {
+                const N = state.research.highPrecision ? computeNHighPrecision(currentR, k) : computeN(currentR, k);
+                const expected = Math.pow(currentR, k) / ZETA_VALUES[k];
+                const error = N - expected;
+                const relative = (error / expected) * 100;
+                
+                exportCtx.fillText(`k=${k}: Δ(${currentR})=${error.toFixed(2)} (${relative.toFixed(2)}%)`, 
+                    legendX + 40 * dpr, yPos);
+                yPos += lineHeight;
+            });
+            
+            // Add watermark
+            exportCtx.globalAlpha = 0.3;
+            exportCtx.font = `italic ${30 * dpr}px Arial`;
+            exportCtx.fillStyle = 'white';
+            exportCtx.fillText('Boundary Cancellation Principle', legendX + 20 * dpr, exportCanvas.height - 50 * dpr);
+            exportCtx.globalAlpha = 1.0;
+            
+            // Export
+            const link = document.createElement('a');
+            link.download = `error_analysis_chart_${Date.now()}.png`;
+            link.href = exportCanvas.toDataURL('image/png', 1.0);
+            link.click();
+            
+            showExportStatus('Exported error chart with detailed legend', 'success');
+        }
+        
+        // ===========================================
+        // COMPREHENSIVE EXPORT FUNCTIONS
+        // ===========================================
+        
+        function exportErrorDataCSV() {
+            const maxR = parseInt(document.getElementById('maxRadiusSlider').value);
+            const step = parseInt(document.getElementById('stepSizeSlider').value);
+            const selectedDims = Array.from(document.querySelectorAll('.dimension-checkbox:checked'))
+                .map(cb => parseInt(cb.value));
+            
+            if (selectedDims.length === 0) {
+                showExportStatus('Please select at least one dimension', 'error');
+                return;
+            }
+            
+            let csv = 'R';
+            selectedDims.forEach(k => {
+                csv += `,N(R)_k${k},Expected_k${k},Error_k${k},RelativeError%_k${k},Density_k${k}`;
+            });
+            csv += '\n';
+            
+            for (let R = step; R <= maxR; R += step) {
+                csv += R;
+                selectedDims.forEach(k => {
+                    const N = state.research.highPrecision ? computeNHighPrecision(R, k) : computeN(R, k);
+                    const expected = Math.pow(R, k) / ZETA_VALUES[k];
+                    const error = N - expected;
+                    const relative = (error / expected) * 100;
+                    const density = N / Math.pow(R, k);
+                    
+                    csv += `,${N},${expected.toFixed(6)},${error.toFixed(6)},${relative.toFixed(6)},${density.toFixed(6)}`;
+                });
+                csv += '\n';
+            }
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = `error_analysis_R${maxR}_${Date.now()}.csv`;
+            link.click();
+            
+            setTimeout(() => URL.revokeObjectURL(url), 100);
+            
+            showExportStatus(`Exported error data for R=1-${maxR}, k=${selectedDims.join(',')}`, 'success');
+        }
+        
+        function exportLatticeDataCSV() {
+            const R = parseInt(document.getElementById('radius2DSlider').value);
+            
+            let csv = 'x,y,gcd,is_coprime,is_boundary,distance_from_origin\n';
+            for (let x = 1; x <= R; x++) {
+                for (let y = 1; y <= R; y++) {
+                    const g = gcd(x, y);
+                    const isCoprime = g === 1;
+                    const isBoundary = Math.max(x, y) === R;
+                    const distance = Math.sqrt(x*x + y*y);
+                    
+                    csv += `${x},${y},${g},${isCoprime},${isBoundary},${distance.toFixed(4)}\n`;
+                }
+            }
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = `lattice_${R}x${R}_${Date.now()}.csv`;
+            link.click();
+            
+            setTimeout(() => URL.revokeObjectURL(url), 100);
+            
+            showExportStatus(`Exported ${R}x${R} lattice data (${R*R} points)`, 'success');
+        }
+        
+        function exportFullReportJSON() {
+            const data = {
+                metadata: {
+                    export_date: new Date().toISOString(),
+                    project: 'Boundary Cancellation Principle',
+                    version: '1.0.0',
+                    author: 'Wessen Getachew',
+                    contact: '@7dview'
+                },
+                parameters: {
+                    current_2D_radius: parseInt(document.getElementById('radius2DSlider').value),
+                    current_3D_radius: parseInt(document.getElementById('radius3DSlider').value),
+                    chart_max_radius: parseInt(document.getElementById('maxRadiusSlider').value),
+                    chart_step_size: parseInt(document.getElementById('stepSizeSlider').value),
+                    dimensions: Array.from(document.querySelectorAll('.dimension-checkbox:checked'))
+                        .map(cb => parseInt(cb.value))
+                },
+                mathematical_constants: ZETA_VALUES,
+                statistics: {
+                    '2D': {
+                        total_points: parseInt(document.getElementById('totalPoints2D').textContent.replace(/,/g, '')),
+                        coprime_points: parseInt(document.getElementById('coprimeCount2D').textContent.replace(/,/g, '')),
+                        error: parseFloat(document.getElementById('error2D').textContent),
+                        boundary_points: parseInt(document.getElementById('boundaryCount2D').textContent.replace(/,/g, ''))
+                    },
+                    '3D': {
+                        total_points: parseInt(document.getElementById('totalPoints3D').textContent.replace(/,/g, '')),
+                        coprime_points: parseInt(document.getElementById('coprimeCount3D').textContent.replace(/,/g, '')),
+                        error: parseFloat(document.getElementById('error3D').textContent),
+                        boundary_points: parseInt(document.getElementById('boundaryCount3D').textContent.replace(/,/g, ''))
+                    }
+                },
+                research_data: state.research.diagnosticData,
+                console_history: state.research.consoleHistory.slice(-100) // Last 100 entries
+            };
+            
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = `full_report_${Date.now()}.json`;
+            link.click();
+            
+            setTimeout(() => URL.revokeObjectURL(url), 100);
+            
+            showExportStatus('Exported comprehensive report (JSON)', 'success');
+        }
+        
+        function exportResearchCSV() {
+            if (state.research.diagnosticData.length === 0) {
+                showExportStatus('No research data to export', 'warning');
+                return;
+            }
+            
+            let csv = 'timestamp,type,k,R,value,exponent,confidence,r2,re,im,distance\n';
+            
+            state.research.diagnosticData.forEach(entry => {
+                csv += `${entry.timestamp || ''},`;
+                csv += `${entry.type || ''},`;
+                csv += `${entry.k || ''},`;
+                csv += `${entry.R || ''},`;
+                csv += `${entry.value || entry.delta || ''},`;
+                csv += `${entry.exponent || ''},`;
+                csv += `${entry.confidence || ''},`;
+                csv += `${entry.r2 || ''},`;
+                csv += `${entry.re || ''},`;
+                csv += `${entry.im || ''},`;
+                csv += `${entry.distance || ''}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = `research_data_${Date.now()}.csv`;
+            link.click();
+            
+            setTimeout(() => URL.revokeObjectURL(url), 100);
+            
+            showExportStatus(`Exported ${state.research.diagnosticData.length} research data points`, 'success');
+        }
+        
+        function exportBatchAll() {
+            const start = parseInt(document.getElementById('batchStart').value) || 1;
+            const end = parseInt(document.getElementById('batchEnd').value) || 100;
+            const step = parseInt(document.getElementById('batchStep').value) || 10;
+            
+            if (start >= end) {
+                showExportStatus('Start must be less than end', 'error');
+                return;
+            }
+            
+            let csv = 'R,k=2_N(R),k=2_Expected,k=2_Error,k=2_Relative%,k=2_Density,';
+            csv += 'k=3_N(R),k=3_Expected,k=3_Error,k=3_Relative%,k=3_Density,';
+            csv += 'k=4_N(R),k=4_Expected,k=4_Error,k=4_Relative%,k=4_Density\n';
+            
+            for (let R = start; R <= end; R += step) {
+                csv += R;
+                
+                for (let k = 2; k <= 4; k++) {
+                    const N = computeN(R, k);
+                    const expected = Math.pow(R, k) / ZETA_VALUES[k];
+                    const error = N - expected;
+                    const relative = (error / expected) * 100;
+                    const density = N / Math.pow(R, k);
+                    
+                    csv += `,${N},${expected.toFixed(6)},${error.toFixed(6)},${relative.toFixed(6)},${density.toFixed(6)}`;
+                }
+                
+                csv += '\n';
+            }
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = `batch_analysis_R${start}_${end}_${Date.now()}.csv`;
+            link.click();
+            
+            setTimeout(() => URL.revokeObjectURL(url), 100);
+            
+            showExportStatus(`Exported batch analysis for R=${start}-${end} (step=${step})`, 'success');
+        }
+        
+        function showExportStatus(message, type = 'info') {
+            const statusEl = document.getElementById('exportStatus');
+            statusEl.textContent = message;
+            
+            if (type === 'success') {
+                statusEl.style.color = '#10b981';
+                statusEl.style.borderLeft = '4px solid #10b981';
+            } else if (type === 'error') {
+                statusEl.style.color = '#ef4444';
+                statusEl.style.borderLeft = '4px solid #ef4444';
+            } else if (type === 'warning') {
+                statusEl.style.color = '#f59e0b';
+                statusEl.style.borderLeft = '4px solid #f59e0b';
+            } else {
+                statusEl.style.color = '#f0f0f0';
+                statusEl.style.borderLeft = '4px solid #1a5fb4';
+            }
+            
+            setTimeout(() => {
+                statusEl.textContent = 'Ready to export. Select an option above.';
+                statusEl.style.color = '#f0f0f0';
+                statusEl.style.borderLeft = '4px solid var(--border-color)';
+            }, 5000);
+        }
+        
+        // ===========================================
+        // RESEARCH MODE FUNCTIONS
+        // ===========================================
+        
+        function initResearchMode() {
+            // Toggle research mode
+            document.getElementById('researchToggle').addEventListener('click', () => {
+                state.researchMode = !state.researchMode;
+                const overlay = document.getElementById('researchOverlay');
+                const toggleBtn = document.getElementById('researchToggle');
+                
+                if (state.researchMode) {
+                    overlay.classList.add('active');
+                    toggleBtn.classList.add('active');
+                    toggleBtn.innerHTML = '<span>🔬</span> Research Mode (ON)';
+                    logToConsole('Research mode activated', 'info');
+                } else {
+                    overlay.classList.remove('active');
+                    toggleBtn.classList.remove('active');
+                    toggleBtn.innerHTML = '<span>🔬</span> Research Mode';
+                }
+            });
+            
+            // Close research mode
+            document.getElementById('closeResearch').addEventListener('click', () => {
+                state.researchMode = false;
+                document.getElementById('researchOverlay').classList.remove('active');
+                document.getElementById('researchToggle').classList.remove('active');
+                document.getElementById('researchToggle').innerHTML = '<span>🔬</span> Research Mode';
+            });
+            
+            // Research controls
+            document.getElementById('toggleMobiusWave').addEventListener('click', function() {
+                state.research.mobiusWave = !state.research.mobiusWave;
+                this.textContent = state.research.mobiusWave ? 'Hide Wave' : 'Show Wave';
+                this.classList.toggle('active');
+                
+                if (state.currentTab === 'visualization') {
+                    draw2DLattice();
+                }
+                
+                logToConsole(`Möbius wave overlay ${state.research.mobiusWave ? 'enabled' : 'disabled'}`, 'info');
+            });
+            
+            document.getElementById('waveIntensityBtn').addEventListener('click', function() {
+                state.research.waveIntensity = (state.research.waveIntensity + 0.5) % 2.5;
+                const levels = ['Low', 'Medium', 'High', 'Very High'];
+                this.textContent = `Intensity: ${levels[Math.floor(state.research.waveIntensity / 0.5)]}`;
+                
+                if (state.research.mobiusWave) {
+                    draw2DLattice();
+                }
+            });
+            
+            document.getElementById('toggleLogLog').addEventListener('click', function() {
+                state.research.logLogPlot = !state.research.logLogPlot;
+                this.textContent = state.research.logLogPlot ? 'Linear Scale' : 'Log-Log Scale';
+                this.classList.toggle('active');
+                
+                if (state.chart) {
+                    updateChart();
+                }
+                
+                logToConsole(`Log-log plot ${state.research.logLogPlot ? 'enabled' : 'disabled'}`, 'info');
+            });
+            
+            document.getElementById('fitPowerLaw').addEventListener('click', calculateGrowthExponent);
+            document.getElementById('togglePrecision').addEventListener('click', togglePrecisionMode);
+            document.getElementById('benchmarkPrecision').addEventListener('click', benchmarkPrecision);
+            
+            // Console controls
+            document.getElementById('clearConsole').addEventListener('click', clearConsole);
+            document.getElementById('exportResearchData').addEventListener('click', exportResearchCSV);
+            document.getElementById('runFullAnalysis').addEventListener('click', runFullAnalysis);
+        }
+        
+        function calculateGrowthExponent() {
+            const maxR = parseInt(document.getElementById('maxRadiusSlider').value);
+            const step = parseInt(document.getElementById('stepSizeSlider').value);
+            const k = parseInt(document.querySelector('.dimension-checkbox:checked')?.value || 2);
+            
+            // Collect log-log data
+            const logR = [];
+            const logDelta = [];
+            
+            for (let R = step; R <= maxR; R += step) {
+                const N = state.research.highPrecision ? computeNHighPrecision(R, k) : computeN(R, k);
+                const expected = Math.pow(R, k) / ZETA_VALUES[k];
+                const delta = Math.abs(N - expected);
+                
+                if (delta > 0 && R > 1) {
+                    logR.push(Math.log(R));
+                    logDelta.push(Math.log(delta));
+                }
+            }
+            
+            // Linear regression
+            const n = logR.length;
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            
+            for (let i = 0; i < n; i++) {
+                sumX += logR[i];
+                sumY += logDelta[i];
+                sumXY += logR[i] * logDelta[i];
+                sumX2 += logR[i] * logR[i];
+            }
+            
+            const α = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            const β = (sumY - α * sumX) / n;
+            
+            // Calculate R²
+            let ssTotal = 0, ssResidual = 0;
+            const meanY = sumY / n;
+            
+            for (let i = 0; i < n; i++) {
+                const predicted = α * logR[i] + β;
+                ssTotal += Math.pow(logDelta[i] - meanY, 2);
+                ssResidual += Math.pow(logDelta[i] - predicted, 2);
+            }
+            
+            const r2 = 1 - (ssResidual / (ssTotal || 1));
+            const confidence = 1.96 * Math.sqrt(ssResidual / (n - 2)) / Math.sqrt(sumX2 - sumX * sumX / n);
+            
+            // Update display
+            document.getElementById('exponentDisplay').textContent = α.toFixed(4);
+            document.getElementById('confidenceDisplay').textContent = confidence.toFixed(6);
+            document.getElementById('r2Display').textContent = r2.toFixed(6);
+            
+            // Also update in analysis tab
+            document.getElementById('growthExponent').textContent = α.toFixed(4);
+            document.getElementById('goodnessOfFit').textContent = r2.toFixed(6);
+            
+            // Store in research data
+            state.research.diagnosticData.push({
+                type: 'growth_exponent',
+                k: k,
+                R_max: maxR,
+                exponent: α,
+                confidence: confidence,
+                r2: r2,
+                timestamp: new Date().toISOString()
+            });
+            
+            logToConsole(`Growth exponent: α = ${α.toFixed(4)} ± ${confidence.toFixed(6)} (R² = ${r2.toFixed(6)})`, 'info');
+            
+            return { exponent: α, confidence: confidence, r2: r2 };
+        }
+        
+        function updateCriticalStrip(R, k) {
+            const N = state.research.highPrecision ? computeNHighPrecision(R, k) : computeN(R, k);
+            const expected = Math.pow(R, k) / ZETA_VALUES[k];
+            const delta = N - expected;
+            
+            // Map delta to complex plane (simplified visualization)
+            const re = 0.5 + (delta / Math.pow(R, k - 0.5)) * 0.1;
+            const im = Math.log(R) * 0.5;
+            
+            // Normalize for display
+            const displayRe = Math.max(0, Math.min(1, re));
+            const displayIm = Math.max(0.25, Math.min(0.75, im / 10));
+            
+            // Update point position
+            const point = document.getElementById('deltaPoint');
+            point.style.left = `${displayRe * 100}%`;
+            point.style.top = `${displayIm * 100}%`;
+            
+            // Update display
+            document.getElementById('currentRe').textContent = re.toFixed(6);
+            document.getElementById('currentIm').textContent = im.toFixed(6);
+            document.getElementById('distanceFromHalf').textContent = Math.abs(re - 0.5).toFixed(6);
+            
+            // Store data
+            state.research.diagnosticData.push({
+                type: 'critical_strip',
+                R: R,
+                k: k,
+                delta: delta,
+                re: re,
+                im: im,
+                distance: Math.abs(re - 0.5),
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        function togglePrecisionMode() {
+            state.research.highPrecision = !state.research.highPrecision;
+            const btn = document.getElementById('togglePrecision');
+            
+            if (state.research.highPrecision) {
+                btn.textContent = 'High Precision';
+                btn.classList.add('active');
+                Decimal.set({ precision: state.research.precisionDigits });
+                logToConsole(`High precision mode enabled (${state.research.precisionDigits} digits)`, 'info');
+            } else {
+                btn.textContent = '64-bit Float';
+                btn.classList.remove('active');
+                logToConsole('Switched to standard 64-bit floating point', 'info');
+            }
+            
+            // Update chart if on analysis tab
+            if (state.currentTab === 'analysis' && state.chart) {
+                updateChart();
+            }
+        }
+        
+        function benchmarkPrecision() {
+            const R = state.currentR;
+            const k = 2;
+            
+            // Standard precision
+            const startStandard = performance.now();
+            const N_standard = computeN(R, k);
+            const expected_standard = Math.pow(R, k) / ZETA_VALUES[k];
+            const delta_standard = N_standard - expected_standard;
+            const timeStandard = performance.now() - startStandard;
+            
+            // High precision
+            const startHigh = performance.now();
+            const N_high = computeNHighPrecision(R, k);
+            const expected_high = new Decimal(R).pow(k).dividedBy(ZETA_VALUES[k]).toNumber();
+            const delta_high = N_high - expected_high;
+            const timeHigh = performance.now() - startHigh;
+            
+            // Calculate relative error
+            const relError = Math.abs(delta_standard - delta_high) / Math.abs(delta_high || 1);
+            
+            // Update display
+            document.getElementById('standardPrecision').textContent = delta_standard.toExponential(6);
+            document.getElementById('highPrecision').textContent = delta_high.toExponential(6);
+            document.getElementById('relativeErrorDisplay').textContent = relError.toExponential(6);
+            
+            logToConsole(`Benchmark: Standard=${timeStandard.toFixed(2)}ms, High=${timeHigh.toFixed(2)}ms, RelError=${relError.toExponential(6)}`, 'info');
+        }
+        
+        function runFullAnalysis() {
+            logToConsole('Starting full diagnostic analysis...', 'info');
+            
+            // 1. Growth exponent
+            const exponent = calculateGrowthExponent();
+            
+            // 2. Running average test
+            testBoundarySelfCorrection();
+            
+            // 3. Precision benchmark
+            benchmarkPrecision();
+            
+            // 4. Update critical strip
+            const maxR = parseInt(document.getElementById('maxRadiusSlider').value);
+            const k = parseInt(document.querySelector('.dimension-checkbox:checked')?.value || 2);
+            updateCriticalStrip(maxR, k);
+            
+            logToConsole('Full analysis complete!', 'info');
+        }
+        
+        function testBoundarySelfCorrection() {
+            const R = parseInt(document.getElementById('maxRadiusSlider').value);
+            const k = 2;
+            const step = parseInt(document.getElementById('stepSizeSlider').value);
+            
+            const errors = [];
+            let runningSum = 0;
+            
+            for (let r = step; r <= R; r += step) {
+                const N = state.research.highPrecision ? computeNHighPrecision(r, k) : computeN(r, k);
+                const expected = Math.pow(r, k) / ZETA_VALUES[k];
+                const error = N - expected;
+                errors.push(error);
+                runningSum += error;
+            }
+            
+            const runningAverage = runningSum / errors.length;
+            
+            // Calculate autocorrelation
+            const mean = errors.reduce((a, b) => a + b, 0) / errors.length;
+            let autocorr = 0;
+            let variance = 0;
+            
+            for (let i = 0; i < errors.length; i++) {
+                variance += Math.pow(errors[i] - mean, 2);
+                if (i > 0) {
+                    autocorr += (errors[i] - mean) * (errors[i-1] - mean);
+                }
+            }
+            
+            variance /= errors.length;
+            autocorr /= (errors.length - 1) * variance;
+            
+            // Update display
+            document.getElementById('runningAverage').textContent = runningAverage.toExponential(4);
+            document.getElementById('autocorrelation').textContent = autocorr.toFixed(4);
+            
+            // Test for self-correction
+            const passed = Math.abs(runningAverage) < 0.01 && Math.abs(autocorr) < 0.1;
+            
+            logToConsole(`Self-correction test: ${passed ? 'PASS' : 'FAIL'} (avg=${runningAverage.toExponential(4)}, autocorr=${autocorr.toFixed(4)})`, 
+                        passed ? 'info' : 'warning');
+        }
+        
         function logToConsole(message, type = 'info') {
             const consoleEl = document.getElementById('researchConsole');
             const entry = document.createElement('div');
@@ -3444,10 +3619,294 @@
             
             consoleEl.appendChild(entry);
             consoleEl.scrollTop = consoleEl.scrollHeight;
+            
+            // Store in history
+            state.research.consoleHistory.push({
+                message,
+                type,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Limit history size
+            if (state.research.consoleHistory.length > 100) {
+                state.research.consoleHistory.shift();
+            }
+        }
+        
+        function clearConsole() {
+            const consoleEl = document.getElementById('researchConsole');
+            consoleEl.innerHTML = '';
+            state.research.consoleHistory = [];
+            logToConsole('Console cleared', 'info');
+        }
+        
+        // ===========================================
+        // TAB MANAGEMENT
+        // ===========================================
+        
+        function initTabs() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.getAttribute('data-tab');
+                    
+                    // Update active tab button
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Update active tab pane
+                    tabPanes.forEach(pane => pane.classList.remove('active'));
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // Update state
+                    state.currentTab = tabId;
+                    
+                    // Initialize specific features if needed
+                    if (tabId === 'visualization') {
+                        init2DVisualization();
+                        init3DVisualization();
+                    } else if (tabId === 'analysis') {
+                        if (!state.chart) {
+                            initChart();
+                        } else {
+                            updateChart();
+                        }
+                    }
+                });
+            });
+        }
+        
+        // ===========================================
+        // EXPORT INITIALIZATION
+        // ===========================================
+        
+        function initExport() {
+            // Enhanced PNG exports with legends
+            document.getElementById('export2DPNG').addEventListener('click', export2DPNGWithLegend);
+            document.getElementById('export3DPNG').addEventListener('click', export3DPNGWithLegend);
+            document.getElementById('exportChartPNG').addEventListener('click', exportChartPNGWithLegend);
+            
+            // CSV exports
+            document.getElementById('exportErrorCSV').addEventListener('click', exportErrorDataCSV);
+            document.getElementById('exportLatticeCSV').addEventListener('click', exportLatticeDataCSV);
+            document.getElementById('exportResearchCSV').addEventListener('click', exportResearchCSV);
+            
+            // JSON export
+            document.getElementById('exportFullReport').addEventListener('click', exportFullReportJSON);
+            
+            // Batch export
+            document.getElementById('exportBatchAll').addEventListener('click', exportBatchAll);
+            
+            // Batch preview
+            document.getElementById('previewBatch').addEventListener('click', () => {
+                const start = parseInt(document.getElementById('batchStart').value) || 1;
+                const end = parseInt(document.getElementById('batchEnd').value) || 100;
+                const step = parseInt(document.getElementById('batchStep').value) || 10;
+                
+                if (start >= end) {
+                    showExportStatus('Start must be less than end', 'error');
+                    return;
+                }
+                
+                const preview = document.getElementById('batchPreview');
+                preview.innerHTML = `Batch Preview: R = ${start} to ${end} (step=${step})<br>`;
+                preview.innerHTML += `Will export ${Math.floor((end - start) / step) + 1} data points<br>`;
+                preview.innerHTML += `Dimensions: k=2,3,4<br>`;
+                preview.innerHTML += `Filesize estimate: ~${Math.floor(((end - start) / step + 1) * 100)} KB`;
+                preview.style.display = 'block';
+            });
+            
+            // Settings sliders
+            document.getElementById('qualitySlider').addEventListener('input', function() {
+                document.getElementById('qualityValue').textContent = this.value;
+            });
+            
+            document.getElementById('precisionSlider').addEventListener('input', function() {
+                document.getElementById('precisionValue').textContent = this.value;
+            });
+        }
+        
+        // ===========================================
+        // INITIALIZATION
+        // ===========================================
+        
+        function init() {
+            // Initialize tabs
+            initTabs();
+            
+            // Initialize GCD calculator
+            document.getElementById('calculateGCD').addEventListener('click', calculateGCD);
+            document.getElementById('addGCDInput').addEventListener('click', addGCDInput);
+            document.getElementById('showFactors').addEventListener('click', showPrimeFactors);
+            
+            // Initialize number theory tools
+            document.getElementById('calculateMobius').addEventListener('click', () => {
+                const n = parseInt(document.getElementById('mobiusInput').value) || 1;
+                const mu = mobius(n);
+                document.getElementById('mobiusResult').innerHTML = `μ(${n}) = ${mu}`;
+            });
+            
+            document.getElementById('testPrime').addEventListener('click', () => {
+                const n = parseInt(document.getElementById('primeTestInput').value) || 1;
+                const isPrimeResult = isPrime(n);
+                document.getElementById('primeResult').innerHTML = 
+                    `${n} is ${isPrimeResult ? 'prime ✓' : 'composite'}`;
+            });
+            
+            document.getElementById('calculateTotient').addEventListener('click', () => {
+                const n = parseInt(document.getElementById('totientInput').value) || 1;
+                const phi = totient(n);
+                document.getElementById('totientResult').innerHTML = `φ(${n}) = ${phi}`;
+            });
+            
+            // Initialize chart controls
+            document.getElementById('maxRadiusSlider').addEventListener('input', () => {
+                const value = document.getElementById('maxRadiusSlider').value;
+                document.getElementById('maxRadiusValue').textContent = value;
+                document.getElementById('maxRadiusInput').value = value;
+                updateChart();
+            });
+            
+            document.getElementById('setMaxRadius').addEventListener('click', () => {
+                const value = parseInt(document.getElementById('maxRadiusInput').value);
+                if (value >= 10 && value <= 5000) {
+                    document.getElementById('maxRadiusSlider').value = value;
+                    document.getElementById('maxRadiusValue').textContent = value;
+                    updateChart();
+                }
+            });
+            
+            document.getElementById('stepSizeSlider').addEventListener('input', () => {
+                document.getElementById('stepSizeValue').textContent = document.getElementById('stepSizeSlider').value;
+                updateChart();
+            });
+            
+            document.getElementById('showAbsoluteError').addEventListener('change', updateChart);
+            document.getElementById('showRelativeError').addEventListener('change', updateChart);
+            document.getElementById('showRunningAverage').addEventListener('change', updateChart);
+            
+            document.querySelectorAll('.dimension-checkbox').forEach(cb => {
+                cb.addEventListener('change', updateChart);
+            });
+            
+            document.getElementById('analyzePoint').addEventListener('click', () => {
+                const R = parseInt(document.getElementById('analyzeR').value) || 100;
+                const k = parseInt(document.getElementById('analyzeK').value) || 2;
+                const N = state.research.highPrecision ? computeNHighPrecision(R, k) : computeN(R, k);
+                const expected = Math.pow(R, k) / ZETA_VALUES[k];
+                const error = N - expected;
+                const relative = (error / expected) * 100;
+                
+                document.getElementById('analysisResult').innerHTML = 
+                    `For R=${R}, k=${k}:<br>` +
+                    `N(R) = ${N.toLocaleString()}<br>` +
+                    `Expected = ${expected.toFixed(2)}<br>` +
+                    `Δ(R) = ${error.toFixed(2)}<br>` +
+                    `Relative Error = ${relative.toFixed(4)}%`;
+            });
+            
+            // Initialize research mode
+            initResearchMode();
+            
+            // Initialize export functions
+            initExport();
+            
+            // Initialize chart controls in analysis tab
+            document.getElementById('calculateExponent').addEventListener('click', calculateGrowthExponent);
+            document.getElementById('testSelfCorrection').addEventListener('click', testBoundarySelfCorrection);
+            
+            // Show welcome message
+            setTimeout(() => {
+                logToConsole('Welcome to the Boundary Cancellation Principle Discovery Engine!', 'info');
+                logToConsole('Use Research Mode (Ctrl+R) for advanced diagnostics', 'info');
+            }, 1000);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'r') {
+                    e.preventDefault();
+                    document.getElementById('researchToggle').click();
+                }
+            });
+            
+            // Initialize canvas on window resize
+            window.addEventListener('resize', () => {
+                if (state.currentTab === 'visualization') {
+                    // Reinitialize 2D canvas with proper clearing
+                    const canvas2D = document.getElementById('latticeCanvas2D');
+                    if (canvas2D) {
+                        const ctx = canvas2D.getContext('2d');
+                        const container = canvas2D.parentElement;
+                        const dpr = window.devicePixelRatio || 1;
+                        
+                        canvas2D.width = container.clientWidth * dpr;
+                        canvas2D.height = container.clientHeight * dpr;
+                        canvas2D.style.width = container.clientWidth + 'px';
+                        canvas2D.style.height = container.clientHeight + 'px';
+                        
+                        ctx.setTransform(1, 0, 0, 1, 0, 0);
+                        ctx.clearRect(0, 0, canvas2D.width, canvas2D.height);
+                        
+                        draw2DLattice();
+                    }
+                    
+                    // Handle 3D resize
+                    if (state.threeRenderer && state.threeCamera) {
+                        const canvas3D = document.getElementById('latticeCanvas3D');
+                        if (canvas3D) {
+                            const container = canvas3D.parentElement;
+                            state.threeCamera.aspect = container.clientWidth / container.clientHeight;
+                            state.threeCamera.updateProjectionMatrix();
+                            state.threeRenderer.setSize(container.clientWidth, container.clientHeight);
+                        }
+                    }
+                }
+                
+                // Handle chart resize
+                if (state.chart) {
+                    state.chart.resize();
+                }
+            });
         }
         
         // Start everything when page loads
         window.addEventListener('load', init);
+        
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            if (state.animationId) clearTimeout(state.animationId);
+            if (state.animationFrameId) cancelAnimationFrame(state.animationFrameId);
+            
+            // Clean up Three.js resources
+            if (state.is3DInitialized) {
+                while(state.threeObjects.length) {
+                    const obj = state.threeObjects.pop();
+                    if (obj.geometry) obj.geometry.dispose();
+                    if (obj.material) {
+                        if (Array.isArray(obj.material)) {
+                            obj.material.forEach(material => material.dispose());
+                        } else {
+                            obj.material.dispose();
+                        }
+                    }
+                }
+            }
+        });
+        
+        // MathJax configuration
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
     </script>
 </body>
-                                            </html>
+                            </html>
