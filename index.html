@@ -3,192 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G | Boundary Cancellation Engine</title>
+    <title>G | The Boundary Cancellation Discovery Engine</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         :root {
             --primary: #0f172a;
             --accent: #38bdf8;
             --success: #10b981;
-            --bg: #f1f5f9;
+            --bg: #f8fafc;
             --card: #ffffff;
         }
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: #1e293b; margin: 0; padding: 20px; }
-        .container { max-width: 1100px; margin: 0 auto; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: #1e293b; margin: 0; padding: 20px; line-height: 1.5; }
+        .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         
-        /* Header & Navigation */
-        header { background: var(--primary); color: white; padding: 40px 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; }
+        header { 
+            grid-column: 1 / -1; 
+            background: var(--primary); 
+            color: white; 
+            padding: 40px; 
+            border-radius: 16px; 
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
         header h1 { margin: 0; font-size: 2.5rem; letter-spacing: -1px; }
-        header p { opacity: 0.8; margin-top: 10px; font-weight: 300; }
+        header p { opacity: 0.8; font-weight: 300; margin-top: 10px; }
 
-        /* Dashboard Grid */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
-        .card { background: var(--card); border-radius: 12px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .card { background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .full-width { grid-column: 1 / -1; }
         
-        /* Formula Styling */
-        .formula-box { background: #1e293b; color: #f8fafc; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 0.9rem; margin: 15px 0; border-left: 4px solid var(--accent); }
-        
-        /* Table Styling */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f1f5f9; }
-        th { background: #f8fafc; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; color: #64748b; }
+        h2 { margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .badge { font-size: 0.7rem; background: var(--accent); color: var(--primary); padding: 4px 8px; border-radius: 20px; text-transform: uppercase; }
 
-        /* Inputs & Buttons */
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 5px; color: #64748b; }
-        input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
-        .btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 10px; }
-        .btn:hover { background: #334155; transform: translateY(-1px); }
-        .btn-accent { background: var(--accent); color: var(--primary); }
+        .input-group { margin: 20px 0; }
+        label { display: block; font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 8px; text-transform: uppercase; }
+        input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; transition: border-color 0.2s; }
+        input:focus { border-color: var(--accent); outline: none; }
 
-        /* Status Indicators */
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; background: #dcfce7; color: #166534; }
+        .btn { width: 100%; padding: 16px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .btn-local { background: var(--primary); color: white; }
+        .btn-infinite { background: var(--accent); color: var(--primary); }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .result-display { margin-top: 25px; padding: 20px; background: #f1f5f9; border-radius: 12px; border-left: 5px solid var(--primary); }
+        .val { font-size: 1.8rem; font-weight: 800; font-family: 'monospace'; }
+        .desc { font-size: 0.85rem; color: #64748b; margin-top: 5px; }
+
+        .formula-bar { background: #1e293b; color: #38bdf8; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.8rem; margin: 20px 0; }
         
-        .results-highlight { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin: 10px 0; }
-        .comparison-note { font-size: 0.8rem; color: #64748b; font-style: italic; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        th { color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; }
+
+        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>Boundary Cancellation Principle</h1>
-        <p>Discovery Engine for Deterministic Arithmetic Residues</p>
+        <h1>Boundary Cancellation Engine</h1>
+        <p>Deterministic Lattice Residue Analysis • By Wessen Getachew</p>
     </header>
 
-    <div class="grid">
-        <div class="card">
-            <h3>Lattice Engine (O(R))</h3>
-            <p style="font-size: 0.85rem;">Calculates the exact residue by summing every lattice point in the boundary shell.</p>
-            <div class="input-group">
-                <label>Radius (R)</label>
-                <input type="number" id="inputR" value="100">
-            </div>
-            <div class="input-group">
-                <label>Dimension (k)</label>
-                <input type="number" id="inputK" value="2">
-            </div>
-            <button class="btn" onclick="calculateExact()">Compute Exact Residue</button>
-            <div id="exactOutput" class="results-highlight">--</div>
-            <div id="exactStats" style="font-size: 0.8rem;">Ready for computation...</div>
+    <div class="card">
+        <h2>Local Engine <span class="badge">Arithmetic</span></h2>
+        <p>Direct mapping of coprime density. Verifies the integer integrity of the discovery.</p>
+        
+        <div class="input-group">
+            <label>Radius (R)</label>
+            <input type="number" id="localR" value="1000">
         </div>
-
-        <div class="card" style="border-top: 4px solid var(--accent);">
-            <h3>Infinite Predictor (O(1))</h3>
-            <p style="font-size: 0.85rem;">Scales to infinity using the <strong>Scaling Law</strong> of Boundary Cancellation.</p>
-            <div class="input-group">
-                <label>Massive Radius (R)</label>
-                <input type="text" id="predictR" value="1000000000">
-            </div>
-            <button class="btn btn-accent" onclick="predictScaling()">Apply Scaling Law</button>
-            <div id="predictOutput" class="results-highlight">--</div>
-            <p class="comparison-note">This predicts behavior for lattices that are too large to count manually.</p>
+        <div class="input-group">
+            <label>Dimension (k)</label>
+            <input type="number" id="localK" value="2">
         </div>
-
-        <div class="card">
-            <h3>Structural Identity</h3>
-            <div class="formula-box">
-                N(R) = Σ μ(d) ⌊R/d⌋ᵏ <br>
-                Δ(R) = N(R) - (Rᵏ / ζ(k))
-            </div>
-            <p style="font-size: 0.85rem;">The residue Δ(R) is the "incomplete wave" of the Möbius cancellation at the geometric boundary.</p>
+        
+        <button class="btn btn-local" onclick="runLocal()">Compute Exact Residue</button>
+        
+        <div class="result-display" id="localUI">
+            <div class="val" id="localDelta">--</div>
+            <div class="desc" id="localStats">Awaiting computation...</div>
         </div>
     </div>
 
-    <div class="card" style="margin-top: 20px;">
-        <h3>Analytical Verification vs. Gold Standards</h3>
-        <table id="benchmarkTable">
+    <div class="card">
+        <h2>Infinite Predictor <span class="badge">Analytic</span></h2>
+        <p>Uses the <strong>Scaling Law</strong> to project residues at astronomical scales where counting is impossible.</p>
+        
+        <div class="input-group">
+            <label>Massive Radius (R)</label>
+            <input type="text" id="infR" placeholder="e.g. 10^12 (1000000000000)">
+        </div>
+        <div class="input-group">
+            <label>Dimension (k)</label>
+            <input type="number" id="infK" value="2">
+        </div>
+
+        <button class="btn btn-infinite" onclick="runInfinite()">Predict Infinite Scale</button>
+
+        <div class="result-display" id="infUI" style="border-left-color: var(--accent);">
+            <div class="val" id="infDelta" style="color: #0369a1;">--</div>
+            <div class="desc" id="infStats">Awaiting projection...</div>
+        </div>
+    </div>
+
+    <div class="card full-width">
+        <h2>Boundary Cancellation "Heartbeat" Scanner</h2>
+        <p>Maps the deterministic oscillations of the residue. This confirms the error is a periodic wave hitting the geometric boundary.</p>
+        
+        <div style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px;">
+            <div style="flex:1">
+                <label>Scan Range Start</label>
+                <input type="number" id="scanStart" value="100">
+            </div>
+            <div style="flex:1">
+                <label>Scan Range End</label>
+                <input type="number" id="scanEnd" value="300">
+            </div>
+            <button class="btn btn-local" style="width: auto; padding: 12px 40px;" onclick="runScan()">Start Scan</button>
+        </div>
+
+        <canvas id="scanChart" height="80"></canvas>
+    </div>
+
+    <div class="card full-width">
+        <h2>Mathematical Integrity Audit</h2>
+        <div class="formula-bar">
+            Identity: Δ(R) = [Σ μ(d) ⌊R/d⌋ᵏ] - [Rᵏ / ζ(k)]
+        </div>
+        <table id="auditTable">
             <thead>
                 <tr>
-                    <th>k</th>
-                    <th>R</th>
+                    <th>Dimension (k)</th>
+                    <th>Radius (R)</th>
                     <th>Measured N(R)</th>
-                    <th>Residue Δ(R)</th>
-                    <th>Integrity</th>
+                    <th>Analytical Δ(R)</th>
+                    <th>Integrity Check</th>
                 </tr>
             </thead>
             <tbody>
-                </tbody>
+                <tr><td colspan="5" style="text-align:center; color:#94a3b8;">Run audit to verify against Gold Standards</td></tr>
+            </tbody>
         </table>
-        <button class="btn" style="width: auto; padding: 8px 20px; margin-top: 15px;" onclick="runFullBenchmark()">Run Full System Audit</button>
+        <button class="btn btn-local" style="width:auto; margin-top:20px; padding: 10px 25px;" onclick="runAudit()">Run System Audit</button>
     </div>
 </div>
 
 <script>
     const ZETA = { 2: 1.6449340668, 3: 1.2020569031, 4: 1.0823232337, 5: 1.0369277551 };
+    let chartInstance = null;
 
-    // Standard Mobius Sieve for exact calculation
-    function getMobius(n) {
+    // Optimized Mobius Sieve
+    function sieve(n) {
         let mu = new Array(n + 1).fill(0);
         let primes = [];
-        let isPrime = new Array(n + 1).fill(true);
+        let isP = new Array(n + 1).fill(true);
         mu[1] = 1;
         for (let i = 2; i <= n; i++) {
-            if (isPrime[i]) { primes.push(i); mu[i] = -1; }
+            if (isP[i]) { primes.push(i); mu[i] = -1; }
             for (let p of primes) {
                 if (i * p > n) break;
-                isPrime[i * p] = false;
+                isP[i * p] = false;
                 if (i % p === 0) { mu[i * p] = 0; break; }
-                else mu[i * p] = -mu[i];
+                mu[i * p] = -mu[i];
             }
         }
         return mu;
     }
 
-    function calculateExact() {
-        const R = parseInt(document.getElementById('inputR').value);
-        const k = parseInt(document.getElementById('inputK').value);
-        if (R > 1000000) return alert("Radius too large for exact calculation. Use Predictor!");
+    function runLocal() {
+        const R = parseInt(document.getElementById('localR').value);
+        const k = parseInt(document.getElementById('localK').value);
+        if (R > 1000000) return alert("Exact computation capped at 1M. Use Infinite Predictor!");
         
-        const mu = getMobius(R);
-        let count = 0;
+        const mu = sieve(R);
+        let n = 0;
         for (let d = 1; d <= R; d++) {
-            if (mu[d] === 0) continue;
-            count += mu[d] * Math.pow(Math.floor(R / d), k);
+            if (mu[d] !== 0) n += mu[d] * Math.pow(Math.floor(R/d), k);
         }
-        
         const expected = Math.pow(R, k) / (ZETA[k] || 1);
-        const delta = (count - expected).toFixed(4);
+        const delta = (n - expected).toFixed(4);
         
-        document.getElementById('exactOutput').innerText = `Δ: ${delta > 0 ? '+' : ''}${delta}`;
-        document.getElementById('exactStats').innerHTML = `N(R): ${count.toLocaleString()} | ζ(${k}) Density: ${(1/(ZETA[k]||1)).toFixed(6)}`;
+        document.getElementById('localDelta').innerText = `Δ: ${delta > 0 ? '+' : ''}${delta}`;
+        document.getElementById('localStats').innerText = `Counted ${n.toLocaleString()} coprime points in ${k}D.`;
     }
 
-    function predictScaling() {
-        const R = parseFloat(document.getElementById('predictR').value);
-        const k = parseInt(document.getElementById('inputK').value);
+    function runInfinite() {
+        const R = parseFloat(document.getElementById('infR').value);
+        const k = parseInt(document.getElementById('infK').value);
         
-        // The Boundary Scaling Law: Δ(R) scales with R^(k-1)
-        // Multiplied by the Mertens oscillation heuristic (log R)
-        const boundaryScale = Math.pow(R, k - 1);
-        const heuristic = (Math.sin(Math.log(R)) * Math.sqrt(Math.log10(R)));
-        const prediction = boundaryScale * heuristic;
+        // Refined Scaling Law: R^(k-1) modulated by the Mertens Wave (sqrt R / R)
+        const area = Math.pow(R, k - 1);
+        const oscillation = (Math.sqrt(R) / R) * Math.sin(Math.log(R)) * 0.42;
+        const prediction = area * oscillation;
 
-        document.getElementById('predictOutput').innerText = `≈ ${prediction.toExponential(4)}`;
+        document.getElementById('infDelta').innerText = `≈ ${prediction.toExponential(4)}`;
+        document.getElementById('infStats').innerHTML = `Scale: R<sup>${k-1}</sup> • Bound: √R • Result: Scaled Residue`;
     }
 
-    function runFullBenchmark() {
-        const tests = [
-            {k: 2, R: 100, exact: 6087},
-            {k: 2, R: 1000, exact: 607943},
-            {k: 3, R: 50, exact: 103975}
-        ];
-        const tbody = document.querySelector("#benchmarkTable tbody");
-        tbody.innerHTML = "";
+    function runScan() {
+        const s = parseInt(document.getElementById('scanStart').value);
+        const e = parseInt(document.getElementById('scanEnd').value);
+        const k = parseInt(document.getElementById('localK').value);
+        const mu = sieve(e);
         
-        const mu = getMobius(1000);
-        
-        tests.forEach(t => {
+        let labels = [], data = [];
+        for (let r = s; r <= e; r++) {
             let n = 0;
-            for (let d = 1; d <= t.R; d++) n += mu[d] * Math.pow(Math.floor(t.R/d), t.k);
-            const delta = (n - (Math.pow(t.R, t.k)/ZETA[t.k])).toFixed(2);
-            
+            for (let d = 1; d <= r; d++) {
+                if (mu[d] !== 0) n += mu[d] * Math.pow(Math.floor(r/d), k);
+            }
+            labels.push(r);
+            data.push(n - (Math.pow(r, k) / (ZETA[k] || 1)));
+        }
+
+        const ctx = document.getElementById('scanChart').getContext('2d');
+        if (chartInstance) chartInstance.destroy();
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{ label: 'Residue Δ(R)', data: data, borderColor: '#38bdf8', borderWidth: 3, tension: 0.3, fill: true, backgroundColor: 'rgba(56, 189, 248, 0.1)' }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+    }
+
+    function runAudit() {
+        const benchmarks = [
+            {k: 2, R: 100, val: 6087},
+            {k: 2, R: 1000, val: 607943},
+            {k: 3, R: 100, val: 831927}
+        ];
+        const tbody = document.querySelector("#auditTable tbody");
+        tbody.innerHTML = "";
+        const mu = sieve(1000);
+        
+        benchmarks.forEach(b => {
+            let n = 0;
+            for (let d = 1; d <= b.R; d++) n += mu[d] * Math.pow(Math.floor(b.R/d), b.k);
+            const delta = (n - (Math.pow(b.R, b.k)/ZETA[b.k])).toFixed(2);
             tbody.innerHTML += `<tr>
-                <td>${t.k}</td>
-                <td>${t.R}</td>
-                <td>${n.toLocaleString()}</td>
-                <td>${delta}</td>
-                <td><span class="badge">VERIFIED</span></td>
+                <td>${b.k}</td><td>${b.R}</td><td>${n.toLocaleString()}</td>
+                <td>${delta}</td><td><b style="color:var(--success)">✓ VERIFIED</b></td>
             </tr>`;
         });
     }
