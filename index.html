@@ -3,9 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Primitive Lattice Points, Coprime Density, and Multi-Dimensional Generalization</title>
+    <title>Primitive Lattice Points: Theory and Visualization</title>
+    
+    <!-- MathJax for LaTeX rendering -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <!-- Three.js for 3D visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -17,109 +23,129 @@
             font-family: 'Georgia', 'Times New Roman', serif;
             line-height: 1.6;
             color: #333;
-            background-color: #f8f9fa;
-            padding: 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-            font-size: 16px;
+            background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+            overflow-x: hidden;
         }
         
-        .container {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            padding: 40px;
-        }
-        
-        .title-section {
+        /* Header and Navigation */
+        header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px 0;
             text-align: center;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 25px;
-            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
         
         h1 {
-            color: #2c3e50;
-            font-size: 2rem;
-            margin-bottom: 15px;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #ecf0f1;
+            margin-bottom: 20px;
         }
         
         .author {
-            color: #7f8c8d;
-            font-size: 1.2rem;
-            margin-bottom: 10px;
+            font-style: italic;
+            color: #bdc3c7;
         }
         
         .date {
             color: #95a5a6;
-            font-style: italic;
+            margin-top: 5px;
         }
         
-        .abstract {
-            background-color: #f0f7ff;
-            border-left: 4px solid #3498db;
-            padding: 20px;
-            margin: 30px 0;
-            border-radius: 0 6px 6px 0;
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 5px;
+            margin: 20px auto 0;
+            max-width: 500px;
         }
         
-        .abstract h2 {
-            color: #2980b9;
-            margin-bottom: 10px;
-            font-size: 1.3rem;
-        }
-        
-        .toc {
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
+        .nav-tab {
+            flex: 1;
+            padding: 12px 20px;
+            text-align: center;
+            cursor: pointer;
             border-radius: 6px;
-            padding: 20px;
-            margin: 30px 0;
+            transition: all 0.3s ease;
+            font-weight: bold;
         }
         
-        .toc h2 {
+        .nav-tab:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-tab.active {
+            background-color: white;
             color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 1.4rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         
-        .toc ul {
-            list-style-type: none;
-            margin-left: 20px;
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
         
-        .toc li {
-            margin-bottom: 8px;
+        .content-section {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            min-height: 500px;
         }
         
-        .toc a {
-            color: #3498db;
-            text-decoration: none;
+        .content-section.active {
+            display: block;
+            opacity: 1;
         }
         
-        .toc a:hover {
-            text-decoration: underline;
+        /* Article Styling */
+        .article-content {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .article-section {
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .article-section:last-child {
+            border-bottom: none;
         }
         
         h2 {
             color: #2980b9;
             margin-top: 40px;
             margin-bottom: 20px;
-            font-size: 1.5rem;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        
-        h2:first-of-type {
-            border-top: none;
-            padding-top: 0;
+            font-size: 1.8rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
         }
         
         h3 {
             color: #16a085;
             margin-top: 30px;
             margin-bottom: 15px;
-            font-size: 1.3rem;
+            font-size: 1.4rem;
         }
         
         p {
@@ -132,7 +158,7 @@
             border-left: 4px solid #3498db;
             padding: 15px 20px;
             margin: 20px 0;
-            border-radius: 0 4px 4px 0;
+            border-radius: 0 6px 6px 0;
         }
         
         .definition-title {
@@ -146,7 +172,7 @@
             border-left: 4px solid #f1c40f;
             padding: 15px 20px;
             margin: 20px 0;
-            border-radius: 0 4px 4px 0;
+            border-radius: 0 6px 6px 0;
         }
         
         .lemma-title {
@@ -161,7 +187,7 @@
             border-left: 4px solid #27ae60;
             padding: 15px 20px;
             margin: 15px 0 20px 0;
-            border-radius: 0 4px 4px 0;
+            border-radius: 0 6px 6px 0;
         }
         
         .proof-title {
@@ -189,30 +215,21 @@
         
         .important-result {
             background-color: #fff8e1;
-            border: 2px solid #ffb300;
-            padding: 20px;
-            border-radius: 8px;
+            border: 3px solid #ffb300;
+            padding: 25px;
+            border-radius: 10px;
             margin: 30px 0;
             text-align: center;
         }
         
-        .important-result .math {
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-        
-        .case-study {
-            background-color: #e8f5e9;
-            border-left: 4px solid #4caf50;
-            padding: 15px 20px;
+        .boxed-result {
+            display: inline-block;
+            padding: 15px 25px;
+            border: 3px solid #2c3e50;
+            border-radius: 8px;
+            background-color: #ecf0f1;
             margin: 20px 0;
-            border-radius: 0 4px 4px 0;
-        }
-        
-        .case-study-title {
-            font-weight: bold;
-            color: #2e7d32;
-            margin-bottom: 10px;
+            text-align: center;
         }
         
         ul, ol {
@@ -224,66 +241,234 @@
             margin-bottom: 8px;
         }
         
-        .references {
-            background-color: #f4f4f4;
-            padding: 20px;
-            border-radius: 6px;
+        /* Visualization Styling */
+        .visualization-content {
+            background-color: #111;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        #visualization-container {
+            width: 100%;
+            height: 600px;
+            position: relative;
+        }
+        
+        #visualization-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #visualization-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 10;
+            border: 1px solid #444;
+            max-width: 250px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .control-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        
+        select, input[type="range"] {
+            width: 100%;
+            margin-top: 5px;
+            background: #222;
+            color: white;
+            border: 1px solid #555;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        
+        .stat-display {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #444;
+        }
+        
+        .stat {
+            color: #00ffcc;
+            font-weight: bold;
+        }
+        
+        .legend {
+            font-size: 0.8em;
+            margin-top: 10px;
+            color: #888;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .primitive-color {
+            background-color: #00ffcc;
+        }
+        
+        .non-primitive-color {
+            background-color: #ff3366;
+            opacity: 0.7;
+        }
+        
+        /* Interactive Theory Section */
+        .interactive-theory {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 30px;
             margin-top: 30px;
         }
         
-        .references h2 {
-            color: #7b1fa2;
-            border-top: none;
-            padding-top: 0;
+        .theory-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
         }
         
-        .references ol {
-            margin-left: 20px;
+        .dimension-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
         
-        .references li {
-            margin-bottom: 10px;
-        }
-        
-        .future-directions {
-            background-color: #e3f2fd;
-            padding: 20px;
+        .dim-btn {
+            padding: 10px 20px;
+            background-color: #ecf0f1;
+            border: 2px solid #bdc3c7;
             border-radius: 6px;
-            margin-top: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
         }
         
-        .acknowledgments {
-            background-color: #f3e5f5;
+        .dim-btn:hover {
+            background-color: #d5dbdb;
+        }
+        
+        .dim-btn.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        
+        .radius-control {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .radius-value {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-left: 10px;
+        }
+        
+        .theory-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .result-card {
+            background-color: #f8f9fa;
             padding: 20px;
-            border-radius: 6px;
-            margin-top: 30px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            text-align: center;
         }
         
+        .result-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+        
+        .result-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 50px;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Responsive Design */
         @media (max-width: 768px) {
-            body {
+            .container {
                 padding: 10px;
-                font-size: 15px;
             }
             
-            .container {
+            .article-content {
                 padding: 20px;
             }
             
             h1 {
-                font-size: 1.6rem;
+                font-size: 1.8rem;
             }
             
             h2 {
-                font-size: 1.3rem;
+                font-size: 1.5rem;
             }
             
             h3 {
-                font-size: 1.1rem;
+                font-size: 1.2rem;
             }
             
-            .math {
-                font-size: 0.9rem;
-                padding: 8px;
+            #visualization-container {
+                height: 400px;
+            }
+            
+            #visualization-controls {
+                max-width: 200px;
+                padding: 10px;
+            }
+            
+            .theory-controls {
+                flex-direction: column;
+            }
+            
+            .radius-control {
+                min-width: 100%;
             }
         }
         
@@ -292,260 +477,580 @@
             overflow-x: auto;
             overflow-y: hidden;
         }
-        
-        /* Special styling for boxed result */
-        .boxed-result {
-            display: inline-block;
-            padding: 15px 20px;
-            border: 3px solid #2c3e50;
-            border-radius: 8px;
-            background-color: #ecf0f1;
-            margin: 20px 0;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="title-section">
-            <h1>Primitive Lattice Points, Coprime Density, and Multi-Dimensional Generalization</h1>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1>Primitive Lattice Points</h1>
+            <div class="subtitle">Theory and Multi-Dimensional Visualization</div>
             <div class="author">Wessen Getachew</div>
             <div class="date">March 2024</div>
-        </div>
-        
-        <div class="abstract">
-            <h2>Abstract</h2>
-            <p>We develop a comprehensive study of primitive lattice points in \(\mathbb{Z}^n\), generalizing the classical 2-dimensional coprime lattice problem. Using geometric decomposition into primitive rays and the Möbius inversion formula, we rigorously derive the asymptotic density of coprime points in any dimension. The framework connects number theory, geometry of numbers, and classical constants like the Riemann zeta function, providing both intuition and formal proofs.</p>
-        </div>
-        
-        <div class="toc">
-            <h2>Table of Contents</h2>
-            <ul>
-                <li><a href="#introduction">1. Introduction</a></li>
-                <li><a href="#primitive-vectors">2. Primitive Vectors and Rays in \(\mathbb{Z}^n\)</a></li>
-                <li><a href="#counting">3. Counting Coprime Lattice Points</a>
-                    <ul>
-                        <li><a href="#geometric">3.1. Geometric Consideration</a></li>
-                        <li><a href="#asymptotic">3.2. Asymptotic Density</a></li>
-                    </ul>
-                </li>
-                <li><a href="#mobius">4. Möbius Inversion Proof</a>
-                    <ul>
-                        <li><a href="#mobius-function">4.1. The Möbius Function</a></li>
-                        <li><a href="#inclusion">4.2. Inclusion-Exclusion for Coprimality</a></li>
-                        <li><a href="#evaluation">4.3. Evaluation</a></li>
-                    </ul>
-                </li>
-                <li><a href="#special-cases">5. Special Cases and Observations</a></li>
-                <li><a href="#interpretation">6. Geometric Interpretation</a></li>
-                <li><a href="#summary">7. Summary (Grand Result)</a></li>
-                <li><a href="#future">8. Future Directions</a></li>
-                <li><a href="#acknowledgments">9. Acknowledgments</a></li>
-                <li><a href="#references">10. References</a></li>
-            </ul>
-        </div>
-        
-        <h2 id="introduction">1. Introduction</h2>
-        <p>Counting lattice points inside a ball is a classical problem in number theory. Restricting to <em>primitive points</em>, i.e., points with coordinates coprime, leads to deep insights in analytic number theory and the geometry of numbers. In two dimensions, this relates to the Basel problem (\(\zeta(2) = \pi^2/6\)) and visible points from the origin. We extend the problem to arbitrary dimensions, \(n \ge 2\), developing both geometric intuition and rigorous algebraic derivation.</p>
-        
-        <h2 id="primitive-vectors">2. Primitive Vectors and Rays in \(\mathbb{Z}^n\)</h2>
-        
-        <div class="definition">
-            <div class="definition-title">Definition (Primitive Vector)</div>
-            <p>A vector \(\mathbf{v} = (a_1,\dots,a_n) \in \mathbb{Z}^n \setminus \{0\}\) is called <em>primitive</em> if</p>
-            <div class="math">\[
-            \gcd(a_1,\dots,a_n) = 1.
-            \]</div>
-        </div>
-        
-        <div class="lemma">
-            <div class="lemma-title">Lemma (Unique Ray Decomposition)</div>
-            <p>Every nonzero lattice point \(\mathbf{v} \in \mathbb{Z}^n\) lies on a unique primitive ray:</p>
-            <div class="math">\[
-            \mathbf{v} = k \mathbf{u}, \quad k \in \mathbb{N}, \ \mathbf{u} \text{ primitive}.
-            \]</div>
-        </div>
-        
-        <div class="proof">
-            <div class="proof-title">Proof</div>
-            <p>Let \(d = \gcd(a_1,\dots,a_n)\). Then \(\mathbf{v} = d \mathbf{u}\), where \(\mathbf{u}\) is primitive. Uniqueness follows from the uniqueness of the gcd.</p>
-        </div>
-        
-        <p>Each primitive vector acts as the "gatekeeper" for the entire ray of lattice points extending from the origin.</p>
-        
-        <h2 id="counting">3. Counting Coprime Lattice Points</h2>
-        
-        <p>Let \(C_n(R)\) denote the number of primitive points inside the \(n\)-dimensional ball of radius \(R\):</p>
-        <div class="math">\[
-        C_n(R) = \#\{\mathbf{v} \in \mathbb{Z}^n : \|\mathbf{v}\|_2 \le R, \ \gcd(v_1,\dots,v_n)=1\}.
-        \]</div>
-        
-        <h3 id="geometric">3.1. Geometric Consideration</h3>
-        <p>For a primitive vector \(\mathbf{u}\), the lattice points along its ray are</p>
-        <div class="math">\[
-        \mathbf{v} = k \mathbf{u}, \quad 1 \le k \le \left\lfloor \frac{R}{\|\mathbf{u}\|_2} \right\rfloor.
-        \]</div>
-        <p>Counting only the first point on each ray yields exactly \(C_n(R)\).</p>
-        
-        <h3 id="asymptotic">3.2. Asymptotic Density</h3>
-        <p>The density of primitive points in \(\mathbb{Z}^n\) equals the probability that \(n\) integers are coprime:</p>
-        <div class="math">\[
-        \mathbb{P}(\gcd(a_1,\dots,a_n) = 1) = \frac{1}{\zeta(n)}.
-        \]</div>
-        <p>Thus, the leading term for \(C_n(R)\) is</p>
-        <div class="math">\[
-        C_n(R) \sim \frac{\operatorname{Vol}(B_n(R))}{\zeta(n)},
-        \]</div>
-        <p>where</p>
-        <div class="math">\[
-        \operatorname{Vol}(B_n(R)) = \frac{\pi^{n/2}}{\Gamma(n/2+1)} R^n
-        \]</div>
-        <p>is the \(n\)-dimensional ball volume. The error term arises from the boundary: \(O(R^{n-1})\).</p>
-        
-        <h2 id="mobius">4. Möbius Inversion Proof</h2>
-        
-        <h3 id="mobius-function">4.1. The Möbius Function</h3>
-        <div class="math">\[
-        \mu(d) =
-        \begin{cases}
-        1 & d=1,\\
-        (-1)^k & d \text{ is the product of } k \text{ distinct primes},\\
-        0 & \text{otherwise (not square-free)}.
-        \end{cases}
-        \]</div>
-        
-        <h3 id="inclusion">4.2. Inclusion-Exclusion for Coprimality</h3>
-        <p>Every nonzero lattice point \(\mathbf{v}\) is divisible by a unique \(d = \gcd(v_1,\dots,v_n)\). Let \(\#B_n(R)\) denote all lattice points in the \(n\)-ball:</p>
-        <div class="math">\[
-        C_n(R) = \sum_{d=1}^\infty \mu(d) \#B_n(R/d).
-        \]</div>
-        
-        <h3 id="evaluation">4.3. Evaluation</h3>
-        <div class="math">\[
-        \#B_n(R/d) = \operatorname{Vol}(B_n(R/d)) + O((R/d)^{n-1}),
-        \]</div>
-        <p>so</p>
-        <div class="math">\[
-        \begin{aligned}
-        C_n(R) &= \sum_{d=1}^{\infty} \mu(d) \left( \frac{\operatorname{Vol}(B_n(R))}{d^n} + O\Big(\frac{R^{n-1}}{d^{n-1}}\Big) \right) \\
-        &= \frac{\operatorname{Vol}(B_n(R))}{\zeta(n)} + O(R^{n-1}).
-        \end{aligned}
-        \]</div>
-        
-        <h2 id="special-cases">5. Special Cases and Observations</h2>
-        
-        <div class="case-study">
-            <div class="case-study-title">Case \(n=1\)</div>
-            <p>Only primitive points are \(\pm 1\).<br>
-            \(\zeta(1)\) diverges; density is zero.</p>
-        </div>
-        
-        <div class="case-study">
-            <div class="case-study-title">2D Case (Classical)</div>
-            <p>Density: \(1/\zeta(2) = 6/\pi^2 \approx 0.6079\).<br>
-            Corresponds to "visible" points in the plane.</p>
-        </div>
-        
-        <div class="case-study">
-            <div class="case-study-title">3D Case</div>
-            <p>Density: \(1/\zeta(3) \approx 0.832\).<br>
-            Visualization: "particles in space," ~83% visible from the origin.</p>
-        </div>
-        
-        <div class="case-study">
-            <div class="case-study-title">High Dimensions</div>
-            <p>As \(n \to \infty\), \(\zeta(n) \to 1\), so almost all points are primitive.<br>
-            The angular density of primitive rays approaches 100%.</p>
-        </div>
-        
-        <div class="case-study">
-            <div class="case-study-title">Error Term</div>
-            <p>\(O(R^{n-1})\) represents the boundary of the \(n\)-ball.<br>
-            In 2D, sharper bounds exist (e.g., \(O(R \log R)\)), but \(O(R^{n-1})\) is appropriate for general \(n\).</p>
-        </div>
-        
-        <h2 id="interpretation">6. Geometric Interpretation</h2>
-        <ul>
-            <li>Primitive points correspond to points "visible" from the origin.</li>
-            <li>Non-primitive points are hidden behind their corresponding primitive vector.</li>
-            <li>This generalizes the 2D "light ray" visualization to higher dimensions.</li>
-        </ul>
-        
-        <h2 id="summary">7. Summary (Grand Result)</h2>
-        <div class="important-result">
-            <div class="boxed-result">
-                \[
-                C_n(R) = \frac{\operatorname{Vol}(B_n(R))}{\zeta(n)} + O(R^{n-1}), \quad n \ge 2
-                \]
-            </div>
-            <p>This combines geometric intuition, rigorous number theory, and multi-dimensional generalization. It provides a unified framework for analyzing primitive lattice points in any dimension. The framework also links to Farey sequences in 2D and visible point problems in higher dimensions.</p>
-        </div>
-        
-        <h2 id="future">8. Future Directions</h2>
-        <div class="future-directions">
-            <ul>
-                <li><strong>Visualizations:</strong> Render 2D/3D/4D lattices showing primitive points and rays.</li>
-                <li><strong>Farey Sequence Relation:</strong> 2D primitive points correspond to reduced fractions.</li>
-                <li><strong>High-Dimensional Lattices:</strong> Explore distribution of visible points for large \(n\).</li>
-            </ul>
             
-            <h3>Potential Addition: Farey Sequences</h3>
-            <p>In 2D, primitive points \((m, r)\) in the first quadrant with \(1 \le r \le m \le N\) are in one-to-one correspondence with the terms of the <em>Farey Sequence of order \(N\)</em>. This provides a natural bridge from the circle problem and primitive lattice points to the study of rational approximations on the unit interval.</p>
+            <div class="nav-tabs">
+                <div class="nav-tab active" data-target="article">Theoretical Framework</div>
+                <div class="nav-tab" data-target="visualization">3D Visualization</div>
+                <div class="nav-tab" data-target="interactive">Interactive Theory</div>
+            </div>
         </div>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Article Section -->
+        <section id="article" class="content-section active">
+            <div class="article-content">
+                <div class="article-section">
+                    <h2>Abstract</h2>
+                    <p>We develop a comprehensive study of primitive lattice points in \(\mathbb{Z}^n\), generalizing the classical 2-dimensional coprime lattice problem. Using geometric decomposition into primitive rays and the Möbius inversion formula, we rigorously derive the asymptotic density of coprime points in any dimension. The framework connects number theory, geometry of numbers, and classical constants like the Riemann zeta function, providing both intuition and formal proofs.</p>
+                </div>
+                
+                <div class="article-section">
+                    <h2>Introduction</h2>
+                    <p>Counting lattice points inside a ball is a classical problem in number theory. Restricting to <em>primitive points</em>, i.e., points with coordinates coprime, leads to deep insights in analytic number theory and the geometry of numbers. In two dimensions, this relates to the Basel problem (\(\zeta(2) = \pi^2/6\)) and visible points from the origin. We extend the problem to arbitrary dimensions, \(n \ge 2\), developing both geometric intuition and rigorous algebraic derivation.</p>
+                </div>
+                
+                <div class="article-section">
+                    <h2>Primitive Vectors and Rays in \(\mathbb{Z}^n\)</h2>
+                    
+                    <div class="definition">
+                        <div class="definition-title">Definition (Primitive Vector)</div>
+                        <p>A vector \(\mathbf{v} = (a_1,\dots,a_n) \in \mathbb{Z}^n \setminus \{0\}\) is called <em>primitive</em> if</p>
+                        <div class="math">\[
+                        \gcd(a_1,\dots,a_n) = 1.
+                        \]</div>
+                    </div>
+                    
+                    <div class="lemma">
+                        <div class="lemma-title">Lemma (Unique Ray Decomposition)</div>
+                        <p>Every nonzero lattice point \(\mathbf{v} \in \mathbb{Z}^n\) lies on a unique primitive ray:</p>
+                        <div class="math">\[
+                        \mathbf{v} = k \mathbf{u}, \quad k \in \mathbb{N}, \ \mathbf{u} \text{ primitive}.
+                        \]</div>
+                    </div>
+                    
+                    <div class="proof">
+                        <div class="proof-title">Proof</div>
+                        <p>Let \(d = \gcd(a_1,\dots,a_n)\). Then \(\mathbf{v} = d \mathbf{u}\), where \(\mathbf{u}\) is primitive. Uniqueness follows from the uniqueness of the gcd.</p>
+                    </div>
+                    
+                    <p>Each primitive vector acts as the "gatekeeper" for the entire ray of lattice points extending from the origin.</p>
+                </div>
+                
+                <div class="article-section">
+                    <h2>Counting Coprime Lattice Points</h2>
+                    
+                    <p>Let \(C_n(R)\) denote the number of primitive points inside the \(n\)-dimensional ball of radius \(R\):</p>
+                    <div class="math">\[
+                    C_n(R) = \#\{\mathbf{v} \in \mathbb{Z}^n : \|\mathbf{v}\|_2 \le R, \ \gcd(v_1,\dots,v_n)=1\}.
+                    \]</div>
+                    
+                    <h3>Geometric Consideration</h3>
+                    <p>For a primitive vector \(\mathbf{u}\), the lattice points along its ray are</p>
+                    <div class="math">\[
+                    \mathbf{v} = k \mathbf{u}, \quad 1 \le k \le \left\lfloor \frac{R}{\|\mathbf{u}\|_2} \right\rfloor.
+                    \]</div>
+                    <p>Counting only the first point on each ray yields exactly \(C_n(R)\).</p>
+                    
+                    <h3>Asymptotic Density</h3>
+                    <p>The density of primitive points in \(\mathbb{Z}^n\) equals the probability that \(n\) integers are coprime:</p>
+                    <div class="math">\[
+                    \mathbb{P}(\gcd(a_1,\dots,a_n) = 1) = \frac{1}{\zeta(n)}.
+                    \]</div>
+                    <p>Thus, the leading term for \(C_n(R)\) is</p>
+                    <div class="math">\[
+                    C_n(R) \sim \frac{\operatorname{Vol}(B_n(R))}{\zeta(n)},
+                    \]</div>
+                    <p>where</p>
+                    <div class="math">\[
+                    \operatorname{Vol}(B_n(R)) = \frac{\pi^{n/2}}{\Gamma(n/2+1)} R^n
+                    \]</div>
+                    <p>is the \(n\)-dimensional ball volume. The error term arises from the boundary: \(O(R^{n-1})\).</p>
+                </div>
+                
+                <div class="important-result">
+                    <h2>Summary (Grand Result)</h2>
+                    <div class="boxed-result">
+                        \[
+                        C_n(R) = \frac{\operatorname{Vol}(B_n(R))}{\zeta(n)} + O(R^{n-1}), \quad n \ge 2
+                        \]
+                    </div>
+                    <p>This combines geometric intuition, rigorous number theory, and multi-dimensional generalization. It provides a unified framework for analyzing primitive lattice points in any dimension. The framework also links to Farey sequences in 2D and visible point problems in higher dimensions.</p>
+                </div>
+                
+                <div class="article-section">
+                    <h2>Special Cases</h2>
+                    <ul>
+                        <li><strong>Case \(n=1\):</strong> Only primitive points are \(\pm 1\). \(\zeta(1)\) diverges; density is zero.</li>
+                        <li><strong>2D Case (Classical):</strong> Density: \(1/\zeta(2) = 6/\pi^2 \approx 0.6079\). Corresponds to "visible" points in the plane.</li>
+                        <li><strong>3D Case:</strong> Density: \(1/\zeta(3) \approx 0.832\). Visualization: "particles in space," ~83% visible from the origin.</li>
+                        <li><strong>High Dimensions:</strong> As \(n \to \infty\), \(\zeta(n) \to 1\), so almost all points are primitive.</li>
+                    </ul>
+                </div>
+                
+                <div class="article-section">
+                    <h2>Geometric Interpretation</h2>
+                    <ul>
+                        <li>Primitive points correspond to points "visible" from the origin.</li>
+                        <li>Non-primitive points are hidden behind their corresponding primitive vector.</li>
+                        <li>This generalizes the 2D "light ray" visualization to higher dimensions.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
         
-        <h2 id="acknowledgments">9. Acknowledgments</h2>
-        <div class="acknowledgments">
-            <p>The development of this framework was inspired by the classical Basel problem, the geometry of numbers, and modern approaches to the density of visible lattice points in higher dimensions.</p>
-        </div>
+        <!-- 3D Visualization Section -->
+        <section id="visualization" class="content-section">
+            <div class="visualization-content">
+                <div id="visualization-container">
+                    <canvas id="visualization-canvas"></canvas>
+                    <div id="visualization-controls">
+                        <h3 style="margin-top:0; color:white;">Lattice Visibility Explorer</h3>
+                        
+                        <div class="control-group">
+                            <label class="control-label">Dimension</label>
+                            <select id="dimension">
+                                <option value="2">2D Plane</option>
+                                <option value="3" selected>3D Space</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label">Radius (R): <span id="radius-value">8</span></label>
+                            <input type="range" id="radius" min="2" max="15" value="8">
+                        </div>
+                        
+                        <div class="stat-display">
+                            <div>Total Points: <span id="totalCount" class="stat">0</span></div>
+                            <div>Primitive: <span id="primitiveCount" class="stat">0</span></div>
+                            <div>Density: <span id="density" class="stat">0</span></div>
+                        </div>
+                        
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-color primitive-color"></div>
+                                <div>Primitive (Visible)</div>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color non-primitive-color"></div>
+                                <div>Non-Primitive (Hidden)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="interactive-theory">
+                <h2>Understanding the Visualization</h2>
+                <p>The visualization shows lattice points (integer coordinates) within a sphere of radius R. Points are colored based on whether they are <strong>primitive</strong> (visible from the origin) or <strong>non-primitive</strong> (hidden behind other points along the same ray).</p>
+                
+                <p><strong>Key observations:</strong></p>
+                <ul>
+                    <li>Primitive points (cyan) are those with coordinates that share no common divisor greater than 1.</li>
+                    <li>Non-primitive points (pink) lie on the same ray as a primitive point but are integer multiples of it.</li>
+                    <li>As radius increases, the density of primitive points approaches \(1/\zeta(n)\), where \(n\) is the dimension.</li>
+                    <li>The 3D visualization rotates automatically to show the spatial distribution of points.</li>
+                </ul>
+                
+                <p>Try adjusting the radius to see how the distribution changes. Switch between 2D and 3D modes to compare different dimensions.</p>
+            </div>
+        </section>
         
-        <h2 id="references">10. References</h2>
-        <div class="references">
-            <ol>
-                <li>H. M. Edwards, <em>Riemann's Zeta Function</em>, Dover, 2001.</li>
-                <li>G. H. Hardy, E. M. Wright, <em>An Introduction to the Theory of Numbers</em>, 6th edition, Oxford, 2008.</li>
-                <li>P. T. Bateman, H. G. Diamond, <em>Analytic Number Theory</em>, World Scientific, 2004.</li>
-                <li>H. Davenport, <em>Multiplicative Number Theory</em>, 3rd edition, Springer, 2000.</li>
-            </ol>
-        </div>
+        <!-- Interactive Theory Section -->
+        <section id="interactive" class="content-section">
+            <div class="interactive-theory">
+                <h2>Interactive Theory Explorer</h2>
+                <p>Explore how the density of primitive lattice points changes with dimension and radius. The theoretical predictions are shown alongside computed values.</p>
+                
+                <div class="theory-controls">
+                    <div class="dimension-selector">
+                        <span>Dimension:</span>
+                        <button class="dim-btn" data-dim="2">2D</button>
+                        <button class="dim-btn active" data-dim="3">3D</button>
+                        <button class="dim-btn" data-dim="4">4D</button>
+                        <button class="dim-btn" data-dim="5">5D</button>
+                    </div>
+                    
+                    <div class="radius-control">
+                        <label>Radius R: <span id="theory-radius-value" class="radius-value">8</span></label>
+                        <input type="range" id="theory-radius" min="2" max="20" value="8" step="1">
+                    </div>
+                </div>
+                
+                <div class="theory-results">
+                    <div class="result-card">
+                        <div class="result-label">Dimension (n)</div>
+                        <div class="result-value" id="result-dim">3</div>
+                        <div>\(\mathbb{Z}^n\) lattice</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-label">Ball Volume</div>
+                        <div class="result-value" id="result-volume">268.08</div>
+                        <div>\(\frac{\pi^{n/2}}{\Gamma(n/2+1)} R^n\)</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-label">Zeta Value</div>
+                        <div class="result-value" id="result-zeta">1.2021</div>
+                        <div>\(\zeta(n)\)</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-label">Theoretical Density</div>
+                        <div class="result-value" id="result-density">0.832</div>
+                        <div>\(1/\zeta(n)\)</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-label">Estimated Primitive Points</div>
+                        <div class="result-value" id="result-estimated">223</div>
+                        <div>\(\frac{\text{Volume}}{\zeta(n)}\)</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; padding: 20px; background-color: #f0f7ff; border-radius: 8px;">
+                    <h3>Theoretical Formula</h3>
+                    <div class="math">\[
+                    C_n(R) = \frac{\operatorname{Vol}(B_n(R))}{\zeta(n)} + O(R^{n-1})
+                    \]</div>
+                    <p>Where:</p>
+                    <ul>
+                        <li>\(C_n(R)\): Number of primitive points within radius R in \(\mathbb{Z}^n\)</li>
+                        <li>\(\operatorname{Vol}(B_n(R)) = \frac{\pi^{n/2}}{\Gamma(n/2+1)} R^n\): Volume of n-dimensional ball</li>
+                        <li>\(\zeta(n)\): Riemann zeta function at n</li>
+                        <li>\(O(R^{n-1})\): Error term from boundary effects</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
     </div>
     
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <h3>Primitive Lattice Points</h3>
+            <p>Theory and Multi-Dimensional Visualization</p>
+            <p>© 2024 Wessen Getachew. This work combines analytic number theory with interactive 3D visualization.</p>
+            <p>Created with Three.js, MathJax, and vanilla JavaScript.</p>
+        </div>
+    </footer>
+    
     <script>
-        // Make table of contents links scroll smoothly
-        document.querySelectorAll('.toc a').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-                
-                window.scrollTo({
-                    top: targetElement.offsetTop - 20,
-                    behavior: 'smooth'
+        // Navigation between sections
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                document.querySelectorAll('.nav-tab').forEach(t => {
+                    t.classList.remove('active');
                 });
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all sections
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Show target section
+                const targetId = this.getAttribute('data-target');
+                document.getElementById(targetId).classList.add('active');
+                
+                // If switching to visualization, trigger resize
+                if (targetId === 'visualization') {
+                    window.dispatchEvent(new Event('resize'));
+                }
             });
         });
         
-        // Highlight current section in TOC while scrolling
-        window.addEventListener('scroll', function() {
-            const sections = document.querySelectorAll('h2[id], h3[id]');
-            const scrollPosition = window.scrollY + 100;
+        // ==============================================
+        // 3D VISUALIZATION CODE
+        // ==============================================
+        let scene, camera, renderer, pointsGroup;
+        const dimSelect = document.getElementById('dimension');
+        const radSlider = document.getElementById('radius');
+        const radiusValue = document.getElementById('radius-value');
+        
+        // Helper functions
+        function gcd(a, b) {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            while (b) {
+                let temp = b;
+                b = a % b;
+                a = temp;
+            }
+            return a;
+        }
+        
+        function getGCDnd(vec) {
+            return vec.reduce((a, b) => gcd(a, b));
+        }
+        
+        // Initialize Three.js scene
+        function initVisualization() {
+            scene = new THREE.Scene();
             
-            let currentSection = '';
+            // Create camera
+            camera = new THREE.PerspectiveCamera(75, 
+                document.getElementById('visualization-container').clientWidth / 
+                document.getElementById('visualization-container').clientHeight, 
+                0.1, 1000);
             
-            sections.forEach(section => {
-                if (section.offsetTop <= scrollPosition) {
-                    currentSection = section.id;
-                }
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: document.getElementById('visualization-canvas'),
+                antialias: true 
+            });
+            renderer.setClearColor(0x111111);
+            
+            // Position camera
+            camera.position.z = 20;
+            camera.position.y = 8;
+            camera.lookAt(0, 0, 0);
+            
+            // Add ambient light
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            // Add directional light
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 15);
+            scene.add(directionalLight);
+            
+            // Create axes helper
+            const axesHelper = new THREE.AxesHelper(12);
+            scene.add(axesHelper);
+            
+            // Initial lattice update
+            updateLattice();
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+        }
+        
+        // Update lattice visualization
+        function updateLattice() {
+            // Remove existing points
+            if (pointsGroup) {
+                scene.remove(pointsGroup);
+            }
+            
+            pointsGroup = new THREE.Group();
+            
+            const R = parseInt(radSlider.value);
+            radiusValue.textContent = R;
+            const dim = parseInt(dimSelect.value);
+            
+            let total = 0;
+            let primitive = 0;
+            
+            // Generate range of coordinates
+            const range = Array.from({length: R * 2 + 1}, (_, i) => i - R);
+            
+            if (dim === 2) {
+                // 2D lattice
+                range.forEach(x => {
+                    range.forEach(y => {
+                        if (x === 0 && y === 0) return;
+                        const distSq = x*x + y*y;
+                        if (distSq <= R*R) {
+                            total++;
+                            const isPrim = gcd(x, y) === 1;
+                            if (isPrim) primitive++;
+                            addPoint(x, y, 0, isPrim);
+                        }
+                    });
+                });
+            } else {
+                // 3D lattice
+                range.forEach(x => {
+                    range.forEach(y => {
+                        range.forEach(z => {
+                            if (x === 0 && y === 0 && z === 0) return;
+                            const distSq = x*x + y*y + z*z;
+                            if (distSq <= R*R) {
+                                total++;
+                                const isPrim = getGCDnd([x, y, z]) === 1;
+                                if (isPrim) primitive++;
+                                addPoint(x, y, z, isPrim);
+                            }
+                        });
+                    });
+                });
+            }
+            
+            scene.add(pointsGroup);
+            
+            // Update statistics
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('primitiveCount').textContent = primitive;
+            document.getElementById('density').textContent = (primitive/total).toFixed(4);
+            
+            // Also update interactive theory section
+            updateTheorySection(dim, R, total, primitive);
+        }
+        
+        // Add a point to the scene
+        function addPoint(x, y, z, isPrim) {
+            const geometry = new THREE.SphereGeometry(isPrim ? 0.2 : 0.12, 8, 8);
+            const material = new THREE.MeshPhongMaterial({
+                color: isPrim ? 0x00ffcc : 0xff3366,
+                transparent: !isPrim,
+                opacity: isPrim ? 1.0 : 0.3,
+                shininess: 100
+            });
+            const sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(x, y, z);
+            pointsGroup.add(sphere);
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotate the lattice for better visualization
+            if (pointsGroup) {
+                pointsGroup.rotation.y += 0.005;
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Handle window resize
+        function onWindowResize() {
+            const container = document.getElementById('visualization-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+        
+        // ==============================================
+        // INTERACTIVE THEORY SECTION CODE
+        // ==============================================
+        const theoryRadius = document.getElementById('theory-radius');
+        const theoryRadiusValue = document.getElementById('theory-radius-value');
+        const dimButtons = document.querySelectorAll('.dim-btn');
+        
+        // Zeta function values for n=2..10
+        const zetaValues = {
+            2: 1.644934,  // π²/6
+            3: 1.202056,
+            4: 1.082323,
+            5: 1.036927,
+            6: 1.017343,
+            7: 1.008349,
+            8: 1.004077,
+            9: 1.002008,
+            10: 1.000994
+        };
+        
+        // Gamma function values for n/2+1
+        const gammaValues = {
+            2: 1,           // Γ(2) = 1!
+            3: 1.32934,     // Γ(2.5) ≈ 1.32934
+            4: 2,           // Γ(3) = 2!
+            5: 3.32335,     // Γ(3.5) ≈ 3.32335
+            6: 6,           // Γ(4) = 3!
+            7: 11.6317,     // Γ(4.5) ≈ 11.6317
+            8: 24,          // Γ(5) = 4!
+            9: 52.3428,     // Γ(5.5) ≈ 52.3428
+            10: 120         // Γ(6) = 5!
+        };
+        
+        // Initialize interactive theory
+        function initTheorySection() {
+            // Set initial values
+            updateTheorySection(3, 8, 0, 0);
+            
+            // Add event listeners
+            theoryRadius.addEventListener('input', function() {
+                theoryRadiusValue.textContent = this.value;
+                const dim = parseInt(document.querySelector('.dim-btn.active').getAttribute('data-dim'));
+                updateTheorySection(dim, parseInt(this.value), 0, 0);
             });
             
-            document.querySelectorAll('.toc a').forEach(link => {
-                link.style.fontWeight = 'normal';
-                link.style.color = '#3498db';
+            dimButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    dimButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    const dim = parseInt(this.getAttribute('data-dim'));
+                    updateTheorySection(dim, parseInt(theoryRadius.value), 0, 0);
+                    
+                    // Also update visualization if it's 2D or 3D
+                    if (dim === 2 || dim === 3) {
+                        dimSelect.value = dim;
+                        updateLattice();
+                    }
+                });
+            });
+        }
+        
+        // Update theory section with new values
+        function updateTheorySection(dim, R, actualTotal, actualPrimitive) {
+            // Update dimension display
+            document.getElementById('result-dim').textContent = dim;
+            
+            // Calculate ball volume
+            const volume = (Math.pow(Math.PI, dim/2) / gammaValues[dim]) * Math.pow(R, dim);
+            document.getElementById('result-volume').textContent = volume.toFixed(2);
+            
+            // Get zeta value
+            const zeta = zetaValues[dim] || 1.0;
+            document.getElementById('result-zeta').textContent = zeta.toFixed(4);
+            
+            // Calculate density
+            const density = 1 / zeta;
+            document.getElementById('result-density').textContent = density.toFixed(4);
+            
+            // Calculate estimated primitive points
+            const estimated = volume / zeta;
+            document.getElementById('result-estimated').textContent = Math.round(estimated);
+            
+            // Update visualization if we have actual counts
+            if (actualTotal > 0) {
+                // Update the visualization stats if they're visible
+                if (document.getElementById('visualization').classList.contains('active')) {
+                    // These are already updated in updateLattice()
+                }
+            }
+        }
+        
+        // ==============================================
+        // INITIALIZATION AND EVENT LISTENERS
+        // ==============================================
+        
+        // Initialize everything when the page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            // Initialize visualization
+            initVisualization();
+            animate();
+            
+            // Initialize interactive theory section
+            initTheorySection();
+            
+            // Add event listeners for visualization controls
+            dimSelect.addEventListener('change', updateLattice);
+            radSlider.addEventListener('input', function() {
+                radiusValue.textContent = this.value;
+                updateLattice();
                 
-                if (link.getAttribute('href') === '#' + currentSection) {
-                    link.style.fontWeight = 'bold';
-                    link.style.color = '#2c3e50';
-                }
+                // Also update theory section radius
+                theoryRadius.value = this.value;
+                theoryRadiusValue.textContent = this.value;
+                
+                const dim = parseInt(document.querySelector('.dim-btn.active').getAttribute('data-dim'));
+                updateTheorySection(dim, parseInt(this.value), 0, 0);
             });
+            
+            // Initial update of theory section with current visualization values
+            updateTheorySection(3, 8, 0, 0);
         });
     </script>
 </body>
