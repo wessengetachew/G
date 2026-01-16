@@ -252,6 +252,11 @@
                 <div class="color-legend-item"><div class="color-swatch" style="background:#3b82f6"></div>R (right)</div>
             </div>
         </div>
+        
+        <div style="margin-top:15px; padding:15px; background:#1e293b; border-radius:8px; border:1px solid #334155; text-align:center;">
+            <button onclick="screenshotFullTab('main')" style="padding:12px 24px; font-size:14px;">Screenshot Full Main Tab</button>
+            <button class="secondary" onclick="exportMainTabData()" style="margin-left:10px; padding:12px 24px; font-size:14px;">Export Main Tab Data</button>
+        </div>
     </div>
     
     <!-- THEORY TAB -->
@@ -2149,18 +2154,26 @@ document.getElementById('mainRing').addEventListener('mousemove', function(e) {
     } else tooltip.classList.remove('visible');
 });
 
+// Tree canvas click handler - added via setTimeout after DOM ready
+
 function openPointModal(p) {
     document.getElementById('pointModalTitle').textContent = `${p.r}/${p.m}`;
     const cf = toCF(p.r, p.m);
+    const path = getPathToFraction(p.r, p.m);
+    const coloredPath = path.split('').map(c => 
+        `<span style="color:${c === 'L' ? '#ef4444' : '#3b82f6'}; font-weight:bold;">${c}</span>`
+    ).join('');
+    
     document.getElementById('pointModalBody').innerHTML = `
         <div class="detail-grid">
             <div class="detail-card"><h5>Fraction</h5><div class="value">${p.r}/${p.m}</div><div class="sub">= ${(p.r/p.m).toFixed(8)}</div></div>
             <div class="detail-card"><h5>Sector</h5><div class="value">${p.sector}</div><div class="sub">(1/${p.sector+1}, 1/${p.sector}]</div></div>
             <div class="detail-card"><h5>Modulus</h5><div class="value" style="color:${p.isPrime?'#f59e0b':'#6366f1'}">${p.m}</div><div class="sub">${p.isPrime?'Prime':'Composite'}</div></div>
         </div>
-        <div class="theorem-box"><strong>CF:</strong> [${cf.join('; ')}]<br><strong>Path:</strong> ${cfPath(cf)}</div>
-        <div style="margin-top:12px;">
+        <div class="theorem-box"><strong>CF:</strong> [${cf.join('; ')}]<br><strong>SB Path:</strong> ${coloredPath || 'ROOT'} <span style="color:#64748b;">(${path.length} steps)</span></div>
+        <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
             <button onclick="closePointModal(); openSectorModal(${p.sector});">View All in Sector ${p.sector}</button>
+            <button class="secondary" onclick="closePointModal(); selectPointForTree({r:${p.r},m:${p.m},sector:${p.sector},isPrime:${p.isPrime}}); document.getElementById('sectorTreeCanvas').scrollIntoView({behavior:'smooth'});">Show Tree Path</button>
         </div>
     `;
     document.getElementById('pointModal').classList.add('active');
@@ -3297,6 +3310,32 @@ function exportJSON() {
 
 function exportAllData() { exportCSVAll(); }
 
+function exportMainTabData() {
+    let csv = 'Type,Data\n';
+    csv += 'Parameters,"N=' + state.nMax + ', Sectors=' + state.sectorMin + '-' + state.sectorMax + '"\n\n';
+    csv += 'Sector,Interval,Exact,Predicted,Error%,Primes,Composites\n';
+    state.sectors.forEach(s => {
+        const res = state.residuesBySector[s.n] || [];
+        const primeCount = res.filter(r => r.isPrime).length;
+        csv += s.n + ',"(1/' + (s.n+1) + ',1/' + s.n + ']",' + (s.exact || '') + ',' + s.predicted.toFixed(2) + ',' + (s.relError ? s.relError.toFixed(2) : '') + ',' + primeCount + ',' + (res.length - primeCount) + '\n';
+    });
+    
+    if (selectedTreePoint) {
+        const path = getPathToFraction(selectedTreePoint.r, selectedTreePoint.m);
+        csv += '\nSelected Point\n';
+        csv += 'Fraction,' + selectedTreePoint.r + '/' + selectedTreePoint.m + '\n';
+        csv += 'Sector,' + selectedTreePoint.sector + '\n';
+        csv += 'SB Path,"' + path + '"\n';
+        csv += 'Path Length,' + path.length + '\n';
+    }
+    
+    const blob = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'main_tab_data_N' + state.nMax + '.csv';
+    a.click();
+}
+
 function switchTab(name) {
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
@@ -3489,6 +3528,34 @@ setTimeout(addExportButtons, 500);
 
 computeAll();
 
+// Initialize sector tree on load
+setTimeout(() => {
+    drawSectorTree();
+    // Add tree canvas click handler if not already added
+    const treeCanvas = document.getElementById('sectorTreeCanvas');
+    if (treeCanvas && !treeCanvas.hasClickHandler) {
+        treeCanvas.hasClickHandler = true;
+        treeCanvas.addEventListener('click', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const depth = +document.getElementById('treeDepth').value;
+            const treeNodes = buildSternBrocotTree(depth);
+            
+            let closest = null, minDist = 15;
+            treeNodes.forEach(node => {
+                const d = Math.sqrt((node.x - x)**2 + (node.y - y)**2);
+                if (d < minDist) { minDist = d; closest = node; }
+            });
+            
+            if (closest) {
+                const point = { r: closest.r, m: closest.m, sector: getSector(closest.r, closest.m), isPrime: isPrime(closest.m) };
+                selectPointForTree(point);
+            }
+        });
+    }
+}, 100);
+
 // Add zoom controls to all chart boxes
 function addZoomControlsToCharts() {
     // Charts already have 4K export buttons, no additional controls needed
@@ -3500,4 +3567,4 @@ document.getElementById('sectorModal').addEventListener('click', function(e) { i
 
 setTimeout(addZoomControlsToCharts, 500);</script>
 </body>
-                    </html>
+        </html>
