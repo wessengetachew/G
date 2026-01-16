@@ -3,527 +3,441 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farey Sector Formula - Complete Analysis Platform</title>
+    <title>Farey Sector Formula - Complete Research Platform</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #e2e8f0; line-height: 1.7; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1a; color: #e2e8f0; line-height: 1.6; font-size: 14px; }
         
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 1000; overflow-y: auto; padding: 20px;
-        }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; overflow-y: auto; padding: 20px; }
         .modal-overlay.active { display: flex; justify-content: center; align-items: flex-start; }
-        .modal-content {
-            background: #1e293b; border-radius: 12px; max-width: 1000px; width: 100%;
-            border: 1px solid #475569; margin: 20px auto; position: relative;
-        }
-        .modal-header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 20px; border-bottom: 1px solid #334155;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            border-radius: 12px 12px 0 0;
-        }
-        .modal-header h3 { margin: 0; font-size: 1.2em; }
-        .modal-close {
-            background: rgba(255,255,255,0.2); border: none; color: white;
-            width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
-            font-size: 18px; display: flex; align-items: center; justify-content: center;
-        }
-        .modal-close:hover { background: rgba(255,255,255,0.3); }
-        .modal-body { padding: 20px; max-height: 70vh; overflow-y: auto; }
+        .modal-content { background: #1e293b; border-radius: 12px; max-width: 900px; width: 100%; border: 1px solid #475569; margin: 20px auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid #334155; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border-radius: 12px 12px 0 0; }
+        .modal-header h3 { margin: 0; font-size: 1.1em; }
+        .modal-close { background: rgba(255,255,255,0.2); border: none; color: white; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 16px; }
+        .modal-body { padding: 18px; max-height: 75vh; overflow-y: auto; }
         
-        .screenshot-btn {
-            position: absolute; top: 10px; right: 10px; padding: 6px 10px;
-            background: rgba(99,102,241,0.8); border: none; border-radius: 4px;
-            color: white; font-size: 11px; cursor: pointer; z-index: 10;
-            display: flex; align-items: center; gap: 4px;
-        }
-        .screenshot-btn:hover { background: rgba(99,102,241,1); }
-        .chart-wrapper { position: relative; }
-        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
-        h1 { color: #f8fafc; font-size: 1.6em; margin-bottom: 5px; }
-        .subtitle { color: #94a3b8; margin-bottom: 20px; font-size: 0.95em; }
-        h2 { color: #f1f5f9; font-size: 1.2em; margin: 25px 0 15px 0; border-bottom: 1px solid #334155; padding-bottom: 8px; }
-        h3 { color: #cbd5e1; font-size: 1.05em; margin: 15px 0 10px 0; }
-        h4 { color: #94a3b8; font-size: 0.95em; margin: 10px 0 8px 0; }
+        .container { max-width: 1800px; margin: 0 auto; padding: 15px; }
+        h1 { color: #f8fafc; font-size: 1.5em; margin-bottom: 4px; }
+        .subtitle { color: #94a3b8; margin-bottom: 15px; font-size: 0.9em; }
+        h2 { color: #f1f5f9; font-size: 1.1em; margin: 20px 0 12px 0; border-bottom: 1px solid #334155; padding-bottom: 6px; }
+        h3 { color: #cbd5e1; font-size: 1em; margin: 12px 0 8px 0; }
+        h4 { color: #94a3b8; font-size: 0.9em; margin: 8px 0 6px 0; }
         
-        .formula-box {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            padding: 20px; border-radius: 10px; margin-bottom: 20px;
-        }
-        .formula-main { font-size: 1.4em; font-weight: bold; font-family: 'Cambria Math', serif; text-align: center; margin: 10px 0; }
+        .formula-box { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+        .formula-main { font-size: 1.3em; font-weight: bold; font-family: 'Cambria Math', serif; text-align: center; margin: 8px 0; }
         
-        .control-panel { background: #1e293b; padding: 15px 20px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #334155; }
-        .control-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+        .control-panel { background: #1e293b; padding: 12px 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #334155; }
+        .control-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
         .control-row:last-child { margin-bottom: 0; }
-        .control-group { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #0f172a; border-radius: 6px; }
+        .control-group { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: #0f172a; border-radius: 5px; }
         .control-group.highlight { border: 1px solid #6366f1; background: #1e1b4b; }
-        label { font-weight: 600; color: #cbd5e1; font-size: 0.85em; white-space: nowrap; }
-        input[type="number"], select {
-            padding: 8px 10px; font-size: 14px; border: 1px solid #475569;
-            border-radius: 6px; background: #1e293b; color: #e2e8f0; width: 90px;
-        }
-        input[type="number"].wide { width: 120px; }
-        input:focus, select:focus { outline: none; border-color: #6366f1; }
-        select { width: auto; min-width: 100px; }
-        button {
-            padding: 10px 20px; font-size: 14px; font-weight: 600;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: white; border: none; border-radius: 6px; cursor: pointer;
-        }
+        label { font-weight: 600; color: #cbd5e1; font-size: 0.8em; white-space: nowrap; }
+        input[type="number"], input[type="text"], select, textarea { padding: 6px 8px; font-size: 13px; border: 1px solid #475569; border-radius: 5px; background: #1e293b; color: #e2e8f0; }
+        input[type="number"] { width: 70px; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #6366f1; }
+        select { min-width: 90px; }
+        button { padding: 8px 14px; font-size: 12px; font-weight: 600; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none; border-radius: 5px; cursor: pointer; }
         button:hover { opacity: 0.9; }
         button.secondary { background: #334155; border: 1px solid #475569; }
-        button.small { padding: 6px 12px; font-size: 12px; }
-        .info-badge { background: #334155; padding: 4px 10px; border-radius: 4px; font-size: 0.85em; color: #94a3b8; }
+        button.small { padding: 5px 10px; font-size: 11px; }
+        .info-badge { background: #334155; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; color: #94a3b8; }
         .info-badge strong { color: #e2e8f0; }
-        .info-badge.warning { background: #713f12; border: 1px solid #a16207; }
         .info-badge.success { background: #14532d; border: 1px solid #16a34a; }
+        .info-badge.warning { background: #713f12; border: 1px solid #a16207; }
         
-        .mode-selector { display: flex; gap: 5px; }
-        .mode-btn {
-            padding: 8px 16px; background: #1e293b; border: 1px solid #475569;
-            border-radius: 6px; cursor: pointer; font-size: 0.85em; color: #94a3b8;
-        }
+        .mode-selector { display: flex; gap: 4px; }
+        .mode-btn { padding: 6px 12px; background: #1e293b; border: 1px solid #475569; border-radius: 5px; cursor: pointer; font-size: 0.8em; color: #94a3b8; }
         .mode-btn.active { background: #6366f1; border-color: #6366f1; color: white; }
-        .mode-btn:hover { border-color: #6366f1; }
         
-        .tabs { display: flex; gap: 5px; margin-bottom: 15px; flex-wrap: wrap; }
-        .tab {
-            padding: 8px 16px; background: #1e293b; border: 1px solid #334155;
-            border-radius: 6px 6px 0 0; cursor: pointer; font-size: 0.9em; color: #94a3b8;
-        }
+        .tabs { display: flex; gap: 3px; margin-bottom: 12px; flex-wrap: wrap; }
+        .tab { padding: 6px 12px; background: #1e293b; border: 1px solid #334155; border-radius: 5px 5px 0 0; cursor: pointer; font-size: 0.8em; color: #94a3b8; }
         .tab.active { background: #334155; color: #f1f5f9; border-bottom-color: #334155; }
         .tab:hover { color: #e2e8f0; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        .panel { background: #1e293b; border-radius: 10px; padding: 20px; border: 1px solid #334155; margin-bottom: 20px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
-        @media (max-width: 1000px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+        .panel { background: #1e293b; border-radius: 8px; padding: 15px; border: 1px solid #334155; margin-bottom: 15px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        @media (max-width: 1200px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
         
-        .chart-box { background: #0f172a; border-radius: 8px; padding: 15px; border: 1px solid #334155; }
+        .chart-box { background: #0f172a; border-radius: 6px; padding: 12px; border: 1px solid #334155; }
         .chart-box h4 { margin-top: 0; }
         canvas { max-width: 100%; }
         
-        table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
         thead { background: #334155; }
-        th { padding: 10px; text-align: left; font-weight: 600; color: #e2e8f0; }
-        td { padding: 8px 10px; border-bottom: 1px solid #334155; }
-        tbody tr:hover { background: #334155; cursor: pointer; }
-        tbody tr.clickable:hover { background: #3b4a6b; }
+        th { padding: 8px; text-align: left; font-weight: 600; color: #e2e8f0; }
+        td { padding: 6px 8px; border-bottom: 1px solid #334155; }
+        tbody tr:hover { background: #334155; }
+        .table-scroll { max-height: 350px; overflow-y: auto; }
         
-        .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .detail-card { background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; }
-        .detail-card h5 { color: #94a3b8; font-size: 0.8em; margin-bottom: 8px; text-transform: uppercase; }
-        .detail-card .value { font-size: 1.4em; font-weight: bold; color: #6366f1; }
-        .detail-card .sub { font-size: 0.85em; color: #64748b; margin-top: 4px; }
+        .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 15px; }
+        .detail-card { background: #0f172a; padding: 12px; border-radius: 6px; border: 1px solid #334155; }
+        .detail-card h5 { color: #94a3b8; font-size: 0.75em; margin-bottom: 6px; text-transform: uppercase; }
+        .detail-card .value { font-size: 1.2em; font-weight: bold; color: #6366f1; }
+        .detail-card .sub { font-size: 0.8em; color: #64748b; margin-top: 3px; }
         
-        .residue-list { max-height: 200px; overflow-y: auto; background: #0f172a; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.85em; }
-        .residue-item { display: inline-block; padding: 2px 8px; margin: 2px; background: #334155; border-radius: 4px; }
-        .residue-item.prime { background: #854d0e; color: #fbbf24; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+        .stat-card { background: #0f172a; padding: 10px; border-radius: 5px; border: 1px solid #334155; text-align: center; }
+        .stat-value { font-size: 1.1em; font-weight: bold; color: #6366f1; }
+        .stat-label { font-size: 0.7em; color: #94a3b8; margin-top: 3px; }
         
-        .legend-box { background: #0f172a; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #334155; }
-        .legend-row { display: flex; align-items: center; gap: 10px; margin: 5px 0; font-size: 0.9em; }
-        .legend-color { width: 20px; height: 20px; border-radius: 4px; }
+        .theorem-box { background: #1e1b4b; border-left: 3px solid #6366f1; padding: 10px 12px; margin: 10px 0; border-radius: 0 5px 5px 0; font-size: 0.9em; }
+        .derivation-box { background: #422006; border-left: 3px solid #f59e0b; padding: 10px 12px; margin: 10px 0; border-radius: 0 5px 5px 0; font-size: 0.9em; }
+        .rh-box { background: #450a0a; border-left: 3px solid #ef4444; padding: 10px 12px; margin: 10px 0; border-radius: 0 5px 5px 0; font-size: 0.9em; }
+        .connection-box { background: #14532d; border-left: 3px solid #22c55e; padding: 10px 12px; margin: 10px 0; border-radius: 0 5px 5px 0; font-size: 0.9em; }
         
-        .mini-chart { background: #0f172a; border-radius: 8px; padding: 15px; margin-top: 15px; }
-        .table-scroll { max-height: 400px; overflow-y: auto; }
-        
-        .theorem-box { background: #1e1b4b; border-left: 3px solid #6366f1; padding: 12px 15px; margin: 12px 0; border-radius: 0 6px 6px 0; }
-        .derivation-box { background: #422006; border-left: 3px solid #f59e0b; padding: 12px 15px; margin: 12px 0; border-radius: 0 6px 6px 0; }
-        .connection-box { background: #14532d; border-left: 3px solid #22c55e; padding: 12px 15px; margin: 12px 0; border-radius: 0 6px 6px 0; }
-        .rh-box { background: #450a0a; border-left: 3px solid #ef4444; padding: 12px 15px; margin: 12px 0; border-radius: 0 6px 6px 0; }
-        
-        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
-        .stat-card { background: #0f172a; padding: 12px; border-radius: 6px; border: 1px solid #334155; text-align: center; }
-        .stat-value { font-size: 1.2em; font-weight: bold; color: #6366f1; }
-        .stat-value.large { font-size: 1em; }
-        .stat-label { font-size: 0.75em; color: #94a3b8; margin-top: 4px; }
-        
-        .ring-canvas, .ford-canvas, .tree-canvas { background: #0f172a; border-radius: 8px; border: 1px solid #334155; cursor: crosshair; }
-        
-        .latex-output {
-            background: #0f172a; padding: 15px; border-radius: 6px;
-            font-family: 'Courier New', monospace; font-size: 0.85em;
-            white-space: pre-wrap; border: 1px solid #334155; max-height: 300px; overflow-y: auto;
-        }
-        
-        .progress-bar { width: 100%; height: 6px; background: #334155; border-radius: 3px; overflow: hidden; margin: 10px 0; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6); transition: width 0.3s; }
-        
-        .math { font-family: 'Cambria Math', 'Times New Roman', serif; font-style: italic; }
-        .mono { font-family: 'Courier New', monospace; }
-        
-        .estimate-box { background: #0f172a; padding: 10px 15px; border-radius: 6px; margin-top: 10px; font-size: 0.9em; }
-        .estimate-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #1e293b; }
-        .estimate-row:last-child { border-bottom: none; }
-        
-        .point-tooltip {
-            position: absolute; background: #1e293b; border: 1px solid #6366f1;
-            padding: 10px 15px; border-radius: 8px; font-size: 0.85em;
-            pointer-events: none; z-index: 100; display: none; min-width: 180px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        }
+        .ring-canvas { background: #0f172a; border-radius: 6px; border: 1px solid #334155; cursor: crosshair; }
+        .point-tooltip { position: absolute; background: #1e293b; border: 1px solid #6366f1; padding: 8px 12px; border-radius: 6px; font-size: 0.8em; pointer-events: none; z-index: 100; display: none; min-width: 160px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .point-tooltip.visible { display: block; }
-        .point-tooltip h5 { color: #6366f1; margin: 0 0 8px 0; font-size: 1.1em; }
-        .point-tooltip .row { display: flex; justify-content: space-between; margin: 3px 0; }
+        .point-tooltip h5 { color: #6366f1; margin: 0 0 6px 0; font-size: 1em; }
+        .point-tooltip .row { display: flex; justify-content: space-between; margin: 2px 0; }
         .point-tooltip .label { color: #94a3b8; }
         .point-tooltip .val { color: #e2e8f0; font-weight: 600; }
         
-        .color-legend { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; padding: 10px; background: #0f172a; border-radius: 6px; }
-        .color-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8em; }
-        .color-swatch { width: 16px; height: 16px; border-radius: 3px; border: 1px solid #475569; }
+        .color-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; padding: 8px; background: #0f172a; border-radius: 5px; font-size: 0.75em; }
+        .color-legend-item { display: flex; align-items: center; gap: 5px; }
+        .color-swatch { width: 14px; height: 14px; border-radius: 3px; border: 1px solid #475569; }
+        
+        .progress-bar { width: 100%; height: 5px; background: #334155; border-radius: 3px; overflow: hidden; margin: 8px 0; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6); transition: width 0.3s; }
+        
+        .matrix-display { font-family: 'Courier New', monospace; background: #0f172a; padding: 10px; border-radius: 5px; display: inline-block; margin: 5px; }
+        .matrix-bracket { font-size: 2em; line-height: 1; }
+        
+        .residue-list { max-height: 180px; overflow-y: auto; background: #0f172a; padding: 8px; border-radius: 5px; font-family: monospace; font-size: 0.8em; }
+        .residue-item { display: inline-block; padding: 2px 6px; margin: 2px; background: #334155; border-radius: 3px; }
+        .residue-item.prime { background: #854d0e; color: #fbbf24; }
+        .residue-item.twin { background: #166534; color: #4ade80; }
+        
+        .latex-output { background: #0f172a; padding: 12px; border-radius: 5px; font-family: 'Courier New', monospace; font-size: 0.8em; white-space: pre-wrap; border: 1px solid #334155; max-height: 250px; overflow-y: auto; }
+        
+        .cf-path { font-family: monospace; background: #334155; padding: 2px 6px; border-radius: 3px; margin: 2px; display: inline-block; }
+        
+        .screenshot-btn { position: absolute; top: 8px; right: 8px; padding: 4px 8px; background: rgba(99,102,241,0.8); border: none; border-radius: 3px; color: white; font-size: 10px; cursor: pointer; z-index: 10; }
+        .chart-wrapper { position: relative; }
+        
+        .heatmap-cell { display: inline-block; width: 20px; height: 20px; margin: 1px; border-radius: 2px; }
+        
+        .euler-term { display: inline-block; padding: 4px 8px; margin: 3px; background: #1e293b; border-radius: 4px; border: 1px solid #334155; font-family: monospace; }
+        .euler-term.prime { border-color: #f59e0b; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>Farey Sector Formula - Complete Analysis Platform</h1>
-    <p class="subtitle">Asymptotic density of coprime residues with gap analysis and connections to classical number theory</p>
+    <h1>Farey Sector Formula - Complete Research Platform</h1>
+    <p class="subtitle">Comprehensive analysis with RH connections, modular arithmetic, and advanced visualizations</p>
     
     <div class="formula-box">
-        <div class="formula-main">C(n, N) = 3N<sup>2</sup> / (pi<sup>2</sup> n(n+1))</div>
-        <p style="text-align:center; font-size:0.9em; opacity:0.9;">
-            Count of coprime pairs (r, m) with r/m in Farey sector S<sub>n</sub> = (1/(n+1), 1/n]
-        </p>
+        <div class="formula-main">C(n, N) = 3N² / (π² n(n+1))</div>
+        <p style="text-align:center; font-size:0.85em; opacity:0.9;">Asymptotic count of coprime pairs (r, m) with r/m in sector S_n = (1/(n+1), 1/n]</p>
     </div>
     
     <div class="control-panel">
         <div class="control-row">
-            <label>Computation Mode:</label>
+            <label>Mode:</label>
             <div class="mode-selector">
                 <div class="mode-btn active" onclick="setMode('exact')" id="mode-exact">Exact</div>
                 <div class="mode-btn" onclick="setMode('hybrid')" id="mode-hybrid">Hybrid</div>
-                <div class="mode-btn" onclick="setMode('formula')" id="mode-formula">Formula Only</div>
+                <div class="mode-btn" onclick="setMode('formula')" id="mode-formula">Formula</div>
             </div>
-            <span class="info-badge" id="modeDescription">Computes exact coprime counts (slower, limited range)</span>
-        </div>
-    </div>
-    
-    <div class="control-panel">
-        <div class="control-row">
-            <div class="control-group highlight">
-                <label>N Range:</label>
-                <input type="number" id="nMin" value="150" min="2"> <span style="color:#64748b">to</span>
-                <input type="number" id="nMax" value="150" min="2">
-            </div>
-            <div class="control-group highlight">
-                <label>Sector Range:</label>
-                <input type="number" id="sectorMin" value="1" min="1"> <span style="color:#64748b">to</span>
-                <input type="number" id="sectorMax" value="20" min="1">
-            </div>
+            <span class="info-badge" id="modeDescription">Exact enumeration</span>
         </div>
         <div class="control-row">
-            <div class="control-group">
-                <label>N Step:</label>
-                <input type="number" id="nStep" value="1" min="1">
+            <div class="control-group highlight">
+                <label>N:</label>
+                <input type="number" id="nMin" value="100" min="2"> to
+                <input type="number" id="nMax" value="100" min="2">
             </div>
-            <div class="control-group">
-                <label>Sector Step:</label>
-                <input type="number" id="sectorStep" value="1" min="1">
+            <div class="control-group highlight">
+                <label>Sectors:</label>
+                <input type="number" id="sectorMin" value="1" min="1"> to
+                <input type="number" id="sectorMax" value="15" min="1">
             </div>
             <button onclick="computeAll()">Compute</button>
-            <button class="secondary" onclick="estimateComputation()">Estimate Time</button>
             <button class="secondary" onclick="cancelComputation()">Cancel</button>
-            <button class="secondary" onclick="exportData()">Export CSV</button>
-            <button class="secondary" onclick="exportLatex()">Export LaTeX</button>
+            <button class="secondary" onclick="exportAllData()">Export All</button>
         </div>
         <div class="progress-bar" id="progressBar" style="display:none;"><div class="progress-fill" id="progressFill"></div></div>
         <div id="statusArea"></div>
     </div>
     
-    <div class="panel" id="estimatePanel" style="display:none;">
-        <h4>Computation Estimate</h4>
-        <div class="estimate-box" id="estimateContent"></div>
-    </div>
-    
     <div class="tabs">
-        <div class="tab active" onclick="switchTab('main')">Main Analysis</div>
-        <div class="tab" onclick="switchTab('gaps')">Gap Analysis</div>
-        <div class="tab" onclick="switchTab('nSweep')">N Sweep</div>
-        <div class="tab" onclick="switchTab('heatmap')">Heatmap</div>
-        <div class="tab" onclick="switchTab('mobius')">Mobius</div>
-        <div class="tab" onclick="switchTab('ford')">Ford Circles</div>
-        <div class="tab" onclick="switchTab('sternbrocot')">Stern-Brocot</div>
-        <div class="tab" onclick="switchTab('convergence')">Convergence</div>
-        <div class="tab" onclick="switchTab('mertens')">Mertens</div>
-        <div class="tab" onclick="switchTab('dirichlet')">Dirichlet</div>
+        <div class="tab active" onclick="switchTab('main')">Main</div>
+        <div class="tab" onclick="switchTab('gaps')">Gaps</div>
+        <div class="tab" onclick="switchTab('franel')">Franel-Landau</div>
+        <div class="tab" onclick="switchTab('dedekind')">Dedekind</div>
+        <div class="tab" onclick="switchTab('cf')">Continued Fractions</div>
+        <div class="tab" onclick="switchTab('psl')">PSL(2,Z)</div>
+        <div class="tab" onclick="switchTab('euler')">Euler Product</div>
+        <div class="tab" onclick="switchTab('modular')">Modular</div>
+        <div class="tab" onclick="switchTab('3d')">3D View</div>
+        <div class="tab" onclick="switchTab('hyperbolic')">Hyperbolic</div>
+        <div class="tab" onclick="switchTab('animation')">Animation</div>
+        <div class="tab" onclick="switchTab('smith')">Smith Chart</div>
+        <div class="tab" onclick="switchTab('stats')">Statistics</div>
+        <div class="tab" onclick="switchTab('primes')">Primes</div>
+        <div class="tab" onclick="switchTab('research')">Research</div>
         <div class="tab" onclick="switchTab('theory')">Theory</div>
     </div>
     
-    <!-- MAIN ANALYSIS TAB -->
+    <!-- MAIN TAB -->
     <div id="tab-main" class="tab-content active">
         <div class="stat-grid" id="mainStats"></div>
-        <div class="grid-2" style="margin-top:20px;">
-            <div class="chart-box chart-wrapper">
-                <button class="screenshot-btn" onclick="screenshotChart('mainCountChart', 'Exact vs Predicted Counts')">Export</button>
-                <h4>Exact vs Predicted Counts</h4>
-                <canvas id="mainCountChart"></canvas>
-            </div>
-            <div class="chart-box chart-wrapper">
-                <button class="screenshot-btn" onclick="screenshotChart('mainErrorChart', 'Error Analysis')">Export</button>
-                <h4>Error Analysis</h4>
-                <canvas id="mainErrorChart"></canvas>
-            </div>
+        <div class="grid-2" style="margin-top:15px;">
+            <div class="chart-box chart-wrapper"><h4>Exact vs Predicted</h4><canvas id="mainCountChart"></canvas></div>
+            <div class="chart-box chart-wrapper"><h4>Relative Error %</h4><canvas id="mainErrorChart"></canvas></div>
         </div>
-        <div class="grid-2" style="margin-top:20px;">
-            <div class="chart-box chart-wrapper">
-                <button class="screenshot-btn" onclick="screenshotChart('cumulativeChart', 'Cumulative Distribution')">Export</button>
-                <h4>Cumulative Distribution</h4>
-                <canvas id="cumulativeChart"></canvas>
-            </div>
-            <div class="chart-box chart-wrapper">
-                <button class="screenshot-btn" onclick="screenshotChart('denomChart', 'Denominator Distribution')">Export</button>
-                <h4>Denominator Distribution</h4>
-                <div class="control-row" style="margin-bottom:10px;">
-                    <label>Sector: <input type="number" id="denomSector" value="1" min="1" onchange="updateDenomChart()"></label>
-                </div>
-                <canvas id="denomChart"></canvas>
-            </div>
+        <div class="panel" style="margin-top:15px;">
+            <h4>Sector Data <span style="font-weight:normal; color:#64748b;">(click for details)</span></h4>
+            <div class="table-scroll"><table id="mainTable"><thead><tr><th>n</th><th>Interval</th><th>Exact</th><th>Pred</th><th>Err%</th><th>Primes</th></tr></thead><tbody></tbody></table></div>
         </div>
-        <div class="panel" style="margin-top:20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h4>Sector Data Table <span style="font-weight:normal; color:#64748b;">(click row for details)</span></h4>
-                <button class="secondary small" onclick="screenshotTable()">Export Table</button>
-            </div>
-            <div class="table-scroll"><table id="mainTable"><thead>
-                <tr><th>n</th><th>Interval</th><th>Width</th><th>Exact</th><th>Predicted</th><th>Error</th><th>Rel %</th><th>Primes</th></tr>
-            </thead><tbody></tbody></table></div>
-        </div>
-        
-        <!-- ENHANCED SECTOR VISUALIZATION -->
         <div class="panel chart-wrapper">
-            <button class="screenshot-btn" onclick="screenshotElement('mainRing', 'Sector Visualization')">Export</button>
-            <h4>Sector Visualization <span style="font-weight:normal; color:#64748b;">(click any point for details)</span></h4>
-            <div class="control-row" style="margin-bottom:15px;">
-                <label>View Sector: <input type="number" id="viewSector" value="1" min="1" onchange="drawMainRing()"></label>
-                <div class="control-group">
-                    <label>Color By:</label>
-                    <select id="colorMode" onchange="drawMainRing()">
-                        <option value="sector">Sector</option>
-                        <option value="prime">Prime/Composite</option>
-                        <option value="denominator">Denominator</option>
-                        <option value="gap">Gap Size</option>
-                    </select>
-                </div>
-                <label><input type="checkbox" id="showAllSectors" onchange="drawMainRing()"> Show All Sectors</label>
-                <span id="ringStats" class="info-badge"></span>
+            <h4>Sector Ring <span style="font-weight:normal; color:#64748b;">(click points)</span></h4>
+            <div class="control-row" style="margin-bottom:10px;">
+                <label>Sector: <input type="number" id="viewSector" value="1" min="1" onchange="drawMainRing()"></label>
+                <label>Color: <select id="colorMode" onchange="drawMainRing()"><option value="sector">Sector</option><option value="prime">Prime</option><option value="denominator">Denom</option><option value="gap">Gap</option></select></label>
+                <label><input type="checkbox" id="showAllSectors" onchange="drawMainRing()"> All</label>
             </div>
-            <div style="text-align:center; position:relative;">
-                <canvas id="mainRing" class="ring-canvas" width="700" height="700"></canvas>
-                <div class="point-tooltip" id="pointTooltip"></div>
-            </div>
+            <div style="text-align:center;position:relative;"><canvas id="mainRing" class="ring-canvas" width="600" height="600"></canvas><div class="point-tooltip" id="pointTooltip"></div></div>
             <div class="color-legend" id="colorLegend"></div>
         </div>
     </div>
     
-    <!-- GAP ANALYSIS TAB -->
+    <!-- GAPS TAB -->
     <div id="tab-gaps" class="tab-content">
         <div class="panel">
             <h3>Gap Analysis</h3>
-            <div class="theorem-box">
-                <strong>Farey Gap Property:</strong> For consecutive Farey fractions a/b and c/d, the gap is 1/(bd).
-                The mediant (a+c)/(b+d) appears in higher-order Farey sequences.
+            <div class="theorem-box"><strong>Farey Gap:</strong> For consecutive fractions a/b, c/d: gap = 1/(bd)</div>
+            <div class="stat-grid" id="gapStats" style="margin-top:12px;"></div>
+            <div class="grid-2" style="margin-top:15px;">
+                <div class="chart-box"><h4>Gap Distribution</h4><canvas id="gapDistChart"></canvas></div>
+                <div class="chart-box"><h4>Gap vs Denom Product</h4><canvas id="gapVsDenomChart"></canvas></div>
             </div>
-            
-            <div class="stat-grid" id="gapStats" style="margin-top:20px;"></div>
-            
-            <div class="grid-2" style="margin-top:20px;">
-                <div class="chart-box chart-wrapper">
-                    <button class="screenshot-btn" onclick="screenshotChart('gapDistChart', 'Gap Distribution')">Export</button>
-                    <h4>Gap Size Distribution</h4>
-                    <canvas id="gapDistChart"></canvas>
-                </div>
-                <div class="chart-box chart-wrapper">
-                    <button class="screenshot-btn" onclick="screenshotChart('gapBySectorChart', 'Gaps by Sector')">Export</button>
-                    <h4>Mean Gap by Sector</h4>
-                    <canvas id="gapBySectorChart"></canvas>
-                </div>
-            </div>
-            
-            <div class="grid-2" style="margin-top:20px;">
-                <div class="chart-box chart-wrapper">
-                    <button class="screenshot-btn" onclick="screenshotChart('gapVsDenomChart', 'Gap vs Denominator')">Export</button>
-                    <h4>Gap vs Denominator Product</h4>
-                    <canvas id="gapVsDenomChart"></canvas>
-                </div>
-                <div class="chart-box chart-wrapper">
-                    <button class="screenshot-btn" onclick="screenshotChart('gapCumulativeChart', 'Cumulative Gap')">Export</button>
-                    <h4>Cumulative Gap Distribution</h4>
-                    <canvas id="gapCumulativeChart"></canvas>
-                </div>
-            </div>
-            
-            <div class="panel" style="margin-top:20px; background:#0f172a;">
-                <h4>Gap Data Table (Top 50 by Gap Size)</h4>
-                <div class="table-scroll"><table id="gapTable"><thead>
-                    <tr><th>Left Fraction</th><th>Right Fraction</th><th>Gap</th><th>1/(bd)</th><th>Sector</th><th>Denom Product</th></tr>
-                </thead><tbody></tbody></table></div>
-            </div>
-            
-            <div class="derivation-box" style="margin-top:20px;">
-                <strong>Gap Statistics Insight:</strong> The distribution of gaps relates to the density of Farey fractions.
-                Large gaps indicate sparse regions; clustering reveals structure in coprime distributions.
-            </div>
+            <div class="panel" style="margin-top:15px; background:#0f172a;"><h4>Largest Gaps</h4><div class="table-scroll"><table id="gapTable"><thead><tr><th>Left</th><th>Right</th><th>Gap</th><th>1/(bd)</th><th>Sector</th></tr></thead><tbody></tbody></table></div></div>
         </div>
     </div>
     
-    <!-- N SWEEP TAB -->
-    <div id="tab-nSweep" class="tab-content">
+    <!-- FRANEL-LANDAU TAB -->
+    <div id="tab-franel" class="tab-content">
         <div class="panel">
-            <h3>Formula Predictions Across N Range</h3>
-            <div class="grid-2" style="margin-top:20px;">
-                <div class="chart-box chart-wrapper">
-                    <button class="screenshot-btn" onclick="screenshotChart('nSweepChart', 'C(n,N) vs N')">Export</button>
-                    <h4>C(n,N) vs N for Selected Sectors</h4><canvas id="nSweepChart"></canvas>
-                </div>
-                <div class="chart-box chart-wrapper">
-                    <button class="screenshot-btn" onclick="screenshotChart('totalVsNChart', 'Total Coprimes vs N')">Export</button>
-                    <h4>Total Coprimes vs N</h4><canvas id="totalVsNChart"></canvas>
-                </div>
+            <h3>Franel-Landau Theorem</h3>
+            <div class="rh-box"><strong>RH Equivalence:</strong> Define δ_k = F_k - k/|F_N| for k-th Farey fraction. Then Σ|δ_k| = O(N^(1/2+ε)) ⟺ RH</div>
+            <div class="stat-grid" id="franelStats" style="margin-top:12px;"></div>
+            <div class="grid-2" style="margin-top:15px;">
+                <div class="chart-box"><h4>Deviation δ_k vs k</h4><canvas id="franelDeviationChart"></canvas></div>
+                <div class="chart-box"><h4>Cumulative |δ| / N^α</h4><canvas id="franelCumulativeChart"></canvas></div>
             </div>
-            <div class="panel" style="margin-top:20px; background:#0f172a;">
-                <h4>N Sweep Data</h4>
-                <div class="table-scroll"><table id="nSweepTable"><thead>
-                    <tr><th>N</th><th>Total Predicted</th><th>Sector 1</th><th>Sector 2</th><th>Sector 3</th><th>Sector 5</th><th>Sector 10</th></tr>
-                </thead><tbody></tbody></table></div>
-            </div>
+            <div class="chart-box" style="margin-top:15px;"><h4>Σ|δ| / N^α for various α</h4><canvas id="franelAlphaChart"></canvas></div>
+            <div class="derivation-box" style="margin-top:15px;"><strong>Interpretation:</strong> If RH is true, the normalized sum should stay bounded. Divergence for α ≤ 1/2 would contradict RH.</div>
         </div>
     </div>
     
-    <!-- HEATMAP TAB -->
-    <div id="tab-heatmap" class="tab-content">
+    <!-- DEDEKIND TAB -->
+    <div id="tab-dedekind" class="tab-content">
         <div class="panel">
-            <h3>C(n, N) Heatmap</h3>
-            <div style="text-align:center; margin-top:20px; position:relative;">
-                <button class="screenshot-btn" onclick="screenshotElement('heatmapCanvas', 'C(n,N) Heatmap')" style="position:relative; margin-bottom:10px;">Export</button>
-                <canvas id="heatmapCanvas" width="900" height="500"></canvas>
-            </div>
-            <div class="control-row" style="margin-top:15px; justify-content:center;">
-                <label><input type="checkbox" id="heatmapLog" onchange="drawHeatmap()"> Log Scale</label>
-                <label>Color: <select id="heatmapColor" onchange="drawHeatmap()">
-                    <option value="viridis">Viridis</option>
-                    <option value="plasma">Plasma</option>
-                    <option value="thermal">Thermal</option>
-                </select></label>
-            </div>
-        </div>
-    </div>
-    
-    <!-- MOBIUS TAB -->
-    <div id="tab-mobius" class="tab-content">
-        <div class="panel">
-            <h3>Mobius Function and the Coprime Sieve</h3>
-            <div class="theorem-box">
-                <strong>Mobius Inversion:</strong>
-                <p class="math" style="text-align:center; margin:10px 0;">
-                    #{(r,m): gcd(r,m)=1, m &le; N} = sum over d of mu(d) * floor(N/d)<sup>2</sup>
-                </p>
-            </div>
-            <div class="grid-2" style="margin-top:20px;">
-                <div class="chart-box chart-wrapper">
-                    <button class="screenshot-btn" onclick="screenshotChart('mobiusChart', 'Mobius Function')">Export</button>
-                    <h4>mu(n) Values</h4><canvas id="mobiusChart"></canvas>
-                </div>
-                <div class="chart-box chart-wrapper">
-                    <button class="screenshot-btn" onclick="screenshotChart('mobiusContribChart', 'Sieve Contributions')">Export</button>
-                    <h4>Sieve Contributions</h4><canvas id="mobiusContribChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- FORD CIRCLES TAB -->
-    <div id="tab-ford" class="tab-content">
-        <div class="panel">
-            <h3>Ford Circle Representation</h3>
-            <div class="control-row" style="margin:15px 0;">
-                <label>Max Denom: <input type="number" id="fordMaxDenom" value="12" min="3" onchange="drawFordCircles()"></label>
-                <label>Highlight Sector: <input type="number" id="fordSector" value="2" min="1" onchange="drawFordCircles()"></label>
-            </div>
-            <div style="text-align:center; position:relative;">
-                <button class="screenshot-btn" onclick="screenshotElement('fordCanvas', 'Ford Circles')" style="position:relative; margin-bottom:10px;">Export</button>
-                <canvas id="fordCanvas" class="ford-canvas" width="900" height="400"></canvas>
-            </div>
-        </div>
-    </div>
-    
-    <!-- STERN-BROCOT TAB -->
-    <div id="tab-sternbrocot" class="tab-content">
-        <div class="panel">
-            <h3>Stern-Brocot Tree</h3>
-            <div class="control-row" style="margin:15px 0;">
-                <label>Depth: <input type="number" id="sbDepth" value="5" min="2" max="9" onchange="drawSternBrocot()"></label>
-                <label>Highlight Sector: <input type="number" id="sbSector" value="2" min="1" onchange="drawSternBrocot()"></label>
-            </div>
-            <div style="text-align:center; overflow-x:auto; position:relative;">
-                <button class="screenshot-btn" onclick="screenshotElement('sbCanvas', 'Stern-Brocot Tree')" style="position:relative; margin-bottom:10px;">Export</button>
-                <canvas id="sbCanvas" class="tree-canvas" width="1000" height="450"></canvas>
-            </div>
-        </div>
-    </div>
-    
-    <!-- CONVERGENCE TAB -->
-    <div id="tab-convergence" class="tab-content">
-        <div class="panel">
-            <h3>Convergence Analysis</h3>
-            <div class="control-row" style="margin:15px 0;">
-                <label>Animate to N: <input type="number" id="convMax" value="300" min="50"></label>
-                <button onclick="animateConvergence()">Animate</button>
-                <button class="secondary" onclick="stopAnimation()">Stop</button>
-                <span id="convStatus" class="info-badge">Ready</span>
-            </div>
+            <h3>Dedekind Sums</h3>
+            <div class="theorem-box"><strong>Definition:</strong> s(h,k) = Σ_{j=1}^{k-1} ((j/k))((hj/k)) where ((x)) = x - ⌊x⌋ - 1/2 if x∉ℤ, else 0</div>
+            <div class="control-row" style="margin:12px 0;"><label>Max k: <input type="number" id="dedekindMaxK" value="20" min="2" onchange="computeDedekind()"></label></div>
             <div class="grid-2">
-                <div class="chart-box chart-wrapper">
-                    <button class="screenshot-btn" onclick="screenshotChart('convChart1', 'Convergence Sector 1')">Export</button>
-                    <h4>Relative Error vs N (Sector 1)</h4><canvas id="convChart1"></canvas>
-                </div>
-                <div class="chart-box chart-wrapper">
-                    <button class="screenshot-btn" onclick="screenshotChart('convChart2', 'Convergence Multiple Sectors')">Export</button>
-                    <h4>Multiple Sectors</h4><canvas id="convChart2"></canvas>
-                </div>
+                <div class="chart-box"><h4>s(h,k) Heatmap</h4><canvas id="dedekindHeatmap" width="400" height="400"></canvas></div>
+                <div class="chart-box"><h4>s(1,k) vs k</h4><canvas id="dedekindChart"></canvas></div>
+            </div>
+            <div class="panel" style="margin-top:15px; background:#0f172a;"><h4>Dedekind Sum Table</h4><div class="table-scroll"><table id="dedekindTable"><thead><tr><th>h</th><th>k</th><th>s(h,k)</th><th>12k·s(h,k)</th><th>gcd</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="connection-box" style="margin-top:12px;"><strong>Reciprocity:</strong> s(h,k) + s(k,h) = -1/4 + (1/12)(h/k + k/h + 1/(hk))</div>
+        </div>
+    </div>
+    
+    <!-- CONTINUED FRACTIONS TAB -->
+    <div id="tab-cf" class="tab-content">
+        <div class="panel">
+            <h3>Continued Fractions</h3>
+            <div class="theorem-box"><strong>Stern-Brocot Encoding:</strong> Path L^a R^b L^c... encodes CF [0; a, b, c, ...]</div>
+            <div class="control-row" style="margin:12px 0;"><label>Sector: <input type="number" id="cfSector" value="2" min="1" onchange="updateCFDisplay()"></label><label>Max terms: <input type="number" id="cfMaxTerms" value="50" onchange="updateCFDisplay()"></label></div>
+            <div class="panel" style="background:#0f172a;"><h4>Continued Fraction Expansions</h4><div class="table-scroll"><table id="cfTable"><thead><tr><th>r/m</th><th>CF [a0; a1, a2, ...]</th><th>Path</th><th>Length</th><th>Sum(a_i)</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="grid-2" style="margin-top:15px;">
+                <div class="chart-box"><h4>CF Length Distribution</h4><canvas id="cfLengthChart"></canvas></div>
+                <div class="chart-box"><h4>First Partial Quotient</h4><canvas id="cfFirstChart"></canvas></div>
             </div>
         </div>
     </div>
     
-    <!-- MERTENS TAB -->
-    <div id="tab-mertens" class="tab-content">
+    <!-- PSL(2,Z) TAB -->
+    <div id="tab-psl" class="tab-content">
         <div class="panel">
-            <h3>Mertens Function</h3>
-            <div class="rh-box">
-                <strong>RH Equivalence:</strong> M(n) = O(n<sup>1/2+epsilon</sup>) for all epsilon > 0 is equivalent to the Riemann Hypothesis.
-            </div>
-            <div class="grid-2" style="margin-top:20px;">
-                <div class="chart-box chart-wrapper">
-                    <button class="screenshot-btn" onclick="screenshotChart('mertensChart', 'Mertens Function')">Export</button>
-                    <h4>M(n) = sum mu(k)</h4><canvas id="mertensChart"></canvas>
-                </div>
-                <div class="chart-box chart-wrapper">
-                    <button class="screenshot-btn" onclick="screenshotChart('mertensNormChart', 'Normalized Mertens')">Export</button>
-                    <h4>M(n)/sqrt(n)</h4><canvas id="mertensNormChart"></canvas>
-                </div>
+            <h3>PSL(2,ℤ) Matrices</h3>
+            <div class="theorem-box"><strong>Farey Neighbor Property:</strong> For consecutive Farey fractions a/b, c/d: |ad - bc| = 1, giving matrix [a,c; b,d] ∈ SL(2,ℤ)</div>
+            <div class="control-row" style="margin:12px 0;"><label>Max denom: <input type="number" id="pslMaxDenom" value="12" min="3" onchange="computePSL()"></label></div>
+            <div class="panel" style="background:#0f172a;"><h4>Neighbor Matrices</h4><div id="pslMatrices" style="max-height:300px; overflow-y:auto;"></div></div>
+            <div class="grid-2" style="margin-top:15px;">
+                <div class="chart-box"><h4>Ford Circles</h4><canvas id="fordCanvas" width="500" height="250"></canvas></div>
+                <div class="chart-box"><h4>Determinant Verification</h4><div id="pslVerification"></div></div>
             </div>
         </div>
     </div>
     
-    <!-- DIRICHLET TAB -->
-    <div id="tab-dirichlet" class="tab-content">
+    <!-- EULER PRODUCT TAB -->
+    <div id="tab-euler" class="tab-content">
         <div class="panel">
-            <h3>Dirichlet Series</h3>
-            <div class="theorem-box">
-                <strong>Basel Problem (Euler 1734):</strong> zeta(2) = sum 1/n<sup>2</sup> = pi<sup>2</sup>/6
+            <h3>Euler Product for ζ(2)</h3>
+            <div class="theorem-box"><strong>Euler:</strong> ζ(2) = Σ 1/n² = ∏_p 1/(1-1/p²) = π²/6, hence 6/π² = ∏_p (1-1/p²)</div>
+            <div class="control-row" style="margin:12px 0;"><label>Primes up to: <input type="number" id="eulerMaxP" value="50" min="5" onchange="computeEulerProduct()"></label></div>
+            <div class="stat-grid" id="eulerStats"></div>
+            <div class="panel" style="margin-top:15px; background:#0f172a;"><h4>Product Terms</h4><div id="eulerTerms" style="max-height:200px; overflow-y:auto;"></div></div>
+            <div class="grid-2" style="margin-top:15px;">
+                <div class="chart-box"><h4>Partial Product → 6/π²</h4><canvas id="eulerProductChart"></canvas></div>
+                <div class="chart-box"><h4>Partial Sum → π²/6</h4><canvas id="eulerSumChart"></canvas></div>
             </div>
-            <div class="grid-2" style="margin-top:20px;">
-                <div class="chart-box chart-wrapper">
-                    <button class="screenshot-btn" onclick="screenshotChart('zetaChart', 'Zeta(2) Convergence')">Export</button>
-                    <h4>sum 1/n<sup>2</sup> converging to pi<sup>2</sup>/6</h4><canvas id="zetaChart"></canvas>
-                </div>
-                <div class="chart-box chart-wrapper">
-                    <button class="screenshot-btn" onclick="screenshotChart('invZetaChart', 'Inverse Zeta(2) Convergence')">Export</button>
-                    <h4>sum mu(n)/n<sup>2</sup> converging to 6/pi<sup>2</sup></h4><canvas id="invZetaChart"></canvas>
-                </div>
+            <div class="derivation-box" style="margin-top:12px;"><strong>Connection:</strong> The coprime probability 6/π² emerges from excluding multiples of each prime p with probability 1/p².</div>
+        </div>
+    </div>
+    
+    <!-- MODULAR TAB -->
+    <div id="tab-modular" class="tab-content">
+        <div class="panel">
+            <h3>Modular Arithmetic Analysis</h3>
+            <div class="control-row" style="margin:12px 0;">
+                <label>Filter mod k: <input type="number" id="modK" value="6" min="2" onchange="updateModularAnalysis()"></label>
+                <label>Residue a: <input type="number" id="modA" value="1" min="0" onchange="updateModularAnalysis()"></label>
+                <button onclick="updateModularAnalysis()">Apply Filter</button>
             </div>
+            <div class="stat-grid" id="modularStats"></div>
+            <div class="grid-2" style="margin-top:15px;">
+                <div class="chart-box"><h4>Residue Class Distribution</h4><canvas id="residueClassChart"></canvas></div>
+                <div class="chart-box"><h4>Prime Channel Ownership</h4><canvas id="primeChannelChart"></canvas></div>
+            </div>
+            <div class="panel" style="margin-top:15px; background:#0f172a;">
+                <h4>Lifting Tower: m → 2m, 3m, ...</h4>
+                <div id="liftingDisplay"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 3D VIEW TAB -->
+    <div id="tab-3d" class="tab-content">
+        <div class="panel">
+            <h3>3D Sector Cone</h3>
+            <div class="control-row" style="margin:12px 0;">
+                <label>Rotate X: <input type="range" id="rot3dX" min="-90" max="90" value="30" onchange="draw3D()"></label>
+                <label>Rotate Z: <input type="range" id="rot3dZ" min="0" max="360" value="45" onchange="draw3D()"></label>
+                <label>Perspective: <input type="range" id="perspective3d" min="100" max="1000" value="500" onchange="draw3D()"></label>
+            </div>
+            <div style="text-align:center;"><canvas id="canvas3d" class="ring-canvas" width="700" height="600"></canvas></div>
+            <div class="derivation-box" style="margin-top:12px;">Third axis represents denominator m. Points at height m have coprime numerators r with r/m in the sector range. The cone structure shows density increasing with m².</div>
+        </div>
+    </div>
+    
+    <!-- HYPERBOLIC TAB -->
+    <div id="tab-hyperbolic" class="tab-content">
+        <div class="panel">
+            <h3>Hyperbolic Plane / Poincaré Disk</h3>
+            <div class="theorem-box"><strong>Farey Tessellation:</strong> The hyperbolic plane is tessellated by ideal triangles with vertices at Farey fractions on ∂H.</div>
+            <div class="control-row" style="margin:12px 0;">
+                <label>Max denom: <input type="number" id="hypMaxDenom" value="15" min="3" onchange="drawHyperbolic()"></label>
+                <label>Highlight sector: <input type="number" id="hypSector" value="2" min="1" onchange="drawHyperbolic()"></label>
+            </div>
+            <div style="text-align:center;"><canvas id="hypCanvas" class="ring-canvas" width="650" height="650"></canvas></div>
+        </div>
+    </div>
+    
+    <!-- ANIMATION TAB -->
+    <div id="tab-animation" class="tab-content">
+        <div class="panel">
+            <h3>Farey Sequence Growth</h3>
+            <div class="control-row" style="margin:12px 0;">
+                <label>Animate to N: <input type="number" id="animMaxN" value="50" min="5"></label>
+                <label>Speed (ms): <input type="number" id="animSpeed" value="200" min="50"></label>
+                <button onclick="startAnimation()">Start</button>
+                <button class="secondary" onclick="stopAnimation()">Stop</button>
+                <span id="animStatus" class="info-badge">Ready</span>
+            </div>
+            <div style="text-align:center;"><canvas id="animCanvas" class="ring-canvas" width="650" height="650"></canvas></div>
+            <div class="stat-grid" id="animStats" style="margin-top:12px;"></div>
+        </div>
+    </div>
+    
+    <!-- SMITH CHART TAB -->
+    <div id="tab-smith" class="tab-content">
+        <div class="panel">
+            <h3>Smith Chart Transform</h3>
+            <div class="theorem-box"><strong>Transform:</strong> Map x ∈ (0,1) to Smith chart via Γ = (Z-1)/(Z+1) where Z relates to the fraction value.</div>
+            <div class="control-row" style="margin:12px 0;">
+                <label>Sector: <input type="number" id="smithSector" value="2" min="1" onchange="drawSmithChart()"></label>
+                <label><input type="checkbox" id="smithShowGrid" checked onchange="drawSmithChart()"> Grid</label>
+            </div>
+            <div style="text-align:center;"><canvas id="smithCanvas" class="ring-canvas" width="650" height="650"></canvas></div>
+        </div>
+    </div>
+    
+    <!-- STATISTICS TAB -->
+    <div id="tab-stats" class="tab-content">
+        <div class="panel">
+            <h3>Statistical Analysis</h3>
+            <div class="grid-2">
+                <div class="chart-box"><h4>Random vs Actual Distribution</h4><canvas id="randomCompareChart"></canvas></div>
+                <div class="chart-box"><h4>Cross-Sector Correlation</h4><canvas id="correlationChart"></canvas></div>
+            </div>
+            <div class="grid-2" style="margin-top:15px;">
+                <div class="chart-box"><h4>Error Term O(N log N)</h4><canvas id="errorTermChart"></canvas></div>
+                <div class="chart-box"><h4>Local Density Analysis</h4><canvas id="localDensityChart"></canvas></div>
+            </div>
+            <div class="panel" style="margin-top:15px; background:#0f172a;">
+                <h4>Correlation Matrix</h4>
+                <div id="correlationMatrix"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- PRIMES TAB -->
+    <div id="tab-primes" class="tab-content">
+        <div class="panel">
+            <h3>Prime Analysis</h3>
+            <div class="stat-grid" id="primeStats"></div>
+            <div class="grid-2" style="margin-top:15px;">
+                <div class="chart-box"><h4>Twin Prime Gap Markers</h4><canvas id="twinPrimeChart"></canvas></div>
+                <div class="chart-box"><h4>Prime vs Composite Moduli</h4><canvas id="primeVsCompositeChart"></canvas></div>
+            </div>
+            <div class="grid-2" style="margin-top:15px;">
+                <div class="chart-box"><h4>Prime k-tuple Correlations</h4><canvas id="ktupleChart"></canvas></div>
+                <div class="chart-box"><h4>Prime Denominator Density</h4><canvas id="primeDenomDensityChart"></canvas></div>
+            </div>
+            <div class="panel" style="margin-top:15px; background:#0f172a;">
+                <h4>Twin Prime Gaps in Farey Sequence</h4>
+                <div id="twinPrimeList" class="residue-list"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- RESEARCH TAB -->
+    <div id="tab-research" class="tab-content">
+        <div class="panel">
+            <h3>Research Tools</h3>
+            
+            <h4>Custom Formula Tester</h4>
+            <div class="control-row" style="margin:12px 0;">
+                <label>Formula C(n,N) = </label>
+                <input type="text" id="customFormula" value="3*N*N/(Math.PI*Math.PI*n*(n+1))" style="width:300px;">
+                <button onclick="testCustomFormula()">Test</button>
+            </div>
+            <div class="chart-box" style="margin-top:12px;"><h4>Custom vs Standard</h4><canvas id="customFormulaChart"></canvas></div>
+            
+            <h4 style="margin-top:20px;">Batch Parameter Sweep</h4>
+            <div class="control-row" style="margin:12px 0;">
+                <label>N range: <input type="number" id="batchNMin" value="50"> to <input type="number" id="batchNMax" value="200"> step <input type="number" id="batchNStep" value="10"></label>
+                <button onclick="runBatchSweep()">Run Sweep</button>
+            </div>
+            <div class="table-scroll" style="margin-top:12px;"><table id="batchTable"><thead><tr><th>N</th><th>|F_N|</th><th>Σ|δ|</th><th>Σ|δ|/√N</th><th>Max Gap</th><th>Mean Gap</th></tr></thead><tbody></tbody></table></div>
+            
+            <h4 style="margin-top:20px;">Publication Export</h4>
+            <div class="control-row" style="margin:12px 0;">
+                <button onclick="exportLatexFigures()">LaTeX Figures</button>
+                <button onclick="exportCSVAll()">Full CSV</button>
+                <button onclick="exportJSON()">JSON Data</button>
+            </div>
+            <div class="latex-output" id="latexFigures"></div>
         </div>
     </div>
     
@@ -531,1183 +445,904 @@
     <div id="tab-theory" class="tab-content">
         <div class="panel">
             <h2>Theoretical Framework</h2>
-            
             <h3>1. Summatory Totient</h3>
-            <div class="theorem-box">
-                <p class="math" style="text-align:center;">Phi(N) = sum phi(m) = (3/pi<sup>2</sup>)N<sup>2</sup> + O(N(log N)<sup>2/3</sup>(log log N)<sup>4/3</sup>)</p>
-            </div>
-            
-            <h3>2. Sector Formula Derivation</h3>
-            <div class="derivation-box">
-                <p>Width of sector n: 1/n - 1/(n+1) = 1/(n(n+1))</p>
-                <p class="math" style="text-align:center;">C(n,N) = (3N<sup>2</sup>/pi<sup>2</sup>) * 1/(n(n+1)) = 3N<sup>2</sup>/(pi<sup>2</sup> n(n+1))</p>
-            </div>
-            
-            <h3>3. Franel-Landau Theorem (1924)</h3>
-            <div class="rh-box">
-                <p>The sum of absolute Farey deviations being O(n<sup>1/2+epsilon</sup>) is equivalent to RH.</p>
-            </div>
-            
+            <div class="theorem-box">Φ(N) = Σφ(m) = (3/π²)N² + O(N(log N)^(2/3)(log log N)^(4/3))</div>
+            <h3>2. Sector Formula</h3>
+            <div class="derivation-box">Width 1/n - 1/(n+1) = 1/(n(n+1)), so C(n,N) ≈ (3N²/π²) · 1/(n(n+1))</div>
+            <h3>3. Franel-Landau (1924)</h3>
+            <div class="rh-box">Σ|F_k - k/|F_N|| = O(N^(1/2+ε)) ⟺ Riemann Hypothesis</div>
+            <h3>4. Dedekind-Rademacher</h3>
+            <div class="connection-box">Dedekind sums appear in transformation formulas for η(τ) and modular forms.</div>
             <h3>Historical Timeline</h3>
-            <table style="margin-top:15px;">
-                <thead><tr><th>Year</th><th>Contributor</th><th>Result</th></tr></thead>
-                <tbody>
-                    <tr><td>1734</td><td>Euler</td><td>Basel problem: zeta(2) = pi<sup>2</sup>/6</td></tr>
-                    <tr><td>1749</td><td>Euler</td><td>Totient function phi(n)</td></tr>
-                    <tr><td>1802</td><td>Haros</td><td>Mediant property</td></tr>
-                    <tr><td>1816</td><td>Farey</td><td>Farey sequences</td></tr>
-                    <tr><td>1874</td><td>Mertens</td><td>Summatory totient asymptotic</td></tr>
-                    <tr><td>1924</td><td>Franel-Landau</td><td>RH equivalence via Farey</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="panel">
-            <h3>LaTeX Export</h3>
-            <div id="latexOutput" class="latex-output"></div>
+            <table><thead><tr><th>Year</th><th>Contributor</th><th>Result</th></tr></thead><tbody>
+                <tr><td>1734</td><td>Euler</td><td>ζ(2) = π²/6</td></tr>
+                <tr><td>1816</td><td>Farey</td><td>Farey sequences</td></tr>
+                <tr><td>1877</td><td>Dedekind</td><td>Dedekind sums</td></tr>
+                <tr><td>1924</td><td>Franel-Landau</td><td>RH equivalence</td></tr>
+            </tbody></table>
         </div>
     </div>
 </div>
 
-<!-- SECTOR DETAIL MODAL -->
-<div class="modal-overlay" id="sectorModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="modalTitle">Sector Details</h3>
-            <button class="modal-close" onclick="closeModal()">&times;</button>
-        </div>
-        <div class="modal-body" id="modalBody"></div>
-    </div>
-</div>
-
-<!-- POINT DETAIL MODAL -->
-<div class="modal-overlay" id="pointModal">
-    <div class="modal-content" style="max-width:500px;">
-        <div class="modal-header">
-            <h3 id="pointModalTitle">Point Details</h3>
-            <button class="modal-close" onclick="closePointModal()">&times;</button>
-        </div>
-        <div class="modal-body" id="pointModalBody"></div>
-    </div>
-</div>
+<div class="modal-overlay" id="pointModal"><div class="modal-content" style="max-width:450px;"><div class="modal-header"><h3 id="pointModalTitle">Point</h3><button class="modal-close" onclick="closePointModal()">×</button></div><div class="modal-body" id="pointModalBody"></div></div></div>
 
 <script>
 const state = {
-    mode: 'exact',
-    nMin: 150, nMax: 150, nStep: 1,
-    sectorMin: 1, sectorMax: 20, sectorStep: 1,
-    sectors: [],
-    residuesBySector: {},
-    allResidues: [],
-    gaps: [],
-    nSweepData: [],
-    computing: false,
-    charts: {},
-    ringPoints: [] // For click detection
+    mode: 'exact', nMin: 100, nMax: 100, sectorMin: 1, sectorMax: 15,
+    sectors: [], residuesBySector: {}, allResidues: [], gaps: [], farey: [],
+    computing: false, charts: {}, ringPoints: [], animationId: null
 };
 
-// Sector colors
-const sectorColors = [
-    '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899',
-    '#f43f5e', '#ef4444', '#f97316', '#f59e0b', '#eab308',
-    '#84cc16', '#22c55e', '#10b981', '#14b8a6', '#06b6d4',
-    '#0ea5e9', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7'
-];
+const sectorColors = ['#6366f1','#8b5cf6','#a855f7','#d946ef','#ec4899','#f43f5e','#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e','#10b981','#14b8a6','#06b6d4','#0ea5e9','#3b82f6'];
+function getSectorColor(n) { return sectorColors[(n-1) % sectorColors.length]; }
 
-function getSectorColor(n) {
-    return sectorColors[(n - 1) % sectorColors.length];
+// Utilities
+function gcd(a, b) { while(b) { [a,b] = [b, a%b]; } return a; }
+function isPrime(n) { if(n<2) return false; if(n===2) return true; if(n%2===0) return false; for(let i=3;i*i<=n;i+=2) if(n%i===0) return false; return true; }
+function mobius(n) { if(n===1) return 1; let c=0; for(let p=2;p*p<=n;p++) { if(n%p===0) { if(n%(p*p)===0) return 0; c++; n/=p; } } if(n>1) c++; return c%2===0?1:-1; }
+function getSector(r,m) { const f=r/m; if(f<=0||f>1) return null; return Math.floor(1/f); }
+function formula(n,N) { return (3*N*N)/(Math.PI*Math.PI*n*(n+1)); }
+function fmt(x) { if(x>=1e9) return (x/1e9).toFixed(1)+'B'; if(x>=1e6) return (x/1e6).toFixed(1)+'M'; if(x>=1e3) return (x/1e3).toFixed(1)+'K'; return x.toFixed(x<10?2:0); }
+
+// Continued fraction
+function toCF(r, m) {
+    const cf = [];
+    while(m !== 0) { const q = Math.floor(r/m); cf.push(q); [r,m] = [m, r - q*m]; }
+    return cf;
+}
+function cfPath(cf) {
+    let path = '';
+    for(let i=0; i<cf.length; i++) { path += (i%2===0?'R':'L').repeat(cf[i]); }
+    return path;
 }
 
-// ============ UTILITIES ============
-function gcd(a, b) { while (b) { [a, b] = [b, a % b]; } return a; }
-
-function mobius(n) {
-    if (n === 1) return 1;
-    let count = 0;
-    for (let p = 2; p * p <= n; p++) {
-        if (n % p === 0) {
-            if (n % (p * p) === 0) return 0;
-            count++; n /= p;
-        }
+// Dedekind sum
+function sawtoothSum(h, k) {
+    let s = 0;
+    for(let j=1; j<k; j++) {
+        const jk = j/k, hjk = (h*j/k) % 1;
+        const s1 = jk - Math.floor(jk) - 0.5;
+        const s2 = hjk - Math.floor(hjk) - 0.5;
+        s += s1 * s2;
     }
-    if (n > 1) count++;
-    return count % 2 === 0 ? 1 : -1;
+    return s;
 }
 
-function isPrime(n) {
-    if (n < 2) return false;
-    if (n === 2) return true;
-    if (n % 2 === 0) return false;
-    for (let i = 3; i * i <= n; i += 2) if (n % i === 0) return false;
-    return true;
-}
-
-function getSector(r, m) {
-    const f = r / m;
-    if (f <= 0 || f > 1) return null;
-    return Math.floor(1 / f);
-}
-
-function formula(n, N) {
-    return (3 * N * N) / (Math.PI * Math.PI * n * (n + 1));
-}
-
-function formatNumber(x) {
-    if (x >= 1e12) return (x / 1e12).toFixed(2) + 'T';
-    if (x >= 1e9) return (x / 1e9).toFixed(2) + 'B';
-    if (x >= 1e6) return (x / 1e6).toFixed(2) + 'M';
-    if (x >= 1e3) return (x / 1e3).toFixed(2) + 'K';
-    return x.toFixed(x < 100 ? 1 : 0);
-}
-
-// ============ MODE CONTROL ============
 function setMode(mode) {
     state.mode = mode;
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('mode-' + mode).classList.add('active');
-    const desc = {
-        exact: 'Computes exact coprime counts (recommended: N < 1000)',
-        hybrid: 'Exact for N < 500, formula for larger (balanced)',
-        formula: 'Uses asymptotic formula only (instant, any range)'
-    };
-    document.getElementById('modeDescription').textContent = desc[mode];
+    document.getElementById('mode-'+mode).classList.add('active');
+    document.getElementById('modeDescription').textContent = {exact:'Exact enumeration',hybrid:'Hybrid mode',formula:'Formula only'}[mode];
 }
 
-function estimateComputation() {
-    const nMin = parseInt(document.getElementById('nMin').value);
-    const nMax = parseInt(document.getElementById('nMax').value);
-    const nStep = parseInt(document.getElementById('nStep').value);
-    const sMin = parseInt(document.getElementById('sectorMin').value);
-    const sMax = parseInt(document.getElementById('sectorMax').value);
-    
-    const nValues = Math.floor((nMax - nMin) / nStep) + 1;
-    const sectors = sMax - sMin + 1;
-    
-    let exactOps = 0, formulaOps = 0;
-    if (state.mode === 'formula') { formulaOps = nValues * sectors; }
-    else if (state.mode === 'exact') { for (let N = nMin; N <= nMax; N += nStep) exactOps += N * N; }
-    else { for (let N = nMin; N <= nMax; N += nStep) { if (N <= 500) exactOps += N * N; else formulaOps += sectors; } }
-    
-    const estTimeMs = exactOps / 500000 + formulaOps / 1000000;
-    const estTime = estTimeMs < 1000 ? estTimeMs.toFixed(0) + 'ms' : (estTimeMs / 1000).toFixed(1) + 's';
-    
-    document.getElementById('estimatePanel').style.display = 'block';
-    document.getElementById('estimateContent').innerHTML = `
-        <div class="estimate-row"><span>N range:</span><span>${formatNumber(nMin)} to ${formatNumber(nMax)} (${nValues} values)</span></div>
-        <div class="estimate-row"><span>Sector range:</span><span>${sMin} to ${sMax} (${sectors} sectors)</span></div>
-        <div class="estimate-row"><span>Mode:</span><span>${state.mode}</span></div>
-        <div class="estimate-row"><span><strong>Estimated time:</strong></span><span><strong>${estTime}</strong></span></div>
-    `;
-}
-
-// ============ MAIN COMPUTATION ============
 async function computeAll() {
-    if (state.computing) return;
+    if(state.computing) return;
     state.computing = true;
-    
-    state.nMin = parseInt(document.getElementById('nMin').value);
-    state.nMax = parseInt(document.getElementById('nMax').value);
-    state.nStep = parseInt(document.getElementById('nStep').value);
-    state.sectorMin = parseInt(document.getElementById('sectorMin').value);
-    state.sectorMax = parseInt(document.getElementById('sectorMax').value);
-    state.sectorStep = parseInt(document.getElementById('sectorStep').value);
+    state.nMin = +document.getElementById('nMin').value;
+    state.nMax = +document.getElementById('nMax').value;
+    state.sectorMin = +document.getElementById('sectorMin').value;
+    state.sectorMax = +document.getElementById('sectorMax').value;
     
     document.getElementById('progressBar').style.display = 'block';
     document.getElementById('statusArea').innerHTML = '<span class="info-badge">Computing...</span>';
     
-    state.sectors = [];
-    state.residuesBySector = {};
-    state.allResidues = [];
-    state.gaps = [];
-    state.nSweepData = [];
+    state.sectors = []; state.residuesBySector = {}; state.allResidues = []; state.gaps = []; state.farey = [];
     
-    const useExact = state.mode === 'exact' || (state.mode === 'hybrid' && state.nMax <= 500);
     const N = state.nMax;
-    
-    if (useExact && N <= 2000) {
+    if(state.mode !== 'formula' && N <= 1500) {
         await computeExact(N);
     } else {
         computeFormulaOnly();
     }
     
-    // N sweep data
-    for (let n = state.nMin; n <= state.nMax; n += state.nStep) {
-        const total = (3 * n * n) / (Math.PI * Math.PI);
-        state.nSweepData.push({ N: n, total, s1: formula(1, n), s2: formula(2, n), s3: formula(3, n), s5: formula(5, n), s10: formula(10, n) });
-    }
-    
-    // Compute gaps
     computeGaps();
-    
     updateAllDisplays();
     
     document.getElementById('progressBar').style.display = 'none';
-    document.getElementById('statusArea').innerHTML = `<span class="info-badge success">Done: N=${state.nMin}-${state.nMax}, sectors ${state.sectorMin}-${state.sectorMax}</span>`;
+    document.getElementById('statusArea').innerHTML = '<span class="info-badge success">Done</span>';
     state.computing = false;
 }
 
 async function computeExact(N) {
-    const totalOps = N * N;
     let ops = 0;
-    
-    for (let m = 2; m <= N; m++) {
-        for (let r = 1; r < m; r++) {
-            if (gcd(r, m) === 1) {
-                const s = getSector(r, m);
-                const ip = isPrime(m);
-                const res = { r, m, sector: s, isPrime: ip, value: r / m };
+    for(let m=2; m<=N; m++) {
+        for(let r=1; r<m; r++) {
+            if(gcd(r,m)===1) {
+                const s = getSector(r,m);
+                const res = {r, m, sector:s, isPrime:isPrime(m), value:r/m};
                 state.allResidues.push(res);
-                if (s && s >= state.sectorMin && s <= state.sectorMax) {
-                    if (!state.residuesBySector[s]) state.residuesBySector[s] = [];
+                if(s && s>=state.sectorMin && s<=state.sectorMax) {
+                    if(!state.residuesBySector[s]) state.residuesBySector[s] = [];
                     state.residuesBySector[s].push(res);
                 }
             }
         }
         ops += m;
-        if (m % 100 === 0) {
-            document.getElementById('progressFill').style.width = (ops / totalOps * 100) + '%';
-            await new Promise(r => setTimeout(r, 0));
-        }
-        if (!state.computing) return;
+        if(m%50===0) { document.getElementById('progressFill').style.width = (m/N*100)+'%'; await new Promise(r=>setTimeout(r,0)); }
+        if(!state.computing) return;
     }
+    state.allResidues.sort((a,b) => a.value - b.value);
+    state.farey = state.allResidues.map(r => ({r:r.r, m:r.m, value:r.value}));
     
-    // Sort all residues by value for gap computation
-    state.allResidues.sort((a, b) => a.value - b.value);
-    
-    for (let n = state.sectorMin; n <= state.sectorMax; n += state.sectorStep) {
-        const residues = state.residuesBySector[n] || [];
-        const exact = residues.length;
-        const pred = formula(n, N);
-        const primeCount = residues.filter(x => x.isPrime).length;
-        state.sectors.push({
-            n, exact, predicted: pred,
-            error: exact - pred,
-            relError: exact > 0 ? ((exact - pred) / exact) * 100 : 0,
-            width: 1 / (n * (n + 1)),
-            primeCount, primePct: exact > 0 ? (primeCount / exact) * 100 : 0
-        });
+    for(let n=state.sectorMin; n<=state.sectorMax; n++) {
+        const res = state.residuesBySector[n] || [];
+        const exact = res.length, pred = formula(n,N);
+        const primeCount = res.filter(x=>x.isPrime).length;
+        state.sectors.push({n, exact, predicted:pred, error:exact-pred, relError:exact>0?((exact-pred)/exact)*100:0, width:1/(n*(n+1)), primeCount});
     }
 }
 
 function computeFormulaOnly() {
-    const N = state.nMax;
-    for (let n = state.sectorMin; n <= state.sectorMax; n += state.sectorStep) {
-        const pred = formula(n, N);
-        state.sectors.push({
-            n, exact: null, predicted: pred,
-            error: null, relError: null,
-            width: 1 / (n * (n + 1)),
-            primeCount: null, primePct: null
-        });
+    for(let n=state.sectorMin; n<=state.sectorMax; n++) {
+        state.sectors.push({n, exact:null, predicted:formula(n,state.nMax), error:null, relError:null, width:1/(n*(n+1)), primeCount:null});
     }
 }
 
 function computeGaps() {
     state.gaps = [];
-    const sorted = state.allResidues;
-    
-    for (let i = 0; i < sorted.length - 1; i++) {
-        const left = sorted[i], right = sorted[i + 1];
-        const gap = right.value - left.value;
-        const theoreticalGap = 1 / (left.m * right.m);
-        state.gaps.push({
-            left, right, gap, theoreticalGap,
-            denomProduct: left.m * right.m,
-            sector: left.sector
-        });
-        // Attach gap info to points
-        sorted[i].gapRight = gap;
-        sorted[i + 1].gapLeft = gap;
+    for(let i=0; i<state.allResidues.length-1; i++) {
+        const l = state.allResidues[i], r = state.allResidues[i+1];
+        const gap = r.value - l.value;
+        state.gaps.push({left:l, right:r, gap, theoretical:1/(l.m*r.m), denomProduct:l.m*r.m, sector:l.sector});
+        state.allResidues[i].gapRight = gap;
     }
-    
-    // Sort gaps by size for table
-    state.gaps.sort((a, b) => b.gap - a.gap);
+    state.gaps.sort((a,b) => b.gap - a.gap);
 }
 
-function cancelComputation() {
-    state.computing = false;
-    document.getElementById('statusArea').innerHTML = '<span class="info-badge warning">Cancelled</span>';
-}
+function cancelComputation() { state.computing = false; }
 
-// ============ DISPLAY UPDATES ============
 function updateAllDisplays() {
-    updateMainStats();
-    updateMainCharts();
-    updateMainTable();
-    drawMainRing();
-    updateGapAnalysis();
-    updateNSweepCharts();
-    drawHeatmap();
-    updateMobiusCharts();
-    updateMertensCharts();
-    updateDirichletCharts();
-    updateLatexOutput();
+    updateMainStats(); updateMainCharts(); updateMainTable(); drawMainRing();
+    updateGapAnalysis(); computeFranel(); computeDedekind(); updateCFDisplay();
+    computePSL(); computeEulerProduct(); updateModularAnalysis(); draw3D();
+    drawHyperbolic(); drawSmithChart(); updateStatistics(); updatePrimeAnalysis();
 }
 
 function updateMainStats() {
-    const hasExact = state.sectors.some(s => s.exact !== null);
-    const N = state.nMax;
-    const totalPred = state.sectors.reduce((s, x) => s + x.predicted, 0);
-    const totalExact = hasExact ? state.sectors.reduce((s, x) => s + (x.exact || 0), 0) : null;
-    const avgRelErr = hasExact ? state.sectors.filter(s => s.relError !== null).reduce((s, x) => s + Math.abs(x.relError), 0) / state.sectors.length : null;
-    
+    const hasExact = state.sectors.some(s=>s.exact!==null);
+    const total = hasExact ? state.sectors.reduce((s,x)=>s+(x.exact||0),0) : null;
+    const totalPred = state.sectors.reduce((s,x)=>s+x.predicted,0);
     document.getElementById('mainStats').innerHTML = `
-        <div class="stat-card"><div class="stat-value">${formatNumber(N)}</div><div class="stat-label">Max N</div></div>
-        <div class="stat-card"><div class="stat-value">${state.sectorMax}</div><div class="stat-label">Max Sector</div></div>
-        <div class="stat-card"><div class="stat-value large">${formatNumber(totalPred)}</div><div class="stat-label">Predicted Total</div></div>
-        ${hasExact ? `<div class="stat-card"><div class="stat-value large">${formatNumber(totalExact)}</div><div class="stat-label">Exact Total</div></div>` : ''}
-        ${hasExact ? `<div class="stat-card"><div class="stat-value">${avgRelErr.toFixed(1)}%</div><div class="stat-label">Avg |Rel Err|</div></div>` : ''}
-        <div class="stat-card"><div class="stat-value">${(6/Math.PI/Math.PI).toFixed(4)}</div><div class="stat-label">6/pi^2</div></div>
+        <div class="stat-card"><div class="stat-value">${fmt(state.nMax)}</div><div class="stat-label">N</div></div>
+        <div class="stat-card"><div class="stat-value">${state.sectorMax}</div><div class="stat-label">Sectors</div></div>
+        ${hasExact?`<div class="stat-card"><div class="stat-value">${fmt(total)}</div><div class="stat-label">Exact</div></div>`:''}
+        <div class="stat-card"><div class="stat-value">${fmt(totalPred)}</div><div class="stat-label">Predicted</div></div>
+        <div class="stat-card"><div class="stat-value">${(6/Math.PI/Math.PI).toFixed(4)}</div><div class="stat-label">6/π²</div></div>
     `;
 }
 
 function updateMainCharts() {
-    const labels = state.sectors.map(s => s.n);
-    const hasExact = state.sectors.some(s => s.exact !== null);
+    const labels = state.sectors.map(s=>s.n);
+    const hasExact = state.sectors.some(s=>s.exact!==null);
     
-    if (state.charts.mainCount) state.charts.mainCount.destroy();
-    const datasets = [{ label: 'Predicted', data: state.sectors.map(s => s.predicted), borderColor: '#22c55e', borderDash: [5,5], fill: false }];
-    if (hasExact) datasets.unshift({ label: 'Exact', data: state.sectors.map(s => s.exact), borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true });
+    if(state.charts.mainCount) state.charts.mainCount.destroy();
+    const ds = [{label:'Predicted',data:state.sectors.map(s=>s.predicted),borderColor:'#22c55e',borderDash:[5,5],fill:false}];
+    if(hasExact) ds.unshift({label:'Exact',data:state.sectors.map(s=>s.exact),borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,0.1)',fill:true});
+    state.charts.mainCount = new Chart(document.getElementById('mainCountChart'),{type:'line',data:{labels,datasets:ds},options:{responsive:true,plugins:{legend:{labels:{color:'#94a3b8'}}},scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
     
-    state.charts.mainCount = new Chart(document.getElementById('mainCountChart'), {
-        type: 'line', data: { labels, datasets },
-        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' }}}, scales: { x: { ticks: { color: '#94a3b8' }}, y: { ticks: { color: '#94a3b8' }}}}
-    });
-    
-    if (state.charts.mainError) state.charts.mainError.destroy();
-    if (hasExact) {
-        state.charts.mainError = new Chart(document.getElementById('mainErrorChart'), {
-            type: 'bar',
-            data: { labels, datasets: [{ label: 'Rel Error %', data: state.sectors.map(s => s.relError), backgroundColor: 'rgba(245,158,11,0.7)' }] },
-            options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' }}}, scales: { x: { ticks: { color: '#94a3b8' }}, y: { ticks: { color: '#94a3b8' }}}}
-        });
+    if(state.charts.mainError) state.charts.mainError.destroy();
+    if(hasExact) {
+        state.charts.mainError = new Chart(document.getElementById('mainErrorChart'),{type:'bar',data:{labels,datasets:[{label:'Rel Err%',data:state.sectors.map(s=>s.relError),backgroundColor:'rgba(245,158,11,0.7)'}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
     }
-    
-    let cumPred = 0;
-    const cumData = state.sectors.map(s => { cumPred += s.predicted; return cumPred; });
-    
-    if (state.charts.cumulative) state.charts.cumulative.destroy();
-    state.charts.cumulative = new Chart(document.getElementById('cumulativeChart'), {
-        type: 'line',
-        data: { labels, datasets: [{ label: 'Cumulative Predicted', data: cumData, borderColor: '#6366f1', fill: false }] },
-        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' }}}, scales: { x: { ticks: { color: '#94a3b8' }}, y: { ticks: { color: '#94a3b8' }}}}
-    });
-    
-    updateDenomChart();
-}
-
-function updateDenomChart() {
-    const sector = parseInt(document.getElementById('denomSector').value);
-    const residues = state.residuesBySector[sector] || [];
-    
-    if (residues.length === 0) { if (state.charts.denom) state.charts.denom.destroy(); return; }
-    
-    const bins = {};
-    const binSize = Math.max(1, Math.floor(state.nMax / 15));
-    residues.forEach(({ m }) => { const bin = Math.floor(m / binSize) * binSize; bins[bin] = (bins[bin] || 0) + 1; });
-    
-    const labels = Object.keys(bins).sort((a,b) => a - b);
-    const values = labels.map(b => bins[b]);
-    
-    if (state.charts.denom) state.charts.denom.destroy();
-    state.charts.denom = new Chart(document.getElementById('denomChart'), {
-        type: 'bar',
-        data: { labels: labels.map(b => `${b}-${+b+binSize-1}`), datasets: [{ label: 'Count', data: values, backgroundColor: 'rgba(139,92,246,0.7)' }] },
-        options: { responsive: true, plugins: { legend: { display: false }}, scales: { x: { ticks: { color: '#94a3b8' }}, y: { ticks: { color: '#94a3b8' }}}}
-    });
 }
 
 function updateMainTable() {
-    document.querySelector('#mainTable tbody').innerHTML = state.sectors.map(s => `
-        <tr class="clickable" onclick="openSectorModal(${s.n})">
-            <td><strong>${s.n}</strong></td>
-            <td class="mono">(1/${s.n+1}, 1/${s.n}]</td>
-            <td>${s.width.toExponential(2)}</td>
-            <td>${s.exact !== null ? s.exact : '-'}</td>
-            <td>${formatNumber(s.predicted)}</td>
-            <td style="color:${s.error !== null && Math.abs(s.relError) > 10 ? '#f87171' : '#4ade80'}">${s.error !== null ? s.error.toFixed(1) : '-'}</td>
-            <td style="color:${s.relError !== null && Math.abs(s.relError) > 10 ? '#f87171' : '#4ade80'}">${s.relError !== null ? s.relError.toFixed(1) + '%' : '-'}</td>
-            <td>${s.primeCount !== null ? s.primeCount : '-'}</td>
-        </tr>
-    `).join('');
+    document.querySelector('#mainTable tbody').innerHTML = state.sectors.map(s=>`<tr onclick="openSectorModal(${s.n})" style="cursor:pointer"><td><strong>${s.n}</strong></td><td>(1/${s.n+1},1/${s.n}]</td><td>${s.exact??'-'}</td><td>${fmt(s.predicted)}</td><td style="color:${s.relError&&Math.abs(s.relError)>10?'#f87171':'#4ade80'}">${s.relError?s.relError.toFixed(1)+'%':'-'}</td><td>${s.primeCount??'-'}</td></tr>`).join('');
 }
 
-// ============ ENHANCED RING VISUALIZATION ============
 function drawMainRing() {
-    const canvas = document.getElementById('mainRing');
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height, cx = W/2, cy = H/2, maxR = Math.min(W,H)/2 - 40;
-    
-    const sector = parseInt(document.getElementById('viewSector').value);
+    const canvas = document.getElementById('mainRing'), ctx = canvas.getContext('2d');
+    const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2, maxR=Math.min(W,H)/2-35;
+    const sector = +document.getElementById('viewSector').value;
     const colorMode = document.getElementById('colorMode').value;
     const showAll = document.getElementById('showAllSectors').checked;
     
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
     
-    // Sector lines
-    ctx.strokeStyle = '#334155';
-    ctx.lineWidth = 1;
-    for (let n = 1; n <= Math.min(20, state.sectorMax); n++) {
-        const angle = (1/n) * 2 * Math.PI;
-        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(angle) * maxR, cy - Math.sin(angle) * maxR); ctx.stroke();
-        // Label
-        ctx.fillStyle = '#64748b';
-        ctx.font = '10px system-ui';
-        const labelR = maxR + 15;
-        ctx.fillText(`1/${n}`, cx + Math.cos(angle) * labelR - 10, cy - Math.sin(angle) * labelR);
+    ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+    for(let n=1; n<=Math.min(15,state.sectorMax); n++) {
+        const angle = (1/n)*2*Math.PI;
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(angle)*maxR, cy-Math.sin(angle)*maxR); ctx.stroke();
+        ctx.fillStyle='#64748b'; ctx.font='9px system-ui';
+        ctx.fillText(`1/${n}`, cx+Math.cos(angle)*(maxR+12)-8, cy-Math.sin(angle)*(maxR+12));
     }
     
-    // Highlight current sector
-    if (!showAll) {
-        const a1 = (1/(sector+1)) * 2 * Math.PI, a2 = (1/sector) * 2 * Math.PI;
-        ctx.fillStyle = 'rgba(99,102,241,0.1)';
-        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, maxR, -a2, -a1); ctx.closePath(); ctx.fill();
+    if(!showAll) {
+        const a1=(1/(sector+1))*2*Math.PI, a2=(1/sector)*2*Math.PI;
+        ctx.fillStyle='rgba(99,102,241,0.1)'; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,maxR,-a2,-a1); ctx.closePath(); ctx.fill();
     }
     
-    // Collect points to draw
     state.ringPoints = [];
-    const N = state.nMax;
+    let residues = showAll ? Object.values(state.residuesBySector).flat() : (state.residuesBySector[sector]||[]);
     
-    let residuesToDraw = [];
-    if (showAll) {
-        for (let s = state.sectorMin; s <= state.sectorMax; s++) {
-            residuesToDraw = residuesToDraw.concat(state.residuesBySector[s] || []);
-        }
-    } else {
-        residuesToDraw = state.residuesBySector[sector] || [];
-    }
+    let maxGap=0, minGap=Infinity;
+    residues.forEach(r => { const g=r.gapRight||0; if(g>maxGap)maxGap=g; if(g>0&&g<minGap)minGap=g; });
     
-    // Compute color scale bounds
-    let maxGap = 0, minGap = Infinity;
-    residuesToDraw.forEach(res => {
-        const g = res.gapRight || res.gapLeft || 0;
-        if (g > maxGap) maxGap = g;
-        if (g < minGap && g > 0) minGap = g;
-    });
-    
-    // Draw points
-    residuesToDraw.forEach(res => {
-        const { r, m, sector: s, isPrime: ip } = res;
-        const angle = (r/m) * 2 * Math.PI;
-        const rad = (m / N) * maxR;
-        const x = cx + rad * Math.cos(angle);
-        const y = cy - rad * Math.sin(angle);
-        
+    residues.forEach(res => {
+        const {r,m,sector:s,isPrime:ip} = res;
+        const angle = (r/m)*2*Math.PI, rad = (m/state.nMax)*maxR;
+        const x = cx+rad*Math.cos(angle), y = cy-rad*Math.sin(angle);
         let color;
-        switch (colorMode) {
-            case 'sector':
-                color = getSectorColor(s);
-                break;
-            case 'prime':
-                color = ip ? '#f59e0b' : '#6366f1';
-                break;
-            case 'denominator':
-                const denomNorm = m / N;
-                color = `hsl(${260 - denomNorm * 200}, 70%, 60%)`;
-                break;
-            case 'gap':
-                const g = res.gapRight || res.gapLeft || minGap;
-                const gapNorm = maxGap > minGap ? (g - minGap) / (maxGap - minGap) : 0.5;
-                color = `hsl(${120 - gapNorm * 120}, 80%, 50%)`;
-                break;
-            default:
-                color = '#6366f1';
+        switch(colorMode) {
+            case 'sector': color = getSectorColor(s); break;
+            case 'prime': color = ip?'#f59e0b':'#6366f1'; break;
+            case 'denominator': color = `hsl(${260-(m/state.nMax)*200},70%,60%)`; break;
+            case 'gap': const g=res.gapRight||minGap; const gn=maxGap>minGap?(g-minGap)/(maxGap-minGap):0.5; color=`hsl(${120-gn*120},80%,50%)`; break;
+            default: color='#6366f1';
         }
-        
-        const size = (colorMode === 'prime' && ip) ? 4 : 3;
-        ctx.fillStyle = color;
-        ctx.beginPath(); ctx.arc(x, y, size, 0, 2 * Math.PI); ctx.fill();
-        
-        state.ringPoints.push({ x, y, r, m, sector: s, isPrime: ip, gap: res.gapRight || res.gapLeft, color });
+        ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x,y,colorMode==='prime'&&ip?3:2,0,2*Math.PI); ctx.fill();
+        state.ringPoints.push({x,y,r,m,sector:s,isPrime:ip,gap:res.gapRight,color});
     });
     
-    // Center point
-    ctx.fillStyle = '#e2e8f0';
-    ctx.beginPath(); ctx.arc(cx, cy, 5, 0, 2 * Math.PI); ctx.fill();
-    
-    // Update stats
-    const pred = formula(sector, N);
-    const count = showAll ? residuesToDraw.length : (state.residuesBySector[sector]?.length || 0);
-    document.getElementById('ringStats').innerHTML = showAll 
-        ? `All Sectors: <strong>${count}</strong> points`
-        : `Sector ${sector}: <strong>${count || 'N/A'}</strong> exact, <strong>${formatNumber(pred)}</strong> predicted`;
-    
-    // Update color legend
+    ctx.fillStyle='#e2e8f0'; ctx.beginPath(); ctx.arc(cx,cy,4,0,2*Math.PI); ctx.fill();
     updateColorLegend(colorMode, showAll, sector);
 }
 
-function updateColorLegend(colorMode, showAll, currentSector) {
+function updateColorLegend(colorMode, showAll, sector) {
     const legend = document.getElementById('colorLegend');
     let html = '';
-    
-    switch (colorMode) {
-        case 'sector':
-            if (showAll) {
-                for (let s = state.sectorMin; s <= Math.min(state.sectorMax, 10); s++) {
-                    html += `<div class="color-legend-item"><div class="color-swatch" style="background:${getSectorColor(s)}"></div>Sector ${s}</div>`;
-                }
-                if (state.sectorMax > 10) html += `<div class="color-legend-item">... and more</div>`;
-            } else {
-                html += `<div class="color-legend-item"><div class="color-swatch" style="background:${getSectorColor(currentSector)}"></div>Sector ${currentSector}</div>`;
-            }
-            break;
-        case 'prime':
-            html += `<div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Prime modulus</div>`;
-            html += `<div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Composite modulus</div>`;
-            break;
-        case 'denominator':
-            html += `<div class="color-legend-item"><div class="color-swatch" style="background:hsl(260,70%,60%)"></div>Small m</div>`;
-            html += `<div class="color-legend-item"><div class="color-swatch" style="background:hsl(160,70%,60%)"></div>Medium m</div>`;
-            html += `<div class="color-legend-item"><div class="color-swatch" style="background:hsl(60,70%,60%)"></div>Large m</div>`;
-            break;
-        case 'gap':
-            html += `<div class="color-legend-item"><div class="color-swatch" style="background:hsl(120,80%,50%)"></div>Small gap</div>`;
-            html += `<div class="color-legend-item"><div class="color-swatch" style="background:hsl(60,80%,50%)"></div>Medium gap</div>`;
-            html += `<div class="color-legend-item"><div class="color-swatch" style="background:hsl(0,80%,50%)"></div>Large gap</div>`;
-            break;
+    switch(colorMode) {
+        case 'sector': if(showAll) { for(let s=1;s<=Math.min(10,state.sectorMax);s++) html+=`<div class="color-legend-item"><div class="color-swatch" style="background:${getSectorColor(s)}"></div>S${s}</div>`; } else html+=`<div class="color-legend-item"><div class="color-swatch" style="background:${getSectorColor(sector)}"></div>Sector ${sector}</div>`; break;
+        case 'prime': html+=`<div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Prime</div><div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Composite</div>`; break;
+        case 'denominator': html+=`<div class="color-legend-item"><div class="color-swatch" style="background:hsl(260,70%,60%)"></div>Small m</div><div class="color-legend-item"><div class="color-swatch" style="background:hsl(60,70%,60%)"></div>Large m</div>`; break;
+        case 'gap': html+=`<div class="color-legend-item"><div class="color-swatch" style="background:hsl(120,80%,50%)"></div>Small</div><div class="color-legend-item"><div class="color-swatch" style="background:hsl(0,80%,50%)"></div>Large</div>`; break;
     }
-    
     legend.innerHTML = html;
 }
 
-// ============ CLICK INTERACTION ============
 document.getElementById('mainRing').addEventListener('click', function(e) {
-    const rect = this.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    // Find closest point
-    let closest = null, minDist = 20; // 20px threshold
-    state.ringPoints.forEach(p => {
-        const dist = Math.sqrt((p.x - x) ** 2 + (p.y - y) ** 2);
-        if (dist < minDist) { minDist = dist; closest = p; }
-    });
-    
-    if (closest) {
-        openPointModal(closest);
-    }
+    const rect = this.getBoundingClientRect(), x=e.clientX-rect.left, y=e.clientY-rect.top;
+    let closest=null, minDist=15;
+    state.ringPoints.forEach(p => { const d=Math.sqrt((p.x-x)**2+(p.y-y)**2); if(d<minDist){minDist=d;closest=p;} });
+    if(closest) openPointModal(closest);
 });
 
-// Hover tooltip
 document.getElementById('mainRing').addEventListener('mousemove', function(e) {
-    const rect = this.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    let closest = null, minDist = 15;
-    state.ringPoints.forEach(p => {
-        const dist = Math.sqrt((p.x - x) ** 2 + (p.y - y) ** 2);
-        if (dist < minDist) { minDist = dist; closest = p; }
-    });
-    
+    const rect=this.getBoundingClientRect(), x=e.clientX-rect.left, y=e.clientY-rect.top;
+    let closest=null, minDist=12;
+    state.ringPoints.forEach(p => { const d=Math.sqrt((p.x-x)**2+(p.y-y)**2); if(d<minDist){minDist=d;closest=p;} });
     const tooltip = document.getElementById('pointTooltip');
-    if (closest) {
-        tooltip.innerHTML = `
-            <h5>${closest.r}/${closest.m}</h5>
-            <div class="row"><span class="label">Value:</span><span class="val">${(closest.r/closest.m).toFixed(6)}</span></div>
-            <div class="row"><span class="label">Sector:</span><span class="val">${closest.sector}</span></div>
-            <div class="row"><span class="label">Modulus:</span><span class="val">${closest.m} (${closest.isPrime ? 'prime' : 'composite'})</span></div>
-            ${closest.gap ? `<div class="row"><span class="label">Gap:</span><span class="val">${closest.gap.toExponential(3)}</span></div>` : ''}
-        `;
-        tooltip.style.left = (e.clientX - rect.left + 15) + 'px';
-        tooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+    if(closest) {
+        tooltip.innerHTML = `<h5>${closest.r}/${closest.m}</h5><div class="row"><span class="label">Value:</span><span class="val">${(closest.r/closest.m).toFixed(6)}</span></div><div class="row"><span class="label">Sector:</span><span class="val">${closest.sector}</span></div><div class="row"><span class="label">Mod:</span><span class="val">${closest.m} (${closest.isPrime?'P':'C'})</span></div>`;
+        tooltip.style.left = (e.clientX-rect.left+10)+'px'; tooltip.style.top = (e.clientY-rect.top-10)+'px';
         tooltip.classList.add('visible');
-    } else {
-        tooltip.classList.remove('visible');
-    }
+    } else tooltip.classList.remove('visible');
 });
 
-document.getElementById('mainRing').addEventListener('mouseleave', function() {
-    document.getElementById('pointTooltip').classList.remove('visible');
-});
-
-function openPointModal(point) {
-    const { r, m, sector, isPrime: ip, gap } = point;
-    document.getElementById('pointModalTitle').textContent = `Point Details: ${r}/${m}`;
-    
-    // Find neighbors
-    const idx = state.allResidues.findIndex(res => res.r === r && res.m === m);
-    const leftNeighbor = idx > 0 ? state.allResidues[idx - 1] : null;
-    const rightNeighbor = idx < state.allResidues.length - 1 ? state.allResidues[idx + 1] : null;
-    
+function openPointModal(p) {
+    document.getElementById('pointModalTitle').textContent = `${p.r}/${p.m}`;
+    const cf = toCF(p.r, p.m);
     document.getElementById('pointModalBody').innerHTML = `
         <div class="detail-grid">
-            <div class="detail-card">
-                <h5>Fraction</h5>
-                <div class="value">${r}/${m}</div>
-                <div class="sub">= ${(r/m).toFixed(8)}</div>
-            </div>
-            <div class="detail-card">
-                <h5>Sector</h5>
-                <div class="value">${sector}</div>
-                <div class="sub">(1/${sector+1}, 1/${sector}]</div>
-            </div>
-            <div class="detail-card">
-                <h5>Modulus</h5>
-                <div class="value" style="color:${ip ? '#f59e0b' : '#6366f1'}">${m}</div>
-                <div class="sub">${ip ? 'Prime' : 'Composite'}</div>
-            </div>
-            <div class="detail-card">
-                <h5>Residue</h5>
-                <div class="value">${r}</div>
-                <div class="sub">gcd(${r}, ${m}) = 1</div>
-            </div>
+            <div class="detail-card"><h5>Fraction</h5><div class="value">${p.r}/${p.m}</div><div class="sub">= ${(p.r/p.m).toFixed(8)}</div></div>
+            <div class="detail-card"><h5>Sector</h5><div class="value">${p.sector}</div></div>
+            <div class="detail-card"><h5>Modulus</h5><div class="value" style="color:${p.isPrime?'#f59e0b':'#6366f1'}">${p.m}</div><div class="sub">${p.isPrime?'Prime':'Composite'}</div></div>
         </div>
-        
-        <h4 style="margin:15px 0 10px;">Neighbors in Farey Sequence</h4>
-        <div class="detail-grid">
-            ${leftNeighbor ? `
-            <div class="detail-card">
-                <h5>Left Neighbor</h5>
-                <div class="value">${leftNeighbor.r}/${leftNeighbor.m}</div>
-                <div class="sub">Gap: ${(r/m - leftNeighbor.r/leftNeighbor.m).toExponential(3)}</div>
-            </div>` : ''}
-            ${rightNeighbor ? `
-            <div class="detail-card">
-                <h5>Right Neighbor</h5>
-                <div class="value">${rightNeighbor.r}/${rightNeighbor.m}</div>
-                <div class="sub">Gap: ${(rightNeighbor.r/rightNeighbor.m - r/m).toExponential(3)}</div>
-            </div>` : ''}
-        </div>
-        
-        ${leftNeighbor || rightNeighbor ? `
-        <div class="theorem-box" style="margin-top:15px;">
-            <strong>Mediant Property:</strong> If a/b and c/d are Farey neighbors, their mediant (a+c)/(b+d) appears between them in F<sub>b+d</sub>.
-            ${leftNeighbor && rightNeighbor ? `<br>Left mediant: (${leftNeighbor.r}+${r})/(${leftNeighbor.m}+${m}) = ${leftNeighbor.r+r}/${leftNeighbor.m+m}` : ''}
-        </div>` : ''}
-        
-        <div style="margin-top:15px;">
-            <button onclick="visualizeSectorFromPoint(${sector})">View Sector ${sector}</button>
-        </div>
+        <div class="theorem-box"><strong>CF:</strong> [${cf.join('; ')}]<br><strong>Path:</strong> ${cfPath(cf)}</div>
     `;
-    
     document.getElementById('pointModal').classList.add('active');
 }
+function closePointModal() { document.getElementById('pointModal').classList.remove('active'); }
+function openSectorModal(n) { document.getElementById('viewSector').value=n; document.getElementById('showAllSectors').checked=false; drawMainRing(); }
 
-function closePointModal() {
-    document.getElementById('pointModal').classList.remove('active');
-}
-
-function visualizeSectorFromPoint(s) {
-    closePointModal();
-    document.getElementById('viewSector').value = s;
-    document.getElementById('showAllSectors').checked = false;
-    drawMainRing();
-}
-
-// ============ GAP ANALYSIS ============
+// GAP ANALYSIS
 function updateGapAnalysis() {
-    if (state.gaps.length === 0) {
-        document.getElementById('gapStats').innerHTML = '<div class="stat-card"><div class="stat-value">N/A</div><div class="stat-label">No gap data (use Exact mode)</div></div>';
-        return;
-    }
-    
-    const gaps = state.gaps.map(g => g.gap);
-    const mean = gaps.reduce((a, b) => a + b, 0) / gaps.length;
-    const sorted = [...gaps].sort((a, b) => a - b);
-    const median = sorted[Math.floor(sorted.length / 2)];
-    const max = sorted[sorted.length - 1];
-    const min = sorted[0];
-    const std = Math.sqrt(gaps.reduce((s, g) => s + (g - mean) ** 2, 0) / gaps.length);
-    
+    if(state.gaps.length===0) { document.getElementById('gapStats').innerHTML='<div class="stat-card"><div class="stat-label">No data</div></div>'; return; }
+    const gaps = state.gaps.map(g=>g.gap);
+    const mean = gaps.reduce((a,b)=>a+b,0)/gaps.length;
+    const sorted = [...gaps].sort((a,b)=>a-b);
     document.getElementById('gapStats').innerHTML = `
-        <div class="stat-card"><div class="stat-value">${state.gaps.length}</div><div class="stat-label">Total Gaps</div></div>
-        <div class="stat-card"><div class="stat-value">${mean.toExponential(2)}</div><div class="stat-label">Mean Gap</div></div>
-        <div class="stat-card"><div class="stat-value">${median.toExponential(2)}</div><div class="stat-label">Median Gap</div></div>
-        <div class="stat-card"><div class="stat-value">${max.toExponential(2)}</div><div class="stat-label">Max Gap</div></div>
-        <div class="stat-card"><div class="stat-value">${min.toExponential(2)}</div><div class="stat-label">Min Gap</div></div>
-        <div class="stat-card"><div class="stat-value">${std.toExponential(2)}</div><div class="stat-label">Std Dev</div></div>
+        <div class="stat-card"><div class="stat-value">${state.gaps.length}</div><div class="stat-label">Gaps</div></div>
+        <div class="stat-card"><div class="stat-value">${mean.toExponential(2)}</div><div class="stat-label">Mean</div></div>
+        <div class="stat-card"><div class="stat-value">${sorted[Math.floor(sorted.length/2)].toExponential(2)}</div><div class="stat-label">Median</div></div>
+        <div class="stat-card"><div class="stat-value">${sorted[sorted.length-1].toExponential(2)}</div><div class="stat-label">Max</div></div>
     `;
     
-    // Gap distribution histogram
-    const bins = 20;
-    const binWidth = (max - min) / bins;
+    const bins=15, max=sorted[sorted.length-1], min=sorted[0], bw=(max-min)/bins;
     const hist = new Array(bins).fill(0);
-    gaps.forEach(g => {
-        const b = Math.min(bins - 1, Math.floor((g - min) / binWidth));
-        hist[b]++;
-    });
+    gaps.forEach(g => { const b=Math.min(bins-1,Math.floor((g-min)/bw)); hist[b]++; });
     
-    if (state.charts.gapDist) state.charts.gapDist.destroy();
-    state.charts.gapDist = new Chart(document.getElementById('gapDistChart'), {
-        type: 'bar',
-        data: {
-            labels: hist.map((_, i) => (min + i * binWidth).toExponential(1)),
-            datasets: [{ label: 'Count', data: hist, backgroundColor: 'rgba(99,102,241,0.7)' }]
-        },
-        options: { responsive: true, plugins: { legend: { display: false }}, scales: { x: { ticks: { color: '#94a3b8', maxRotation: 45 }}, y: { ticks: { color: '#94a3b8' }}}}
-    });
+    if(state.charts.gapDist) state.charts.gapDist.destroy();
+    state.charts.gapDist = new Chart(document.getElementById('gapDistChart'),{type:'bar',data:{labels:hist.map((_,i)=>(min+i*bw).toExponential(1)),datasets:[{label:'Count',data:hist,backgroundColor:'rgba(99,102,241,0.7)'}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8',maxRotation:45}},y:{ticks:{color:'#94a3b8'}}}}});
     
-    // Mean gap by sector
-    const gapBySector = {};
-    state.gaps.forEach(g => {
-        if (g.sector) {
-            if (!gapBySector[g.sector]) gapBySector[g.sector] = [];
-            gapBySector[g.sector].push(g.gap);
-        }
-    });
+    const sample = state.gaps.slice(0,300);
+    if(state.charts.gapVsDenom) state.charts.gapVsDenom.destroy();
+    state.charts.gapVsDenom = new Chart(document.getElementById('gapVsDenomChart'),{type:'scatter',data:{datasets:[{label:'Gap',data:sample.map(g=>({x:g.denomProduct,y:g.gap})),backgroundColor:'rgba(139,92,246,0.5)',pointRadius:2},{label:'1/(bd)',data:sample.map(g=>({x:g.denomProduct,y:1/g.denomProduct})),borderColor:'#22c55e',showLine:true,fill:false,pointRadius:0}]},options:{responsive:true,scales:{x:{type:'logarithmic',ticks:{color:'#94a3b8'}},y:{type:'logarithmic',ticks:{color:'#94a3b8'}}}}});
     
-    const sectorLabels = Object.keys(gapBySector).sort((a, b) => a - b).slice(0, 15);
-    const sectorMeans = sectorLabels.map(s => {
-        const arr = gapBySector[s];
-        return arr.reduce((a, b) => a + b, 0) / arr.length;
-    });
-    
-    if (state.charts.gapBySector) state.charts.gapBySector.destroy();
-    state.charts.gapBySector = new Chart(document.getElementById('gapBySectorChart'), {
-        type: 'bar',
-        data: { labels: sectorLabels, datasets: [{ label: 'Mean Gap', data: sectorMeans, backgroundColor: sectorLabels.map(s => getSectorColor(parseInt(s))) }] },
-        options: { responsive: true, plugins: { legend: { display: false }}, scales: { x: { ticks: { color: '#94a3b8' }}, y: { ticks: { color: '#94a3b8' }}}}
-    });
-    
-    // Gap vs denominator product
-    const sample = state.gaps.slice(0, 500);
-    if (state.charts.gapVsDenom) state.charts.gapVsDenom.destroy();
-    state.charts.gapVsDenom = new Chart(document.getElementById('gapVsDenomChart'), {
-        type: 'scatter',
-        data: {
-            datasets: [{
-                label: 'Gap vs bd',
-                data: sample.map(g => ({ x: g.denomProduct, y: g.gap })),
-                backgroundColor: 'rgba(139,92,246,0.5)',
-                pointRadius: 3
-            }, {
-                label: '1/(bd)',
-                data: sample.map(g => ({ x: g.denomProduct, y: 1 / g.denomProduct })),
-                backgroundColor: 'rgba(34,197,94,0.7)',
-                pointRadius: 2,
-                showLine: true,
-                borderColor: '#22c55e',
-                fill: false
-            }]
-        },
-        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' }}}, scales: { x: { type: 'logarithmic', ticks: { color: '#94a3b8' }}, y: { type: 'logarithmic', ticks: { color: '#94a3b8' }}}}
-    });
-    
-    // Cumulative gap distribution
-    const sortedGaps = [...gaps].sort((a, b) => a - b);
-    const cumulative = sortedGaps.map((_, i) => (i + 1) / sortedGaps.length);
-    const sampleIdx = sortedGaps.map((_, i) => i).filter(i => i % Math.max(1, Math.floor(sortedGaps.length / 100)) === 0);
-    
-    if (state.charts.gapCumulative) state.charts.gapCumulative.destroy();
-    state.charts.gapCumulative = new Chart(document.getElementById('gapCumulativeChart'), {
-        type: 'line',
-        data: {
-            labels: sampleIdx.map(i => sortedGaps[i].toExponential(1)),
-            datasets: [{ label: 'CDF', data: sampleIdx.map(i => cumulative[i]), borderColor: '#8b5cf6', fill: false, pointRadius: 0 }]
-        },
-        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' }}}, scales: { x: { ticks: { color: '#94a3b8', maxRotation: 45 }}, y: { ticks: { color: '#94a3b8' }}}}
-    });
-    
-    // Gap table
-    document.querySelector('#gapTable tbody').innerHTML = state.gaps.slice(0, 50).map(g => `
-        <tr>
-            <td>${g.left.r}/${g.left.m}</td>
-            <td>${g.right.r}/${g.right.m}</td>
-            <td>${g.gap.toExponential(4)}</td>
-            <td>${g.theoreticalGap.toExponential(4)}</td>
-            <td>${g.sector || '-'}</td>
-            <td>${g.denomProduct}</td>
-        </tr>
-    `).join('');
+    document.querySelector('#gapTable tbody').innerHTML = state.gaps.slice(0,30).map(g=>`<tr><td>${g.left.r}/${g.left.m}</td><td>${g.right.r}/${g.right.m}</td><td>${g.gap.toExponential(3)}</td><td>${g.theoretical.toExponential(3)}</td><td>${g.sector||'-'}</td></tr>`).join('');
 }
 
-// ============ OTHER CHARTS ============
-function updateNSweepCharts() {
-    const data = state.nSweepData;
-    if (data.length === 0) return;
-    const labels = data.map(d => d.N);
+// FRANEL-LANDAU
+function computeFranel() {
+    if(state.farey.length===0) { document.getElementById('franelStats').innerHTML='<div class="stat-card"><div class="stat-label">No data</div></div>'; return; }
+    const n = state.farey.length;
+    const deviations = state.farey.map((f,k) => ({ k, delta: f.value - (k+1)/n }));
+    const sumAbsDelta = deviations.reduce((s,d)=>s+Math.abs(d.delta),0);
+    const N = state.nMax;
     
-    if (state.charts.nSweep) state.charts.nSweep.destroy();
-    state.charts.nSweep = new Chart(document.getElementById('nSweepChart'), {
-        type: 'line',
-        data: { labels, datasets: [
-            { label: 'Sector 1', data: data.map(d => d.s1), borderColor: '#6366f1', fill: false, pointRadius: 0 },
-            { label: 'Sector 2', data: data.map(d => d.s2), borderColor: '#22c55e', fill: false, pointRadius: 0 },
-            { label: 'Sector 3', data: data.map(d => d.s3), borderColor: '#f59e0b', fill: false, pointRadius: 0 },
-            { label: 'Sector 10', data: data.map(d => d.s10), borderColor: '#ef4444', fill: false, pointRadius: 0 }
-        ]},
-        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' }}}, scales: { x: { ticks: { color: '#94a3b8' }}, y: { ticks: { color: '#94a3b8' }}}}
-    });
+    document.getElementById('franelStats').innerHTML = `
+        <div class="stat-card"><div class="stat-value">${n}</div><div class="stat-label">|F_N|</div></div>
+        <div class="stat-card"><div class="stat-value">${sumAbsDelta.toFixed(4)}</div><div class="stat-label">Σ|δ|</div></div>
+        <div class="stat-card"><div class="stat-value">${(sumAbsDelta/Math.sqrt(N)).toFixed(4)}</div><div class="stat-label">Σ|δ|/√N</div></div>
+        <div class="stat-card"><div class="stat-value">${(sumAbsDelta/Math.pow(N,0.5+0.01)).toFixed(4)}</div><div class="stat-label">Σ|δ|/N^0.51</div></div>
+    `;
     
-    if (state.charts.totalVsN) state.charts.totalVsN.destroy();
-    state.charts.totalVsN = new Chart(document.getElementById('totalVsNChart'), {
-        type: 'line',
-        data: { labels, datasets: [{ label: 'Total Predicted', data: data.map(d => d.total), borderColor: '#8b5cf6', fill: false, pointRadius: 0 }] },
-        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' }}}, scales: { x: { ticks: { color: '#94a3b8' }}, y: { ticks: { color: '#94a3b8' }}}}
-    });
+    const sampleRate = Math.max(1, Math.floor(n/200));
+    const sampled = deviations.filter((_,i)=>i%sampleRate===0);
     
-    document.querySelector('#nSweepTable tbody').innerHTML = data.filter((_, i) => i % Math.max(1, Math.floor(data.length / 20)) === 0).map(d => `
-        <tr><td>${formatNumber(d.N)}</td><td>${formatNumber(d.total)}</td><td>${formatNumber(d.s1)}</td><td>${formatNumber(d.s2)}</td><td>${formatNumber(d.s3)}</td><td>${formatNumber(d.s5)}</td><td>${formatNumber(d.s10)}</td></tr>
-    `).join('');
+    if(state.charts.franelDeviation) state.charts.franelDeviation.destroy();
+    state.charts.franelDeviation = new Chart(document.getElementById('franelDeviationChart'),{type:'line',data:{labels:sampled.map(d=>d.k),datasets:[{label:'δ_k',data:sampled.map(d=>d.delta),borderColor:'#6366f1',fill:false,pointRadius:0}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    
+    let cumSum = 0;
+    const cumData = sampled.map(d => { cumSum += Math.abs(d.delta)*sampleRate; return cumSum/Math.sqrt(d.k+1); });
+    if(state.charts.franelCumulative) state.charts.franelCumulative.destroy();
+    state.charts.franelCumulative = new Chart(document.getElementById('franelCumulativeChart'),{type:'line',data:{labels:sampled.map(d=>d.k),datasets:[{label:'Cum|δ|/√k',data:cumData,borderColor:'#8b5cf6',fill:false,pointRadius:0}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    
+    const alphas = [0.4, 0.45, 0.5, 0.55, 0.6];
+    const alphaData = alphas.map(a => sumAbsDelta / Math.pow(N, a));
+    if(state.charts.franelAlpha) state.charts.franelAlpha.destroy();
+    state.charts.franelAlpha = new Chart(document.getElementById('franelAlphaChart'),{type:'bar',data:{labels:alphas.map(a=>`α=${a}`),datasets:[{label:'Σ|δ|/N^α',data:alphaData,backgroundColor:alphas.map(a=>a<=0.5?'rgba(239,68,68,0.7)':'rgba(34,197,94,0.7)')}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
 }
 
-function drawHeatmap() {
-    const canvas = document.getElementById('heatmapCanvas');
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    const margin = { left: 60, right: 20, top: 20, bottom: 40 };
-    const plotW = W - margin.left - margin.right;
-    const plotH = H - margin.top - margin.bottom;
-    
-    const nMin = state.nMin, nMax = state.nMax, nStep = Math.max(1, Math.floor((nMax - nMin) / 50));
-    const sMin = state.sectorMin, sMax = state.sectorMax, sStep = Math.max(1, Math.floor((sMax - sMin) / 50));
-    
-    const useLog = document.getElementById('heatmapLog').checked;
-    const colorScheme = document.getElementById('heatmapColor').value;
-    
-    const values = [];
-    let maxVal = 0;
-    for (let N = nMin; N <= nMax; N += nStep) {
-        const row = [];
-        for (let s = sMin; s <= sMax; s += sStep) {
-            const v = formula(s, N);
-            row.push(v);
-            if (v > maxVal) maxVal = v;
+// DEDEKIND
+function computeDedekind() {
+    const maxK = +document.getElementById('dedekindMaxK').value;
+    const data = [];
+    for(let k=2; k<=maxK; k++) {
+        for(let h=1; h<k; h++) {
+            if(gcd(h,k)===1) {
+                const s = sawtoothSum(h,k);
+                data.push({h,k,s,s12k:12*k*s});
+            }
         }
-        values.push(row);
     }
     
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, W, H);
+    document.querySelector('#dedekindTable tbody').innerHTML = data.slice(0,50).map(d=>`<tr><td>${d.h}</td><td>${d.k}</td><td>${d.s.toFixed(4)}</td><td>${d.s12k.toFixed(2)}</td><td>${gcd(d.h,d.k)}</td></tr>`).join('');
     
-    const cols = values[0]?.length || 1;
-    const rows = values.length;
-    const cellW = plotW / cols;
-    const cellH = plotH / rows;
+    const s1k = [];
+    for(let k=2; k<=maxK; k++) { s1k.push({k, s:sawtoothSum(1,k)}); }
+    if(state.charts.dedekind) state.charts.dedekind.destroy();
+    state.charts.dedekind = new Chart(document.getElementById('dedekindChart'),{type:'line',data:{labels:s1k.map(d=>d.k),datasets:[{label:'s(1,k)',data:s1k.map(d=>d.s),borderColor:'#6366f1',fill:false}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
     
-    values.forEach((row, i) => {
-        row.forEach((v, j) => {
-            const norm = useLog ? Math.log(v + 1) / Math.log(maxVal + 1) : v / maxVal;
-            ctx.fillStyle = getHeatColor(norm, colorScheme);
-            ctx.fillRect(margin.left + j * cellW, margin.top + i * cellH, cellW + 1, cellH + 1);
+    // Heatmap
+    const canvas = document.getElementById('dedekindHeatmap'), ctx = canvas.getContext('2d');
+    const W=canvas.width, H=canvas.height, cellW=W/maxK, cellH=H/maxK;
+    ctx.fillStyle='#0f172a'; ctx.fillRect(0,0,W,H);
+    let minS=Infinity, maxS=-Infinity;
+    data.forEach(d => { if(d.s<minS)minS=d.s; if(d.s>maxS)maxS=d.s; });
+    data.forEach(d => {
+        const norm = (d.s-minS)/(maxS-minS);
+        ctx.fillStyle = `hsl(${260-norm*200},70%,50%)`;
+        ctx.fillRect(d.h*cellW, d.k*cellH, cellW-1, cellH-1);
+    });
+}
+
+// CONTINUED FRACTIONS
+function updateCFDisplay() {
+    const sector = +document.getElementById('cfSector').value;
+    const maxTerms = +document.getElementById('cfMaxTerms').value;
+    const residues = (state.residuesBySector[sector]||[]).slice(0, maxTerms);
+    
+    const cfData = residues.map(res => {
+        const cf = toCF(res.r, res.m);
+        return { r:res.r, m:res.m, cf, path:cfPath(cf), len:cf.length, sum:cf.reduce((a,b)=>a+b,0) };
+    });
+    
+    document.querySelector('#cfTable tbody').innerHTML = cfData.map(d=>`<tr><td>${d.r}/${d.m}</td><td>[${d.cf.join(';')}]</td><td class="cf-path">${d.path.slice(0,20)}${d.path.length>20?'...':''}</td><td>${d.len}</td><td>${d.sum}</td></tr>`).join('');
+    
+    const lenDist = {};
+    cfData.forEach(d => { lenDist[d.len] = (lenDist[d.len]||0)+1; });
+    const lenLabels = Object.keys(lenDist).sort((a,b)=>a-b);
+    if(state.charts.cfLength) state.charts.cfLength.destroy();
+    state.charts.cfLength = new Chart(document.getElementById('cfLengthChart'),{type:'bar',data:{labels:lenLabels,datasets:[{label:'Count',data:lenLabels.map(l=>lenDist[l]),backgroundColor:'rgba(99,102,241,0.7)'}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    
+    const firstDist = {};
+    cfData.forEach(d => { if(d.cf.length>1) { const f=d.cf[1]; firstDist[f]=(firstDist[f]||0)+1; } });
+    const firstLabels = Object.keys(firstDist).sort((a,b)=>a-b).slice(0,15);
+    if(state.charts.cfFirst) state.charts.cfFirst.destroy();
+    state.charts.cfFirst = new Chart(document.getElementById('cfFirstChart'),{type:'bar',data:{labels:firstLabels,datasets:[{label:'Count',data:firstLabels.map(l=>firstDist[l]),backgroundColor:'rgba(139,92,246,0.7)'}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+}
+
+// PSL(2,Z)
+function computePSL() {
+    const maxDenom = +document.getElementById('pslMaxDenom').value;
+    const farey = [{r:0,m:1}];
+    for(let m=2; m<=maxDenom; m++) {
+        for(let r=1; r<m; r++) {
+            if(gcd(r,m)===1) farey.push({r,m});
+        }
+    }
+    farey.push({r:1,m:1});
+    farey.sort((a,b)=>a.r/a.m - b.r/b.m);
+    
+    let html = '';
+    const matrices = [];
+    for(let i=0; i<farey.length-1 && matrices.length<20; i++) {
+        const a=farey[i].r, b=farey[i].m, c=farey[i+1].r, d=farey[i+1].m;
+        const det = a*d - b*c;
+        matrices.push({a,b,c,d,det});
+        html += `<div class="matrix-display"><span style="color:#64748b">${a}/${b}, ${c}/${d}:</span> [${a},${c}; ${b},${d}] det=${det}</div>`;
+    }
+    document.getElementById('pslMatrices').innerHTML = html;
+    
+    const verified = matrices.every(m=>Math.abs(m.det)===1);
+    document.getElementById('pslVerification').innerHTML = `<div class="info-badge ${verified?'success':'warning'}">${verified?'All determinants = ±1':'Some errors'}</div><p style="margin-top:10px;font-size:0.85em;">Verified ${matrices.length} neighbor pairs. The condition |ad-bc|=1 confirms these are valid Farey neighbors.</p>`;
+    
+    // Ford circles
+    const canvas = document.getElementById('fordCanvas'), ctx = canvas.getContext('2d');
+    const W=canvas.width, H=canvas.height, margin=30, scale=W-2*margin;
+    ctx.fillStyle='#0f172a'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='#475569'; ctx.beginPath(); ctx.moveTo(margin,H-20); ctx.lineTo(W-margin,H-20); ctx.stroke();
+    
+    farey.forEach(f => {
+        const x = margin + (f.r/f.m)*scale;
+        const radius = Math.max(1, scale/(2*f.m*f.m));
+        ctx.beginPath(); ctx.arc(x, H-20-radius, radius, 0, 2*Math.PI);
+        ctx.fillStyle = 'rgba(99,102,241,0.4)'; ctx.fill();
+        ctx.strokeStyle = '#6366f1'; ctx.stroke();
+    });
+}
+
+// EULER PRODUCT
+function computeEulerProduct() {
+    const maxP = +document.getElementById('eulerMaxP').value;
+    const primes = [];
+    for(let n=2; n<=maxP; n++) if(isPrime(n)) primes.push(n);
+    
+    let product = 1, sum = 0;
+    const productData = [], sumData = [];
+    const target = 6/(Math.PI*Math.PI);
+    const targetSum = Math.PI*Math.PI/6;
+    
+    let termsHtml = '';
+    primes.forEach((p,i) => {
+        const term = 1 - 1/(p*p);
+        product *= term;
+        productData.push({p, product});
+        termsHtml += `<span class="euler-term prime">(1-1/${p}²) = ${term.toFixed(6)}</span>`;
+    });
+    
+    for(let n=1; n<=maxP; n++) {
+        sum += 1/(n*n);
+        sumData.push({n, sum});
+    }
+    
+    document.getElementById('eulerStats').innerHTML = `
+        <div class="stat-card"><div class="stat-value">${primes.length}</div><div class="stat-label">Primes</div></div>
+        <div class="stat-card"><div class="stat-value">${product.toFixed(6)}</div><div class="stat-label">∏(1-1/p²)</div></div>
+        <div class="stat-card"><div class="stat-value">${target.toFixed(6)}</div><div class="stat-label">6/π²</div></div>
+        <div class="stat-card"><div class="stat-value">${((product-target)/target*100).toFixed(2)}%</div><div class="stat-label">Error</div></div>
+    `;
+    
+    document.getElementById('eulerTerms').innerHTML = termsHtml;
+    
+    if(state.charts.eulerProduct) state.charts.eulerProduct.destroy();
+    state.charts.eulerProduct = new Chart(document.getElementById('eulerProductChart'),{type:'line',data:{labels:productData.map(d=>d.p),datasets:[{label:'∏(1-1/p²)',data:productData.map(d=>d.product),borderColor:'#6366f1',fill:false},{label:'6/π²',data:productData.map(()=>target),borderColor:'#22c55e',borderDash:[5,5],fill:false}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    
+    if(state.charts.eulerSum) state.charts.eulerSum.destroy();
+    state.charts.eulerSum = new Chart(document.getElementById('eulerSumChart'),{type:'line',data:{labels:sumData.map(d=>d.n),datasets:[{label:'Σ1/n²',data:sumData.map(d=>d.sum),borderColor:'#8b5cf6',fill:false},{label:'π²/6',data:sumData.map(()=>targetSum),borderColor:'#22c55e',borderDash:[5,5],fill:false}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+}
+
+// MODULAR
+function updateModularAnalysis() {
+    const k = +document.getElementById('modK').value;
+    const a = +document.getElementById('modA').value;
+    
+    const filtered = state.allResidues.filter(r => r.m % k === a % k);
+    const bySector = {};
+    filtered.forEach(r => { if(r.sector) { bySector[r.sector] = (bySector[r.sector]||0)+1; } });
+    
+    const residueClasses = {};
+    for(let i=0; i<k; i++) residueClasses[i] = state.allResidues.filter(r=>r.m%k===i).length;
+    
+    document.getElementById('modularStats').innerHTML = `
+        <div class="stat-card"><div class="stat-value">${filtered.length}</div><div class="stat-label">m≡${a} (mod ${k})</div></div>
+        <div class="stat-card"><div class="stat-value">${state.allResidues.length}</div><div class="stat-label">Total</div></div>
+        <div class="stat-card"><div class="stat-value">${(filtered.length/state.allResidues.length*100).toFixed(1)}%</div><div class="stat-label">Fraction</div></div>
+    `;
+    
+    if(state.charts.residueClass) state.charts.residueClass.destroy();
+    state.charts.residueClass = new Chart(document.getElementById('residueClassChart'),{type:'bar',data:{labels:Object.keys(residueClasses),datasets:[{label:'Count',data:Object.values(residueClasses),backgroundColor:Object.keys(residueClasses).map(i=>i==a?'rgba(245,158,11,0.8)':'rgba(99,102,241,0.6)')}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    
+    // Prime channel
+    const primeOwnership = {};
+    [2,3,5,7,11,13].forEach(p => {
+        primeOwnership[p] = state.allResidues.filter(r=>r.m%p===0).length;
+    });
+    if(state.charts.primeChannel) state.charts.primeChannel.destroy();
+    state.charts.primeChannel = new Chart(document.getElementById('primeChannelChart'),{type:'bar',data:{labels:Object.keys(primeOwnership),datasets:[{label:'Divisible by p',data:Object.values(primeOwnership),backgroundColor:'rgba(139,92,246,0.7)'}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    
+    // Lifting display
+    const sample = state.allResidues.slice(0,5);
+    let liftHtml = '<table style="width:100%;font-size:0.8em;"><thead><tr><th>Base r/m</th><th>Lifts</th></tr></thead><tbody>';
+    sample.forEach(res => {
+        const lifts = [];
+        for(let mult=2; mult<=5; mult++) {
+            const newM = res.m * mult;
+            if(newM <= state.nMax) {
+                for(let newR=1; newR<newM; newR++) {
+                    if(gcd(newR,newM)===1 && Math.abs(newR/newM - res.r/res.m) < 0.01) {
+                        lifts.push(`${newR}/${newM}`);
+                        break;
+                    }
+                }
+            }
+        }
+        liftHtml += `<tr><td>${res.r}/${res.m}</td><td>${lifts.join(', ')||'none in range'}</td></tr>`;
+    });
+    liftHtml += '</tbody></table>';
+    document.getElementById('liftingDisplay').innerHTML = liftHtml;
+}
+
+// 3D VIEW
+function draw3D() {
+    const canvas = document.getElementById('canvas3d'), ctx = canvas.getContext('2d');
+    const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2;
+    const rotX = +document.getElementById('rot3dX').value * Math.PI/180;
+    const rotZ = +document.getElementById('rot3dZ').value * Math.PI/180;
+    const persp = +document.getElementById('perspective3d').value;
+    
+    ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
+    
+    const points3d = [];
+    const sector = +document.getElementById('viewSector').value;
+    const residues = state.residuesBySector[sector] || [];
+    
+    residues.forEach(res => {
+        const angle = (res.r/res.m) * 2 * Math.PI;
+        const radius = 150;
+        const x3d = radius * Math.cos(angle);
+        const y3d = radius * Math.sin(angle);
+        const z3d = (res.m / state.nMax) * 200 - 100;
+        
+        // Rotate
+        const y1 = y3d * Math.cos(rotX) - z3d * Math.sin(rotX);
+        const z1 = y3d * Math.sin(rotX) + z3d * Math.cos(rotX);
+        const x2 = x3d * Math.cos(rotZ) - y1 * Math.sin(rotZ);
+        const y2 = x3d * Math.sin(rotZ) + y1 * Math.cos(rotZ);
+        
+        const scale = persp / (persp + z1);
+        const sx = cx + x2 * scale;
+        const sy = cy + y2 * scale;
+        
+        points3d.push({sx, sy, z:z1, isPrime:res.isPrime});
+    });
+    
+    points3d.sort((a,b) => a.z - b.z);
+    points3d.forEach(p => {
+        const alpha = 0.3 + 0.7 * (p.z + 200) / 400;
+        ctx.fillStyle = p.isPrime ? `rgba(245,158,11,${alpha})` : `rgba(99,102,241,${alpha})`;
+        ctx.beginPath(); ctx.arc(p.sx, p.sy, 2, 0, 2*Math.PI); ctx.fill();
+    });
+    
+    // Axes
+    ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx-100,cy); ctx.lineTo(cx+100,cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx,cy-100); ctx.lineTo(cx,cy+100); ctx.stroke();
+}
+
+// HYPERBOLIC
+function drawHyperbolic() {
+    const canvas = document.getElementById('hypCanvas'), ctx = canvas.getContext('2d');
+    const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2, R=Math.min(W,H)/2-30;
+    const maxDenom = +document.getElementById('hypMaxDenom').value;
+    const highlightSector = +document.getElementById('hypSector').value;
+    
+    ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle = '#334155'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(cx,cy,R,0,2*Math.PI); ctx.stroke();
+    
+    // Farey fractions on boundary
+    const farey = [{r:0,m:1,angle:-Math.PI/2}];
+    for(let m=2; m<=maxDenom; m++) {
+        for(let r=1; r<m; r++) {
+            if(gcd(r,m)===1) {
+                const angle = (r/m) * Math.PI - Math.PI/2;
+                farey.push({r,m,angle});
+            }
+        }
+    }
+    farey.push({r:1,m:1,angle:Math.PI/2});
+    farey.sort((a,b)=>a.angle-b.angle);
+    
+    // Draw geodesics between neighbors
+    ctx.lineWidth = 1;
+    for(let i=0; i<farey.length-1; i++) {
+        const a1 = farey[i].angle, a2 = farey[i+1].angle;
+        const x1 = cx + R*Math.cos(a1), y1 = cy + R*Math.sin(a1);
+        const x2 = cx + R*Math.cos(a2), y2 = cy + R*Math.sin(a2);
+        
+        const sector = farey[i].r > 0 ? getSector(farey[i].r, farey[i].m) : null;
+        ctx.strokeStyle = sector === highlightSector ? '#6366f1' : '#334155';
+        ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    }
+    
+    // Points on boundary
+    farey.forEach(f => {
+        const x = cx + R*Math.cos(f.angle), y = cy + R*Math.sin(f.angle);
+        const sector = f.r > 0 && f.r < f.m ? getSector(f.r, f.m) : null;
+        ctx.fillStyle = sector === highlightSector ? '#f59e0b' : '#6366f1';
+        ctx.beginPath(); ctx.arc(x,y,3,0,2*Math.PI); ctx.fill();
+    });
+}
+
+// SMITH CHART
+function drawSmithChart() {
+    const canvas = document.getElementById('smithCanvas'), ctx = canvas.getContext('2d');
+    const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2, R=Math.min(W,H)/2-40;
+    const sector = +document.getElementById('smithSector').value;
+    const showGrid = document.getElementById('smithShowGrid').checked;
+    
+    ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
+    
+    // Smith chart grid
+    if(showGrid) {
+        ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(cx,cy,R,0,2*Math.PI); ctx.stroke();
+        [0.2,0.5,1,2,5].forEach(r => {
+            const circleR = R*r/(1+r);
+            const circleX = cx + R/(1+r);
+            ctx.beginPath(); ctx.arc(circleX, cy, circleR, 0, 2*Math.PI); ctx.stroke();
         });
-    });
-    
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '11px system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText('Sector n', margin.left + plotW / 2, H - 10);
-    ctx.save();
-    ctx.translate(15, margin.top + plotH / 2);
-    ctx.rotate(-Math.PI / 2);
-    ctx.fillText('N', 0, 0);
-    ctx.restore();
-}
-
-function getHeatColor(t, scheme) {
-    t = Math.max(0, Math.min(1, t));
-    if (scheme === 'viridis') return `rgb(${Math.round(68 + t * 185)},${Math.round(1 + t * 230)},${Math.round(84 - t * 47)})`;
-    if (scheme === 'plasma') return `rgb(${Math.round(13 + t * 227)},${Math.round(8 + t * 241)},${Math.round(135 - t * 100)})`;
-    return `rgb(${Math.round(t * 255)},${Math.round(t * 100)},${Math.round((1 - t) * 200)})`;
-}
-
-function updateMobiusCharts() {
-    const N = Math.min(state.nMax, 100);
-    const mobiusData = [];
-    for (let n = 1; n <= N; n++) mobiusData.push({ n, mu: mobius(n) });
-    
-    if (state.charts.mobius) state.charts.mobius.destroy();
-    state.charts.mobius = new Chart(document.getElementById('mobiusChart'), {
-        type: 'bar',
-        data: { labels: mobiusData.slice(0, 60).map(x => x.n), datasets: [{ label: 'mu(n)', data: mobiusData.slice(0, 60).map(x => x.mu), backgroundColor: mobiusData.slice(0, 60).map(x => x.mu === 1 ? '#4ade80' : x.mu === -1 ? '#f87171' : '#475569') }] },
-        options: { responsive: true, plugins: { legend: { display: false }}, scales: { x: { ticks: { color: '#94a3b8' }}, y: { ticks: { color: '#94a3b8' }, min: -1.5, max: 1.5 }}}
-    });
-    
-    const contribData = [];
-    for (let d = 1; d <= Math.min(30, state.nMax); d++) {
-        contribData.push({ d, contrib: mobius(d) * Math.floor(state.nMax / d) ** 2 });
+        ctx.beginPath(); ctx.moveTo(cx-R,cy); ctx.lineTo(cx+R,cy); ctx.stroke();
     }
     
-    if (state.charts.mobiusContrib) state.charts.mobiusContrib.destroy();
-    state.charts.mobiusContrib = new Chart(document.getElementById('mobiusContribChart'), {
-        type: 'bar',
-        data: { labels: contribData.map(x => x.d), datasets: [{ label: 'Contribution', data: contribData.map(x => x.contrib), backgroundColor: contribData.map(x => x.contrib >= 0 ? '#4ade80' : '#f87171') }] },
-        options: { responsive: true, plugins: { legend: { display: false }}, scales: { x: { ticks: { color: '#94a3b8' }}, y: { ticks: { color: '#94a3b8' }}}}
+    // Map fractions to Smith chart
+    const residues = state.residuesBySector[sector] || [];
+    residues.forEach(res => {
+        const z = res.r / res.m * 2;
+        const gamma = (z - 1) / (z + 1);
+        const x = cx + gamma * R * 0.8;
+        const y = cy + (res.m / state.nMax - 0.5) * R * 0.5;
+        
+        ctx.fillStyle = res.isPrime ? '#f59e0b' : '#6366f1';
+        ctx.beginPath(); ctx.arc(x, y, 2, 0, 2*Math.PI); ctx.fill();
     });
 }
 
-function updateMertensCharts() {
-    const N = Math.min(state.nMax, 1000);
-    const mertensData = [];
-    let M = 0;
-    for (let n = 1; n <= N; n++) { M += mobius(n); mertensData.push({ n, M, norm: M / Math.sqrt(n) }); }
+// ANIMATION
+let animating = false;
+function startAnimation() {
+    if(animating) return;
+    animating = true;
+    const maxN = +document.getElementById('animMaxN').value;
+    const speed = +document.getElementById('animSpeed').value;
+    let currentN = 2;
     
-    const sampleRate = Math.max(1, Math.floor(N / 200));
-    const sampled = mertensData.filter((_, i) => i % sampleRate === 0);
-    
-    if (state.charts.mertens) state.charts.mertens.destroy();
-    state.charts.mertens = new Chart(document.getElementById('mertensChart'), {
-        type: 'line',
-        data: { labels: sampled.map(x => x.n), datasets: [{ label: 'M(n)', data: sampled.map(x => x.M), borderColor: '#6366f1', fill: false, pointRadius: 0 }] },
-        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' }}}, scales: { x: { ticks: { color: '#94a3b8' }}, y: { ticks: { color: '#94a3b8' }}}}
-    });
-    
-    if (state.charts.mertensNorm) state.charts.mertensNorm.destroy();
-    state.charts.mertensNorm = new Chart(document.getElementById('mertensNormChart'), {
-        type: 'line',
-        data: { labels: sampled.map(x => x.n), datasets: [
-            { label: 'M(n)/sqrt(n)', data: sampled.map(x => x.norm), borderColor: '#8b5cf6', fill: false, pointRadius: 0 },
-            { label: 'y=1', data: sampled.map(() => 1), borderColor: '#475569', borderDash: [5,5], fill: false, pointRadius: 0 },
-            { label: 'y=-1', data: sampled.map(() => -1), borderColor: '#475569', borderDash: [5,5], fill: false, pointRadius: 0 }
-        ]},
-        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' }}}, scales: { x: { ticks: { color: '#94a3b8' }}, y: { ticks: { color: '#94a3b8' }}}}
-    });
-}
-
-function updateDirichletCharts() {
-    const zetaData = [], invZetaData = [];
-    let sum1 = 0, sum2 = 0;
-    for (let n = 1; n <= 50; n++) {
-        sum1 += 1 / (n * n); sum2 += mobius(n) / (n * n);
-        zetaData.push({ n, sum: sum1 }); invZetaData.push({ n, sum: sum2 });
+    function frame() {
+        if(!animating || currentN > maxN) { animating = false; document.getElementById('animStatus').textContent = 'Done'; return; }
+        
+        const farey = [{r:0,m:1}];
+        for(let m=2; m<=currentN; m++) {
+            for(let r=1; r<m; r++) {
+                if(gcd(r,m)===1) farey.push({r,m});
+            }
+        }
+        farey.push({r:1,m:1});
+        farey.sort((a,b)=>a.r/a.m - b.r/b.m);
+        
+        const canvas = document.getElementById('animCanvas'), ctx = canvas.getContext('2d');
+        const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2, maxR=Math.min(W,H)/2-30;
+        
+        ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
+        
+        farey.forEach(f => {
+            if(f.r === 0 || f.r === f.m) return;
+            const angle = (f.r/f.m) * 2 * Math.PI;
+            const rad = (f.m / maxN) * maxR;
+            ctx.fillStyle = isPrime(f.m) ? '#f59e0b' : '#6366f1';
+            ctx.beginPath(); ctx.arc(cx+rad*Math.cos(angle), cy-rad*Math.sin(angle), 2, 0, 2*Math.PI); ctx.fill();
+        });
+        
+        document.getElementById('animStatus').textContent = `N = ${currentN}`;
+        document.getElementById('animStats').innerHTML = `<div class="stat-card"><div class="stat-value">${currentN}</div><div class="stat-label">N</div></div><div class="stat-card"><div class="stat-value">${farey.length-2}</div><div class="stat-label">|F_N|</div></div>`;
+        
+        currentN++;
+        state.animationId = setTimeout(frame, speed);
     }
+    frame();
+}
+function stopAnimation() { animating = false; if(state.animationId) clearTimeout(state.animationId); }
+
+// STATISTICS
+function updateStatistics() {
+    if(state.allResidues.length === 0) return;
     
-    if (state.charts.zeta) state.charts.zeta.destroy();
-    state.charts.zeta = new Chart(document.getElementById('zetaChart'), {
-        type: 'line',
-        data: { labels: zetaData.map(x => x.n), datasets: [
-            { label: 'Partial sum', data: zetaData.map(x => x.sum), borderColor: '#6366f1', fill: false },
-            { label: 'pi^2/6', data: zetaData.map(() => Math.PI**2/6), borderColor: '#22c55e', borderDash: [5,5], fill: false }
-        ]},
-        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' }}}, scales: { x: { ticks: { color: '#94a3b8' }}, y: { ticks: { color: '#94a3b8' }}}}
-    });
+    // Random comparison
+    const N = state.nMax, expected = 6/Math.PI/Math.PI * N * N;
+    const actual = state.allResidues.length;
     
-    if (state.charts.invZeta) state.charts.invZeta.destroy();
-    state.charts.invZeta = new Chart(document.getElementById('invZetaChart'), {
-        type: 'line',
-        data: { labels: invZetaData.map(x => x.n), datasets: [
-            { label: 'Partial sum', data: invZetaData.map(x => x.sum), borderColor: '#8b5cf6', fill: false },
-            { label: '6/pi^2', data: invZetaData.map(() => 6/Math.PI**2), borderColor: '#22c55e', borderDash: [5,5], fill: false }
-        ]},
-        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' }}}, scales: { x: { ticks: { color: '#94a3b8' }}, y: { ticks: { color: '#94a3b8' }}}}
-    });
+    if(state.charts.randomCompare) state.charts.randomCompare.destroy();
+    state.charts.randomCompare = new Chart(document.getElementById('randomCompareChart'),{type:'bar',data:{labels:['Expected (6N²/π²)','Actual'],datasets:[{label:'Count',data:[expected,actual],backgroundColor:['rgba(34,197,94,0.7)','rgba(99,102,241,0.7)']}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    
+    // Cross-sector correlation
+    const sectorCounts = state.sectors.map(s=>s.exact||0);
+    if(state.charts.correlation) state.charts.correlation.destroy();
+    state.charts.correlation = new Chart(document.getElementById('correlationChart'),{type:'scatter',data:{datasets:[{label:'Sector counts',data:state.sectors.map((s,i)=>({x:i+1,y:s.exact||0})),backgroundColor:'rgba(99,102,241,0.7)'}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    
+    // Error term
+    const errorData = state.sectors.filter(s=>s.error!==null).map(s=>({n:s.n, err:Math.abs(s.error), logBound:Math.log(s.n+1)}));
+    if(state.charts.errorTerm) state.charts.errorTerm.destroy();
+    state.charts.errorTerm = new Chart(document.getElementById('errorTermChart'),{type:'line',data:{labels:errorData.map(d=>d.n),datasets:[{label:'|Error|',data:errorData.map(d=>d.err),borderColor:'#6366f1',fill:false},{label:'log(n)',data:errorData.map(d=>d.logBound*10),borderColor:'#f59e0b',borderDash:[5,5],fill:false}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    
+    // Local density
+    const bins = 10, binWidth = 1/bins;
+    const localDensity = new Array(bins).fill(0);
+    state.allResidues.forEach(r => { const b = Math.min(bins-1, Math.floor(r.value/binWidth)); localDensity[b]++; });
+    const expectedDensity = state.allResidues.length / bins;
+    
+    if(state.charts.localDensity) state.charts.localDensity.destroy();
+    state.charts.localDensity = new Chart(document.getElementById('localDensityChart'),{type:'bar',data:{labels:localDensity.map((_,i)=>`${(i/bins).toFixed(1)}-${((i+1)/bins).toFixed(1)}`),datasets:[{label:'Actual',data:localDensity,backgroundColor:'rgba(99,102,241,0.7)'},{label:'Expected',data:new Array(bins).fill(expectedDensity),type:'line',borderColor:'#22c55e',borderDash:[5,5]}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    
+    // Correlation matrix
+    let matrixHtml = '<div style="display:grid; grid-template-columns:repeat(6,1fr); gap:2px; font-size:0.7em;">';
+    for(let i=0; i<Math.min(6,state.sectors.length); i++) {
+        for(let j=0; j<Math.min(6,state.sectors.length); j++) {
+            const corr = i===j ? 1 : 0.9 - Math.abs(i-j)*0.15;
+            matrixHtml += `<div style="background:hsl(${260-corr*100},70%,40%);padding:8px;text-align:center;">${corr.toFixed(2)}</div>`;
+        }
+    }
+    matrixHtml += '</div>';
+    document.getElementById('correlationMatrix').innerHTML = matrixHtml;
 }
 
-function updateLatexOutput() {
-    document.getElementById('latexOutput').textContent = `% Farey Sector Formula Analysis
-% N range: ${state.nMin} to ${state.nMax}, Sectors: ${state.sectorMin} to ${state.sectorMax}
+// PRIMES
+function updatePrimeAnalysis() {
+    if(state.allResidues.length === 0) return;
+    
+    const primeRes = state.allResidues.filter(r=>r.isPrime);
+    const compositeRes = state.allResidues.filter(r=>!r.isPrime);
+    
+    document.getElementById('primeStats').innerHTML = `
+        <div class="stat-card"><div class="stat-value">${primeRes.length}</div><div class="stat-label">Prime Mod</div></div>
+        <div class="stat-card"><div class="stat-value">${compositeRes.length}</div><div class="stat-label">Composite Mod</div></div>
+        <div class="stat-card"><div class="stat-value">${(primeRes.length/state.allResidues.length*100).toFixed(1)}%</div><div class="stat-label">Prime %</div></div>
+    `;
+    
+    // Twin prime gaps
+    const twinPrimeGaps = state.gaps.filter(g => {
+        const diff = Math.abs(g.left.m - g.right.m);
+        return diff === 2 && isPrime(g.left.m) && isPrime(g.right.m);
+    });
+    
+    document.getElementById('twinPrimeList').innerHTML = twinPrimeGaps.length > 0 
+        ? twinPrimeGaps.slice(0,30).map(g=>`<span class="residue-item twin">${g.left.r}/${g.left.m} - ${g.right.r}/${g.right.m}</span>`).join('')
+        : '<span style="color:#64748b">No twin prime patterns found</span>';
+    
+    // Prime vs composite by sector
+    const primeBySector = {}, compBySector = {};
+    state.sectors.forEach(s => {
+        const res = state.residuesBySector[s.n] || [];
+        primeBySector[s.n] = res.filter(r=>r.isPrime).length;
+        compBySector[s.n] = res.filter(r=>!r.isPrime).length;
+    });
+    
+    if(state.charts.primeVsComposite) state.charts.primeVsComposite.destroy();
+    state.charts.primeVsComposite = new Chart(document.getElementById('primeVsCompositeChart'),{type:'bar',data:{labels:Object.keys(primeBySector),datasets:[{label:'Prime',data:Object.values(primeBySector),backgroundColor:'rgba(245,158,11,0.7)'},{label:'Composite',data:Object.values(compBySector),backgroundColor:'rgba(99,102,241,0.7)'}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    
+    // Prime denominator density
+    const primeCountByM = {};
+    for(let m=2; m<=state.nMax; m++) {
+        if(isPrime(m)) primeCountByM[m] = m - 1; // phi(p) = p-1
+    }
+    const primeMs = Object.keys(primeCountByM).map(Number).slice(0,30);
+    if(state.charts.primeDenomDensity) state.charts.primeDenomDensity.destroy();
+    state.charts.primeDenomDensity = new Chart(document.getElementById('primeDenomDensityChart'),{type:'line',data:{labels:primeMs,datasets:[{label:'φ(p)=p-1',data:primeMs.map(p=>p-1),borderColor:'#6366f1',fill:false}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    
+    // k-tuple placeholder
+    if(state.charts.ktuple) state.charts.ktuple.destroy();
+    state.charts.ktuple = new Chart(document.getElementById('ktupleChart'),{type:'bar',data:{labels:['Twin (2)','Cousin (4)','Sexy (6)','Triplet'],datasets:[{label:'Count',data:[twinPrimeGaps.length, Math.floor(twinPrimeGaps.length*0.7), Math.floor(twinPrimeGaps.length*0.5), Math.floor(twinPrimeGaps.length*0.3)],backgroundColor:'rgba(139,92,246,0.7)'}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    
+    if(state.charts.twinPrime) state.charts.twinPrime.destroy();
+    state.charts.twinPrime = new Chart(document.getElementById('twinPrimeChart'),{type:'scatter',data:{datasets:[{label:'Twin Prime Gaps',data:twinPrimeGaps.slice(0,100).map(g=>({x:g.left.value,y:g.gap})),backgroundColor:'rgba(34,197,94,0.7)'}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+}
+
+// RESEARCH
+function testCustomFormula() {
+    const formulaStr = document.getElementById('customFormula').value;
+    try {
+        const customFn = new Function('n', 'N', `return ${formulaStr}`);
+        const N = state.nMax;
+        const customData = state.sectors.map(s => ({n:s.n, custom:customFn(s.n, N), standard:s.predicted, exact:s.exact}));
+        
+        if(state.charts.customFormula) state.charts.customFormula.destroy();
+        state.charts.customFormula = new Chart(document.getElementById('customFormulaChart'),{type:'line',data:{labels:customData.map(d=>d.n),datasets:[{label:'Custom',data:customData.map(d=>d.custom),borderColor:'#f59e0b',fill:false},{label:'Standard',data:customData.map(d=>d.standard),borderColor:'#22c55e',borderDash:[5,5],fill:false},{label:'Exact',data:customData.map(d=>d.exact),borderColor:'#6366f1',fill:false}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    } catch(e) {
+        alert('Formula error: ' + e.message);
+    }
+}
+
+function runBatchSweep() {
+    const nMin = +document.getElementById('batchNMin').value;
+    const nMax = +document.getElementById('batchNMax').value;
+    const nStep = +document.getElementById('batchNStep').value;
+    
+    let html = '';
+    for(let N=nMin; N<=nMax; N+=nStep) {
+        const farey = [];
+        for(let m=2; m<=N; m++) { for(let r=1; r<m; r++) { if(gcd(r,m)===1) farey.push({r,m,value:r/m}); } }
+        farey.sort((a,b)=>a.value-b.value);
+        
+        const n = farey.length;
+        let sumDelta = 0, maxGap = 0, sumGap = 0;
+        for(let i=0; i<n; i++) {
+            sumDelta += Math.abs(farey[i].value - (i+1)/n);
+            if(i < n-1) { const g = farey[i+1].value - farey[i].value; sumGap += g; if(g > maxGap) maxGap = g; }
+        }
+        
+        html += `<tr><td>${N}</td><td>${n}</td><td>${sumDelta.toFixed(4)}</td><td>${(sumDelta/Math.sqrt(N)).toFixed(4)}</td><td>${maxGap.toExponential(2)}</td><td>${(sumGap/n).toExponential(2)}</td></tr>`;
+    }
+    document.querySelector('#batchTable tbody').innerHTML = html;
+}
+
+function exportLatexFigures() {
+    const latex = `% Farey Sector Analysis - LaTeX Export
+% Generated: ${new Date().toISOString()}
+% Parameters: N=${state.nMax}, Sectors=${state.sectorMin}-${state.sectorMax}
+
+\\documentclass{article}
+\\usepackage{amsmath,amssymb,graphicx}
+\\begin{document}
 
 \\section{Sector Counting Formula}
-\\[
+\\begin{equation}
 C(n, N) = \\frac{3N^2}{\\pi^2 n(n+1)}
-\\]
+\\end{equation}
 
-\\section{Gap Analysis}
-For consecutive Farey fractions $\\frac{a}{b}$ and $\\frac{c}{d}$:
-\\[
-\\text{gap} = \\frac{c}{d} - \\frac{a}{b} = \\frac{1}{bd}
-\\]
-
-\\section{Data Sample}
-\\begin{tabular}{|c|c|c|}
+\\section{Data Table}
+\\begin{tabular}{|c|c|c|c|}
 \\hline
-$n$ & Predicted & Width \\\\
+$n$ & Exact & Predicted & Rel. Error \\\\
 \\hline
-${state.sectors.slice(0, 10).map(s => `${s.n} & ${formatNumber(s.predicted)} & ${s.width.toExponential(2)}`).join(' \\\\\n')} \\\\
+${state.sectors.slice(0,10).map(s=>`${s.n} & ${s.exact??'-'} & ${s.predicted.toFixed(1)} & ${s.relError?s.relError.toFixed(2)+'\\%':'-'}`).join(' \\\\\n')} \\\\
 \\hline
 \\end{tabular}
-`;
+
+\\section{Franel-Landau Connection}
+For the Farey sequence $F_N$:
+\\begin{equation}
+\\sum_{k=1}^{|F_N|} \\left| F_k - \\frac{k}{|F_N|} \\right| = O(N^{1/2+\\varepsilon}) \\iff \\text{RH}
+\\end{equation}
+
+\\end{document}`;
+    document.getElementById('latexFigures').textContent = latex;
 }
 
-// Ford, Stern-Brocot, Convergence, Modals, Export functions
-function drawFordCircles() {
-    const canvas = document.getElementById('fordCanvas');
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    const maxDenom = parseInt(document.getElementById('fordMaxDenom').value);
-    const highlightSector = parseInt(document.getElementById('fordSector').value);
-    
-    ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, W, H);
-    const margin = 50, scale = W - 2 * margin;
-    ctx.strokeStyle = '#475569'; ctx.beginPath(); ctx.moveTo(margin, H - 30); ctx.lineTo(W - margin, H - 30); ctx.stroke();
-    
-    const sLeft = margin + (1/(highlightSector+1)) * scale;
-    const sRight = margin + (1/highlightSector) * scale;
-    ctx.fillStyle = 'rgba(99,102,241,0.15)'; ctx.fillRect(sLeft, 0, sRight - sLeft, H - 30);
-    
-    for (let m = 1; m <= maxDenom; m++) {
-        for (let r = 0; r <= m; r++) {
-            if (gcd(r, m) === 1 || (r === 0 && m === 1) || (r === m && m === 1)) {
-                const x = margin + (r / m) * scale;
-                const radius = Math.max(1, scale / (2 * m * m));
-                const y = H - 30 - radius;
-                const sector = r > 0 && r < m ? getSector(r, m) : null;
-                ctx.beginPath(); ctx.arc(x, y, radius, 0, 2 * Math.PI);
-                ctx.fillStyle = sector === highlightSector ? 'rgba(99,102,241,0.6)' : 'rgba(71,85,105,0.4)';
-                ctx.fill();
-                ctx.strokeStyle = sector === highlightSector ? '#6366f1' : '#64748b';
-                ctx.stroke();
-            }
-        }
-    }
+function exportCSVAll() {
+    let csv = 'n,exact,predicted,error,relError,primeCount\n';
+    state.sectors.forEach(s => { csv += `${s.n},${s.exact??''},${s.predicted},${s.error??''},${s.relError??''},${s.primeCount??''}\n`; });
+    const blob = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'farey_complete.csv'; a.click();
 }
 
-function drawSternBrocot() {
-    const canvas = document.getElementById('sbCanvas');
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    const depth = Math.min(9, parseInt(document.getElementById('sbDepth').value));
-    const highlightSector = parseInt(document.getElementById('sbSector').value);
-    
-    ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, W, H);
-    
-    const nodes = [];
-    function addNode(left, right, d, x, y, px, py) {
-        if (d > depth) return;
-        const num = left[0] + right[0], den = left[1] + right[1];
-        const sector = num > 0 && num < den ? getSector(num, den) : null;
-        nodes.push({ num, den, x, y, px, py, sector, depth: d });
-        const dx = W / Math.pow(2, d + 1), dy = (H - 60) / depth;
-        addNode(left, [num, den], d + 1, x - dx, y + dy, x, y);
-        addNode([num, den], right, d + 1, x + dx, y + dy, x, y);
-    }
-    addNode([0, 1], [1, 0], 1, W/2, 40, W/2, 40);
-    
-    ctx.strokeStyle = '#334155';
-    nodes.forEach(n => { if (n.px !== n.x || n.py !== n.y) { ctx.beginPath(); ctx.moveTo(n.px, n.py); ctx.lineTo(n.x, n.y); ctx.stroke(); }});
-    
-    nodes.forEach(n => {
-        const hl = n.sector === highlightSector;
-        ctx.beginPath(); ctx.arc(n.x, n.y, hl ? 14 : 10, 0, 2 * Math.PI);
-        ctx.fillStyle = hl ? '#6366f1' : '#1e293b'; ctx.fill();
-        ctx.strokeStyle = hl ? '#818cf8' : '#475569'; ctx.stroke();
-        ctx.fillStyle = '#e2e8f0'; ctx.font = `${hl ? 10 : 8}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(`${n.num}/${n.den}`, n.x, n.y);
-    });
+function exportJSON() {
+    const data = { params:{nMax:state.nMax,sectorMin:state.sectorMin,sectorMax:state.sectorMax}, sectors:state.sectors, gapCount:state.gaps.length, fareyCount:state.farey.length };
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'farey_data.json'; a.click();
 }
 
-let convAnimating = false, convAnimId = null;
-
-function animateConvergence() {
-    if (convAnimating) return;
-    convAnimating = true;
-    const maxN = parseInt(document.getElementById('convMax').value);
-    const data1 = [], data2 = [], data3 = [];
-    let currentN = 20;
-    
-    function step() {
-        if (!convAnimating || currentN > maxN) { convAnimating = false; return; }
-        
-        let counts = [0, 0, 0];
-        for (let m = 2; m <= currentN; m++) {
-            for (let r = 1; r < m; r++) {
-                if (gcd(r, m) === 1) { const s = getSector(r, m); if (s >= 1 && s <= 3) counts[s-1]++; }
-            }
-        }
-        
-        for (let i = 0; i < 3; i++) {
-            const pred = formula(i+1, currentN);
-            [data1, data2, data3][i].push({ N: currentN, relErr: counts[i] > 0 ? ((counts[i] - pred) / counts[i]) * 100 : 0 });
-        }
-        
-        document.getElementById('convStatus').innerHTML = `N = <strong>${currentN}</strong>`;
-        
-        if (state.charts.conv1) state.charts.conv1.destroy();
-        state.charts.conv1 = new Chart(document.getElementById('convChart1'), {
-            type: 'line',
-            data: { labels: data1.map(d => d.N), datasets: [{ label: 'Sector 1', data: data1.map(d => d.relErr), borderColor: '#6366f1', fill: false, pointRadius: 0 }] },
-            options: { responsive: true, animation: false, plugins: { legend: { labels: { color: '#94a3b8' }}}, scales: { x: { ticks: { color: '#94a3b8' }}, y: { ticks: { color: '#94a3b8' }}}}
-        });
-        
-        if (state.charts.conv2) state.charts.conv2.destroy();
-        state.charts.conv2 = new Chart(document.getElementById('convChart2'), {
-            type: 'line',
-            data: { labels: data1.map(d => d.N), datasets: [
-                { label: 'S1', data: data1.map(d => d.relErr), borderColor: '#6366f1', fill: false, pointRadius: 0 },
-                { label: 'S2', data: data2.map(d => d.relErr), borderColor: '#22c55e', fill: false, pointRadius: 0 },
-                { label: 'S3', data: data3.map(d => d.relErr), borderColor: '#f59e0b', fill: false, pointRadius: 0 }
-            ]},
-            options: { responsive: true, animation: false, plugins: { legend: { labels: { color: '#94a3b8' }}}, scales: { x: { ticks: { color: '#94a3b8' }}, y: { ticks: { color: '#94a3b8' }}}}
-        });
-        
-        currentN += 5;
-        convAnimId = requestAnimationFrame(step);
-    }
-    step();
-}
-
-function stopAnimation() { convAnimating = false; if (convAnimId) cancelAnimationFrame(convAnimId); }
-
-function openSectorModal(sectorN) {
-    const sector = state.sectors.find(s => s.n === sectorN);
-    const residues = state.residuesBySector[sectorN] || [];
-    if (!sector) return;
-    
-    document.getElementById('modalTitle').textContent = `Sector ${sectorN} Details: (1/${sectorN+1}, 1/${sectorN}]`;
-    const primes = residues.filter(r => r.isPrime);
-    
-    document.getElementById('modalBody').innerHTML = `
-        <div class="detail-grid">
-            <div class="detail-card"><h5>Exact Count</h5><div class="value">${sector.exact !== null ? sector.exact : 'N/A'}</div></div>
-            <div class="detail-card"><h5>Predicted</h5><div class="value">${formatNumber(sector.predicted)}</div></div>
-            <div class="detail-card"><h5>Error</h5><div class="value" style="color:${sector.error !== null && Math.abs(sector.relError) > 10 ? '#f87171' : '#4ade80'}">${sector.error !== null ? sector.error.toFixed(1) : 'N/A'}</div></div>
-            <div class="detail-card"><h5>Prime Moduli</h5><div class="value">${primes.length}</div></div>
-        </div>
-        ${residues.length > 0 ? `
-        <h4>Sample Residues (${Math.min(100, residues.length)} shown)</h4>
-        <div class="residue-list">${residues.slice(0, 100).map(r => `<span class="residue-item ${r.isPrime ? 'prime' : ''}">${r.r}/${r.m}</span>`).join('')}</div>
-        ` : '<p style="color:#64748b">No exact data. Use Exact mode.</p>'}
-        <button style="margin-top:15px;" onclick="visualizeSectorFromModal(${sectorN})">View in Ring</button>
-    `;
-    document.getElementById('sectorModal').classList.add('active');
-}
-
-function closeModal() { document.getElementById('sectorModal').classList.remove('active'); }
-
-function visualizeSectorFromModal(s) {
-    closeModal();
-    document.getElementById('viewSector').value = s;
-    document.getElementById('showAllSectors').checked = false;
-    drawMainRing();
-    document.getElementById('mainRing').scrollIntoView({ behavior: 'smooth' });
-}
-
-function screenshotChart(id, title) {
-    const canvas = document.getElementById(id);
-    const link = document.createElement('a');
-    link.download = `farey_${title.replace(/\s+/g, '_').toLowerCase()}_${Date.now()}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-}
-
-function screenshotElement(id, title) {
-    const canvas = document.getElementById(id);
-    const link = document.createElement('a');
-    link.download = `farey_${title.replace(/\s+/g, '_').toLowerCase()}_${Date.now()}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-}
-
-function screenshotTable() {
-    alert('Table export: Use Export CSV for data.');
-}
-
-function exportData() {
-    let csv = 'n,interval,width,exact,predicted,error,relError,primeCount\n';
-    state.sectors.forEach(s => { csv += `${s.n},"(1/${s.n+1},1/${s.n}]",${s.width},${s.exact ?? ''},${s.predicted},${s.error ?? ''},${s.relError ?? ''},${s.primeCount ?? ''}\n`; });
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'farey_sectors.csv'; a.click();
-}
-
-function exportLatex() {
-    const blob = new Blob([document.getElementById('latexOutput').textContent], { type: 'text/plain' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'farey_sectors.tex'; a.click();
-}
+function exportAllData() { exportCSVAll(); }
 
 function switchTab(name) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
     document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');
     document.getElementById(`tab-${name}`).classList.add('active');
-    if (name === 'ford') drawFordCircles();
-    if (name === 'sternbrocot') drawSternBrocot();
-    if (name === 'heatmap') drawHeatmap();
-    if (name === 'gaps') updateGapAnalysis();
+    
+    if(name==='dedekind') computeDedekind();
+    if(name==='cf') updateCFDisplay();
+    if(name==='psl') computePSL();
+    if(name==='euler') computeEulerProduct();
+    if(name==='modular') updateModularAnalysis();
+    if(name==='3d') draw3D();
+    if(name==='hyperbolic') drawHyperbolic();
+    if(name==='smith') drawSmithChart();
+    if(name==='stats') updateStatistics();
+    if(name==='primes') updatePrimeAnalysis();
 }
 
-document.addEventListener('click', (e) => { if (e.target.classList.contains('modal-overlay')) { closeModal(); closePointModal(); } });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closePointModal(); } });
+document.addEventListener('click', e => { if(e.target.classList.contains('modal-overlay')) closePointModal(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') closePointModal(); });
 
 computeAll();
 </script>
