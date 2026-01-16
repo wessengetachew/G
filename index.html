@@ -1,10 +1,10 @@
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Farey Sector Formula - Complete Research Platform</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1a; color: #e2e8f0; line-height: 1.6; font-size: 14px; }
@@ -118,7 +118,13 @@
         .cf-path { font-family: monospace; background: #334155; padding: 2px 6px; border-radius: 3px; margin: 2px; display: inline-block; }
         
         .screenshot-btn { position: absolute; top: 8px; right: 8px; padding: 4px 8px; background: rgba(99,102,241,0.8); border: none; border-radius: 3px; color: white; font-size: 10px; cursor: pointer; z-index: 10; }
+        .export-4k-btn { position: absolute; top: 8px; right: 90px; padding: 4px 8px; background: rgba(168,85,247,0.8); border: none; border-radius: 3px; color: white; font-size: 10px; cursor: pointer; z-index: 10; }
+        .export-4k-btn:hover { background: rgba(168,85,247,1); }
         .chart-wrapper { position: relative; }
+        .composite-export-btn { margin-top: 10px; padding: 10px 16px; font-size: 13px; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); }
+        .composite-export-btn:hover { opacity: 0.95; }
+        #compositeCanvas { display: none; max-width: 100%; margin-top: 10px; }
+        .composite-info { background: #1e1b4b; border: 1px solid #8b5cf6; padding: 10px 12px; border-radius: 5px; margin-top: 10px; font-size: 0.85em; color: #cbd5e1; }
         
         .heatmap-cell { display: inline-block; width: 20px; height: 20px; margin: 1px; border-radius: 2px; }
         
@@ -160,6 +166,7 @@
             <button onclick="computeAll()">Compute</button>
             <button class="secondary" onclick="cancelComputation()">Cancel</button>
             <button class="secondary" onclick="exportAllData()">Export All</button>
+            <button class="composite-export-btn" onclick="exportCompositeTab()" title="Export all visible charts to single 4K image">4K Composite</button>
         </div>
         <div class="progress-bar" id="progressBar" style="display:none;"><div class="progress-fill" id="progressFill"></div></div>
         <div id="statusArea"></div>
@@ -186,6 +193,11 @@
     
     <!-- MAIN TAB -->
     <div id="tab-main" class="tab-content active">
+        <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#1e1b4b);border-left:4px solid #6366f1;margin-bottom:20px;">
+            <h3 style="color:#a78bfa;margin-top:0;">Main Sector Analysis</h3>
+            <div style="background:#0f172a;padding:15px;border-radius:6px;margin:12px 0;font-family:monospace;font-size:1.1em;text-align:center;color:#6366f1;">C(n,N) = 3N² / (π² n(n+1))</div>
+            <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;"><strong>Definition:</strong> Sectors are defined by consecutive Farey bounds: sector S_n spans the interval (1/(n+1), 1/n], a decreasing sequence of intervals that partition [0,1]. <strong>Formula Purpose:</strong> This asymptotic formula provides increasingly accurate predictions of the count of coprime pairs (r,m) with r/m in sector S_n, where N is the maximum denominator. As N grows, the accuracy of this prediction improves significantly. The formula shows how the Farey sequence distributes its fractions across the unit interval with mathematical precision.</p>
+        </div>
         <div class="stat-grid" id="mainStats"></div>
         <div class="grid-2" style="margin-top:15px;">
             <div class="chart-box chart-wrapper"><h4>Exact vs Predicted</h4><canvas id="mainCountChart"></canvas></div>
@@ -209,35 +221,42 @@
     
     <!-- GAPS TAB -->
     <div id="tab-gaps" class="tab-content">
-        <div class="panel">
-            <h3>Gap Analysis</h3>
-            <div class="theorem-box"><strong>Farey Gap:</strong> For consecutive fractions a/b, c/d: gap = 1/(bd)</div>
-            <div class="stat-grid" id="gapStats" style="margin-top:12px;"></div>
+        <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#1e1b4b);border-left:4px solid #8b5cf6;margin-bottom:20px;">
+            <h3 style="color:#a78bfa;margin-top:0;">Farey Gap Analysis</h3>
+            <div style="background:#0f172a;padding:15px;border-radius:6px;margin:12px 0;font-family:monospace;font-size:1.1em;text-align:center;color:#8b5cf6;">gap(a/b, c/d) = 1/(b·d)</div>
+            <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">For consecutive Farey fractions a/b and c/d, the gap between them equals exactly 1/(b·d). This elegant formula shows that gaps decrease as denominators grow. Analyzing gap distribution reveals how fractions cluster and spread across the unit interval. Largest gaps indicate sparse regions, smallest gaps show dense packing.</p>
+        </div>
+        <div class="stat-grid" id="gapStats" style="margin-top:12px;"></div>
             <div class="grid-2" style="margin-top:15px;">
                 <div class="chart-box"><h4>Gap Distribution</h4><canvas id="gapDistChart"></canvas></div>
                 <div class="chart-box"><h4>Gap vs Denom Product</h4><canvas id="gapVsDenomChart"></canvas></div>
             </div>
             <div class="panel" style="margin-top:15px; background:#0f172a;"><h4>Largest Gaps</h4><div class="table-scroll"><table id="gapTable"><thead><tr><th>Left</th><th>Right</th><th>Gap</th><th>1/(bd)</th><th>Sector</th></tr></thead><tbody></tbody></table></div></div>
-        </div>
     </div>
     
     <!-- FRANEL-LANDAU TAB -->
     <div id="tab-franel" class="tab-content">
-        <div class="panel">
-            <h3>Franel-Landau Theorem</h3>
-            <div class="rh-box"><strong>RH Equivalence:</strong> Define δ_k = F_k - k/|F_N| for k-th Farey fraction. Then Σ|δ_k| = O(N^(1/2+ε)) ⟺ RH</div>
-            <div class="stat-grid" id="franelStats" style="margin-top:12px;"></div>
+        <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#1e1b4b);border-left:4px solid #06b6d4;margin-bottom:20px;">
+            <h3 style="color:#a78bfa;margin-top:0;">Franel-Landau Theorem</h3>
+            <div style="background:#0f172a;padding:15px;border-radius:6px;margin:12px 0;font-family:monospace;font-size:1.1em;text-align:center;color:#06b6d4;">Σ|δ_k| = O(N^(1/2+ε)) ⟺ Riemann Hypothesis</div>
+            <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">Define δ_k = F_k - k/|F_N| as the k-th Farey fraction deviation. The growth rate of Σ|δ_k| is directly equivalent to the Riemann Hypothesis. If RH is true, the sum grows slower than N^(1/2+ε) for any ε > 0. This provides a concrete computational test for RH properties through Farey sequence analysis. <strong style="color:#f87171;">Note: These computations illustrate known equivalences but do not constitute a proof or disproof of RH.</strong></p>
+        </div>
+        <div class="stat-grid" id="franelStats" style="margin-top:12px;"></div>
             <div class="grid-2" style="margin-top:15px;">
                 <div class="chart-box"><h4>Deviation δ_k vs k</h4><canvas id="franelDeviationChart"></canvas></div>
                 <div class="chart-box"><h4>Cumulative |δ| / N^α</h4><canvas id="franelCumulativeChart"></canvas></div>
             </div>
             <div class="chart-box" style="margin-top:15px;"><h4>Σ|δ| / N^α for various α</h4><canvas id="franelAlphaChart"></canvas></div>
             <div class="derivation-box" style="margin-top:15px;"><strong>Interpretation:</strong> If RH is true, the normalized sum should stay bounded. Divergence for α ≤ 1/2 would contradict RH.</div>
-        </div>
     </div>
     
     <!-- DEDEKIND TAB -->
     <div id="tab-dedekind" class="tab-content">
+        <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#1e1b4b);border-left:4px solid #f59e0b;margin-bottom:20px;">
+            <h3 style="color:#a78bfa;margin-top:0;">Dedekind Sums</h3>
+            <div style="background:#0f172a;padding:15px;border-radius:6px;margin:12px 0;font-family:monospace;font-size:1.1em;text-align:center;color:#f59e0b;">s(h,k) = Σ_{j=1}^{k-1} ((j/k))((hj/k))</div>
+            <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">Dedekind sums are arithmetic functions encoding properties of coprime pairs (h,k). They satisfy reciprocity formulas: s(h,k) + s(k,h) = -1/4 + (1/12)(h/k + k/h + 1/(hk)). These sums connect to modular forms and are fundamental in algebraic number theory.</p>
+        </div>
         <div class="panel">
             <h3>Dedekind Sums</h3>
             <div class="theorem-box"><strong>Definition:</strong> s(h,k) = Σ_{j=1}^{k-1} ((j/k))((hj/k)) where ((x)) = x - ⌊x⌋ - 1/2 if x∉ℤ, else 0</div>
@@ -1341,10 +1360,177 @@ function switchTab(name) {
     if(name==='primes') updatePrimeAnalysis();
 }
 
+function exportCanvas4K(canvasElement, title) {
+    const canvas = canvasElement;
+    const scale = 2;
+    const scaledWidth = canvas.width * scale;
+    const scaledHeight = canvas.height * scale;
+    
+    const offscreenCanvas = document.createElement('canvas');
+    offscreenCanvas.width = scaledWidth;
+    offscreenCanvas.height = scaledHeight;
+    const ctx = offscreenCanvas.getContext('2d');
+    ctx.scale(scale, scale);
+    
+    const img = new Image();
+    img.onload = function() {
+        ctx.drawImage(img, 0, 0);
+        const link = document.createElement('a');
+        link.href = offscreenCanvas.toDataURL('image/png');
+        link.download = `${title || 'export'}_4k.png`;
+        link.click();
+    };
+    img.src = canvas.toDataURL('image/png');
+}
+
+async function exportCompositeTab() {
+    const tabContent = document.querySelector('.tab-content.active');
+    if (!tabContent) { alert('No tab active'); return; }
+    
+    const baseWidth = 7680;
+    const baseHeight = 4320;
+    const compositeCanvas = document.createElement('canvas');
+    compositeCanvas.width = baseWidth;
+    compositeCanvas.height = baseHeight;
+    const ctx = compositeCanvas.getContext('2d');
+    
+    ctx.fillStyle = '#0a0f1a';
+    ctx.fillRect(0, 0, baseWidth, baseHeight);
+    
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = 'bold 120px Arial';
+    ctx.textAlign = 'center';
+    const activeTab = document.querySelector('.tab.active');
+    const tabName = activeTab ? activeTab.textContent.trim() : 'Export';
+    ctx.fillText(tabName + ' - 4K Composite Export', baseWidth / 2, 200);
+    
+    ctx.font = '60px Arial';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText(`Generated: ${new Date().toLocaleString()}`, baseWidth / 2, 300);
+    
+    const canvases = tabContent.querySelectorAll('canvas');
+    const chartBoxes = tabContent.querySelectorAll('.chart-box');
+    
+    if (canvases.length === 0) { alert('No canvases found in this tab'); return; }
+    
+    let yPos = 450;
+    let xPos = 100;
+    let columnWidth = baseWidth / 2 - 150;
+    let maxHeight = 1500;
+    let colIndex = 0;
+    
+    for (let i = 0; i < canvases.length; i++) {
+        const canvas = canvases[i];
+        const chartBox = chartBoxes[i];
+        
+        if (yPos + maxHeight + 200 > baseHeight) {
+            colIndex++;
+            yPos = 450;
+            if (colIndex >= 2) {
+                alert('Too many charts for one 4K page. Consider exporting individual tabs.');
+                break;
+            }
+        }
+        
+        xPos = colIndex === 0 ? 100 : baseWidth / 2 + 50;
+        
+        const title = chartBox ? chartBox.querySelector('h4')?.textContent || 'Chart' : 'Chart';
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '50px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(title, xPos, yPos);
+        yPos += 80;
+        
+        const img = new Image();
+        img.src = canvas.toDataURL('image/png');
+        await new Promise(resolve => {
+            img.onload = function() {
+                const scaleFactor = columnWidth / canvas.width;
+                const scaledHeight = canvas.height * scaleFactor;
+                ctx.drawImage(img, xPos, yPos, columnWidth, scaledHeight);
+                yPos += scaledHeight + 150;
+                resolve();
+            };
+            img.onerror = () => resolve();
+        });
+    }
+    
+    yPos = baseHeight - 400;
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(50, yPos - 50, baseWidth - 100, 350);
+    
+    ctx.fillStyle = '#f1f5f9';
+    ctx.font = 'bold 50px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('Legend & Parameters', 100, yPos + 20);
+    
+    ctx.font = '40px Arial';
+    ctx.fillStyle = '#cbd5e1';
+    let legendY = yPos + 100;
+    const legendItems = [
+        'Resolution: 4K (7680×4320)',
+        'Color Scale: Indigo (#6366f1) to Purple (#8b5cf6)',
+        'Time Generated: ' + new Date().toISOString(),
+        'Tab: ' + tabName
+    ];
+    
+    legendItems.forEach((item, idx) => {
+        ctx.fillText(item, 120, legendY + (idx * 60));
+    });
+    
+    compositeCanvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `farey_${tabName.toLowerCase().replace(/\\s+/g,'_')}_4k_composite.png`;
+        link.click();
+        URL.revokeObjectURL(url);
+    });
+}
+
+document.addEventListener('click', e => {
+    if (e.target.classList.contains('export-4k-btn')) {
+        const canvas = e.target.closest('.chart-wrapper')?.querySelector('canvas') ||
+                       e.target.closest('.chart-box')?.querySelector('canvas');
+        if (canvas) {
+            const title = e.target.closest('.chart-box')?.querySelector('h4')?.textContent || 'export';
+            exportCanvas4K(canvas, title);
+        }
+    }
+});
+
 document.addEventListener('click', e => { if(e.target.classList.contains('modal-overlay')) closePointModal(); });
 document.addEventListener('keydown', e => { if(e.key==='Escape') closePointModal(); });
 
+function addExportButtons() {
+    document.querySelectorAll('.chart-box').forEach(box => {
+        if (!box.querySelector('.export-4k-btn')) {
+            const btn = document.createElement('button');
+            btn.className = 'export-4k-btn';
+            btn.textContent = '4K Export';
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const canvas = box.querySelector('canvas');
+                const title = box.querySelector('h4')?.textContent || 'export';
+                if (canvas) exportCanvas4K(canvas, title);
+            });
+            box.style.position = 'relative';
+            box.appendChild(btn);
+        }
+    });
+}
+
+const originalSwitchTab = window.switchTab;
+window.switchTab = function(name) {
+    originalSwitchTab.call(this, name);
+    setTimeout(addExportButtons, 100);
+};
+
+document.addEventListener('DOMContentLoaded', addExportButtons);
+setTimeout(addExportButtons, 500);
+
 computeAll();
+
 </script>
 </body>
     </html>
