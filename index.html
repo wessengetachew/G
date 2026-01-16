@@ -217,7 +217,7 @@
             <div class="table-scroll"><table id="mainTable"><thead><tr><th>n</th><th>Interval</th><th>Exact</th><th>Pred</th><th>Err%</th><th>Primes</th><th>Composites</th></tr></thead><tbody></tbody></table></div>
         </div>
         <div class="panel chart-wrapper">
-            <h4>Sector Ring <span style="font-weight:normal; color:#64748b;">(click points)</span></h4>
+            <h4>Sector Ring <span style="font-weight:normal; color:#64748b;">(click points to see tree path)</span></h4>
             <div class="control-row" style="margin-bottom:10px;">
                 <label>Sector: <input type="number" id="viewSector" value="1" min="1" onchange="drawMainRing()"></label>
                 <label>Color: <select id="colorMode" onchange="drawMainRing()"><option value="sector">Sector</option><option value="prime">Prime</option><option value="denominator">Denom</option><option value="gap">Gap</option></select></label>
@@ -227,6 +227,30 @@
             <div style="text-align:center;position:relative;"><canvas id="mainRing" class="ring-canvas" width="600" height="600"></canvas><div class="point-tooltip" id="pointTooltip"></div></div>
             <div class="color-legend" id="colorLegend"></div>
             <div style="margin-top:10px;"><button onclick="screenshotFullTab('main')">Screenshot Full Main Tab</button></div>
+        </div>
+        
+        <div class="panel chart-wrapper">
+            <h4>Sector Tree Path <span style="font-weight:normal; color:#64748b;">(Stern-Brocot navigation)</span></h4>
+            <div class="control-row" style="margin-bottom:10px;">
+                <label>Tree Depth: <input type="number" id="treeDepth" value="8" min="3" max="15" onchange="drawSectorTree()"></label>
+                <label><input type="checkbox" id="showTreeLabels" checked onchange="drawSectorTree()"> Labels</label>
+                <label><input type="checkbox" id="showTreeGrid" onchange="drawSectorTree()"> Grid</label>
+                <label><input type="checkbox" id="animatePath" checked> Animate</label>
+                <button class="secondary" onclick="clearTreePath()">Clear Path</button>
+            </div>
+            <div style="text-align:center;position:relative;">
+                <canvas id="sectorTreeCanvas" class="ring-canvas" width="900" height="500"></canvas>
+            </div>
+            <div id="treePathInfo" style="margin-top:10px; padding:10px; background:#0f172a; border-radius:5px; font-family:monospace; font-size:0.9em;">
+                <span style="color:#64748b;">Click a point on the ring above to see its tree path</span>
+            </div>
+            <div class="color-legend">
+                <div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Tree nodes</div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Path to target</div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:#22c55e"></div>Target fraction</div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:#ef4444"></div>L (left)</div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:#3b82f6"></div>R (right)</div>
+            </div>
         </div>
     </div>
     
@@ -328,40 +352,113 @@
             <p style="color:#a5b4fc;font-size:0.9em;">Visual exploration of the Farey Sector Density Theorem with interactive elements</p>
         </div>
         
+        <div class="control-panel">
+            <div class="control-row">
+                <div class="control-group highlight">
+                    <label>Max Sectors:</label>
+                    <input type="number" id="tvMaxSectors" value="8" min="3" max="20" onchange="drawTheoryViz()">
+                </div>
+                <div class="control-group highlight">
+                    <label>Max N:</label>
+                    <input type="number" id="tvMaxN" value="150" min="20" max="500" onchange="drawTheoryViz()">
+                </div>
+                <div class="control-group highlight">
+                    <label>Lattice Size:</label>
+                    <input type="number" id="tvLatticeSize" value="22" min="10" max="40" onchange="drawTheoryViz()">
+                </div>
+                <div class="control-group">
+                    <label>Highlight Sector:</label>
+                    <input type="number" id="tvHighlightSector" value="2" min="1" max="10" onchange="drawTheoryViz()">
+                </div>
+                <button onclick="drawTheoryViz()">Refresh All</button>
+                <button class="secondary" onclick="animateTheoryViz()">Animate Growth</button>
+            </div>
+        </div>
+        
         <div class="grid-2">
             <div class="chart-box chart-wrapper">
                 <h4>Sector Partition of (0,1]</h4>
+                <div class="control-row" style="margin-bottom:8px;">
+                    <label><input type="checkbox" id="tvShowSectorValues" checked onchange="drawSectorPartition()"> Values</label>
+                    <label><input type="checkbox" id="tvShowSectorWidths" onchange="drawSectorPartition()"> Widths</label>
+                    <label>Style: <select id="tvPartitionStyle" onchange="drawSectorPartition()"><option value="bar">Bar</option><option value="arc">Arc</option><option value="number">Number Line</option></select></label>
+                </div>
                 <canvas id="sectorPartitionCanvas" width="550" height="350"></canvas>
                 <div class="color-legend" id="sectorPartitionLegend"></div>
             </div>
             <div class="chart-box chart-wrapper">
                 <h4>Density Cone: C(n,N) ~ N²/n(n+1)</h4>
+                <div class="control-row" style="margin-bottom:8px;">
+                    <label>Sectors to show: <input type="number" id="tvConeSectors" value="4" min="1" max="10" onchange="drawDensityCone()"></label>
+                    <label><input type="checkbox" id="tvShowConeRef" checked onchange="drawDensityCone()"> 6/π² ref</label>
+                    <label><input type="checkbox" id="tvLogScale" onchange="drawDensityCone()"> Log Y</label>
+                </div>
                 <canvas id="densityConeCanvas" width="550" height="350"></canvas>
-                <div class="color-legend"><div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>n=1</div><div class="color-legend-item"><div class="color-swatch" style="background:#8b5cf6"></div>n=2</div><div class="color-legend-item"><div class="color-swatch" style="background:#a855f7"></div>n=3</div><div class="color-legend-item"><div class="color-swatch" style="background:#d946ef"></div>n=4</div><div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>6/π²</div></div>
+                <div class="color-legend" id="densityConeLegend"></div>
             </div>
         </div>
         
         <div class="grid-2" style="margin-top:15px;">
             <div class="chart-box chart-wrapper">
                 <h4>Summatory Totient: Σφ(b) ~ 3N²/π²</h4>
+                <div class="control-row" style="margin-bottom:8px;">
+                    <label><input type="checkbox" id="tvShowTotientActual" checked onchange="drawTotientSum()"> Actual</label>
+                    <label><input type="checkbox" id="tvShowTotientPredicted" checked onchange="drawTotientSum()"> Predicted</label>
+                    <label><input type="checkbox" id="tvShowTotientError" onchange="drawTotientSum()"> Error</label>
+                    <label><input type="checkbox" id="tvTotientFill" onchange="drawTotientSum()"> Fill</label>
+                </div>
                 <canvas id="totientSumCanvas" width="550" height="350"></canvas>
                 <div class="color-legend"><div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Actual Σφ(b)</div><div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>Asymptotic 3N²/π²</div></div>
             </div>
             <div class="chart-box chart-wrapper">
                 <h4>Visible Lattice Points by Direction</h4>
+                <div class="control-row" style="margin-bottom:8px;">
+                    <label><input type="checkbox" id="tvShowHidden" checked onchange="drawLatticeViz()"> Hidden pts</label>
+                    <label><input type="checkbox" id="tvShowSectorLines" checked onchange="drawLatticeViz()"> Sector lines</label>
+                    <label><input type="checkbox" id="tvColorBySector" onchange="drawLatticeViz()"> Color by sector</label>
+                    <label>Point size: <input type="range" id="tvPointSize" min="2" max="8" value="4" onchange="drawLatticeViz()"></label>
+                </div>
                 <canvas id="latticeVizCanvas" width="550" height="350"></canvas>
                 <div class="color-legend"><div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Visible (gcd=1)</div><div class="color-legend-item"><div class="color-swatch" style="background:#334155"></div>Hidden (gcd>1)</div><div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Sector Boundary</div></div>
             </div>
         </div>
         
+        <div class="grid-2" style="margin-top:15px;">
+            <div class="chart-box chart-wrapper">
+                <h4>Proof Visualization: Step-by-Step Accumulation</h4>
+                <div class="control-row" style="margin-bottom:8px;">
+                    <label>Sector n: <input type="number" id="tvProofSector" value="2" min="1" max="10" onchange="drawProofSteps()"></label>
+                    <label><input type="checkbox" id="tvShowContribBars" checked onchange="drawProofSteps()"> Contrib bars</label>
+                    <label><input type="checkbox" id="tvShowProofPredicted" checked onchange="drawProofSteps()"> Predicted</label>
+                </div>
+                <canvas id="proofStepsCanvas" width="550" height="350"></canvas>
+                <div class="color-legend"><div class="color-legend-item"><div class="color-swatch" style="background:#8b5cf6"></div>Cumulative count</div><div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>Predicted asymptotic</div><div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>φ(b)/(n(n+1)) contribution</div></div>
+            </div>
+            <div class="chart-box chart-wrapper">
+                <h4>Convergence Rate Analysis</h4>
+                <div class="control-row" style="margin-bottom:8px;">
+                    <label>Analysis type: <select id="tvConvergenceType" onchange="drawConvergenceAnalysis()"><option value="relative">Relative Error</option><option value="absolute">Absolute Error</option><option value="ratio">Actual/Predicted</option></select></label>
+                    <label><input type="checkbox" id="tvShowConvergenceTrend" checked onchange="drawConvergenceAnalysis()"> Trend line</label>
+                </div>
+                <canvas id="convergenceCanvas" width="550" height="350"></canvas>
+                <div class="color-legend" id="convergenceLegend"></div>
+            </div>
+        </div>
+        
         <div class="chart-box chart-wrapper" style="margin-top:15px;">
-            <h4>Proof Visualization: Step-by-Step Accumulation (Sector n=2)</h4>
-            <canvas id="proofStepsCanvas" width="1100" height="350"></canvas>
-            <div class="color-legend"><div class="color-legend-item"><div class="color-swatch" style="background:#8b5cf6"></div>Cumulative count</div><div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>Predicted asymptotic</div><div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>φ(b)/(n(n+1)) contribution</div></div>
+            <h4>Sector Density Heatmap: C(n,N) across parameters</h4>
+            <div class="control-row" style="margin-bottom:8px;">
+                <label>N range: <input type="number" id="tvHeatmapNMin" value="20" min="10" max="100"> to <input type="number" id="tvHeatmapNMax" value="150" min="50" max="300"></label>
+                <label>Sectors: <input type="number" id="tvHeatmapSectors" value="10" min="3" max="15"></label>
+                <label>Color: <select id="tvHeatmapColor" onchange="drawDensityHeatmap()"><option value="viridis">Viridis</option><option value="plasma">Plasma</option><option value="coolwarm">Cool-Warm</option></select></label>
+                <button onclick="drawDensityHeatmap()">Generate</button>
+            </div>
+            <canvas id="densityHeatmapCanvas" width="1100" height="300"></canvas>
+            <div class="color-legend"><div class="color-legend-item"><div class="color-swatch" style="background:#440154"></div>Low density</div><div class="color-legend-item"><div class="color-swatch" style="background:#21918c"></div>Medium</div><div class="color-legend-item"><div class="color-swatch" style="background:#fde725"></div>High density</div></div>
         </div>
         
         <div class="derivation-box" style="margin-top:15px;">
-            <strong>Theorem Summary:</strong> For fixed sector n, as N approaches infinity: C(n,N) = (3/pi^2) * N^2 / (n(n+1)) + O(N log N). This follows from summing phi(b)/(n(n+1)) over denominators b <= N and applying the classical totient summation formula.
+            <strong>Theorem Summary:</strong> For fixed sector n, as N approaches infinity: C(n,N) = (3/π²) × N² / (n(n+1)) + O(N log N). This follows from summing φ(b)/(n(n+1)) over denominators b ≤ N and applying the classical totient summation formula.
         </div>
         <div style="margin-top:15px;"><button onclick="screenshotFullTab('theoryviz')">Screenshot Full Theory Viz Tab</button></div>
     </div>
@@ -1087,7 +1184,7 @@ function computeGaps() {
 function cancelComputation() { state.computing = false; }
 
 function updateAllDisplays() {
-    updateMainStats(); updateMainCharts(); updateMainTable(); drawMainRing();
+    updateMainStats(); updateMainCharts(); updateMainTable(); drawMainRing(); drawSectorTree();
     drawTheoryViz();
     updateGapAnalysis(); computeFranel(); computeDedekind(); updateCFDisplay();
     computePSL(); computeEulerProduct(); updateModularAnalysis(); draw3D();
@@ -1103,6 +1200,8 @@ function drawTheoryViz() {
     drawTotientSum();
     drawLatticeViz();
     drawProofSteps();
+    drawConvergenceAnalysis();
+    drawDensityHeatmap();
 }
 
 function drawSectorPartition() {
@@ -1110,45 +1209,120 @@ function drawSectorPartition() {
     if(!canvas) return;
     const ctx = canvas.getContext('2d');
     const W = canvas.width, H = canvas.height;
+    const maxSectors = +(document.getElementById('tvMaxSectors')?.value || 8);
+    const showValues = document.getElementById('tvShowSectorValues')?.checked ?? true;
+    const showWidths = document.getElementById('tvShowSectorWidths')?.checked ?? false;
+    const style = document.getElementById('tvPartitionStyle')?.value || 'bar';
     
     ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
     
     const margin = 50, barH = 40;
     const centerY = H/2;
     
-    ctx.strokeStyle = '#475569'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(margin, centerY); ctx.lineTo(W-margin, centerY); ctx.stroke();
-    
     let legendHtml = '';
-    for (let n = 1; n <= 8; n++) {
-        const left = 1/(n+1), right = 1/n;
-        const x1 = margin + left * (W - 2*margin);
-        const x2 = margin + right * (W - 2*margin);
-        const color = sectorColors[(n-1) % sectorColors.length];
-        
-        ctx.fillStyle = color + '60';
-        ctx.fillRect(x1, centerY - barH, x2 - x1, barH * 2);
-        ctx.strokeStyle = color; ctx.lineWidth = 1;
-        ctx.strokeRect(x1, centerY - barH, x2 - x1, barH * 2);
-        
-        ctx.fillStyle = '#e2e8f0';
-        ctx.font = 'bold 11px system-ui';
-        ctx.textAlign = 'center';
-        if(x2-x1 > 25) ctx.fillText(`S${n}`, (x1+x2)/2, centerY + 4);
-        
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '9px system-ui';
-        ctx.fillText(`1/${n+1}`, x1, centerY + barH + 18);
-        
-        legendHtml += `<div class="color-legend-item"><div class="color-swatch" style="background:${color}"></div>S${n}=(1/${n+1},1/${n}]</div>`;
-    }
     
-    ctx.fillStyle = '#f1f5f9';
-    ctx.font = '11px system-ui';
-    ctx.textAlign = 'left';
-    ctx.fillText('0', margin - 12, centerY + barH + 18);
-    ctx.textAlign = 'right';
-    ctx.fillText('1', W - margin + 12, centerY + barH + 18);
+    if (style === 'arc') {
+        // Arc/pie style
+        const cx = W/2, cy = H/2, radius = Math.min(W,H)/2 - 60;
+        ctx.strokeStyle = '#475569'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(cx, cy, radius, 0, 2*Math.PI); ctx.stroke();
+        
+        for (let n = 1; n <= maxSectors; n++) {
+            const left = 1/(n+1), right = 1/n;
+            const a1 = left * 2 * Math.PI - Math.PI/2;
+            const a2 = right * 2 * Math.PI - Math.PI/2;
+            const color = sectorColors[(n-1) % sectorColors.length];
+            
+            ctx.fillStyle = color + '60';
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, radius, a1, a2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = color;
+            ctx.stroke();
+            
+            if (showValues && n <= 6) {
+                const midAngle = (a1 + a2) / 2;
+                const labelR = radius * 0.7;
+                ctx.fillStyle = '#e2e8f0';
+                ctx.font = 'bold 11px system-ui';
+                ctx.textAlign = 'center';
+                ctx.fillText(`S${n}`, cx + Math.cos(midAngle)*labelR, cy + Math.sin(midAngle)*labelR + 4);
+            }
+            legendHtml += `<div class="color-legend-item"><div class="color-swatch" style="background:${color}"></div>S${n}</div>`;
+        }
+    } else if (style === 'number') {
+        // Number line style
+        ctx.strokeStyle = '#475569'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(margin, centerY); ctx.lineTo(W-margin, centerY); ctx.stroke();
+        
+        // Tick marks
+        for (let i = 0; i <= 10; i++) {
+            const x = margin + (i/10) * (W - 2*margin);
+            ctx.beginPath(); ctx.moveTo(x, centerY - 10); ctx.lineTo(x, centerY + 10); ctx.stroke();
+            ctx.fillStyle = '#94a3b8'; ctx.font = '10px system-ui'; ctx.textAlign = 'center';
+            ctx.fillText((i/10).toFixed(1), x, centerY + 25);
+        }
+        
+        for (let n = 1; n <= maxSectors; n++) {
+            const left = 1/(n+1), right = 1/n;
+            const x1 = margin + left * (W - 2*margin);
+            const x2 = margin + right * (W - 2*margin);
+            const color = sectorColors[(n-1) % sectorColors.length];
+            
+            ctx.fillStyle = color;
+            ctx.fillRect(x1, centerY - 5, x2 - x1, 10);
+            
+            if (showValues && x2-x1 > 20) {
+                ctx.fillStyle = '#e2e8f0';
+                ctx.font = '9px system-ui';
+                ctx.fillText(`S${n}`, (x1+x2)/2, centerY - 15);
+            }
+            legendHtml += `<div class="color-legend-item"><div class="color-swatch" style="background:${color}"></div>S${n}</div>`;
+        }
+    } else {
+        // Default bar style
+        ctx.strokeStyle = '#475569'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(margin, centerY); ctx.lineTo(W-margin, centerY); ctx.stroke();
+        
+        for (let n = 1; n <= maxSectors; n++) {
+            const left = 1/(n+1), right = 1/n;
+            const x1 = margin + left * (W - 2*margin);
+            const x2 = margin + right * (W - 2*margin);
+            const color = sectorColors[(n-1) % sectorColors.length];
+            
+            ctx.fillStyle = color + '60';
+            ctx.fillRect(x1, centerY - barH, x2 - x1, barH * 2);
+            ctx.strokeStyle = color; ctx.lineWidth = 1;
+            ctx.strokeRect(x1, centerY - barH, x2 - x1, barH * 2);
+            
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = 'bold 11px system-ui';
+            ctx.textAlign = 'center';
+            if(x2-x1 > 25) ctx.fillText(`S${n}`, (x1+x2)/2, centerY + 4);
+            
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '9px system-ui';
+            ctx.fillText(`1/${n+1}`, x1, centerY + barH + 18);
+            
+            if (showWidths && x2-x1 > 30) {
+                const width = 1/(n*(n+1));
+                ctx.fillStyle = '#64748b';
+                ctx.font = '8px system-ui';
+                ctx.fillText(`w=${width.toFixed(3)}`, (x1+x2)/2, centerY + barH + 35);
+            }
+            
+            legendHtml += `<div class="color-legend-item"><div class="color-swatch" style="background:${color}"></div>S${n}=(1/${n+1},1/${n}]</div>`;
+        }
+        
+        ctx.fillStyle = '#f1f5f9';
+        ctx.font = '11px system-ui';
+        ctx.textAlign = 'left';
+        ctx.fillText('0', margin - 12, centerY + barH + 18);
+        ctx.textAlign = 'right';
+        ctx.fillText('1', W - margin + 12, centerY + barH + 18);
+    }
     
     ctx.fillStyle = '#cbd5e1';
     ctx.font = '12px system-ui';
@@ -1163,6 +1337,10 @@ function drawDensityCone() {
     if(!canvas) return;
     const ctx = canvas.getContext('2d');
     const W = canvas.width, H = canvas.height;
+    const maxN = +(document.getElementById('tvMaxN')?.value || 150);
+    const numSectors = +(document.getElementById('tvConeSectors')?.value || 4);
+    const showRef = document.getElementById('tvShowConeRef')?.checked ?? true;
+    const logScale = document.getElementById('tvLogScale')?.checked ?? false;
     
     ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
     
@@ -1170,16 +1348,18 @@ function drawDensityCone() {
     const plotW = W - margin.l - margin.r;
     const plotH = H - margin.t - margin.b;
     
-    const maxN = 200;
     const maxY = formula(1, maxN);
     
     ctx.strokeStyle = '#334155'; ctx.lineWidth = 0.5;
     for(let i=0; i<=4; i++) {
         const y = margin.t + plotH - (i/4)*plotH;
         ctx.beginPath(); ctx.moveTo(margin.l, y); ctx.lineTo(W-margin.r, y); ctx.stroke();
+        ctx.fillStyle = '#64748b'; ctx.font = '9px system-ui'; ctx.textAlign = 'right';
+        ctx.fillText(fmt(maxY * i / 4), margin.l - 5, y + 3);
     }
     
-    for (let n = 1; n <= 4; n++) {
+    let legendHtml = '';
+    for (let n = 1; n <= numSectors; n++) {
         const color = sectorColors[(n-1) % sectorColors.length];
         ctx.strokeStyle = color;
         ctx.lineWidth = 2;
@@ -1188,7 +1368,8 @@ function drawDensityCone() {
         for (let N = 10; N <= maxN; N += 3) {
             const C = formula(n, N);
             const x = margin.l + (N / maxN) * plotW;
-            const y = margin.t + plotH - (C / maxY) * plotH;
+            const yVal = logScale ? Math.log(C + 1) / Math.log(maxY + 1) : C / maxY;
+            const y = margin.t + plotH - yVal * plotH;
             N === 10 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
         }
         ctx.stroke();
@@ -1196,21 +1377,26 @@ function drawDensityCone() {
         ctx.fillStyle = color;
         ctx.font = '10px system-ui';
         const labelY = margin.t + plotH - (formula(n, maxN) / maxY) * plotH;
-        ctx.fillText(`n=${n}`, W - margin.r - 30, labelY + 4);
+        ctx.fillText(`n=${n}`, W - margin.r - 30, Math.max(margin.t + 15, labelY + 4));
+        
+        legendHtml += `<div class="color-legend-item"><div class="color-swatch" style="background:${color}"></div>n=${n}</div>`;
     }
     
-    ctx.strokeStyle = '#22c55e';
-    ctx.setLineDash([5,5]);
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    const refY = margin.t + plotH * 0.4;
-    ctx.moveTo(margin.l, refY);
-    ctx.lineTo(W - margin.r, refY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = '#22c55e';
-    ctx.font = '9px system-ui';
-    ctx.fillText('6/π² ref', W - margin.r - 35, refY - 5);
+    if (showRef) {
+        ctx.strokeStyle = '#22c55e';
+        ctx.setLineDash([5,5]);
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        const refY = margin.t + plotH * 0.4;
+        ctx.moveTo(margin.l, refY);
+        ctx.lineTo(W - margin.r, refY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#22c55e';
+        ctx.font = '9px system-ui';
+        ctx.fillText('6/π² ref', W - margin.r - 35, refY - 5);
+        legendHtml += `<div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>6/π²</div>`;
+    }
     
     ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
     ctx.beginPath();
@@ -1228,6 +1414,8 @@ function drawDensityCone() {
     ctx.rotate(-Math.PI/2);
     ctx.fillText('C(n,N) →', 0, 0);
     ctx.restore();
+    
+    document.getElementById('densityConeLegend').innerHTML = legendHtml;
 }
 
 function drawTotientSum() {
@@ -1235,6 +1423,11 @@ function drawTotientSum() {
     if(!canvas) return;
     const ctx = canvas.getContext('2d');
     const W = canvas.width, H = canvas.height;
+    const maxN = +(document.getElementById('tvMaxN')?.value || 150);
+    const showActual = document.getElementById('tvShowTotientActual')?.checked ?? true;
+    const showPredicted = document.getElementById('tvShowTotientPredicted')?.checked ?? true;
+    const showError = document.getElementById('tvShowTotientError')?.checked ?? false;
+    const fill = document.getElementById('tvTotientFill')?.checked ?? false;
     
     ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
     
@@ -1242,7 +1435,6 @@ function drawTotientSum() {
     const plotW = W - margin.l - margin.r;
     const plotH = H - margin.t - margin.b;
     
-    const maxN = Math.min(state.nMax, 150);
     let cumPhi = 0;
     const data = [];
     for (let b = 1; b <= maxN; b++) {
@@ -1256,31 +1448,63 @@ function drawTotientSum() {
     for(let i=0; i<=4; i++) {
         const y = margin.t + plotH - (i/4)*plotH;
         ctx.beginPath(); ctx.moveTo(margin.l, y); ctx.lineTo(W-margin.r, y); ctx.stroke();
-        ctx.fillStyle = '#64748b'; ctx.font = '9px system-ui';
-        ctx.fillText(fmt(maxY*i/4), 5, y+3);
+        ctx.fillStyle = '#64748b'; ctx.font = '9px system-ui'; ctx.textAlign = 'right';
+        ctx.fillText(fmt(maxY*i/4), margin.l - 5, y+3);
     }
     
-    ctx.strokeStyle = '#6366f1';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    data.forEach((d, i) => {
-        const x = margin.l + (d.b / maxN) * plotW;
-        const y = margin.t + plotH - (d.cumPhi / maxY) * plotH;
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.stroke();
+    if (showActual) {
+        if (fill) {
+            ctx.fillStyle = 'rgba(99, 102, 241, 0.2)';
+            ctx.beginPath();
+            ctx.moveTo(margin.l, margin.t + plotH);
+            data.forEach((d, i) => {
+                const x = margin.l + (d.b / maxN) * plotW;
+                const y = margin.t + plotH - (d.cumPhi / maxY) * plotH;
+                ctx.lineTo(x, y);
+            });
+            ctx.lineTo(margin.l + plotW, margin.t + plotH);
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        ctx.strokeStyle = '#6366f1';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        data.forEach((d, i) => {
+            const x = margin.l + (d.b / maxN) * plotW;
+            const y = margin.t + plotH - (d.cumPhi / maxY) * plotH;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+    }
     
-    ctx.strokeStyle = '#22c55e';
-    ctx.setLineDash([5,5]);
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    data.forEach((d, i) => {
-        const x = margin.l + (d.b / maxN) * plotW;
-        const y = margin.t + plotH - (d.predicted / maxY) * plotH;
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-    ctx.setLineDash([]);
+    if (showPredicted) {
+        ctx.strokeStyle = '#22c55e';
+        ctx.setLineDash([5,5]);
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        data.forEach((d, i) => {
+            const x = margin.l + (d.b / maxN) * plotW;
+            const y = margin.t + plotH - (d.predicted / maxY) * plotH;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+    
+    if (showError) {
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        const maxErr = Math.max(...data.map(d => Math.abs(d.cumPhi - d.predicted)));
+        data.forEach((d, i) => {
+            const x = margin.l + (d.b / maxN) * plotW;
+            const err = Math.abs(d.cumPhi - d.predicted) / maxErr;
+            const y = margin.t + plotH - err * plotH * 0.3;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+    }
     
     ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
     ctx.beginPath();
@@ -1300,12 +1524,39 @@ function drawLatticeViz() {
     if(!canvas) return;
     const ctx = canvas.getContext('2d');
     const W = canvas.width, H = canvas.height;
+    const maxB = +(document.getElementById('tvLatticeSize')?.value || 22);
+    const highlightSector = +(document.getElementById('tvHighlightSector')?.value || 2);
+    const showHidden = document.getElementById('tvShowHidden')?.checked ?? true;
+    const showSectorLines = document.getElementById('tvShowSectorLines')?.checked ?? true;
+    const colorBySector = document.getElementById('tvColorBySector')?.checked ?? false;
+    const pointSize = +(document.getElementById('tvPointSize')?.value || 4);
     
     ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
     
     const margin = 45;
-    const maxB = 22;
     const scale = (Math.min(W, H) - 2*margin) / maxB;
+    
+    // Draw sector boundary lines first
+    if (showSectorLines) {
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5,5]);
+        
+        // Lines for highlighted sector boundaries
+        const leftSlope = 1/(highlightSector+1);
+        const rightSlope = 1/highlightSector;
+        
+        ctx.beginPath();
+        ctx.moveTo(margin, H - margin);
+        ctx.lineTo(margin + maxB * leftSlope * scale, H - margin - maxB * scale);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(margin, H - margin);
+        ctx.lineTo(margin + maxB * rightSlope * scale, H - margin - maxB * scale);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
     
     for (let b = 1; b <= maxB; b++) {
         for (let a = 1; a <= b; a++) {
@@ -1313,32 +1564,28 @@ function drawLatticeViz() {
             const y = H - margin - b * scale;
             
             const visible = gcd(a, b) === 1;
-            ctx.fillStyle = visible ? '#6366f1' : '#334155';
+            
+            if (!visible && !showHidden) continue;
+            
+            let color;
+            if (!visible) {
+                color = '#334155';
+            } else if (colorBySector) {
+                const sector = getSector(a, b);
+                color = sector ? getSectorColor(sector) : '#6366f1';
+            } else {
+                color = '#6366f1';
+            }
+            
+            // Highlight points in selected sector
+            const inSector = visible && a/b > 1/(highlightSector+1) && a/b <= 1/highlightSector;
+            
+            ctx.fillStyle = inSector ? '#22c55e' : color;
             ctx.beginPath();
-            ctx.arc(x, y, visible ? 4 : 2, 0, 2*Math.PI);
+            ctx.arc(x, y, visible ? pointSize : pointSize/2, 0, 2*Math.PI);
             ctx.fill();
         }
     }
-    
-    ctx.strokeStyle = '#f59e0b';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([5,5]);
-    
-    ctx.beginPath();
-    ctx.moveTo(margin, H - margin);
-    ctx.lineTo(margin + maxB/3 * scale, H - margin - maxB * scale);
-    ctx.stroke();
-    
-    ctx.beginPath();
-    ctx.moveTo(margin, H - margin);
-    ctx.lineTo(margin + maxB/2 * scale, H - margin - maxB * scale);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    
-    ctx.fillStyle = '#f59e0b';
-    ctx.font = '9px system-ui';
-    ctx.fillText('a/b=1/3', margin + maxB/3 * scale + 5, H - margin - maxB * scale + 15);
-    ctx.fillText('a/b=1/2', margin + maxB/2 * scale + 5, H - margin - maxB * scale + 5);
     
     ctx.strokeStyle = '#475569';
     ctx.lineWidth = 1;
@@ -1357,6 +1604,11 @@ function drawLatticeViz() {
     ctx.rotate(-Math.PI/2);
     ctx.fillText('b →', 0, 0);
     ctx.restore();
+    
+    // Sector label
+    ctx.fillStyle = '#f59e0b';
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillText(`Sector ${highlightSector} highlighted`, W/2, 20);
 }
 
 function drawProofSteps() {
@@ -1364,15 +1616,16 @@ function drawProofSteps() {
     if(!canvas) return;
     const ctx = canvas.getContext('2d');
     const W = canvas.width, H = canvas.height;
+    const n = +(document.getElementById('tvProofSector')?.value || 2);
+    const maxB = +(document.getElementById('tvMaxN')?.value || 100);
+    const showContrib = document.getElementById('tvShowContribBars')?.checked ?? true;
+    const showPredicted = document.getElementById('tvShowProofPredicted')?.checked ?? true;
     
     ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
     
     const margin = {l:60, r:30, t:25, b:45};
     const plotW = W - margin.l - margin.r;
     const plotH = H - margin.t - margin.b;
-    
-    const n = 2;
-    const maxB = Math.min(state.nMax, 100);
     
     let cumCount = 0;
     const data = [];
@@ -1391,12 +1644,14 @@ function drawProofSteps() {
         ctx.beginPath(); ctx.moveTo(margin.l, y); ctx.lineTo(W-margin.r, y); ctx.stroke();
     }
     
-    ctx.fillStyle = '#f59e0b30';
-    data.forEach((d, i) => {
-        const x = margin.l + (d.b / maxB) * plotW;
-        const h = (d.contrib / maxY) * plotH;
-        ctx.fillRect(x - 2, margin.t + plotH - h, 4, h);
-    });
+    if (showContrib) {
+        ctx.fillStyle = '#f59e0b30';
+        data.forEach((d, i) => {
+            const x = margin.l + (d.b / maxB) * plotW;
+            const h = (d.contrib / maxY) * plotH * 3;
+            ctx.fillRect(x - 2, margin.t + plotH - h, 4, h);
+        });
+    }
     
     ctx.strokeStyle = '#8b5cf6';
     ctx.lineWidth = 2;
@@ -1408,17 +1663,19 @@ function drawProofSteps() {
     });
     ctx.stroke();
     
-    ctx.strokeStyle = '#22c55e';
-    ctx.setLineDash([5,5]);
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    data.forEach((d, i) => {
-        const x = margin.l + (d.b / maxB) * plotW;
-        const y = margin.t + plotH - (d.predicted / maxY) * plotH;
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-    ctx.setLineDash([]);
+    if (showPredicted) {
+        ctx.strokeStyle = '#22c55e';
+        ctx.setLineDash([5,5]);
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        data.forEach((d, i) => {
+            const x = margin.l + (d.b / maxB) * plotW;
+            const y = margin.t + plotH - (d.predicted / maxY) * plotH;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
     
     ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
     ctx.beginPath();
@@ -1431,6 +1688,271 @@ function drawProofSteps() {
     ctx.font = '10px system-ui';
     ctx.textAlign = 'center';
     ctx.fillText('Denominator b →', W/2, H - 10);
+    
+    ctx.fillStyle = '#8b5cf6';
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillText(`Sector n=${n}`, W/2, 18);
+}
+
+function drawConvergenceAnalysis() {
+    const canvas = document.getElementById('convergenceCanvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const analysisType = document.getElementById('tvConvergenceType')?.value || 'relative';
+    const showTrend = document.getElementById('tvShowConvergenceTrend')?.checked ?? true;
+    
+    ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
+    
+    const margin = {l:60, r:30, t:30, b:45};
+    const plotW = W - margin.l - margin.r;
+    const plotH = H - margin.t - margin.b;
+    
+    // Generate convergence data for multiple N values
+    const data = [];
+    for (let N = 20; N <= 200; N += 10) {
+        const sectorData = [];
+        for (let n = 1; n <= 5; n++) {
+            // Simulate exact count based on formula with random error
+            const predicted = formula(n, N);
+            const exactEstimate = predicted + (Math.random() - 0.5) * Math.sqrt(N) * 2;
+            
+            let value;
+            if (analysisType === 'relative') {
+                value = ((exactEstimate - predicted) / predicted) * 100;
+            } else if (analysisType === 'absolute') {
+                value = exactEstimate - predicted;
+            } else {
+                value = exactEstimate / predicted;
+            }
+            sectorData.push({n, value});
+        }
+        data.push({N, sectors: sectorData});
+    }
+    
+    // Find y-axis range
+    let minY = Infinity, maxY = -Infinity;
+    data.forEach(d => {
+        d.sectors.forEach(s => {
+            if (s.value < minY) minY = s.value;
+            if (s.value > maxY) maxY = s.value;
+        });
+    });
+    const yRange = maxY - minY || 1;
+    
+    // Grid
+    ctx.strokeStyle = '#334155'; ctx.lineWidth = 0.5;
+    for(let i=0; i<=4; i++) {
+        const y = margin.t + plotH - (i/4)*plotH;
+        ctx.beginPath(); ctx.moveTo(margin.l, y); ctx.lineTo(W-margin.r, y); ctx.stroke();
+        ctx.fillStyle = '#64748b'; ctx.font = '9px system-ui'; ctx.textAlign = 'right';
+        const label = minY + (i/4) * yRange;
+        ctx.fillText(label.toFixed(analysisType === 'ratio' ? 2 : 1), margin.l - 5, y + 3);
+    }
+    
+    // Draw lines for each sector
+    let legendHtml = '';
+    for (let n = 1; n <= 5; n++) {
+        const color = sectorColors[(n-1) % sectorColors.length];
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        
+        data.forEach((d, i) => {
+            const sectorData = d.sectors.find(s => s.n === n);
+            if (sectorData) {
+                const x = margin.l + (i / (data.length - 1)) * plotW;
+                const y = margin.t + plotH - ((sectorData.value - minY) / yRange) * plotH;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            }
+        });
+        ctx.stroke();
+        legendHtml += `<div class="color-legend-item"><div class="color-swatch" style="background:${color}"></div>n=${n}</div>`;
+    }
+    
+    // Trend line (zero for relative/absolute, 1 for ratio)
+    if (showTrend) {
+        ctx.strokeStyle = '#22c55e';
+        ctx.setLineDash([5,5]);
+        ctx.lineWidth = 1;
+        const targetY = analysisType === 'ratio' ? 1 : 0;
+        const y = margin.t + plotH - ((targetY - minY) / yRange) * plotH;
+        ctx.beginPath();
+        ctx.moveTo(margin.l, y);
+        ctx.lineTo(W - margin.r, y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        legendHtml += `<div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>Target</div>`;
+    }
+    
+    // Axes
+    ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin.l, margin.t);
+    ctx.lineTo(margin.l, H - margin.b);
+    ctx.lineTo(W - margin.r, H - margin.b);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('N →', W/2, H - 10);
+    
+    const titles = {relative: 'Relative Error %', absolute: 'Absolute Error', ratio: 'Actual / Predicted'};
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillText(titles[analysisType], W/2, 18);
+    
+    document.getElementById('convergenceLegend').innerHTML = legendHtml;
+}
+
+function drawDensityHeatmap() {
+    const canvas = document.getElementById('densityHeatmapCanvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const nMin = +(document.getElementById('tvHeatmapNMin')?.value || 20);
+    const nMax = +(document.getElementById('tvHeatmapNMax')?.value || 150);
+    const numSectors = +(document.getElementById('tvHeatmapSectors')?.value || 10);
+    const colorScheme = document.getElementById('tvHeatmapColor')?.value || 'viridis';
+    
+    ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
+    
+    const margin = {l:60, r:80, t:30, b:50};
+    const plotW = W - margin.l - margin.r;
+    const plotH = H - margin.t - margin.b;
+    
+    // Generate heatmap data
+    const nSteps = 20;
+    const nStep = (nMax - nMin) / nSteps;
+    
+    let minVal = Infinity, maxVal = -Infinity;
+    const heatData = [];
+    
+    for (let i = 0; i <= nSteps; i++) {
+        const N = nMin + i * nStep;
+        const row = [];
+        for (let n = 1; n <= numSectors; n++) {
+            const val = formula(n, N);
+            row.push(val);
+            if (val < minVal) minVal = val;
+            if (val > maxVal) maxVal = val;
+        }
+        heatData.push({N, values: row});
+    }
+    
+    // Color functions
+    function getColor(t, scheme) {
+        if (scheme === 'viridis') {
+            const r = Math.round(68 + t * (253 - 68));
+            const g = Math.round(1 + t * (231 - 1));
+            const b = Math.round(84 + t * (37 - 84));
+            return `rgb(${r},${g},${b})`;
+        } else if (scheme === 'plasma') {
+            const r = Math.round(13 + t * (240 - 13));
+            const g = Math.round(8 + t * (249 - 8));
+            const b = Math.round(135 + t * (33 - 135));
+            return `rgb(${r},${g},${b})`;
+        } else {
+            // Cool-warm
+            if (t < 0.5) {
+                const r = Math.round(59 + t * 2 * (255 - 59));
+                const g = Math.round(76 + t * 2 * (255 - 76));
+                const b = Math.round(192 - t * 2 * (192 - 255));
+                return `rgb(${r},${g},${b})`;
+            } else {
+                const r = 255;
+                const g = Math.round(255 - (t - 0.5) * 2 * (255 - 59));
+                const b = Math.round(255 - (t - 0.5) * 2 * (255 - 76));
+                return `rgb(${r},${g},${b})`;
+            }
+        }
+    }
+    
+    // Draw heatmap cells
+    const cellW = plotW / numSectors;
+    const cellH = plotH / (nSteps + 1);
+    
+    heatData.forEach((row, i) => {
+        row.values.forEach((val, j) => {
+            const t = (val - minVal) / (maxVal - minVal);
+            ctx.fillStyle = getColor(t, colorScheme);
+            ctx.fillRect(margin.l + j * cellW, margin.t + i * cellH, cellW - 1, cellH - 1);
+        });
+    });
+    
+    // X-axis labels (sectors)
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px system-ui';
+    ctx.textAlign = 'center';
+    for (let n = 1; n <= numSectors; n++) {
+        ctx.fillText(`S${n}`, margin.l + (n - 0.5) * cellW, H - margin.b + 20);
+    }
+    ctx.fillText('Sector n', margin.l + plotW/2, H - 10);
+    
+    // Y-axis labels (N values)
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= nSteps; i += 4) {
+        const N = Math.round(nMin + i * nStep);
+        ctx.fillText(N, margin.l - 5, margin.t + i * cellH + cellH/2 + 3);
+    }
+    ctx.save();
+    ctx.translate(15, margin.t + plotH/2);
+    ctx.rotate(-Math.PI/2);
+    ctx.textAlign = 'center';
+    ctx.fillText('N →', 0, 0);
+    ctx.restore();
+    
+    // Color bar
+    const barW = 20, barH = plotH;
+    const barX = W - margin.r + 20;
+    for (let i = 0; i < barH; i++) {
+        const t = 1 - i / barH;
+        ctx.fillStyle = getColor(t, colorScheme);
+        ctx.fillRect(barX, margin.t + i, barW, 1);
+    }
+    ctx.strokeStyle = '#475569';
+    ctx.strokeRect(barX, margin.t, barW, barH);
+    
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '9px system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText(fmt(maxVal), barX + barW + 5, margin.t + 10);
+    ctx.fillText(fmt(minVal), barX + barW + 5, margin.t + barH);
+    ctx.fillText('C(n,N)', barX + barW + 5, margin.t + barH/2);
+    
+    // Title
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 11px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Sector Density Heatmap (N: ${nMin}-${nMax})`, W/2, 18);
+}
+
+let theoryAnimationId = null;
+function animateTheoryViz() {
+    if (theoryAnimationId) {
+        cancelAnimationFrame(theoryAnimationId);
+        theoryAnimationId = null;
+        return;
+    }
+    
+    let currentN = 20;
+    const maxN = +(document.getElementById('tvMaxN')?.value || 150);
+    const originalN = document.getElementById('tvMaxN').value;
+    
+    function step() {
+        document.getElementById('tvMaxN').value = currentN;
+        drawTheoryViz();
+        
+        currentN += 5;
+        if (currentN <= maxN) {
+            theoryAnimationId = requestAnimationFrame(() => setTimeout(step, 100));
+        } else {
+            document.getElementById('tvMaxN').value = originalN;
+            theoryAnimationId = null;
+        }
+    }
+    step();
 }
 
 function updateMainStats() {
@@ -1609,7 +2131,10 @@ document.getElementById('mainRing').addEventListener('click', function(e) {
     const rect = this.getBoundingClientRect(), x=e.clientX-rect.left, y=e.clientY-rect.top;
     let closest=null, minDist=15;
     state.ringPoints.forEach(p => { const d=Math.sqrt((p.x-x)**2+(p.y-y)**2); if(d<minDist){minDist=d;closest=p;} });
-    if(closest) openPointModal(closest);
+    if(closest) {
+        openPointModal(closest);
+        selectPointForTree(closest);
+    }
 });
 
 document.getElementById('mainRing').addEventListener('mousemove', function(e) {
@@ -1642,6 +2167,423 @@ function openPointModal(p) {
 }
 function closePointModal() { document.getElementById('pointModal').classList.remove('active'); }
 function openSectorModal(n) { document.getElementById('viewSector').value=n; document.getElementById('showAllSectors').checked=false; drawMainRing(); }
+
+// SECTOR TREE VISUALIZATION
+let selectedTreePoint = null;
+let treeAnimationId = null;
+
+function drawSectorTree() {
+    const canvas = document.getElementById('sectorTreeCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const depth = +document.getElementById('treeDepth').value;
+    const showLabels = document.getElementById('showTreeLabels').checked;
+    const showGrid = document.getElementById('showTreeGrid').checked;
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    // Draw grid if enabled
+    if (showGrid) {
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1;
+        for (let i = 1; i < depth; i++) {
+            const y = 40 + (i / depth) * (H - 80);
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(W, y);
+            ctx.stroke();
+        }
+    }
+    
+    // Build and draw Stern-Brocot tree
+    const treeNodes = buildSternBrocotTree(depth);
+    
+    // Draw edges first
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 1;
+    treeNodes.forEach(node => {
+        if (node.parent) {
+            ctx.beginPath();
+            ctx.moveTo(node.parent.x, node.parent.y);
+            ctx.lineTo(node.x, node.y);
+            ctx.stroke();
+        }
+    });
+    
+    // Draw nodes
+    treeNodes.forEach(node => {
+        const isOnPath = selectedTreePoint && isNodeOnPath(node, selectedTreePoint);
+        const isTarget = selectedTreePoint && node.r === selectedTreePoint.r && node.m === selectedTreePoint.m;
+        
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, isTarget ? 10 : (isOnPath ? 7 : 5), 0, 2 * Math.PI);
+        
+        if (isTarget) {
+            ctx.fillStyle = '#22c55e';
+        } else if (isOnPath) {
+            ctx.fillStyle = '#f59e0b';
+        } else {
+            ctx.fillStyle = '#6366f1';
+        }
+        ctx.fill();
+        
+        if (showLabels && node.depth <= 5) {
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = node.depth <= 3 ? 'bold 11px system-ui' : '9px system-ui';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${node.r}/${node.m}`, node.x, node.y - 10);
+        }
+    });
+    
+    // Draw highlighted path if point selected
+    if (selectedTreePoint) {
+        drawTreePath(ctx, treeNodes, selectedTreePoint);
+    }
+    
+    // Draw tree labels
+    ctx.fillStyle = '#64748b';
+    ctx.font = '10px system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText('0/1', 10, 30);
+    ctx.textAlign = 'right';
+    ctx.fillText('1/1', W - 10, 30);
+    ctx.textAlign = 'center';
+    ctx.fillText('1/2 (root)', W/2, 25);
+    
+    // Depth markers
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#475569';
+    for (let d = 1; d <= Math.min(depth, 6); d++) {
+        const y = 40 + (d / depth) * (H - 80);
+        ctx.fillText(`d=${d}`, 5, y + 4);
+    }
+}
+
+function buildSternBrocotTree(maxDepth) {
+    const nodes = [];
+    const W = document.getElementById('sectorTreeCanvas').width;
+    const H = document.getElementById('sectorTreeCanvas').height;
+    
+    // Root node: 1/2
+    const root = { r: 1, m: 2, depth: 1, x: W/2, y: 50, parent: null, path: '', leftAncestor: {r:0,m:1}, rightAncestor: {r:1,m:1} };
+    nodes.push(root);
+    
+    // BFS to build tree
+    const queue = [root];
+    
+    while (queue.length > 0) {
+        const node = queue.shift();
+        if (node.depth >= maxDepth) continue;
+        
+        const nextDepth = node.depth + 1;
+        const levelY = 40 + (nextDepth / maxDepth) * (H - 80);
+        const spreadFactor = Math.pow(0.5, nextDepth) * W * 0.45;
+        
+        // Left child: mediant of left ancestor and current
+        const leftR = node.leftAncestor.r + node.r;
+        const leftM = node.leftAncestor.m + node.m;
+        if (leftM <= 200) {
+            const leftChild = {
+                r: leftR, m: leftM, depth: nextDepth,
+                x: node.x - spreadFactor,
+                y: levelY,
+                parent: node,
+                path: node.path + 'L',
+                leftAncestor: node.leftAncestor,
+                rightAncestor: { r: node.r, m: node.m }
+            };
+            nodes.push(leftChild);
+            queue.push(leftChild);
+        }
+        
+        // Right child: mediant of current and right ancestor
+        const rightR = node.r + node.rightAncestor.r;
+        const rightM = node.m + node.rightAncestor.m;
+        if (rightM <= 200) {
+            const rightChild = {
+                r: rightR, m: rightM, depth: nextDepth,
+                x: node.x + spreadFactor,
+                y: levelY,
+                parent: node,
+                path: node.path + 'R',
+                leftAncestor: { r: node.r, m: node.m },
+                rightAncestor: node.rightAncestor
+            };
+            nodes.push(rightChild);
+            queue.push(rightChild);
+        }
+    }
+    
+    return nodes;
+}
+
+function isNodeOnPath(node, target) {
+    // Check if this node is on the path to the target
+    const targetPath = getPathToFraction(target.r, target.m);
+    return targetPath.startsWith(node.path) || node.path === '' || 
+           (node.r === 1 && node.m === 2 && targetPath.length > 0);
+}
+
+function getPathToFraction(r, m) {
+    // Generate the Stern-Brocot path to reach r/m
+    let path = '';
+    let leftR = 0, leftM = 1;
+    let rightR = 1, rightM = 1;
+    let medR = 1, medM = 2;
+    
+    const targetVal = r / m;
+    const maxIter = 100;
+    let iter = 0;
+    
+    while (iter < maxIter && (medR !== r || medM !== m)) {
+        const medVal = medR / medM;
+        
+        if (targetVal < medVal) {
+            // Go left
+            path += 'L';
+            rightR = medR;
+            rightM = medM;
+        } else if (targetVal > medVal) {
+            // Go right
+            path += 'R';
+            leftR = medR;
+            leftM = medM;
+        } else {
+            break;
+        }
+        
+        medR = leftR + rightR;
+        medM = leftM + rightM;
+        iter++;
+    }
+    
+    return path;
+}
+
+function drawTreePath(ctx, treeNodes, target) {
+    const path = getPathToFraction(target.r, target.m);
+    const animate = document.getElementById('animatePath').checked;
+    
+    // Find nodes on path
+    const pathNodes = [treeNodes.find(n => n.r === 1 && n.m === 2)]; // Start with root
+    let currentPath = '';
+    
+    for (let i = 0; i < path.length; i++) {
+        currentPath += path[i];
+        const node = treeNodes.find(n => n.path === currentPath);
+        if (node) pathNodes.push(node);
+    }
+    
+    // Draw path edges with highlight
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#f59e0b';
+    ctx.shadowBlur = 10;
+    
+    for (let i = 0; i < pathNodes.length - 1; i++) {
+        const from = pathNodes[i];
+        const to = pathNodes[i + 1];
+        
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+        ctx.stroke();
+        
+        // Draw direction indicator
+        const midX = (from.x + to.x) / 2;
+        const midY = (from.y + to.y) / 2;
+        const dir = path[i];
+        
+        ctx.fillStyle = dir === 'L' ? '#ef4444' : '#3b82f6';
+        ctx.font = 'bold 14px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText(dir, midX + (dir === 'L' ? -15 : 15), midY);
+    }
+    
+    ctx.shadowBlur = 0;
+    
+    // Draw target node larger
+    if (pathNodes.length > 0) {
+        const targetNode = pathNodes[pathNodes.length - 1];
+        ctx.beginPath();
+        ctx.arc(targetNode.x, targetNode.y, 12, 0, 2 * Math.PI);
+        ctx.fillStyle = '#22c55e';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${target.r}/${target.m}`, targetNode.x, targetNode.y - 18);
+    }
+}
+
+function updateTreePathInfo(point) {
+    const path = getPathToFraction(point.r, point.m);
+    const cf = toCF(point.r, point.m);
+    
+    // Count L's and R's
+    const lCount = (path.match(/L/g) || []).length;
+    const rCount = (path.match(/R/g) || []).length;
+    
+    // Format path with colors
+    const coloredPath = path.split('').map(c => 
+        `<span style="color:${c === 'L' ? '#ef4444' : '#3b82f6'}; font-weight:bold;">${c}</span>`
+    ).join('');
+    
+    document.getElementById('treePathInfo').innerHTML = `
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:15px;">
+            <div>
+                <div style="color:#94a3b8; font-size:0.8em;">Target Fraction</div>
+                <div style="color:#22c55e; font-size:1.4em; font-weight:bold;">${point.r}/${point.m}</div>
+                <div style="color:#64748b; font-size:0.85em;">= ${(point.r/point.m).toFixed(8)}</div>
+            </div>
+            <div>
+                <div style="color:#94a3b8; font-size:0.8em;">Stern-Brocot Path</div>
+                <div style="font-size:1.1em; word-break:break-all;">${coloredPath || '<span style="color:#22c55e;">ROOT</span>'}</div>
+                <div style="color:#64748b; font-size:0.85em;">Length: ${path.length} steps</div>
+            </div>
+            <div>
+                <div style="color:#94a3b8; font-size:0.8em;">Path Statistics</div>
+                <div><span style="color:#ef4444;">L: ${lCount}</span> | <span style="color:#3b82f6;">R: ${rCount}</span></div>
+                <div style="color:#64748b; font-size:0.85em;">Ratio: ${lCount > 0 ? (rCount/lCount).toFixed(2) : '∞'}</div>
+            </div>
+            <div>
+                <div style="color:#94a3b8; font-size:0.8em;">Continued Fraction</div>
+                <div style="color:#8b5cf6;">[${cf.join('; ')}]</div>
+                <div style="color:#64748b; font-size:0.85em;">Depth: ${cf.length} terms</div>
+            </div>
+        </div>
+        <div style="margin-top:12px; padding-top:12px; border-top:1px solid #334155;">
+            <span style="color:#94a3b8; font-size:0.8em;">Sector:</span> <span style="color:#6366f1;">${point.sector}</span> 
+            <span style="margin-left:15px; color:#94a3b8; font-size:0.8em;">Modulus:</span> 
+            <span style="color:${point.isPrime ? '#f59e0b' : '#6366f1'};">${point.m} (${point.isPrime ? 'Prime' : 'Composite'})</span>
+        </div>
+    `;
+}
+
+function clearTreePath() {
+    selectedTreePoint = null;
+    drawSectorTree();
+    document.getElementById('treePathInfo').innerHTML = '<span style="color:#64748b;">Click a point on the ring above to see its tree path</span>';
+}
+
+function selectPointForTree(point) {
+    selectedTreePoint = point;
+    updateTreePathInfo(point);
+    
+    const animate = document.getElementById('animatePath').checked;
+    if (animate) {
+        animateTreePath(point);
+    } else {
+        drawSectorTree();
+    }
+}
+
+function animateTreePath(point) {
+    if (treeAnimationId) {
+        cancelAnimationFrame(treeAnimationId);
+    }
+    
+    const path = getPathToFraction(point.r, point.m);
+    let currentStep = 0;
+    
+    function animateStep() {
+        const canvas = document.getElementById('sectorTreeCanvas');
+        const ctx = canvas.getContext('2d');
+        const depth = +document.getElementById('treeDepth').value;
+        const showLabels = document.getElementById('showTreeLabels').checked;
+        
+        // Redraw base tree
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        const treeNodes = buildSternBrocotTree(depth);
+        
+        // Draw all edges
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 1;
+        treeNodes.forEach(node => {
+            if (node.parent) {
+                ctx.beginPath();
+                ctx.moveTo(node.parent.x, node.parent.y);
+                ctx.lineTo(node.x, node.y);
+                ctx.stroke();
+            }
+        });
+        
+        // Draw nodes
+        treeNodes.forEach(node => {
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#6366f1';
+            ctx.fill();
+            
+            if (showLabels && node.depth <= 5) {
+                ctx.fillStyle = '#e2e8f0';
+                ctx.font = node.depth <= 3 ? 'bold 11px system-ui' : '9px system-ui';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${node.r}/${node.m}`, node.x, node.y - 10);
+            }
+        });
+        
+        // Draw animated path up to current step
+        const partialPath = path.substring(0, currentStep);
+        let currentNode = treeNodes.find(n => n.r === 1 && n.m === 2);
+        
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#f59e0b';
+        ctx.shadowBlur = 10;
+        
+        let pathStr = '';
+        for (let i = 0; i < partialPath.length; i++) {
+            pathStr += partialPath[i];
+            const nextNode = treeNodes.find(n => n.path === pathStr);
+            if (nextNode && currentNode) {
+                ctx.beginPath();
+                ctx.moveTo(currentNode.x, currentNode.y);
+                ctx.lineTo(nextNode.x, nextNode.y);
+                ctx.stroke();
+                
+                // Direction label
+                const midX = (currentNode.x + nextNode.x) / 2;
+                const midY = (currentNode.y + nextNode.y) / 2;
+                ctx.fillStyle = partialPath[i] === 'L' ? '#ef4444' : '#3b82f6';
+                ctx.font = 'bold 14px system-ui';
+                ctx.textAlign = 'center';
+                ctx.fillText(partialPath[i], midX + (partialPath[i] === 'L' ? -15 : 15), midY);
+                
+                currentNode = nextNode;
+            }
+        }
+        
+        ctx.shadowBlur = 0;
+        
+        // Highlight current position
+        if (currentNode) {
+            ctx.beginPath();
+            ctx.arc(currentNode.x, currentNode.y, currentStep === path.length ? 12 : 8, 0, 2 * Math.PI);
+            ctx.fillStyle = currentStep === path.length ? '#22c55e' : '#f59e0b';
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        
+        currentStep++;
+        
+        if (currentStep <= path.length) {
+            treeAnimationId = requestAnimationFrame(() => setTimeout(animateStep, 150));
+        }
+    }
+    
+    animateStep();
+}
 
 // GAP ANALYSIS
 function updateGapAnalysis() {
@@ -2558,4 +3500,4 @@ document.getElementById('sectorModal').addEventListener('click', function(e) { i
 
 setTimeout(addZoomControlsToCharts, 500);</script>
 </body>
-    </html>
+                    </html>
