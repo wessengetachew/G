@@ -9,6 +9,87 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1a; color: #e2e8f0; line-height: 1.6; font-size: 14px; }
         
+        /* GLOBAL HARMONIC CONTROL PANEL */
+        .harmonic-global-panel {
+            position: fixed;
+            top: 45px;
+            right: 0;
+            width: 340px;
+            max-height: calc(100vh - 50px);
+            background: linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%);
+            border-left: 2px solid #8b5cf6;
+            border-bottom: 2px solid #8b5cf6;
+            border-radius: 0 0 0 12px;
+            z-index: 999;
+            transform: translateX(300px);
+            transition: transform 0.3s ease;
+            box-shadow: -5px 5px 25px rgba(0,0,0,0.6);
+            overflow-y: auto;
+        }
+        .harmonic-global-panel.expanded { transform: translateX(0); }
+        .harmonic-toggle {
+            position: absolute;
+            left: -44px;
+            top: 10px;
+            width: 44px;
+            height: 90px;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            border: none;
+            border-radius: 8px 0 0 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            box-shadow: -3px 3px 10px rgba(0,0,0,0.4);
+        }
+        .harmonic-toggle:hover { background: linear-gradient(135deg, #a78bfa, #818cf8); }
+        .harmonic-toggle .icon { font-size: 18px; margin-bottom: 5px; writing-mode: horizontal-tb; }
+        .harmonic-panel-header {
+            padding: 12px 15px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            border-radius: 0 0 0 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .harmonic-panel-header h3 { margin: 0; font-size: 14px; flex: 1; }
+        .harmonic-panel-body { padding: 12px; }
+        .harmonic-section { margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #334155; }
+        .harmonic-section:last-child { border-bottom: none; margin-bottom: 0; }
+        .harmonic-section h4 { color: #a5b4fc; font-size: 11px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .harmonic-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .harmonic-row label { font-size: 11px; color: #94a3b8; min-width: 70px; }
+        .harmonic-row input[type="range"] { flex: 1; height: 6px; }
+        .harmonic-row input[type="number"] { width: 60px; padding: 4px 6px; font-size: 11px; }
+        .harmonic-row select { flex: 1; padding: 4px 6px; font-size: 11px; }
+        .harmonic-value { min-width: 45px; text-align: right; font-size: 11px; color: #6366f1; font-weight: 600; }
+        .harmonic-btn { padding: 6px 12px; font-size: 11px; border-radius: 4px; cursor: pointer; border: none; }
+        .harmonic-btn.primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; }
+        .harmonic-btn.secondary { background: #334155; color: #e2e8f0; border: 1px solid #475569; }
+        .harmonic-btn:hover { opacity: 0.9; }
+        .harmonic-btn.playing { background: #22c55e; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .interval-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+        .interval-btn { padding: 5px 4px; font-size: 9px; background: #1e293b; border: 1px solid #475569; border-radius: 3px; color: #e2e8f0; cursor: pointer; text-align: center; }
+        .interval-btn:hover { background: #334155; border-color: #6366f1; }
+        .interval-btn.active { background: #6366f1; border-color: #8b5cf6; }
+        .mode-indicator { display: inline-block; padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+        .mode-unison { background: #22c55e30; color: #4ade80; border: 1px solid #22c55e; }
+        .mode-consonant { background: #3b82f630; color: #60a5fa; border: 1px solid #3b82f6; }
+        .mode-complex { background: #f59e0b30; color: #fbbf24; border: 1px solid #f59e0b; }
+        .mode-dissonant { background: #ef444430; color: #f87171; border: 1px solid #ef4444; }
+        .arnold-mini-canvas { width: 100%; height: 120px; background: #0f172a; border-radius: 4px; border: 1px solid #334155; }
+        .freq-display { background: #0f172a; padding: 8px; border-radius: 4px; text-align: center; margin-top: 8px; }
+        .freq-display .freq { font-size: 20px; font-weight: bold; color: #8b5cf6; }
+        .freq-display .note { font-size: 12px; color: #94a3b8; }
+        .harmonic-spectrum { height: 60px; background: #0f172a; border-radius: 4px; margin-top: 8px; }
+        
         .nav-links { background: linear-gradient(90deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%); padding: 8px 15px; border-bottom: 1px solid #4338ca; overflow-x: auto; white-space: nowrap; position: sticky; top: 0; z-index: 500; }
         .nav-links::-webkit-scrollbar { height: 4px; }
         .nav-links::-webkit-scrollbar-track { background: #1e1b4b; }
@@ -168,6 +249,108 @@
     <a href="https://wessengetachew.github.io/Rebuild/" target="_blank">Rebuild</a>
     <a href="https://wessengetachew.github.io/Goldbach/" target="_blank">Goldbach</a>
 </div>
+
+<!-- GLOBAL HARMONIC ANALYSIS PANEL -->
+<div class="harmonic-global-panel" id="harmonicPanel">
+    <button class="harmonic-toggle" onclick="toggleHarmonicPanel()">
+        <span class="icon">♪</span>
+        HARMONIC
+    </button>
+    <div class="harmonic-panel-header">
+        <h3>Global Harmonic Control</h3>
+        <button class="harmonic-btn secondary" onclick="resetHarmonicDefaults()" title="Reset">Reset</button>
+    </div>
+    <div class="harmonic-panel-body">
+        <div class="harmonic-section">
+            <h4>Audio Engine</h4>
+            <div class="harmonic-row">
+                <label>Base Freq:</label>
+                <input type="range" id="baseFreq" min="110" max="880" value="220" oninput="updateBaseFreq()">
+                <span class="harmonic-value" id="baseFreqVal">220 Hz</span>
+            </div>
+            <div class="harmonic-row">
+                <label>Volume:</label>
+                <input type="range" id="harmonicVolume" min="0" max="100" value="30" oninput="updateHarmonicVolume()">
+                <span class="harmonic-value" id="volumeVal">30%</span>
+            </div>
+            <div class="harmonic-row">
+                <label>Waveform:</label>
+                <select id="waveform" onchange="updateWaveform()">
+                    <option value="sine">Sine</option>
+                    <option value="triangle">Triangle</option>
+                    <option value="square">Square</option>
+                    <option value="sawtooth">Sawtooth</option>
+                </select>
+            </div>
+            <div class="harmonic-row" style="margin-top:8px;">
+                <button class="harmonic-btn primary" id="playBtn" onclick="playSelectedFraction()">Play Fraction</button>
+                <button class="harmonic-btn secondary" onclick="playArpeggio()">Arpeggio</button>
+                <button class="harmonic-btn secondary" onclick="stopAudio()">Stop</button>
+            </div>
+            <div class="freq-display">
+                <div class="freq" id="currentFreqDisplay">-- Hz</div>
+                <div class="note" id="currentNoteDisplay">Select a fraction</div>
+            </div>
+        </div>
+        
+        <div class="harmonic-section">
+            <h4>Musical Intervals</h4>
+            <div class="interval-grid">
+                <button class="interval-btn" onclick="setInterval(1,1)" title="Unison">1:1</button>
+                <button class="interval-btn" onclick="setInterval(2,1)" title="Octave">2:1</button>
+                <button class="interval-btn" onclick="setInterval(3,2)" title="Perfect Fifth">3:2</button>
+                <button class="interval-btn" onclick="setInterval(4,3)" title="Perfect Fourth">4:3</button>
+                <button class="interval-btn" onclick="setInterval(5,4)" title="Major Third">5:4</button>
+                <button class="interval-btn" onclick="setInterval(6,5)" title="Minor Third">6:5</button>
+                <button class="interval-btn" onclick="setInterval(5,3)" title="Major Sixth">5:3</button>
+                <button class="interval-btn" onclick="setInterval(8,5)" title="Minor Sixth">8:5</button>
+                <button class="interval-btn" onclick="setInterval(9,8)" title="Major Second">9:8</button>
+            </div>
+        </div>
+        
+        <div class="harmonic-section">
+            <h4>Harmonic Mode</h4>
+            <div class="harmonic-row">
+                <label>Current:</label>
+                <span class="mode-indicator mode-consonant" id="harmonicModeIndicator">Consonant</span>
+            </div>
+            <div style="font-size:10px; color:#64748b; margin-top:6px;">
+                <div><span class="mode-indicator mode-unison">Unison</span> q = 1</div>
+                <div style="margin-top:3px;"><span class="mode-indicator mode-consonant">Consonant</span> q ≤ 4</div>
+                <div style="margin-top:3px;"><span class="mode-indicator mode-complex">Complex</span> q ≤ 16</div>
+                <div style="margin-top:3px;"><span class="mode-indicator mode-dissonant">Dissonant</span> q > 16</div>
+            </div>
+        </div>
+        
+        <div class="harmonic-section">
+            <h4>Arnold Tongue Preview</h4>
+            <canvas id="arnoldMiniCanvas" class="arnold-mini-canvas"></canvas>
+            <div class="harmonic-row" style="margin-top:6px;">
+                <label>Coupling K:</label>
+                <input type="range" id="arnoldK" min="0" max="100" value="50" oninput="updateArnoldTongue()">
+                <span class="harmonic-value" id="arnoldKVal">0.50</span>
+            </div>
+        </div>
+        
+        <div class="harmonic-section">
+            <h4>Frequency Spectrum</h4>
+            <canvas id="harmonicSpectrum" class="harmonic-spectrum"></canvas>
+            <div class="harmonic-row" style="margin-top:6px;">
+                <label><input type="checkbox" id="applyHarmonicColor" onchange="applyHarmonicColoring()"> Color by consonance</label>
+            </div>
+            <div class="harmonic-row">
+                <label><input type="checkbox" id="showArnoldOnTree" onchange="drawSectorTree()"> Arnold on tree</label>
+            </div>
+        </div>
+        
+        <div class="harmonic-section">
+            <h4>Selected Fraction</h4>
+            <div id="selectedFractionInfo" style="font-size:11px; color:#94a3b8;">
+                Click a point on any visualization to select
+            </div>
+        </div>
+    </div>
+</div>
 <div class="container">
     <h1>Farey Sector Formula - Complete Research Platform</h1>
     <p class="subtitle">Comprehensive analysis with RH connections, modular arithmetic, and advanced visualizations</p>
@@ -224,6 +407,7 @@
         <div class="tab" onclick="switchTab('smith')">Smith Chart</div>
         <div class="tab" onclick="switchTab('stats')">Statistics</div>
         <div class="tab" onclick="switchTab('primes')">Primes</div>
+        <div class="tab" onclick="switchTab('harmonic')">Harmonic</div>
         <div class="tab" onclick="switchTab('primorial')">Primorial Sieve</div>
         <div class="tab" onclick="switchTab('research')">Research</div>
     </div>
@@ -278,6 +462,10 @@
                 <div class="color-legend-item"><div class="color-swatch" style="background:#22c55e"></div>Target fraction</div>
                 <div class="color-legend-item"><div class="color-swatch" style="background:#ef4444"></div>L (left)</div>
                 <div class="color-legend-item"><div class="color-swatch" style="background:#3b82f6"></div>R (right)</div>
+                <div class="color-legend-item" style="border-left:1px solid #475569; padding-left:10px;"><strong style="color:#8b5cf6;">Arnold:</strong></div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:#22c55e"></div>Unison</div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:#3b82f6"></div>Consonant</div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Complex</div>
             </div>
         </div>
         
@@ -839,6 +1027,114 @@
         </div>
     </div>
     
+    <!-- HARMONIC ANALYSIS TAB -->
+    <div id="tab-harmonic" class="tab-content">
+        <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid #8b5cf6;margin-bottom:20px;">
+            <h3 style="color:#c7d2fe;margin-top:0;">Harmonic Analysis & Arnold Tongues</h3>
+            <p style="color:#a5b4fc;font-size:0.9em;">Map Farey fractions to musical frequencies, explore consonance/dissonance, and visualize Arnold tongues</p>
+            <div style="display:flex;gap:15px;flex-wrap:wrap;margin-top:12px;">
+                <div style="background:rgba(99,102,241,0.2);padding:10px 15px;border-radius:6px;border:1px solid #6366f1;">
+                    <div style="color:#a5b4fc;font-size:0.75em;">Frequency Ratio</div>
+                    <div style="color:#f1f5f9;font-size:1.1em;font-family:monospace;">f = f₀ × (p/q)</div>
+                </div>
+                <div style="background:rgba(34,197,94,0.2);padding:10px 15px;border-radius:6px;border:1px solid #22c55e;">
+                    <div style="color:#86efac;font-size:0.75em;">Consonance Principle</div>
+                    <div style="color:#f1f5f9;font-size:0.9em;">Small q = Pure intervals</div>
+                </div>
+                <div style="background:rgba(245,158,11,0.2);padding:10px 15px;border-radius:6px;border:1px solid #f59e0b;">
+                    <div style="color:#fcd34d;font-size:0.75em;">Arnold Tongue Width</div>
+                    <div style="color:#f1f5f9;font-size:0.9em;">∝ K/q (coupling/denom)</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-panel">
+            <div class="control-row">
+                <div class="control-group highlight">
+                    <label>Base Frequency:</label>
+                    <input type="number" id="harmonicBaseFreq" value="220" min="20" max="2000" onchange="updateHarmonicTab()">
+                    <span>Hz</span>
+                </div>
+                <div class="control-group">
+                    <label>Sector:</label>
+                    <input type="number" id="harmonicSector" value="2" min="1" max="15" onchange="updateHarmonicTab()">
+                </div>
+                <div class="control-group">
+                    <label>Max Denom:</label>
+                    <input type="number" id="harmonicMaxDenom" value="32" min="4" max="100" onchange="updateHarmonicTab()">
+                </div>
+                <button onclick="updateHarmonicTab()">Refresh</button>
+                <button class="secondary" onclick="playHarmonicScale()">Play Scale</button>
+            </div>
+        </div>
+        
+        <div class="grid-2">
+            <div class="chart-box chart-wrapper">
+                <h4>Arnold Tongues (Stern-Brocot)</h4>
+                <div class="control-row" style="margin-bottom:8px;">
+                    <label>Coupling K: <input type="range" id="arnoldCoupling" min="0" max="100" value="60" oninput="drawArnoldTongues()"></label>
+                    <span id="arnoldCouplingVal" style="color:#8b5cf6;">0.60</span>
+                    <label><input type="checkbox" id="arnoldShowLabels" checked onchange="drawArnoldTongues()"> Labels</label>
+                </div>
+                <canvas id="arnoldTongueCanvas" width="550" height="400"></canvas>
+                <div class="color-legend">
+                    <div class="color-legend-item"><div class="color-swatch" style="background:#22c55e"></div>Unison (q=1)</div>
+                    <div class="color-legend-item"><div class="color-swatch" style="background:#3b82f6"></div>Consonant (q≤4)</div>
+                    <div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Complex (q≤16)</div>
+                    <div class="color-legend-item"><div class="color-swatch" style="background:#ef4444"></div>Dissonant (q>16)</div>
+                </div>
+            </div>
+            <div class="chart-box chart-wrapper">
+                <h4>Frequency Spectrum</h4>
+                <div class="control-row" style="margin-bottom:8px;">
+                    <label><input type="checkbox" id="freqLogScale" onchange="drawFrequencySpectrum()"> Log scale</label>
+                    <label><input type="checkbox" id="freqShowOctaves" checked onchange="drawFrequencySpectrum()"> Octaves</label>
+                    <label>Sort: <select id="freqSortMode" onchange="drawFrequencySpectrum()"><option value="freq">Frequency</option><option value="consonance">Consonance</option><option value="denom">Denominator</option></select></label>
+                </div>
+                <canvas id="freqSpectrumCanvas" width="550" height="400"></canvas>
+                <div class="color-legend">
+                    <div class="color-legend-item"><div class="color-swatch" style="background:#8b5cf6"></div>Frequency bars</div>
+                    <div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>Octave lines</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid-2" style="margin-top:15px;">
+            <div class="chart-box chart-wrapper">
+                <h4>Consonance Map</h4>
+                <canvas id="consonanceMapCanvas" width="550" height="350"></canvas>
+                <div class="color-legend">
+                    <div class="color-legend-item"><div class="color-swatch" style="background:#22c55e"></div>High consonance</div>
+                    <div class="color-legend-item"><div class="color-swatch" style="background:#ef4444"></div>Low consonance</div>
+                </div>
+            </div>
+            <div class="chart-box chart-wrapper">
+                <h4>Interval Circle (Pitch Class)</h4>
+                <canvas id="intervalCircleCanvas" width="550" height="350"></canvas>
+                <div class="color-legend">
+                    <div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Fraction position</div>
+                    <div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>12-TET reference</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel" style="margin-top:15px;">
+            <h4>Musical Intervals in Sector</h4>
+            <div class="table-scroll" style="max-height:300px;">
+                <table id="intervalTable">
+                    <thead><tr><th>Fraction</th><th>Ratio</th><th>Frequency</th><th>Cents</th><th>Closest Note</th><th>Interval Name</th><th>Mode</th><th>Play</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="derivation-box" style="margin-top:15px;">
+            <strong>Harmonic Theory:</strong> Fractions p/q with small denominators q produce consonant intervals. The ancient Greeks discovered that simple ratios like 2:1 (octave), 3:2 (fifth), and 4:3 (fourth) sound harmonious. Arnold tongues show how these ratios create stable "locking" regions in coupled oscillator systems - wider tongues indicate more robust synchronization.
+        </div>
+        
+        <div style="margin-top:15px;"><button onclick="screenshotFullTab('harmonic')">Screenshot Full Harmonic Tab</button></div>
+    </div>
+    
     <!-- PRIMORIAL SIEVE TAB -->
     <div id="tab-primorial" class="tab-content">
         <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid #4338ca;margin-bottom:20px;">
@@ -1281,12 +1577,6 @@ function screenshotFullTab(tabName) {
             formula: 'φ(p) = p-1 for prime p',
             description: 'Prime denominator distribution and twin prime patterns',
             params: ['Prime vs composite ratio', 'k-tuple correlations', 'Gap patterns at primes']
-        },
-        'primorial': {
-            title: 'Primorial Sieve & Farey Connection',
-            formula: 'C(n,N,a,k) = 3N²/(π²n(n+1)φ(k))',
-            description: 'Unified formula connecting Farey sector distribution with primorial residue classes',
-            params: ['φ(30×2ⁿ)/(30×2ⁿ) = 4/15 constant', 'Sector × Residue uniformity', 'φ(P_k)/P_k → approaches 6/π²']
         },
         'research': {
             title: 'Research Tools',
@@ -2658,6 +2948,7 @@ document.getElementById('mainRing').addEventListener('click', function(e) {
     if(closest) {
         openPointModal(closest);
         selectPointForTree(closest);
+        selectFractionForHarmonic(closest.r, closest.m);
     }
 });
 
@@ -2673,26 +2964,18 @@ document.getElementById('mainRing').addEventListener('mousemove', function(e) {
     } else tooltip.classList.remove('visible');
 });
 
-// Tree canvas click handler - added via setTimeout after DOM ready
-
 function openPointModal(p) {
     document.getElementById('pointModalTitle').textContent = `${p.r}/${p.m}`;
     const cf = toCF(p.r, p.m);
-    const path = getPathToFraction(p.r, p.m);
-    const coloredPath = path.split('').map(c => 
-        `<span style="color:${c === 'L' ? '#ef4444' : '#3b82f6'}; font-weight:bold;">${c}</span>`
-    ).join('');
-    
     document.getElementById('pointModalBody').innerHTML = `
         <div class="detail-grid">
             <div class="detail-card"><h5>Fraction</h5><div class="value">${p.r}/${p.m}</div><div class="sub">= ${(p.r/p.m).toFixed(8)}</div></div>
             <div class="detail-card"><h5>Sector</h5><div class="value">${p.sector}</div><div class="sub">(1/${p.sector+1}, 1/${p.sector}]</div></div>
             <div class="detail-card"><h5>Modulus</h5><div class="value" style="color:${p.isPrime?'#f59e0b':'#6366f1'}">${p.m}</div><div class="sub">${p.isPrime?'Prime':'Composite'}</div></div>
         </div>
-        <div class="theorem-box"><strong>CF:</strong> [${cf.join('; ')}]<br><strong>SB Path:</strong> ${coloredPath || 'ROOT'} <span style="color:#64748b;">(${path.length} steps)</span></div>
-        <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+        <div class="theorem-box"><strong>CF:</strong> [${cf.join('; ')}]<br><strong>Path:</strong> ${cfPath(cf)}</div>
+        <div style="margin-top:12px;">
             <button onclick="closePointModal(); openSectorModal(${p.sector});">View All in Sector ${p.sector}</button>
-            <button class="secondary" onclick="closePointModal(); selectPointForTree({r:${p.r},m:${p.m},sector:${p.sector},isPrime:${p.isPrime}}); document.getElementById('sectorTreeCanvas').scrollIntoView({behavior:'smooth'});">Show Tree Path</button>
         </div>
     `;
     document.getElementById('pointModal').classList.add('active');
@@ -2712,6 +2995,7 @@ function drawSectorTree() {
     const depth = +document.getElementById('treeDepth').value;
     const showLabels = document.getElementById('showTreeLabels').checked;
     const showGrid = document.getElementById('showTreeGrid').checked;
+    const showArnold = document.getElementById('showArnoldOnTree')?.checked ?? false;
     
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, W, H);
@@ -2756,6 +3040,10 @@ function drawSectorTree() {
             ctx.fillStyle = '#22c55e';
         } else if (isOnPath) {
             ctx.fillStyle = '#f59e0b';
+        } else if (showArnold && typeof getHarmonicMode === 'function') {
+            // Color by harmonic mode (Arnold tongue)
+            const mode = getHarmonicMode(node.m);
+            ctx.fillStyle = mode.color;
         } else {
             ctx.fillStyle = '#6366f1';
         }
@@ -4031,1017 +4319,6 @@ function updatePrimeAnalysis() {
     state.charts.twinPrime = new Chart(document.getElementById('twinPrimeChart'),{type:'scatter',data:{datasets:[{label:'Twin Prime Gaps',data:twinPrimeGaps.slice(0,100).map(g=>({x:g.left.value,y:g.gap})),backgroundColor:'rgba(34,197,94,0.7)'}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
 }
 
-// PRIMORIAL SIEVE FUNCTIONS
-const primorialState = {
-    base: 30,
-    power: 0,
-    modulus: 30,
-    coprimeClasses: [],
-    sectorResidueMatrix: [],
-    N: 200,
-    sectors: 8
-};
-
-function getPrimes(max) {
-    const sieve = new Array(max + 1).fill(true);
-    sieve[0] = sieve[1] = false;
-    for (let i = 2; i * i <= max; i++) {
-        if (sieve[i]) {
-            for (let j = i * i; j <= max; j += i) sieve[j] = false;
-        }
-    }
-    return sieve.map((v, i) => v ? i : -1).filter(x => x > 0);
-}
-
-function getCoprimeClasses(m) {
-    const classes = [];
-    for (let a = 1; a < m; a++) {
-        if (gcd(a, m) === 1) classes.push(a);
-    }
-    return classes;
-}
-
-function primorialPhi(base) {
-    const factors = { 6: [2, 3], 30: [2, 3, 5], 210: [2, 3, 5, 7], 2310: [2, 3, 5, 7, 11] };
-    const primes = factors[base] || [2, 3, 5];
-    let phi = base;
-    primes.forEach(p => { phi = phi * (p - 1) / p; });
-    return phi;
-}
-
-function updatePrimorialSieve() {
-    primorialState.base = +document.getElementById('primorialBase').value;
-    primorialState.power = +document.getElementById('primorialPower').value;
-    primorialState.N = +document.getElementById('primorialN').value;
-    primorialState.sectors = +document.getElementById('primorialSectors').value;
-    primorialState.modulus = primorialState.base * Math.pow(2, primorialState.power);
-    primorialState.coprimeClasses = getCoprimeClasses(primorialState.modulus);
-    
-    // Compute sector × residue matrix
-    computeSectorResidueMatrix();
-    
-    // Update stats
-    updatePrimorialStats();
-    
-    // Update residue class selector
-    updateResidueClassSelector();
-    
-    // Draw all visualizations
-    drawSectorResidueHeatmap();
-    drawDensityConstant();
-    drawLiftingTree();
-    drawUnifiedFormulaChart();
-    drawPrimeDistribution();
-    drawUniformityTest();
-    drawPrimorialComparison();
-    updateResidueClassList();
-    updateSectorResidueTable();
-}
-
-function computeSectorResidueMatrix() {
-    const { modulus, coprimeClasses, N, sectors } = primorialState;
-    
-    // Initialize matrix: sectors × residue classes
-    primorialState.sectorResidueMatrix = [];
-    for (let n = 1; n <= sectors; n++) {
-        const row = {};
-        coprimeClasses.forEach(a => { row[a] = { total: 0, primes: 0, fractions: [] }; });
-        primorialState.sectorResidueMatrix.push({ sector: n, classes: row, total: 0 });
-    }
-    
-    // Enumerate coprimes and categorize
-    for (let m = 2; m <= N; m++) {
-        const residue = m % modulus;
-        if (gcd(residue, modulus) !== 1 && residue !== 0) continue;
-        const effectiveResidue = residue === 0 ? modulus : residue;
-        if (!coprimeClasses.includes(effectiveResidue) && effectiveResidue !== modulus) continue;
-        
-        for (let r = 1; r < m; r++) {
-            if (gcd(r, m) !== 1) continue;
-            
-            const sector = getSector(r, m);
-            if (!sector || sector > sectors) continue;
-            
-            const mResidue = m % modulus || modulus;
-            if (coprimeClasses.includes(mResidue)) {
-                const row = primorialState.sectorResidueMatrix[sector - 1];
-                if (row.classes[mResidue]) {
-                    row.classes[mResidue].total++;
-                    row.classes[mResidue].fractions.push({ r, m });
-                    if (isPrime(m)) row.classes[mResidue].primes++;
-                    row.total++;
-                }
-            }
-        }
-    }
-}
-
-function updatePrimorialStats() {
-    const { base, power, modulus, coprimeClasses, N, sectors } = primorialState;
-    const phiM = coprimeClasses.length;
-    const density = phiM / modulus;
-    const baseDensity = primorialPhi(base) / base;
-    
-    const totalCoprimes = primorialState.sectorResidueMatrix.reduce((s, r) => s + r.total, 0);
-    const primeCount = primorialState.sectorResidueMatrix.reduce((s, r) => 
-        s + Object.values(r.classes).reduce((ss, c) => ss + c.primes, 0), 0);
-    
-    document.getElementById('primorialStats').innerHTML = `
-        <div class="stat-card"><div class="stat-value">${modulus}</div><div class="stat-label">Modulus k = ${base}×2^${power}</div></div>
-        <div class="stat-card"><div class="stat-value">${phiM}</div><div class="stat-label">φ(k) classes</div></div>
-        <div class="stat-card"><div class="stat-value">${density.toFixed(4)}</div><div class="stat-label">φ(k)/k density</div></div>
-        <div class="stat-card"><div class="stat-value" style="color:#22c55e">${baseDensity.toFixed(4)}</div><div class="stat-label">Base density (constant)</div></div>
-        <div class="stat-card"><div class="stat-value">${totalCoprimes}</div><div class="stat-label">Total coprimes</div></div>
-        <div class="stat-card"><div class="stat-value" style="color:#f59e0b">${primeCount}</div><div class="stat-label">Prime denominators</div></div>
-    `;
-}
-
-function updateResidueClassSelector() {
-    const select = document.getElementById('unifiedResidueClass');
-    select.innerHTML = primorialState.coprimeClasses.map(a => 
-        `<option value="${a}">${a}</option>`
-    ).join('');
-}
-
-function updateResidueClassList() {
-    const { coprimeClasses, modulus } = primorialState;
-    document.getElementById('residueClassList').innerHTML = coprimeClasses.map(a => 
-        `<span class="residue-item${isPrime(a) ? ' prime' : ''}" title="gcd(${a},${modulus})=1">${a}</span>`
-    ).join('');
-}
-
-function drawSectorResidueHeatmap() {
-    const canvas = document.getElementById('sectorResidueHeatmap');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    const { coprimeClasses, sectorResidueMatrix, sectors } = primorialState;
-    const normalize = document.getElementById('heatmapNormalize')?.checked ?? true;
-    const showValues = document.getElementById('heatmapShowValues')?.checked ?? false;
-    const colorScheme = document.getElementById('heatmapColorScheme')?.value || 'purple';
-    
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, W, H);
-    
-    const margin = { l: 50, r: 20, t: 40, b: 60 };
-    const plotW = W - margin.l - margin.r;
-    const plotH = H - margin.t - margin.b;
-    
-    const numClasses = coprimeClasses.length;
-    const cellW = plotW / numClasses;
-    const cellH = plotH / sectors;
-    
-    // Find max value for color scaling
-    let maxVal = 0;
-    sectorResidueMatrix.forEach(row => {
-        const rowTotal = row.total || 1;
-        Object.values(row.classes).forEach(c => {
-            const val = normalize ? c.total / rowTotal : c.total;
-            if (val > maxVal) maxVal = val;
-        });
-    });
-    
-    // Color function
-    function getColor(t, scheme) {
-        t = Math.min(1, Math.max(0, t));
-        if (scheme === 'purple') {
-            const r = Math.round(30 + t * (196 - 30));
-            const g = Math.round(27 + t * (181 - 27));
-            const b = Math.round(75 + t * (253 - 75));
-            return `rgb(${r},${g},${b})`;
-        } else if (scheme === 'heat') {
-            if (t < 0.5) {
-                return `rgb(${Math.round(t*2*255)},${Math.round(t*2*100)},0)`;
-            } else {
-                return `rgb(255,${Math.round((t-0.5)*2*255)},${Math.round((t-0.5)*2*100)})`;
-            }
-        } else { // viridis
-            const r = Math.round(68 + t * (253 - 68));
-            const g = Math.round(1 + t * (231 - 1));
-            const b = Math.round(84 + t * (37 - 84));
-            return `rgb(${r},${g},${b})`;
-        }
-    }
-    
-    // Draw cells
-    sectorResidueMatrix.forEach((row, rowIdx) => {
-        const rowTotal = row.total || 1;
-        coprimeClasses.forEach((a, colIdx) => {
-            const count = row.classes[a]?.total || 0;
-            const val = normalize ? count / rowTotal : count;
-            const t = maxVal > 0 ? val / maxVal : 0;
-            
-            const x = margin.l + colIdx * cellW;
-            const y = margin.t + rowIdx * cellH;
-            
-            ctx.fillStyle = getColor(t, colorScheme);
-            ctx.fillRect(x + 1, y + 1, cellW - 2, cellH - 2);
-            
-            if (showValues && cellW > 25 && cellH > 20) {
-                ctx.fillStyle = t > 0.5 ? '#1e1b4b' : '#e2e8f0';
-                ctx.font = '9px system-ui';
-                ctx.textAlign = 'center';
-                ctx.fillText(count.toString(), x + cellW/2, y + cellH/2 + 3);
-            }
-        });
-    });
-    
-    // X-axis labels (residue classes)
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '9px system-ui';
-    ctx.textAlign = 'center';
-    const step = Math.ceil(numClasses / 20);
-    coprimeClasses.forEach((a, i) => {
-        if (i % step === 0) {
-            ctx.fillText(a.toString(), margin.l + i * cellW + cellW/2, H - margin.b + 15);
-        }
-    });
-    ctx.fillText('Residue class a (mod ' + primorialState.modulus + ')', margin.l + plotW/2, H - 10);
-    
-    // Y-axis labels (sectors)
-    ctx.textAlign = 'right';
-    for (let n = 1; n <= sectors; n++) {
-        ctx.fillText('S' + n, margin.l - 5, margin.t + (n - 0.5) * cellH + 4);
-    }
-    
-    // Title
-    ctx.fillStyle = '#cbd5e1';
-    ctx.font = 'bold 11px system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText(`Sector × Residue Distribution (${normalize ? 'normalized' : 'counts'})`, W/2, 20);
-}
-
-function drawDensityConstant() {
-    const canvas = document.getElementById('densityConstantCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    const maxPower = +(document.getElementById('densityMaxPower')?.value || 8);
-    const showTheory = document.getElementById('densityShowTheory')?.checked ?? true;
-    const base = primorialState.base;
-    
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, W, H);
-    
-    const margin = { l: 70, r: 30, t: 30, b: 50 };
-    const plotW = W - margin.l - margin.r;
-    const plotH = H - margin.t - margin.b;
-    
-    // Compute densities for each power
-    const data = [];
-    const basePhi = primorialPhi(base);
-    const constantDensity = basePhi / base;
-    
-    for (let n = 0; n <= maxPower; n++) {
-        const m = base * Math.pow(2, n);
-        const phiM = basePhi * Math.pow(2, n);
-        const density = phiM / m;
-        data.push({ n, m, phiM, density });
-    }
-    
-    // Y-axis range
-    const minY = constantDensity * 0.9;
-    const maxY = constantDensity * 1.1;
-    
-    // Grid
-    ctx.strokeStyle = '#334155';
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i <= 4; i++) {
-        const y = margin.t + plotH - (i / 4) * plotH;
-        ctx.beginPath();
-        ctx.moveTo(margin.l, y);
-        ctx.lineTo(W - margin.r, y);
-        ctx.stroke();
-        
-        const val = minY + (i / 4) * (maxY - minY);
-        ctx.fillStyle = '#64748b';
-        ctx.font = '9px system-ui';
-        ctx.textAlign = 'right';
-        ctx.fillText(val.toFixed(4), margin.l - 5, y + 3);
-    }
-    
-    // Theory line
-    if (showTheory) {
-        const theoryY = margin.t + plotH - ((constantDensity - minY) / (maxY - minY)) * plotH;
-        ctx.strokeStyle = '#22c55e';
-        ctx.setLineDash([5, 5]);
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(margin.l, theoryY);
-        ctx.lineTo(W - margin.r, theoryY);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        
-        ctx.fillStyle = '#22c55e';
-        ctx.font = '10px system-ui';
-        ctx.textAlign = 'left';
-        ctx.fillText(`Constant = ${constantDensity.toFixed(4)}`, W - margin.r - 120, theoryY - 8);
-    }
-    
-    // Data points and line
-    ctx.strokeStyle = '#6366f1';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    data.forEach((d, i) => {
-        const x = margin.l + (i / maxPower) * plotW;
-        const y = margin.t + plotH - ((d.density - minY) / (maxY - minY)) * plotH;
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-    
-    // Points
-    data.forEach((d, i) => {
-        const x = margin.l + (i / maxPower) * plotW;
-        const y = margin.t + plotH - ((d.density - minY) / (maxY - minY)) * plotH;
-        
-        ctx.beginPath();
-        ctx.arc(x, y, 6, 0, 2 * Math.PI);
-        ctx.fillStyle = '#6366f1';
-        ctx.fill();
-        ctx.strokeStyle = '#c4b5fd';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        
-        // Label
-        ctx.fillStyle = '#e2e8f0';
-        ctx.font = '8px system-ui';
-        ctx.textAlign = 'center';
-        ctx.fillText(`${base}×2^${i}`, x, H - margin.b + 15);
-    });
-    
-    // Axes
-    ctx.strokeStyle = '#475569';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(margin.l, margin.t);
-    ctx.lineTo(margin.l, H - margin.b);
-    ctx.lineTo(W - margin.r, H - margin.b);
-    ctx.stroke();
-    
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '10px system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText('Modulus k = ' + base + '×2ⁿ', margin.l + plotW/2, H - 10);
-    
-    ctx.fillStyle = '#cbd5e1';
-    ctx.font = 'bold 11px system-ui';
-    ctx.fillText(`φ(k)/k = ${constantDensity.toFixed(4)} (constant for all n)`, W/2, 18);
-}
-
-function drawLiftingTree() {
-    const canvas = document.getElementById('liftingTreeCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    const levels = +(document.getElementById('liftingLevels')?.value || 4);
-    const highlightSector = +(document.getElementById('liftingSector')?.value || 2);
-    const showCounts = document.getElementById('liftingShowCounts')?.checked ?? true;
-    const base = primorialState.base;
-    const N = primorialState.N;
-    
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, W, H);
-    
-    const margin = { l: 30, r: 30, t: 50, b: 30 };
-    const plotW = W - margin.l - margin.r;
-    const plotH = H - margin.t - margin.b;
-    
-    // Build tree structure
-    const baseClasses = getCoprimeClasses(base);
-    const tree = [];
-    
-    // Level 0: base classes
-    tree.push(baseClasses.map(a => ({
-        residue: a,
-        modulus: base,
-        x: 0, y: 0,
-        children: [],
-        count: 0,
-        sectorCount: 0
-    })));
-    
-    // Build subsequent levels
-    for (let level = 1; level < levels; level++) {
-        const prevLevel = tree[level - 1];
-        const currentLevel = [];
-        const currentMod = base * Math.pow(2, level);
-        
-        prevLevel.forEach(node => {
-            // Each class splits into 2
-            const child1 = node.residue;
-            const child2 = node.residue + base * Math.pow(2, level - 1);
-            
-            currentLevel.push({
-                residue: child1,
-                modulus: currentMod,
-                parent: node,
-                x: 0, y: 0,
-                count: 0,
-                sectorCount: 0
-            });
-            currentLevel.push({
-                residue: child2,
-                modulus: currentMod,
-                parent: node,
-                x: 0, y: 0,
-                count: 0,
-                sectorCount: 0
-            });
-        });
-        tree.push(currentLevel);
-    }
-    
-    // Count coprimes in each class (for highlighted sector)
-    for (let m = 2; m <= N; m++) {
-        for (let r = 1; r < m; r++) {
-            if (gcd(r, m) !== 1) continue;
-            const sector = getSector(r, m);
-            
-            tree.forEach((level, levelIdx) => {
-                const mod = base * Math.pow(2, levelIdx);
-                const residue = m % mod || mod;
-                const node = level.find(n => n.residue === residue);
-                if (node) {
-                    node.count++;
-                    if (sector === highlightSector) node.sectorCount++;
-                }
-            });
-        }
-    }
-    
-    // Calculate positions
-    tree.forEach((level, levelIdx) => {
-        const levelY = margin.t + (levelIdx / (levels - 1)) * plotH;
-        const levelWidth = plotW / level.length;
-        
-        level.forEach((node, nodeIdx) => {
-            node.x = margin.l + (nodeIdx + 0.5) * levelWidth;
-            node.y = levelY;
-        });
-    });
-    
-    // Draw edges
-    for (let level = 1; level < levels; level++) {
-        tree[level].forEach(node => {
-            if (node.parent) {
-                ctx.strokeStyle = node.sectorCount > 0 ? '#f59e0b' : '#334155';
-                ctx.lineWidth = node.sectorCount > 0 ? 2 : 1;
-                ctx.beginPath();
-                ctx.moveTo(node.parent.x, node.parent.y);
-                ctx.lineTo(node.x, node.y);
-                ctx.stroke();
-            }
-        });
-    }
-    
-    // Draw nodes
-    tree.forEach((level, levelIdx) => {
-        level.forEach(node => {
-            const hasSectorData = node.sectorCount > 0;
-            
-            ctx.beginPath();
-            ctx.arc(node.x, node.y, hasSectorData ? 14 : 10, 0, 2 * Math.PI);
-            ctx.fillStyle = hasSectorData ? '#f59e0b' : '#6366f1';
-            ctx.fill();
-            ctx.strokeStyle = '#c4b5fd';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-            
-            // Residue label
-            ctx.fillStyle = '#fff';
-            ctx.font = hasSectorData ? 'bold 9px system-ui' : '8px system-ui';
-            ctx.textAlign = 'center';
-            ctx.fillText(node.residue.toString(), node.x, node.y + 3);
-            
-            // Count label
-            if (showCounts && hasSectorData) {
-                ctx.fillStyle = '#fcd34d';
-                ctx.font = '8px system-ui';
-                ctx.fillText(node.sectorCount.toString(), node.x, node.y + 22);
-            }
-        });
-    });
-    
-    // Level labels
-    ctx.fillStyle = '#64748b';
-    ctx.font = '10px system-ui';
-    ctx.textAlign = 'left';
-    for (let level = 0; level < levels; level++) {
-        const mod = base * Math.pow(2, level);
-        const y = margin.t + (level / (levels - 1)) * plotH;
-        ctx.fillText(`mod ${mod}`, 5, y + 4);
-    }
-    
-    // Title
-    ctx.fillStyle = '#cbd5e1';
-    ctx.font = 'bold 11px system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText(`Lifting Tree: Classes in Sector ${highlightSector} (yellow)`, W/2, 20);
-}
-
-function drawUnifiedFormulaChart() {
-    const canvas = document.getElementById('unifiedFormulaCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    const { modulus, coprimeClasses, N, sectors, sectorResidueMatrix } = primorialState;
-    const selectedClass = +(document.getElementById('unifiedResidueClass')?.value || coprimeClasses[0]);
-    const showAll = document.getElementById('unifiedShowAll')?.checked ?? false;
-    const phiK = coprimeClasses.length;
-    
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, W, H);
-    
-    const margin = { l: 60, r: 30, t: 30, b: 50 };
-    const plotW = W - margin.l - margin.r;
-    const plotH = H - margin.t - margin.b;
-    
-    // Compute actual and predicted values
-    const data = [];
-    for (let n = 1; n <= sectors; n++) {
-        const row = sectorResidueMatrix[n - 1];
-        const actual = row.classes[selectedClass]?.total || 0;
-        const predicted = (3 * N * N) / (Math.PI * Math.PI * n * (n + 1) * phiK);
-        data.push({ n, actual, predicted });
-    }
-    
-    const maxY = Math.max(...data.map(d => Math.max(d.actual, d.predicted))) * 1.1;
-    
-    // Grid
-    ctx.strokeStyle = '#334155';
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i <= 4; i++) {
-        const y = margin.t + plotH - (i / 4) * plotH;
-        ctx.beginPath();
-        ctx.moveTo(margin.l, y);
-        ctx.lineTo(W - margin.r, y);
-        ctx.stroke();
-        
-        ctx.fillStyle = '#64748b';
-        ctx.font = '9px system-ui';
-        ctx.textAlign = 'right';
-        ctx.fillText(Math.round(maxY * i / 4).toString(), margin.l - 5, y + 3);
-    }
-    
-    const barWidth = plotW / sectors * 0.35;
-    
-    // Draw bars
-    data.forEach((d, i) => {
-        const x = margin.l + (i + 0.5) * (plotW / sectors);
-        
-        // Actual bar
-        const actualH = (d.actual / maxY) * plotH;
-        ctx.fillStyle = '#6366f1';
-        ctx.fillRect(x - barWidth - 2, margin.t + plotH - actualH, barWidth, actualH);
-        
-        // Predicted bar
-        const predH = (d.predicted / maxY) * plotH;
-        ctx.fillStyle = 'rgba(34, 197, 94, 0.7)';
-        ctx.fillRect(x + 2, margin.t + plotH - predH, barWidth, predH);
-        
-        // X label
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '10px system-ui';
-        ctx.textAlign = 'center';
-        ctx.fillText('S' + d.n, x, H - margin.b + 15);
-    });
-    
-    // Axes
-    ctx.strokeStyle = '#475569';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(margin.l, margin.t);
-    ctx.lineTo(margin.l, H - margin.b);
-    ctx.lineTo(W - margin.r, H - margin.b);
-    ctx.stroke();
-    
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '10px system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText('Sector n', margin.l + plotW/2, H - 10);
-    
-    ctx.fillStyle = '#cbd5e1';
-    ctx.font = 'bold 11px system-ui';
-    ctx.fillText(`C(n,N,${selectedClass},${modulus}): Actual vs 3N²/(π²n(n+1)φ(k))`, W/2, 18);
-}
-
-function drawPrimeDistribution() {
-    const canvas = document.getElementById('primeDistributionCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    const { modulus, coprimeClasses, sectorResidueMatrix } = primorialState;
-    const showExpected = document.getElementById('primeDistShowExpected')?.checked ?? true;
-    
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, W, H);
-    
-    const margin = { l: 60, r: 30, t: 30, b: 60 };
-    const plotW = W - margin.l - margin.r;
-    const plotH = H - margin.t - margin.b;
-    
-    // Count primes per residue class
-    const primeCounts = {};
-    coprimeClasses.forEach(a => { primeCounts[a] = 0; });
-    
-    sectorResidueMatrix.forEach(row => {
-        Object.entries(row.classes).forEach(([a, data]) => {
-            primeCounts[+a] += data.primes;
-        });
-    });
-    
-    const totalPrimes = Object.values(primeCounts).reduce((s, c) => s + c, 0);
-    const expected = totalPrimes / coprimeClasses.length;
-    const maxY = Math.max(...Object.values(primeCounts), expected) * 1.1;
-    
-    const barWidth = plotW / coprimeClasses.length * 0.8;
-    
-    // Draw bars
-    coprimeClasses.forEach((a, i) => {
-        const x = margin.l + (i + 0.5) * (plotW / coprimeClasses.length);
-        const h = (primeCounts[a] / maxY) * plotH;
-        
-        ctx.fillStyle = '#f59e0b';
-        ctx.fillRect(x - barWidth/2, margin.t + plotH - h, barWidth, h);
-    });
-    
-    // Expected line
-    if (showExpected) {
-        const expY = margin.t + plotH - (expected / maxY) * plotH;
-        ctx.strokeStyle = '#22c55e';
-        ctx.setLineDash([5, 5]);
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(margin.l, expY);
-        ctx.lineTo(W - margin.r, expY);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        
-        ctx.fillStyle = '#22c55e';
-        ctx.font = '9px system-ui';
-        ctx.textAlign = 'left';
-        ctx.fillText(`Expected: ${expected.toFixed(1)}`, W - margin.r - 80, expY - 5);
-    }
-    
-    // X labels
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '8px system-ui';
-    ctx.textAlign = 'center';
-    const step = Math.ceil(coprimeClasses.length / 15);
-    coprimeClasses.forEach((a, i) => {
-        if (i % step === 0) {
-            ctx.fillText(a.toString(), margin.l + (i + 0.5) * (plotW / coprimeClasses.length), H - margin.b + 15);
-        }
-    });
-    ctx.font = '10px system-ui';
-    ctx.fillText('Residue class a', margin.l + plotW/2, H - 10);
-    
-    // Axes
-    ctx.strokeStyle = '#475569';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(margin.l, margin.t);
-    ctx.lineTo(margin.l, H - margin.b);
-    ctx.lineTo(W - margin.r, H - margin.b);
-    ctx.stroke();
-    
-    ctx.fillStyle = '#cbd5e1';
-    ctx.font = 'bold 11px system-ui';
-    ctx.fillText(`Prime Distribution (${totalPrimes} primes across ${coprimeClasses.length} classes)`, W/2, 18);
-}
-
-function drawUniformityTest() {
-    const canvas = document.getElementById('uniformityTestCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    const { coprimeClasses, sectorResidueMatrix } = primorialState;
-    const testSector = +(document.getElementById('uniformitySector')?.value || 2);
-    const showChiSq = document.getElementById('uniformityShowChiSq')?.checked ?? true;
-    
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, W, H);
-    
-    const margin = { l: 60, r: 30, t: 30, b: 60 };
-    const plotW = W - margin.l - margin.r;
-    const plotH = H - margin.t - margin.b;
-    
-    // Get counts for test sector
-    const row = sectorResidueMatrix[testSector - 1];
-    if (!row) return;
-    
-    const counts = coprimeClasses.map(a => row.classes[a]?.total || 0);
-    const total = counts.reduce((s, c) => s + c, 0);
-    const expected = total / coprimeClasses.length;
-    
-    // Chi-squared
-    let chiSq = 0;
-    counts.forEach(c => {
-        chiSq += Math.pow(c - expected, 2) / (expected || 1);
-    });
-    const df = coprimeClasses.length - 1;
-    
-    const maxY = Math.max(...counts, expected) * 1.15;
-    const barWidth = plotW / coprimeClasses.length * 0.8;
-    
-    // Draw bars
-    coprimeClasses.forEach((a, i) => {
-        const x = margin.l + (i + 0.5) * (plotW / coprimeClasses.length);
-        const h = (counts[i] / maxY) * plotH;
-        
-        // Color based on deviation from expected
-        const deviation = Math.abs(counts[i] - expected) / (expected || 1);
-        const color = deviation < 0.2 ? '#8b5cf6' : (deviation < 0.5 ? '#f59e0b' : '#ef4444');
-        
-        ctx.fillStyle = color;
-        ctx.fillRect(x - barWidth/2, margin.t + plotH - h, barWidth, h);
-    });
-    
-    // Expected line
-    const expY = margin.t + plotH - (expected / maxY) * plotH;
-    ctx.strokeStyle = '#22c55e';
-    ctx.setLineDash([5, 5]);
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(margin.l, expY);
-    ctx.lineTo(W - margin.r, expY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    
-    // Chi-squared stat
-    if (showChiSq) {
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(W - margin.r - 130, margin.t + 5, 120, 50);
-        ctx.strokeStyle = '#475569';
-        ctx.strokeRect(W - margin.r - 130, margin.t + 5, 120, 50);
-        
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '9px system-ui';
-        ctx.textAlign = 'left';
-        ctx.fillText('χ² = ' + chiSq.toFixed(2), W - margin.r - 120, margin.t + 22);
-        ctx.fillText('df = ' + df, W - margin.r - 120, margin.t + 37);
-        const pVal = chiSq < df * 2 ? 'Likely uniform' : 'Non-uniform';
-        ctx.fillStyle = chiSq < df * 2 ? '#22c55e' : '#ef4444';
-        ctx.fillText(pVal, W - margin.r - 120, margin.t + 50);
-    }
-    
-    // X labels
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '8px system-ui';
-    ctx.textAlign = 'center';
-    const step = Math.ceil(coprimeClasses.length / 15);
-    coprimeClasses.forEach((a, i) => {
-        if (i % step === 0) {
-            ctx.fillText(a.toString(), margin.l + (i + 0.5) * (plotW / coprimeClasses.length), H - margin.b + 15);
-        }
-    });
-    
-    // Axes
-    ctx.strokeStyle = '#475569';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(margin.l, margin.t);
-    ctx.lineTo(margin.l, H - margin.b);
-    ctx.lineTo(W - margin.r, H - margin.b);
-    ctx.stroke();
-    
-    ctx.fillStyle = '#cbd5e1';
-    ctx.font = 'bold 11px system-ui';
-    ctx.fillText(`Sector ${testSector} Uniformity: ${total} coprimes, expected ${expected.toFixed(1)}/class`, W/2, 18);
-}
-
-function drawPrimorialComparison() {
-    const canvas = document.getElementById('primorialComparisonCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    const maxK = +(document.getElementById('primorialCompareMax')?.value || 8);
-    const showProduct = document.getElementById('primorialShowProduct')?.checked ?? true;
-    const showRatio = document.getElementById('primorialShowRatio')?.checked ?? false;
-    
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, W, H);
-    
-    const margin = { l: 70, r: 80, t: 30, b: 50 };
-    const plotW = W - margin.l - margin.r;
-    const plotH = H - margin.t - margin.b;
-    
-    // Compute primorials and their densities
-    const primes = getPrimes(100);
-    const data = [];
-    let primorial = 1;
-    let phiPrimorial = 1;
-    let eulerProduct = 1;
-    
-    for (let k = 0; k < Math.min(maxK, primes.length); k++) {
-        const p = primes[k];
-        primorial *= p;
-        phiPrimorial *= (p - 1);
-        eulerProduct *= (1 - 1/(p*p));
-        
-        data.push({
-            k: k + 1,
-            p,
-            primorial,
-            density: phiPrimorial / primorial,
-            eulerProduct,
-            target: 6 / (Math.PI * Math.PI)
-        });
-    }
-    
-    const target = 6 / (Math.PI * Math.PI);
-    const minY = 0;
-    const maxY = showRatio ? 1.5 : 0.6;
-    
-    // Grid
-    ctx.strokeStyle = '#334155';
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i <= 5; i++) {
-        const y = margin.t + plotH - (i / 5) * plotH;
-        ctx.beginPath();
-        ctx.moveTo(margin.l, y);
-        ctx.lineTo(W - margin.r, y);
-        ctx.stroke();
-        
-        ctx.fillStyle = '#64748b';
-        ctx.font = '9px system-ui';
-        ctx.textAlign = 'right';
-        ctx.fillText((minY + (i / 5) * (maxY - minY)).toFixed(3), margin.l - 5, y + 3);
-    }
-    
-    // Target line (6/π²)
-    const targetY = margin.t + plotH - ((target - minY) / (maxY - minY)) * plotH;
-    ctx.strokeStyle = '#22c55e';
-    ctx.setLineDash([5, 5]);
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(margin.l, targetY);
-    ctx.lineTo(W - margin.r, targetY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = '#22c55e';
-    ctx.font = '10px system-ui';
-    ctx.textAlign = 'left';
-    ctx.fillText('6/π² = ' + target.toFixed(5), W - margin.r + 5, targetY + 4);
-    
-    // φ(P_k)/P_k line
-    ctx.strokeStyle = '#6366f1';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    data.forEach((d, i) => {
-        const x = margin.l + ((i + 0.5) / data.length) * plotW;
-        const val = showRatio ? d.density / target : d.density;
-        const y = margin.t + plotH - ((val - minY) / (maxY - minY)) * plotH;
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-    
-    // Points
-    data.forEach((d, i) => {
-        const x = margin.l + ((i + 0.5) / data.length) * plotW;
-        const val = showRatio ? d.density / target : d.density;
-        const y = margin.t + plotH - ((val - minY) / (maxY - minY)) * plotH;
-        
-        ctx.beginPath();
-        ctx.arc(x, y, 6, 0, 2 * Math.PI);
-        ctx.fillStyle = '#6366f1';
-        ctx.fill();
-        
-        // Label
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '9px system-ui';
-        ctx.textAlign = 'center';
-        ctx.fillText('P' + d.k, x, H - margin.b + 15);
-        ctx.fillStyle = '#64748b';
-        ctx.font = '8px system-ui';
-        ctx.fillText('(' + d.p + ')', x, H - margin.b + 26);
-    });
-    
-    // Euler product line
-    if (showProduct) {
-        ctx.strokeStyle = '#f59e0b';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        data.forEach((d, i) => {
-            const x = margin.l + ((i + 0.5) / data.length) * plotW;
-            const val = showRatio ? d.eulerProduct / target : d.eulerProduct;
-            const y = margin.t + plotH - ((val - minY) / (maxY - minY)) * plotH;
-            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-        });
-        ctx.stroke();
-        
-        // Points
-        data.forEach((d, i) => {
-            const x = margin.l + ((i + 0.5) / data.length) * plotW;
-            const val = showRatio ? d.eulerProduct / target : d.eulerProduct;
-            const y = margin.t + plotH - ((val - minY) / (maxY - minY)) * plotH;
-            
-            ctx.beginPath();
-            ctx.arc(x, y, 4, 0, 2 * Math.PI);
-            ctx.fillStyle = '#f59e0b';
-            ctx.fill();
-        });
-    }
-    
-    // Axes
-    ctx.strokeStyle = '#475569';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(margin.l, margin.t);
-    ctx.lineTo(margin.l, H - margin.b);
-    ctx.lineTo(W - margin.r, H - margin.b);
-    ctx.stroke();
-    
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '10px system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText('Primorial P_k = 2×3×5×...×p_k', margin.l + plotW/2, H - 5);
-    
-    ctx.fillStyle = '#cbd5e1';
-    ctx.font = 'bold 11px system-ui';
-    ctx.fillText('Primorial Density vs Euler Product: Both approach 6/π²', W/2, 18);
-}
-
-function updateSectorResidueTable() {
-    const { coprimeClasses, sectorResidueMatrix } = primorialState;
-    const phiK = coprimeClasses.length;
-    
-    let html = '';
-    sectorResidueMatrix.forEach((row, idx) => {
-        const avgPerClass = row.total / phiK;
-        
-        // Chi-squared
-        let chiSq = 0;
-        const expected = row.total / phiK;
-        Object.values(row.classes).forEach(c => {
-            chiSq += Math.pow(c.total - expected, 2) / (expected || 1);
-        });
-        const df = phiK - 1;
-        const isUniform = chiSq < df * 2;
-        
-        html += `<tr>
-            <td><strong>S${idx + 1}</strong></td>
-            <td>${row.total}</td>
-            <td>${avgPerClass.toFixed(1)}</td>
-            <td>${chiSq.toFixed(2)}</td>
-            <td style="color:${isUniform ? '#22c55e' : '#ef4444'}">${isUniform ? 'Yes' : 'No'}</td>
-        </tr>`;
-    });
-    
-    document.querySelector('#sectorResidueTable tbody').innerHTML = html;
-}
-
-let liftingAnimationId = null;
-function animateLiftingTree() {
-    if (liftingAnimationId) {
-        cancelAnimationFrame(liftingAnimationId);
-        liftingAnimationId = null;
-        return;
-    }
-    
-    let currentLevel = 0;
-    const maxLevels = +(document.getElementById('liftingLevels')?.value || 4);
-    
-    function step() {
-        document.getElementById('liftingLevels').value = currentLevel + 1;
-        drawLiftingTree();
-        
-        currentLevel++;
-        if (currentLevel < maxLevels) {
-            liftingAnimationId = requestAnimationFrame(() => setTimeout(step, 800));
-        } else {
-            liftingAnimationId = null;
-        }
-    }
-    step();
-}
-
-function exportPrimorialData() {
-    const { modulus, coprimeClasses, sectorResidueMatrix, N, base, power } = primorialState;
-    
-    let csv = 'Primorial Sieve Data Export\n';
-    csv += `Base,${base}\n`;
-    csv += `Power,${power}\n`;
-    csv += `Modulus,${modulus}\n`;
-    csv += `N,${N}\n`;
-    csv += `phi(k),${coprimeClasses.length}\n`;
-    csv += `Density,${(coprimeClasses.length/modulus).toFixed(6)}\n\n`;
-    
-    csv += 'Coprime Classes,' + coprimeClasses.join(',') + '\n\n';
-    
-    csv += 'Sector × Residue Matrix\n';
-    csv += 'Sector,' + coprimeClasses.join(',') + ',Total\n';
-    sectorResidueMatrix.forEach((row, idx) => {
-        csv += `S${idx+1},` + coprimeClasses.map(a => row.classes[a]?.total || 0).join(',') + `,${row.total}\n`;
-    });
-    
-    const blob = new Blob([csv], {type:'text/csv'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `primorial_sieve_${base}x2^${power}_N${N}.csv`;
-    a.click();
-}
-
 // RESEARCH
 function testCustomFormula() {
     const formulaStr = document.getElementById('customFormula').value;
@@ -5170,7 +4447,7 @@ function switchTab(name) {
     if(name==='smith') drawSmithChart();
     if(name==='stats') updateStatistics();
     if(name==='primes') updatePrimeAnalysis();
-    if(name==='primorial') updatePrimorialSieve();
+    if(name==='harmonic') updateHarmonicTab();
     if(name==='theoryviz') drawTheoryViz();
     
     setTimeout(addZoomControlsToCharts, 100);
@@ -5347,34 +4624,6 @@ setTimeout(addExportButtons, 500);
 
 computeAll();
 
-// Initialize sector tree on load
-setTimeout(() => {
-    drawSectorTree();
-    // Add tree canvas click handler if not already added
-    const treeCanvas = document.getElementById('sectorTreeCanvas');
-    if (treeCanvas && !treeCanvas.hasClickHandler) {
-        treeCanvas.hasClickHandler = true;
-        treeCanvas.addEventListener('click', function(e) {
-            const rect = this.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const depth = +document.getElementById('treeDepth').value;
-            const treeNodes = buildSternBrocotTree(depth);
-            
-            let closest = null, minDist = 15;
-            treeNodes.forEach(node => {
-                const d = Math.sqrt((node.x - x)**2 + (node.y - y)**2);
-                if (d < minDist) { minDist = d; closest = node; }
-            });
-            
-            if (closest) {
-                const point = { r: closest.r, m: closest.m, sector: getSector(closest.r, closest.m), isPrime: isPrime(closest.m) };
-                selectPointForTree(point);
-            }
-        });
-    }
-}, 100);
-
 // Add zoom controls to all chart boxes
 function addZoomControlsToCharts() {
     // Charts already have 4K export buttons, no additional controls needed
@@ -5384,6 +4633,680 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape') { closePointM
 
 document.getElementById('sectorModal').addEventListener('click', function(e) { if(e.target === this) closeSectorModal(); });
 
+// =============================================
+// GLOBAL HARMONIC ANALYSIS SYSTEM
+// =============================================
+let audioCtx = null;
+let currentOscillator = null;
+let currentGain = null;
+let selectedHarmonicFraction = { r: 1, m: 2 };
+let harmonicSettings = {
+    baseFreq: 220,
+    volume: 0.3,
+    waveform: 'sine',
+    coupling: 0.5
+};
+
+function initAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
+
+function toggleHarmonicPanel() {
+    document.getElementById('harmonicPanel').classList.toggle('expanded');
+}
+
+function updateBaseFreq() {
+    const freq = document.getElementById('baseFreq').value;
+    harmonicSettings.baseFreq = +freq;
+    document.getElementById('baseFreqVal').textContent = freq + ' Hz';
+    updateHarmonicDisplays();
+}
+
+function updateHarmonicVolume() {
+    const vol = document.getElementById('harmonicVolume').value;
+    harmonicSettings.volume = vol / 100;
+    document.getElementById('volumeVal').textContent = vol + '%';
+    if (currentGain) {
+        currentGain.gain.setValueAtTime(harmonicSettings.volume, audioCtx.currentTime);
+    }
+}
+
+function updateWaveform() {
+    harmonicSettings.waveform = document.getElementById('waveform').value;
+    if (currentOscillator) {
+        currentOscillator.type = harmonicSettings.waveform;
+    }
+}
+
+function getHarmonicMode(q) {
+    if (q === 1) return { name: 'Unison', class: 'mode-unison', color: '#22c55e' };
+    if (q <= 4) return { name: 'Consonant', class: 'mode-consonant', color: '#3b82f6' };
+    if (q <= 16) return { name: 'Complex', class: 'mode-complex', color: '#f59e0b' };
+    return { name: 'Dissonant', class: 'mode-dissonant', color: '#ef4444' };
+}
+
+function frequencyToCents(f1, f2) {
+    return 1200 * Math.log2(f2 / f1);
+}
+
+function frequencyToNote(freq) {
+    const A4 = 440;
+    const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const semitones = 12 * Math.log2(freq / A4);
+    const noteNum = Math.round(semitones) + 69;
+    const octave = Math.floor(noteNum / 12) - 1;
+    const noteIndex = ((noteNum % 12) + 12) % 12;
+    const cents = Math.round((semitones - Math.round(semitones)) * 100);
+    return { name: noteNames[noteIndex] + octave, cents: cents };
+}
+
+function getIntervalName(r, m) {
+    const ratio = r / m;
+    const intervals = [
+        { r: 1, m: 1, name: 'Unison' },
+        { r: 2, m: 1, name: 'Octave' },
+        { r: 3, m: 2, name: 'Perfect Fifth' },
+        { r: 4, m: 3, name: 'Perfect Fourth' },
+        { r: 5, m: 4, name: 'Major Third' },
+        { r: 6, m: 5, name: 'Minor Third' },
+        { r: 5, m: 3, name: 'Major Sixth' },
+        { r: 8, m: 5, name: 'Minor Sixth' },
+        { r: 9, m: 8, name: 'Major Second' },
+        { r: 16, m: 15, name: 'Minor Second' },
+        { r: 15, m: 8, name: 'Major Seventh' },
+        { r: 16, m: 9, name: 'Minor Seventh' },
+        { r: 45, m: 32, name: 'Tritone' }
+    ];
+    for (const int of intervals) {
+        if (Math.abs(ratio - int.r / int.m) < 0.001) return int.name;
+    }
+    return r + ':' + m;
+}
+
+function playFraction(r, m, duration = 0.5) {
+    initAudioContext();
+    stopAudio();
+    
+    const freq = harmonicSettings.baseFreq * (r / m);
+    currentOscillator = audioCtx.createOscillator();
+    currentGain = audioCtx.createGain();
+    
+    currentOscillator.type = harmonicSettings.waveform;
+    currentOscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    currentGain.gain.setValueAtTime(harmonicSettings.volume, audioCtx.currentTime);
+    currentGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    
+    currentOscillator.connect(currentGain);
+    currentGain.connect(audioCtx.destination);
+    currentOscillator.start();
+    currentOscillator.stop(audioCtx.currentTime + duration);
+    
+    updateHarmonicDisplays();
+}
+
+function playSelectedFraction() {
+    playFraction(selectedHarmonicFraction.r, selectedHarmonicFraction.m, 1.0);
+    document.getElementById('playBtn').classList.add('playing');
+    setTimeout(() => document.getElementById('playBtn').classList.remove('playing'), 1000);
+}
+
+function playArpeggio() {
+    initAudioContext();
+    const sector = +document.getElementById('viewSector')?.value || 2;
+    const fractions = (state.residuesBySector[sector] || []).slice(0, 8);
+    if (fractions.length === 0) return;
+    
+    let delay = 0;
+    fractions.forEach((f, i) => {
+        setTimeout(() => playFraction(f.r, f.m, 0.4), delay);
+        delay += 300;
+    });
+}
+
+function playHarmonicScale() {
+    initAudioContext();
+    const sector = +(document.getElementById('harmonicSector')?.value || 2);
+    const fractions = (state.residuesBySector[sector] || []).slice(0, 12);
+    if (fractions.length === 0) return;
+    
+    fractions.sort((a, b) => a.r / a.m - b.r / b.m);
+    let delay = 0;
+    fractions.forEach((f, i) => {
+        setTimeout(() => playFraction(f.r, f.m, 0.35), delay);
+        delay += 250;
+    });
+}
+
+function stopAudio() {
+    if (currentOscillator) {
+        try { currentOscillator.stop(); } catch(e) {}
+        currentOscillator = null;
+    }
+    document.getElementById('playBtn')?.classList.remove('playing');
+}
+
+function setInterval(r, m) {
+    selectedHarmonicFraction = { r, m };
+    updateHarmonicDisplays();
+    playFraction(r, m, 0.8);
+    
+    document.querySelectorAll('.interval-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+function selectFractionForHarmonic(r, m) {
+    selectedHarmonicFraction = { r, m };
+    updateHarmonicDisplays();
+    
+    const freq = harmonicSettings.baseFreq * (r / m);
+    const note = frequencyToNote(freq);
+    const mode = getHarmonicMode(m);
+    
+    document.getElementById('selectedFractionInfo').innerHTML = `
+        <div style="font-size:16px; color:#8b5cf6; font-weight:bold;">${r}/${m}</div>
+        <div>Frequency: <strong>${freq.toFixed(2)} Hz</strong></div>
+        <div>Note: <strong>${note.name}</strong> (${note.cents >= 0 ? '+' : ''}${note.cents}¢)</div>
+        <div>Interval: <strong>${getIntervalName(r, m)}</strong></div>
+        <div>Mode: <span class="mode-indicator ${mode.class}">${mode.name}</span></div>
+    `;
+}
+
+function updateHarmonicDisplays() {
+    const { r, m } = selectedHarmonicFraction;
+    const freq = harmonicSettings.baseFreq * (r / m);
+    const note = frequencyToNote(freq);
+    const mode = getHarmonicMode(m);
+    
+    document.getElementById('currentFreqDisplay').textContent = freq.toFixed(2) + ' Hz';
+    document.getElementById('currentNoteDisplay').textContent = `${r}/${m} = ${note.name} (${note.cents >= 0 ? '+' : ''}${note.cents}¢)`;
+    
+    const indicator = document.getElementById('harmonicModeIndicator');
+    indicator.className = 'mode-indicator ' + mode.class;
+    indicator.textContent = mode.name;
+    
+    drawArnoldMini();
+    drawHarmonicSpectrum();
+}
+
+function updateArnoldTongue() {
+    const k = document.getElementById('arnoldK').value / 100;
+    harmonicSettings.coupling = k;
+    document.getElementById('arnoldKVal').textContent = k.toFixed(2);
+    drawArnoldMini();
+}
+
+function drawArnoldMini() {
+    const canvas = document.getElementById('arnoldMiniCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const K = harmonicSettings.coupling;
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    // Draw Arnold tongues for simple ratios
+    const tongues = [
+        { r: 1, m: 1 }, { r: 1, m: 2 }, { r: 2, m: 3 }, { r: 1, m: 3 },
+        { r: 3, m: 4 }, { r: 2, m: 5 }, { r: 3, m: 5 }, { r: 1, m: 4 }
+    ];
+    
+    tongues.forEach(t => {
+        const omega = t.r / t.m;
+        const width = K / t.m * 0.8;
+        const x = omega * W;
+        const mode = getHarmonicMode(t.m);
+        
+        ctx.fillStyle = mode.color + '60';
+        ctx.beginPath();
+        ctx.moveTo(x, H);
+        ctx.lineTo(x - width * W / 2, H * (1 - K));
+        ctx.lineTo(x + width * W / 2, H * (1 - K));
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.strokeStyle = mode.color;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    });
+    
+    // Mark selected fraction
+    const selOmega = selectedHarmonicFraction.r / selectedHarmonicFraction.m;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(selOmega * W, H - 5, 4, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Axes
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    ctx.lineTo(W, H);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, H);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#64748b';
+    ctx.font = '9px system-ui';
+    ctx.fillText('0', 2, H - 3);
+    ctx.fillText('1', W - 10, H - 3);
+    ctx.fillText('K=' + K.toFixed(2), W - 40, 12);
+}
+
+function drawHarmonicSpectrum() {
+    const canvas = document.getElementById('harmonicSpectrum');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    const sector = +document.getElementById('viewSector')?.value || 2;
+    const fractions = (state.residuesBySector[sector] || []).slice(0, 20);
+    if (fractions.length === 0) return;
+    
+    const barWidth = W / fractions.length;
+    fractions.forEach((f, i) => {
+        const mode = getHarmonicMode(f.m);
+        const height = (1 - f.m / 50) * H * 0.8 + H * 0.1;
+        
+        ctx.fillStyle = mode.color + '80';
+        ctx.fillRect(i * barWidth + 1, H - height, barWidth - 2, height);
+    });
+}
+
+function resetHarmonicDefaults() {
+    document.getElementById('baseFreq').value = 220;
+    document.getElementById('harmonicVolume').value = 30;
+    document.getElementById('waveform').value = 'sine';
+    document.getElementById('arnoldK').value = 50;
+    
+    harmonicSettings = { baseFreq: 220, volume: 0.3, waveform: 'sine', coupling: 0.5 };
+    selectedHarmonicFraction = { r: 1, m: 2 };
+    
+    updateBaseFreq();
+    updateHarmonicVolume();
+    updateArnoldTongue();
+    updateHarmonicDisplays();
+}
+
+function applyHarmonicColoring() {
+    const apply = document.getElementById('applyHarmonicColor')?.checked;
+    if (apply) {
+        // Re-draw main ring with harmonic coloring
+        document.getElementById('colorMode').value = 'prime';
+        drawMainRing();
+    }
+}
+
+// HARMONIC TAB FUNCTIONS
+function updateHarmonicTab() {
+    drawArnoldTongues();
+    drawFrequencySpectrum();
+    drawConsonanceMap();
+    drawIntervalCircle();
+    updateIntervalTable();
+}
+
+function drawArnoldTongues() {
+    const canvas = document.getElementById('arnoldTongueCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const K = (document.getElementById('arnoldCoupling')?.value || 60) / 100;
+    const showLabels = document.getElementById('arnoldShowLabels')?.checked ?? true;
+    
+    document.getElementById('arnoldCouplingVal').textContent = K.toFixed(2);
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    const margin = { l: 50, r: 20, t: 30, b: 40 };
+    const plotW = W - margin.l - margin.r;
+    const plotH = H - margin.t - margin.b;
+    
+    // Generate Farey fractions up to maxDenom
+    const maxDenom = +(document.getElementById('harmonicMaxDenom')?.value || 32);
+    const fractions = [];
+    for (let m = 1; m <= maxDenom; m++) {
+        for (let r = 0; r <= m; r++) {
+            if (gcd(r, m) === 1) {
+                fractions.push({ r, m, omega: r / m });
+            }
+        }
+    }
+    fractions.sort((a, b) => a.omega - b.omega);
+    
+    // Draw tongues
+    fractions.forEach(f => {
+        if (f.r === 0) return;
+        const omega = f.omega;
+        const width = K / f.m;
+        const x = margin.l + omega * plotW;
+        const mode = getHarmonicMode(f.m);
+        
+        // Triangle tongue
+        ctx.fillStyle = mode.color + '40';
+        ctx.beginPath();
+        ctx.moveTo(x, margin.t + plotH);
+        ctx.lineTo(x - width * plotW / 2, margin.t + plotH * (1 - K * 0.9));
+        ctx.lineTo(x + width * plotW / 2, margin.t + plotH * (1 - K * 0.9));
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.strokeStyle = mode.color;
+        ctx.lineWidth = f.m <= 4 ? 2 : 1;
+        ctx.stroke();
+        
+        // Labels for simple fractions
+        if (showLabels && f.m <= 6 && width * plotW > 15) {
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = f.m <= 4 ? 'bold 10px system-ui' : '9px system-ui';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${f.r}/${f.m}`, x, margin.t + plotH + 15);
+        }
+    });
+    
+    // Axes
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin.l, margin.t);
+    ctx.lineTo(margin.l, margin.t + plotH);
+    ctx.lineTo(margin.l + plotW, margin.t + plotH);
+    ctx.stroke();
+    
+    // Labels
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '11px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Frequency Ratio Ω = p/q', margin.l + plotW / 2, H - 5);
+    ctx.save();
+    ctx.translate(15, margin.t + plotH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('Coupling K', 0, 0);
+    ctx.restore();
+    
+    // Title
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 12px system-ui';
+    ctx.fillText('Arnold Tongues (Phase-Locking Regions)', margin.l + plotW / 2, 18);
+}
+
+function drawFrequencySpectrum() {
+    const canvas = document.getElementById('freqSpectrumCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const baseFreq = +(document.getElementById('harmonicBaseFreq')?.value || 220);
+    const sector = +(document.getElementById('harmonicSector')?.value || 2);
+    const logScale = document.getElementById('freqLogScale')?.checked ?? false;
+    const showOctaves = document.getElementById('freqShowOctaves')?.checked ?? true;
+    const sortMode = document.getElementById('freqSortMode')?.value || 'freq';
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    const margin = { l: 60, r: 20, t: 30, b: 50 };
+    const plotW = W - margin.l - margin.r;
+    const plotH = H - margin.t - margin.b;
+    
+    let fractions = (state.residuesBySector[sector] || []).map(f => ({
+        ...f,
+        freq: baseFreq * (f.r / f.m),
+        mode: getHarmonicMode(f.m)
+    }));
+    
+    if (fractions.length === 0) {
+        ctx.fillStyle = '#64748b';
+        ctx.font = '14px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('No data - run computation first', W / 2, H / 2);
+        return;
+    }
+    
+    // Sort
+    if (sortMode === 'freq') fractions.sort((a, b) => a.freq - b.freq);
+    else if (sortMode === 'consonance') fractions.sort((a, b) => a.m - b.m);
+    else fractions.sort((a, b) => a.m - b.m);
+    
+    fractions = fractions.slice(0, 50);
+    
+    const maxFreq = Math.max(...fractions.map(f => f.freq));
+    const minFreq = Math.min(...fractions.map(f => f.freq));
+    const barWidth = plotW / fractions.length;
+    
+    // Draw octave lines
+    if (showOctaves) {
+        ctx.strokeStyle = '#22c55e40';
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1;
+        for (let oct = 0; oct < 4; oct++) {
+            const octFreq = baseFreq * Math.pow(2, oct);
+            if (octFreq <= maxFreq * 1.1) {
+                const y = margin.t + plotH - (octFreq / maxFreq) * plotH * 0.9;
+                ctx.beginPath();
+                ctx.moveTo(margin.l, y);
+                ctx.lineTo(margin.l + plotW, y);
+                ctx.stroke();
+                ctx.fillStyle = '#22c55e';
+                ctx.font = '9px system-ui';
+                ctx.textAlign = 'right';
+                ctx.fillText(`${octFreq.toFixed(0)}Hz`, margin.l - 5, y + 3);
+            }
+        }
+        ctx.setLineDash([]);
+    }
+    
+    // Draw bars
+    fractions.forEach((f, i) => {
+        const x = margin.l + i * barWidth;
+        const height = (f.freq / maxFreq) * plotH * 0.85;
+        const y = margin.t + plotH - height;
+        
+        ctx.fillStyle = f.mode.color + '90';
+        ctx.fillRect(x + 1, y, barWidth - 2, height);
+        ctx.strokeStyle = f.mode.color;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + 1, y, barWidth - 2, height);
+    });
+    
+    // Axes
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin.l, margin.t);
+    ctx.lineTo(margin.l, margin.t + plotH);
+    ctx.lineTo(margin.l + plotW, margin.t + plotH);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Fractions (sorted by ' + sortMode + ')', margin.l + plotW / 2, H - 10);
+    
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 12px system-ui';
+    ctx.fillText(`Frequency Spectrum (Base: ${baseFreq} Hz)`, margin.l + plotW / 2, 18);
+}
+
+function drawConsonanceMap() {
+    const canvas = document.getElementById('consonanceMapCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    const margin = { l: 50, r: 20, t: 30, b: 40 };
+    const plotW = W - margin.l - margin.r;
+    const plotH = H - margin.t - margin.b;
+    const maxDenom = +(document.getElementById('harmonicMaxDenom')?.value || 32);
+    
+    // Draw consonance as function of position in [0,1]
+    const resolution = 200;
+    for (let i = 0; i < resolution; i++) {
+        const x = i / resolution;
+        
+        // Find closest Farey fraction
+        let bestR = 1, bestM = 2, bestDist = 1;
+        for (let m = 1; m <= Math.min(maxDenom, 20); m++) {
+            for (let r = 0; r <= m; r++) {
+                if (gcd(r, m) === 1) {
+                    const dist = Math.abs(x - r / m);
+                    if (dist < bestDist) {
+                        bestDist = dist;
+                        bestR = r;
+                        bestM = m;
+                    }
+                }
+            }
+        }
+        
+        const consonance = 1 / bestM;
+        const mode = getHarmonicMode(bestM);
+        
+        const px = margin.l + x * plotW;
+        const height = consonance * plotH * 0.9;
+        
+        ctx.fillStyle = mode.color + '80';
+        ctx.fillRect(px, margin.t + plotH - height, plotW / resolution + 1, height);
+    }
+    
+    // Axes
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin.l, margin.t);
+    ctx.lineTo(margin.l, margin.t + plotH);
+    ctx.lineTo(margin.l + plotW, margin.t + plotH);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Position in [0,1]', margin.l + plotW / 2, H - 10);
+    
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 12px system-ui';
+    ctx.fillText('Consonance Map (height = 1/denominator)', margin.l + plotW / 2, 18);
+}
+
+function drawIntervalCircle() {
+    const canvas = document.getElementById('intervalCircleCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const cx = W / 2, cy = H / 2;
+    const radius = Math.min(W, H) / 2 - 50;
+    const sector = +(document.getElementById('harmonicSector')?.value || 2);
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    // Draw 12-TET reference circle
+    ctx.strokeStyle = '#f59e0b40';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
+    ctx.stroke();
+    
+    // 12-TET positions
+    const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * 2 * Math.PI - Math.PI / 2;
+        const x = cx + Math.cos(angle) * (radius + 20);
+        const y = cy + Math.sin(angle) * (radius + 20);
+        
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius, 4, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText(noteNames[i], x, y + 4);
+    }
+    
+    // Plot fractions on circle
+    const fractions = (state.residuesBySector[sector] || []).slice(0, 30);
+    fractions.forEach(f => {
+        const cents = 1200 * Math.log2(f.r / f.m);
+        const normalizedCents = ((cents % 1200) + 1200) % 1200;
+        const angle = (normalizedCents / 1200) * 2 * Math.PI - Math.PI / 2;
+        const x = cx + Math.cos(angle) * radius * 0.85;
+        const y = cy + Math.sin(angle) * radius * 0.85;
+        
+        const mode = getHarmonicMode(f.m);
+        ctx.fillStyle = mode.color;
+        ctx.beginPath();
+        ctx.arc(x, y, f.m <= 4 ? 6 : 4, 0, 2 * Math.PI);
+        ctx.fill();
+    });
+    
+    // Center label
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 11px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Pitch Class Circle', cx, cy - 5);
+    ctx.font = '10px system-ui';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('(12-TET reference)', cx, cy + 10);
+}
+
+function updateIntervalTable() {
+    const tbody = document.querySelector('#intervalTable tbody');
+    if (!tbody) return;
+    
+    const baseFreq = +(document.getElementById('harmonicBaseFreq')?.value || 220);
+    const sector = +(document.getElementById('harmonicSector')?.value || 2);
+    const fractions = (state.residuesBySector[sector] || []).slice(0, 30);
+    
+    if (fractions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;">No data - run computation first</td></tr>';
+        return;
+    }
+    
+    fractions.sort((a, b) => a.r / a.m - b.r / b.m);
+    
+    let html = '';
+    fractions.forEach(f => {
+        const freq = baseFreq * (f.r / f.m);
+        const note = frequencyToNote(freq);
+        const cents = frequencyToCents(baseFreq, freq);
+        const mode = getHarmonicMode(f.m);
+        const intervalName = getIntervalName(f.r, f.m);
+        
+        html += `<tr>
+            <td><strong>${f.r}/${f.m}</strong></td>
+            <td>${f.r}:${f.m}</td>
+            <td style="color:#8b5cf6">${freq.toFixed(2)} Hz</td>
+            <td>${cents >= 0 ? '+' : ''}${cents.toFixed(1)}¢</td>
+            <td>${note.name} (${note.cents >= 0 ? '+' : ''}${note.cents}¢)</td>
+            <td>${intervalName}</td>
+            <td><span class="mode-indicator ${mode.class}">${mode.name}</span></td>
+            <td><button class="harmonic-btn primary" onclick="playFraction(${f.r},${f.m},0.6)" style="padding:3px 8px;font-size:10px;">Play</button></td>
+        </tr>`;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+// Initialize harmonic panel on load
+setTimeout(() => {
+    drawArnoldMini();
+    drawHarmonicSpectrum();
+}, 100);
+
 setTimeout(addZoomControlsToCharts, 500);</script>
 </body>
-                                         </html>
+                                                                                                                                                             </html>
