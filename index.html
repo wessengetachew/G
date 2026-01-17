@@ -9,6 +9,14 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1a; color: #e2e8f0; line-height: 1.6; font-size: 14px; }
         
+        .nav-links { background: linear-gradient(90deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%); padding: 8px 15px; border-bottom: 1px solid #4338ca; overflow-x: auto; white-space: nowrap; position: sticky; top: 0; z-index: 500; }
+        .nav-links::-webkit-scrollbar { height: 4px; }
+        .nav-links::-webkit-scrollbar-track { background: #1e1b4b; }
+        .nav-links::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 2px; }
+        .nav-links a { display: inline-block; padding: 4px 10px; margin: 2px 3px; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); border-radius: 4px; color: #a5b4fc; text-decoration: none; font-size: 11px; font-weight: 500; transition: all 0.2s; }
+        .nav-links a:hover { background: rgba(99, 102, 241, 0.4); color: #e0e7ff; border-color: #6366f1; transform: translateY(-1px); }
+        .nav-links-label { color: #64748b; font-size: 10px; margin-right: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; overflow-y: auto; padding: 20px; }
         .modal-overlay.active { display: flex; justify-content: center; align-items: flex-start; }
         .modal-content { background: #1e293b; border-radius: 12px; max-width: 900px; width: 100%; border: 1px solid #475569; margin: 20px auto; }
@@ -141,6 +149,25 @@
     </style>
 </head>
 <body>
+<div class="nav-links">
+    <span class="nav-links-label">Projects:</span>
+    <a href="https://wessengetachew.github.io/2025/" target="_blank">2025</a>
+    <a href="https://wessengetachew.github.io/Transform/" target="_blank">Transform</a>
+    <a href="https://wessengetachew.github.io/finite/" target="_blank">Finite</a>
+    <a href="https://wessengetachew.github.io/Primes/" target="_blank">Primes</a>
+    <a href="https://wessengetachew.github.io/Farey/" target="_blank">Farey</a>
+    <a href="https://wessengetachew.github.io/Composite/" target="_blank">Composite</a>
+    <a href="https://wessengetachew.github.io/Ethiopian/" target="_blank">Ethiopian</a>
+    <a href="https://wessengetachew.github.io/2pir/" target="_blank">2πr</a>
+    <a href="https://wessengetachew.github.io/1-2/" target="_blank">1-2</a>
+    <a href="https://wessengetachew.github.io/Rational-/" target="_blank">Rational</a>
+    <a href="https://wessengetachew.github.io/Infinitemoduli/" target="_blank">Infinite Moduli</a>
+    <a href="https://wessengetachew.github.io/Pythagorean-/" target="_blank">Pythagorean</a>
+    <a href="https://wessengetachew.github.io/Phase/" target="_blank">Phase</a>
+    <a href="https://wessengetachew.github.io/Gemini/" target="_blank">Gemini</a>
+    <a href="https://wessengetachew.github.io/Rebuild/" target="_blank">Rebuild</a>
+    <a href="https://wessengetachew.github.io/Goldbach/" target="_blank">Goldbach</a>
+</div>
 <div class="container">
     <h1>Farey Sector Formula - Complete Research Platform</h1>
     <p class="subtitle">Comprehensive analysis with RH connections, modular arithmetic, and advanced visualizations</p>
@@ -857,26 +884,32 @@ function screenshotFullTab(tabName) {
     const canvases = tabElement.querySelectorAll('canvas');
     const statGrids = tabElement.querySelectorAll('.stat-grid');
     const tables = tabElement.querySelectorAll('table');
-    const panels = tabElement.querySelectorAll('.panel');
     
     const padding = 40;
-    const titleHeight = 60;
-    const statsHeight = statGrids.length > 0 ? 90 : 0;
+    const titleHeight = 80;
+    const statsHeight = statGrids.length > 0 ? 100 : 0;
     
-    // Calculate canvas section height
-    let canvasRows = Math.ceil(canvases.length / 2);
-    let canvasSectionHeight = canvasRows * 320;
+    // Calculate canvas section - 2 per row
+    const canvasCount = canvases.length;
+    const canvasRows = Math.ceil(canvasCount / 2);
+    const canvasSectionHeight = canvasRows * 340;
+    
+    // Check if we have odd number of canvases (will have empty space)
+    const hasEmptySpace = canvasCount % 2 === 1;
     
     // Calculate table height
     let tableHeight = 0;
-    tables.forEach(t => {
-        const rows = Math.min(t.querySelectorAll('tbody tr').length, 15);
-        tableHeight += rows * 22 + 50;
-    });
-    tableHeight = Math.min(tableHeight, 400);
+    if (tables.length > 0) {
+        const rows = Math.min(tables[0].querySelectorAll('tbody tr').length, 12);
+        tableHeight = rows * 24 + 60;
+    }
+    tableHeight = Math.min(tableHeight, 350);
     
-    const totalWidth = 900;
-    const totalHeight = titleHeight + statsHeight + canvasSectionHeight + tableHeight + padding * 3;
+    // Formula panel height (for empty space or bottom)
+    const formulaPanelHeight = 200;
+    
+    const totalWidth = 1000;
+    const totalHeight = titleHeight + statsHeight + canvasSectionHeight + tableHeight + formulaPanelHeight + padding * 2;
     
     const composite = document.createElement('canvas');
     composite.width = totalWidth * 2;
@@ -890,41 +923,150 @@ function screenshotFullTab(tabName) {
     
     let currentY = padding;
     
+    // Tab info for formulas
+    const tabInfo = {
+        'main': {
+            title: 'Main Sector Analysis',
+            formula: 'C(n, N) = 3N² / (π² n(n+1))',
+            description: 'Asymptotic count of coprime pairs (r, m) with r/m in sector Sₙ = (1/(n+1), 1/n]',
+            params: ['Coprime density: 6/π² ≈ 0.6079', 'Sector width: 1/(n(n+1))', 'Error term: O(N log N)']
+        },
+        'theory': {
+            title: 'Farey Sector Density Theory',
+            formula: 'C(n, N) ~ (3/π²) · N² / n(n+1)',
+            description: 'Distribution of coprime integer pairs with bounded height whose rational slope lies in a fixed Farey sector',
+            params: ['Σφ(b) = 3N²/π² + O(N log N)', 'Global density: 1/ζ(2) = 6/π²', 'Visible lattice points']
+        },
+        'theoryviz': {
+            title: 'Theory Visualization',
+            formula: 'C(n, N) = 3N² / (π² n(n+1))',
+            description: 'Interactive visual exploration of the Farey Sector Density Theorem',
+            params: ['Summatory totient: Σφ(b) ~ 3N²/π²', 'Sector partition of (0,1]', 'Convergence analysis']
+        },
+        'gaps': {
+            title: 'Farey Gap Analysis',
+            formula: 'gap(a/b, c/d) = |c/d - a/b| = 1/(b·d)',
+            description: 'For consecutive Farey fractions, the gap equals exactly 1/(b·d)',
+            params: ['Mediant property: |ad - bc| = 1', 'Gap decreases with denominator', 'Uniform distribution']
+        },
+        'franel': {
+            title: 'Franel-Landau Theorem',
+            formula: 'Σ|δₖ| = O(N^(1/2+ε)) ⟺ RH',
+            description: 'Equivalence between Farey sequence deviation growth and the Riemann Hypothesis',
+            params: ['δₖ = Fₖ - k/|Fₙ|', 'RH implies bounded Σ|δ|/√N', 'Computational verification']
+        },
+        'dedekind': {
+            title: 'Dedekind Sums',
+            formula: 's(h,k) = Σⱼ₌₁ᵏ⁻¹ ((j/k))((hj/k))',
+            description: 'Arithmetic functions encoding properties of coprime pairs with reciprocity laws',
+            params: ['Reciprocity: s(h,k) + s(k,h) = -1/4 + ...', 'Sawtooth function ((x))', 'Modular forms connection']
+        },
+        'cf': {
+            title: 'Continued Fractions',
+            formula: 'r/m = [a₀; a₁, a₂, ...]',
+            description: 'Stern-Brocot tree encoding via continued fraction expansion',
+            params: ['Path L^a R^b encodes [0; a, b, ...]', 'Convergents approximate r/m', 'Best rational approximations']
+        },
+        'psl': {
+            title: 'PSL(2,ℤ) Matrices',
+            formula: '[a,c; b,d] ∈ SL(2,ℤ) with |ad-bc|=1',
+            description: 'Farey neighbors correspond to matrices with determinant ±1',
+            params: ['Ford circles tangency', 'Hyperbolic tessellation', 'Modular group action']
+        },
+        'euler': {
+            title: 'Euler Product for ζ(2)',
+            formula: 'ζ(2) = Πₚ 1/(1-1/p²) = π²/6',
+            description: 'The coprime density emerges from excluding prime multiples',
+            params: ['6/π² = Πₚ(1-1/p²)', 'Prime sieve interpretation', 'Basel problem solution']
+        },
+        'modular': {
+            title: 'Modular Arithmetic Analysis',
+            formula: 'm ≡ a (mod k)',
+            description: 'Residue class distribution and prime channel analysis',
+            params: ['Lifting tower: m → 2m, 3m, ...', 'Prime channel ownership', 'Residue class uniformity']
+        },
+        '3d': {
+            title: '3D Sector Cone Visualization',
+            formula: 'Points at height m have coprime r with r/m ∈ Sₙ',
+            description: 'Third axis represents denominator m, showing density growth with m²',
+            params: ['Perspective projection', 'Color by prime/composite', 'Rotation controls']
+        },
+        'hyperbolic': {
+            title: 'Hyperbolic Plane / Poincaré Disk',
+            formula: 'Farey tessellation of ℍ',
+            description: 'The hyperbolic plane is tessellated by ideal triangles with Farey vertices',
+            params: ['Geodesics between neighbors', 'Ford circles on boundary', 'PSL(2,ℤ) action']
+        },
+        'animation': {
+            title: 'Farey Sequence Growth Animation',
+            formula: '|Fₙ| ~ 3N²/π²',
+            description: 'Watch the Farey sequence grow as N increases',
+            params: ['Progressive density increase', 'Prime/composite distribution', 'Mediant insertion']
+        },
+        'smith': {
+            title: 'Smith Chart Transform',
+            formula: 'Γ = (Z-1)/(Z+1)',
+            description: 'Map Farey fractions to Smith chart coordinates',
+            params: ['Impedance transformation', 'Reflection coefficient', 'Complex plane mapping']
+        },
+        'stats': {
+            title: 'Statistical Analysis',
+            formula: 'Expected: 6N²/π², Actual: |coprimes|',
+            description: 'Statistical comparison of actual vs theoretical distributions',
+            params: ['Cross-sector correlation', 'Error term analysis', 'Local density variation']
+        },
+        'primes': {
+            title: 'Prime Analysis',
+            formula: 'φ(p) = p-1 for prime p',
+            description: 'Prime denominator distribution and twin prime patterns',
+            params: ['Prime vs composite ratio', 'k-tuple correlations', 'Gap patterns at primes']
+        },
+        'research': {
+            title: 'Research Tools',
+            formula: 'Custom: C(n,N) = f(n,N)',
+            description: 'Tools for testing custom formulas and batch parameter sweeps',
+            params: ['LaTeX export', 'CSV/JSON data export', 'Parameter sweep analysis']
+        }
+    };
+    
+    const info = tabInfo[tabName] || { title: tabName, formula: '', description: '', params: [] };
+    
+    // Header with gradient
+    const gradient = ctx.createLinearGradient(0, 0, totalWidth, titleHeight);
+    gradient.addColorStop(0, '#1e1b4b');
+    gradient.addColorStop(1, '#312e81');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, totalWidth, titleHeight);
+    
     // Title
-    const tabTitle = {
-        'main': 'Main Analysis',
-        'theory': 'Theory',
-        'theoryviz': 'Theory Visualization',
-        'gaps': 'Gap Analysis',
-        'franel': 'Franel-Landau Analysis',
-        'dedekind': 'Dedekind Sums',
-        'cf': 'Continued Fractions',
-        'psl': 'PSL(2,Z) Matrices',
-        'euler': 'Euler Product',
-        'modular': 'Modular Arithmetic',
-        '3d': '3D View',
-        'hyperbolic': 'Hyperbolic Plane',
-        'animation': 'Animation',
-        'smith': 'Smith Chart',
-        'stats': 'Statistics',
-        'primes': 'Prime Analysis',
-        'research': 'Research Tools'
-    }[tabName] || tabName;
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = 'bold 24px system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText('Farey Sector Formula - ' + info.title, padding, currentY + 30);
     
-    ctx.fillStyle = '#f1f5f9';
-    ctx.font = 'bold 20px system-ui';
-    ctx.fillText('Farey Sector - ' + tabTitle, padding, currentY + 25);
-    ctx.font = '11px system-ui';
-    ctx.fillStyle = '#94a3b8';
-    ctx.fillText('N = ' + state.nMax + ' | Sectors ' + state.sectorMin + '-' + state.sectorMax + ' | ' + new Date().toLocaleString(), padding, currentY + 45);
-    currentY += titleHeight;
+    ctx.font = '12px system-ui';
+    ctx.fillStyle = '#a5b4fc';
+    ctx.fillText('N = ' + state.nMax + ' | Sectors ' + state.sectorMin + '-' + state.sectorMax + ' | ' + new Date().toLocaleString(), padding, currentY + 55);
     
-    // Stats
+    // Formula badge
+    ctx.fillStyle = 'rgba(99, 102, 241, 0.3)';
+    const formulaWidth = ctx.measureText(info.formula).width + 30;
+    ctx.fillRect(totalWidth - padding - formulaWidth - 10, currentY + 15, formulaWidth + 20, 35);
+    ctx.strokeStyle = '#6366f1';
+    ctx.strokeRect(totalWidth - padding - formulaWidth - 10, currentY + 15, formulaWidth + 20, 35);
+    ctx.fillStyle = '#e0e7ff';
+    ctx.font = 'bold 14px "Cambria Math", serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(info.formula, totalWidth - padding - 5, currentY + 38);
+    
+    currentY = titleHeight;
+    
+    // Stats section
     if (statGrids.length > 0) {
         ctx.fillStyle = '#1e293b';
-        ctx.fillRect(padding, currentY, totalWidth - padding * 2, statsHeight - 20);
+        ctx.fillRect(padding, currentY + 10, totalWidth - padding * 2, statsHeight - 20);
         ctx.strokeStyle = '#334155';
-        ctx.strokeRect(padding, currentY, totalWidth - padding * 2, statsHeight - 20);
+        ctx.strokeRect(padding, currentY + 10, totalWidth - padding * 2, statsHeight - 20);
         
         const statCards = statGrids[0].querySelectorAll('.stat-card');
         const statWidth = (totalWidth - padding * 2) / Math.min(statCards.length, 6);
@@ -936,28 +1078,27 @@ function screenshotFullTab(tabName) {
             const value = card.querySelector('.stat-value');
             
             ctx.fillStyle = '#94a3b8';
-            ctx.font = '10px system-ui';
+            ctx.font = '11px system-ui';
             ctx.textAlign = 'center';
-            ctx.fillText(label ? label.textContent : '', x, currentY + 25);
+            ctx.fillText(label ? label.textContent : '', x, currentY + 35);
             
             const valueEl = card.querySelector('.stat-value');
             ctx.fillStyle = valueEl && valueEl.style.color ? valueEl.style.color : '#6366f1';
-            ctx.font = 'bold 16px system-ui';
-            ctx.fillText(value ? value.textContent : '', x, currentY + 50);
+            ctx.font = 'bold 18px system-ui';
+            ctx.fillText(value ? value.textContent : '', x, currentY + 60);
         });
-        ctx.textAlign = 'left';
         currentY += statsHeight;
     }
     
     // Canvases - 2 per row
     const canvasWidth = (totalWidth - padding * 3) / 2;
-    const canvasHeight = 280;
+    const canvasHeight = 300;
     
     canvases.forEach((canvas, i) => {
         const col = i % 2;
         const row = Math.floor(i / 2);
         const x = padding + col * (canvasWidth + padding);
-        const y = currentY + row * (canvasHeight + 30);
+        const y = currentY + row * (canvasHeight + 40);
         
         // Get title from parent chart-box
         const chartBox = canvas.closest('.chart-box');
@@ -967,19 +1108,23 @@ function screenshotFullTab(tabName) {
         ctx.fillStyle = '#0f172a';
         ctx.fillRect(x, y, canvasWidth, canvasHeight);
         ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 1;
         ctx.strokeRect(x, y, canvasWidth, canvasHeight);
         
-        // Title
-        ctx.fillStyle = '#cbd5e1';
+        // Title bar
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(x, y, canvasWidth, 25);
+        ctx.fillStyle = '#e2e8f0';
         ctx.font = 'bold 11px system-ui';
-        ctx.fillText(title, x + 10, y + 18);
+        ctx.textAlign = 'left';
+        ctx.fillText(title, x + 10, y + 17);
         
         // Draw canvas scaled
-        const scale = Math.min((canvasWidth - 20) / canvas.width, (canvasHeight - 40) / canvas.height);
+        const scale = Math.min((canvasWidth - 20) / canvas.width, (canvasHeight - 45) / canvas.height);
         const drawWidth = canvas.width * scale;
         const drawHeight = canvas.height * scale;
         const drawX = x + (canvasWidth - drawWidth) / 2;
-        const drawY = y + 25 + (canvasHeight - 35 - drawHeight) / 2;
+        const drawY = y + 30 + (canvasHeight - 40 - drawHeight) / 2;
         
         try {
             ctx.drawImage(canvas, drawX, drawY, drawWidth, drawHeight);
@@ -987,59 +1132,91 @@ function screenshotFullTab(tabName) {
             ctx.fillStyle = '#64748b';
             ctx.fillText('Canvas render error', drawX + 20, drawY + 50);
         }
-        
-        // Legend from chart-box
-        const legend = chartBox ? chartBox.querySelector('.color-legend') : null;
-        if (legend) {
-            const items = legend.querySelectorAll('.color-legend-item');
-            let legendX = x + 10;
-            const legendY = y + canvasHeight - 18;
-            
-            items.forEach(item => {
-                if (legendX > x + canvasWidth - 50) return;
-                const swatch = item.querySelector('.color-swatch');
-                const text = item.textContent.trim().substring(0, 15);
-                
-                if (swatch) {
-                    ctx.fillStyle = swatch.style.background || '#6366f1';
-                    ctx.fillRect(legendX, legendY - 6, 8, 8);
-                    legendX += 10;
-                }
-                ctx.fillStyle = '#94a3b8';
-                ctx.font = '8px system-ui';
-                ctx.fillText(text, legendX, legendY);
-                legendX += ctx.measureText(text).width + 12;
-            });
-        }
     });
     
-    currentY += canvasRows * (canvasHeight + 30) + 10;
+    // Fill empty space if odd number of canvases
+    if (hasEmptySpace && canvasCount > 0) {
+        const col = canvasCount % 2;
+        const row = Math.floor(canvasCount / 2);
+        const x = padding + col * (canvasWidth + padding);
+        const y = currentY + row * (canvasHeight + 40);
+        
+        // Formula/Info panel in empty space
+        ctx.fillStyle = '#1e1b4b';
+        ctx.fillRect(x, y, canvasWidth, canvasHeight);
+        ctx.strokeStyle = '#6366f1';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, canvasWidth, canvasHeight);
+        
+        // Title
+        ctx.fillStyle = '#c7d2fe';
+        ctx.font = 'bold 14px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('Key Formulas & Parameters', x + canvasWidth/2, y + 30);
+        
+        // Main formula box
+        ctx.fillStyle = 'rgba(99, 102, 241, 0.2)';
+        ctx.fillRect(x + 20, y + 50, canvasWidth - 40, 50);
+        ctx.strokeStyle = '#8b5cf6';
+        ctx.strokeRect(x + 20, y + 50, canvasWidth - 40, 50);
+        ctx.fillStyle = '#f1f5f9';
+        ctx.font = 'bold 16px "Cambria Math", serif';
+        ctx.fillText(info.formula, x + canvasWidth/2, y + 82);
+        
+        // Description
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '11px system-ui';
+        const descLines = wrapText(ctx, info.description, canvasWidth - 40);
+        descLines.forEach((line, i) => {
+            ctx.fillText(line, x + canvasWidth/2, y + 125 + i * 16);
+        });
+        
+        // Parameters
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = 'bold 12px system-ui';
+        ctx.textAlign = 'left';
+        ctx.fillText('Parameters:', x + 25, y + 180);
+        
+        ctx.font = '11px system-ui';
+        ctx.fillStyle = '#a5b4fc';
+        info.params.forEach((param, i) => {
+            ctx.fillText('• ' + param, x + 30, y + 200 + i * 20);
+        });
+        
+        // Current values
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px system-ui';
+        ctx.fillText('Current: N=' + state.nMax + ', Sectors=' + state.sectorMin + '-' + state.sectorMax, x + 25, y + canvasHeight - 20);
+    }
     
-    // Tables
-    if (tables.length > 0 && currentY < totalHeight - 100) {
+    currentY += canvasSectionHeight;
+    
+    // Tables section
+    if (tables.length > 0 && tableHeight > 60) {
         const table = tables[0];
         const headers = table.querySelectorAll('thead th');
         const rows = table.querySelectorAll('tbody tr');
         
-        ctx.fillStyle = '#f1f5f9';
-        ctx.font = 'bold 11px system-ui';
-        ctx.fillText('Data Table', padding, currentY + 15);
-        currentY += 25;
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = 'bold 12px system-ui';
+        ctx.textAlign = 'left';
+        ctx.fillText('Data Table', padding, currentY + 20);
+        currentY += 30;
         
         // Header
         ctx.fillStyle = '#334155';
-        ctx.fillRect(padding, currentY, totalWidth - padding * 2, 20);
+        ctx.fillRect(padding, currentY, totalWidth - padding * 2, 24);
         
         const colWidth = (totalWidth - padding * 2) / Math.max(headers.length, 1);
         ctx.fillStyle = '#e2e8f0';
-        ctx.font = 'bold 9px system-ui';
+        ctx.font = 'bold 10px system-ui';
         headers.forEach((h, i) => {
-            ctx.fillText(h.textContent.substring(0, 12), padding + 5 + i * colWidth, currentY + 14);
+            ctx.fillText(h.textContent.substring(0, 12), padding + 8 + i * colWidth, currentY + 16);
         });
-        currentY += 20;
+        currentY += 24;
         
         // Rows
-        ctx.font = '9px system-ui';
+        ctx.font = '10px system-ui';
         const maxRows = Math.min(rows.length, 10);
         for (let r = 0; r < maxRows; r++) {
             const row = rows[r];
@@ -1047,30 +1224,105 @@ function screenshotFullTab(tabName) {
             
             if (r % 2 === 0) {
                 ctx.fillStyle = '#1e293b';
-                ctx.fillRect(padding, currentY, totalWidth - padding * 2, 18);
+                ctx.fillRect(padding, currentY, totalWidth - padding * 2, 20);
             }
             
             cells.forEach((cell, i) => {
                 ctx.fillStyle = cell.style.color || '#e2e8f0';
-                ctx.fillText(cell.textContent.substring(0, 15), padding + 5 + i * colWidth, currentY + 13);
+                ctx.fillText(cell.textContent.substring(0, 15), padding + 8 + i * colWidth, currentY + 14);
             });
-            currentY += 18;
+            currentY += 20;
         }
         
         if (rows.length > maxRows) {
             ctx.fillStyle = '#64748b';
-            ctx.fillText('... and ' + (rows.length - maxRows) + ' more rows', padding + 5, currentY + 13);
+            ctx.fillText('... and ' + (rows.length - maxRows) + ' more rows', padding + 8, currentY + 14);
+            currentY += 20;
         }
     }
     
-    // Footer
+    // Bottom formula panel
+    currentY = totalHeight - formulaPanelHeight - padding;
+    
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(padding, currentY, totalWidth - padding * 2, formulaPanelHeight);
+    ctx.strokeStyle = '#475569';
+    ctx.strokeRect(padding, currentY, totalWidth - padding * 2, formulaPanelHeight);
+    
+    // Left side - Main formula
+    ctx.fillStyle = '#c7d2fe';
+    ctx.font = 'bold 13px system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText('Core Formula', padding + 20, currentY + 25);
+    
+    ctx.fillStyle = 'rgba(99, 102, 241, 0.15)';
+    ctx.fillRect(padding + 20, currentY + 35, (totalWidth - padding * 2) / 2 - 40, 45);
+    ctx.fillStyle = '#f1f5f9';
+    ctx.font = 'bold 18px "Cambria Math", serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(info.formula, padding + 20 + ((totalWidth - padding * 2) / 2 - 40) / 2, currentY + 65);
+    
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px system-ui';
+    ctx.textAlign = 'left';
+    const descLines2 = wrapText(ctx, info.description, (totalWidth - padding * 2) / 2 - 50);
+    descLines2.forEach((line, i) => {
+        ctx.fillText(line, padding + 25, currentY + 100 + i * 14);
+    });
+    
+    // Right side - Parameters and constants
+    const rightX = padding + (totalWidth - padding * 2) / 2 + 20;
+    ctx.fillStyle = '#c7d2fe';
+    ctx.font = 'bold 13px system-ui';
+    ctx.fillText('Key Parameters', rightX, currentY + 25);
+    
+    ctx.fillStyle = '#a5b4fc';
+    ctx.font = '11px system-ui';
+    info.params.forEach((param, i) => {
+        ctx.fillText('• ' + param, rightX + 5, currentY + 50 + i * 18);
+    });
+    
+    // Constants box
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(rightX, currentY + 120, 200, 55);
+    ctx.strokeStyle = '#334155';
+    ctx.strokeRect(rightX, currentY + 120, 200, 55);
     ctx.fillStyle = '#64748b';
-    ctx.font = '9px system-ui';
-    ctx.fillText('Farey Sector Research Platform | @7dview | wessengetachew.github.io', padding, totalHeight - 12);
+    ctx.font = '10px system-ui';
+    ctx.fillText('Universal Constants:', rightX + 10, currentY + 138);
+    ctx.fillStyle = '#6366f1';
+    ctx.font = '11px monospace';
+    ctx.fillText('6/π² = ' + (6/Math.PI/Math.PI).toFixed(8), rightX + 10, currentY + 155);
+    ctx.fillText('π²/6 = ' + (Math.PI*Math.PI/6).toFixed(8), rightX + 10, currentY + 170);
+    
+    // Footer
+    ctx.fillStyle = '#475569';
+    ctx.font = '10px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Farey Sector Research Platform | @7dview | wessengetachew.github.io', totalWidth / 2, totalHeight - 15);
     
     currentScreenshotData = composite.toDataURL('image/png');
     document.getElementById('screenshotPreview').src = currentScreenshotData;
     document.getElementById('screenshotOverlay').classList.add('active');
+}
+
+// Helper function to wrap text
+function wrapText(ctx, text, maxWidth) {
+    const words = text.split(' ');
+    const lines = [];
+    let currentLine = '';
+    
+    words.forEach(word => {
+        const testLine = currentLine + (currentLine ? ' ' : '') + word;
+        if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+            lines.push(currentLine);
+            currentLine = word;
+        } else {
+            currentLine = testLine;
+        }
+    });
+    if (currentLine) lines.push(currentLine);
+    return lines.slice(0, 3); // Max 3 lines
 }
 
 // Utilities
@@ -2154,26 +2406,18 @@ document.getElementById('mainRing').addEventListener('mousemove', function(e) {
     } else tooltip.classList.remove('visible');
 });
 
-// Tree canvas click handler - added via setTimeout after DOM ready
-
 function openPointModal(p) {
     document.getElementById('pointModalTitle').textContent = `${p.r}/${p.m}`;
     const cf = toCF(p.r, p.m);
-    const path = getPathToFraction(p.r, p.m);
-    const coloredPath = path.split('').map(c => 
-        `<span style="color:${c === 'L' ? '#ef4444' : '#3b82f6'}; font-weight:bold;">${c}</span>`
-    ).join('');
-    
     document.getElementById('pointModalBody').innerHTML = `
         <div class="detail-grid">
             <div class="detail-card"><h5>Fraction</h5><div class="value">${p.r}/${p.m}</div><div class="sub">= ${(p.r/p.m).toFixed(8)}</div></div>
             <div class="detail-card"><h5>Sector</h5><div class="value">${p.sector}</div><div class="sub">(1/${p.sector+1}, 1/${p.sector}]</div></div>
             <div class="detail-card"><h5>Modulus</h5><div class="value" style="color:${p.isPrime?'#f59e0b':'#6366f1'}">${p.m}</div><div class="sub">${p.isPrime?'Prime':'Composite'}</div></div>
         </div>
-        <div class="theorem-box"><strong>CF:</strong> [${cf.join('; ')}]<br><strong>SB Path:</strong> ${coloredPath || 'ROOT'} <span style="color:#64748b;">(${path.length} steps)</span></div>
-        <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+        <div class="theorem-box"><strong>CF:</strong> [${cf.join('; ')}]<br><strong>Path:</strong> ${cfPath(cf)}</div>
+        <div style="margin-top:12px;">
             <button onclick="closePointModal(); openSectorModal(${p.sector});">View All in Sector ${p.sector}</button>
-            <button class="secondary" onclick="closePointModal(); selectPointForTree({r:${p.r},m:${p.m},sector:${p.sector},isPrime:${p.isPrime}}); document.getElementById('sectorTreeCanvas').scrollIntoView({behavior:'smooth'});">Show Tree Path</button>
         </div>
     `;
     document.getElementById('pointModal').classList.add('active');
@@ -3528,34 +3772,6 @@ setTimeout(addExportButtons, 500);
 
 computeAll();
 
-// Initialize sector tree on load
-setTimeout(() => {
-    drawSectorTree();
-    // Add tree canvas click handler if not already added
-    const treeCanvas = document.getElementById('sectorTreeCanvas');
-    if (treeCanvas && !treeCanvas.hasClickHandler) {
-        treeCanvas.hasClickHandler = true;
-        treeCanvas.addEventListener('click', function(e) {
-            const rect = this.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const depth = +document.getElementById('treeDepth').value;
-            const treeNodes = buildSternBrocotTree(depth);
-            
-            let closest = null, minDist = 15;
-            treeNodes.forEach(node => {
-                const d = Math.sqrt((node.x - x)**2 + (node.y - y)**2);
-                if (d < minDist) { minDist = d; closest = node; }
-            });
-            
-            if (closest) {
-                const point = { r: closest.r, m: closest.m, sector: getSector(closest.r, closest.m), isPrime: isPrime(closest.m) };
-                selectPointForTree(point);
-            }
-        });
-    }
-}, 100);
-
 // Add zoom controls to all chart boxes
 function addZoomControlsToCharts() {
     // Charts already have 4K export buttons, no additional controls needed
@@ -3567,4 +3783,4 @@ document.getElementById('sectorModal').addEventListener('click', function(e) { i
 
 setTimeout(addZoomControlsToCharts, 500);</script>
 </body>
-        </html>
+                </html>
