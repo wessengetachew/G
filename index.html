@@ -9,86 +9,147 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1a; color: #e2e8f0; line-height: 1.6; font-size: 14px; }
         
-        /* GLOBAL HARMONIC CONTROL PANEL */
-        .harmonic-global-panel {
-            position: fixed;
-            top: 45px;
-            right: 0;
-            width: 340px;
-            max-height: calc(100vh - 50px);
-            background: linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%);
-            border-left: 2px solid #8b5cf6;
+        /* GLOBAL HARMONIC TOOLBAR - TOP DROPDOWN */
+        .harmonic-toolbar {
+            background: linear-gradient(90deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
             border-bottom: 2px solid #8b5cf6;
-            border-radius: 0 0 0 12px;
-            z-index: 999;
-            transform: translateX(300px);
-            transition: transform 0.3s ease;
-            box-shadow: -5px 5px 25px rgba(0,0,0,0.6);
-            overflow-y: auto;
+            position: sticky;
+            top: 38px;
+            z-index: 500;
         }
-        .harmonic-global-panel.expanded { transform: translateX(0); }
-        .harmonic-toggle {
-            position: absolute;
-            left: -44px;
-            top: 10px;
-            width: 44px;
-            height: 90px;
+        .harmonic-toolbar-header {
+            display: flex;
+            align-items: center;
+            padding: 6px 15px;
+            cursor: pointer;
+            gap: 15px;
+        }
+        .harmonic-toolbar-header:hover { background: rgba(139, 92, 246, 0.1); }
+        .harmonic-toolbar-toggle {
             background: linear-gradient(135deg, #8b5cf6, #6366f1);
             border: none;
-            border-radius: 8px 0 0 8px;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
             cursor: pointer;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 10px;
-            font-weight: 600;
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            box-shadow: -3px 3px 10px rgba(0,0,0,0.4);
+            gap: 6px;
         }
-        .harmonic-toggle:hover { background: linear-gradient(135deg, #a78bfa, #818cf8); }
-        .harmonic-toggle .icon { font-size: 18px; margin-bottom: 5px; writing-mode: horizontal-tb; }
-        .harmonic-panel-header {
-            padding: 12px 15px;
-            background: linear-gradient(90deg, #6366f1, #8b5cf6);
-            border-radius: 0 0 0 0;
+        .harmonic-toolbar-toggle:hover { opacity: 0.9; }
+        .harmonic-toolbar-toggle .icon { font-size: 14px; }
+        .harmonic-toolbar-toggle.playing { background: linear-gradient(135deg, #22c55e, #16a34a); animation: pulse 0.5s infinite; }
+        .harmonic-quick-display {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 20px;
+            flex: 1;
+            margin-left: 15px;
         }
-        .harmonic-panel-header h3 { margin: 0; font-size: 14px; flex: 1; }
-        .harmonic-panel-body { padding: 12px; }
-        .harmonic-section { margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #334155; }
-        .harmonic-section:last-child { border-bottom: none; margin-bottom: 0; }
-        .harmonic-section h4 { color: #a5b4fc; font-size: 11px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .harmonic-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-        .harmonic-row label { font-size: 11px; color: #94a3b8; min-width: 70px; }
-        .harmonic-row input[type="range"] { flex: 1; height: 6px; }
-        .harmonic-row input[type="number"] { width: 60px; padding: 4px 6px; font-size: 11px; }
-        .harmonic-row select { flex: 1; padding: 4px 6px; font-size: 11px; }
-        .harmonic-value { min-width: 45px; text-align: right; font-size: 11px; color: #6366f1; font-weight: 600; }
-        .harmonic-btn { padding: 6px 12px; font-size: 11px; border-radius: 4px; cursor: pointer; border: none; }
-        .harmonic-btn.primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; }
-        .harmonic-btn.secondary { background: #334155; color: #e2e8f0; border: 1px solid #475569; }
-        .harmonic-btn:hover { opacity: 0.9; }
-        .harmonic-btn.playing { background: #22c55e; animation: pulse 1s infinite; }
-        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
-        .interval-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
-        .interval-btn { padding: 5px 4px; font-size: 9px; background: #1e293b; border: 1px solid #475569; border-radius: 3px; color: #e2e8f0; cursor: pointer; text-align: center; }
-        .interval-btn:hover { background: #334155; border-color: #6366f1; }
-        .interval-btn.active { background: #6366f1; border-color: #8b5cf6; }
-        .mode-indicator { display: inline-block; padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
-        .mode-unison { background: #22c55e30; color: #4ade80; border: 1px solid #22c55e; }
-        .mode-consonant { background: #3b82f630; color: #60a5fa; border: 1px solid #3b82f6; }
-        .mode-complex { background: #f59e0b30; color: #fbbf24; border: 1px solid #f59e0b; }
-        .mode-dissonant { background: #ef444430; color: #f87171; border: 1px solid #ef4444; }
-        .arnold-mini-canvas { width: 100%; height: 120px; background: #0f172a; border-radius: 4px; border: 1px solid #334155; }
-        .freq-display { background: #0f172a; padding: 8px; border-radius: 4px; text-align: center; margin-top: 8px; }
-        .freq-display .freq { font-size: 20px; font-weight: bold; color: #8b5cf6; }
-        .freq-display .note { font-size: 12px; color: #94a3b8; }
-        .harmonic-spectrum { height: 60px; background: #0f172a; border-radius: 4px; margin-top: 8px; }
+        .harmonic-quick-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+        }
+        .harmonic-quick-item label { color: #94a3b8; font-size: 11px; }
+        .harmonic-quick-item .value { color: #8b5cf6; font-weight: 600; font-family: monospace; font-size: 13px; }
+        .harmonic-quick-item .note { color: #22c55e; font-weight: 600; font-size: 13px; }
+        .harmonic-quick-btns {
+            display: flex;
+            gap: 6px;
+            margin-left: auto;
+        }
+        .harmonic-quick-btn {
+            padding: 5px 10px;
+            font-size: 11px;
+            background: rgba(99, 102, 241, 0.3);
+            border: 1px solid #6366f1;
+            border-radius: 4px;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .harmonic-quick-btn:hover { background: rgba(99, 102, 241, 0.5); transform: translateY(-1px); }
+        .harmonic-quick-btn.play { background: rgba(34, 197, 94, 0.3); border-color: #22c55e; }
+        .harmonic-quick-btn.play:hover { background: rgba(34, 197, 94, 0.5); }
+        .harmonic-quick-btn.stop { background: rgba(239, 68, 68, 0.3); border-color: #ef4444; }
+        .harmonic-quick-btn.stop:hover { background: rgba(239, 68, 68, 0.5); }
+        
+        .harmonic-panel-dropdown {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+            background: #0f172a;
+        }
+        .harmonic-panel-dropdown.expanded { 
+            max-height: 600px; 
+            overflow-y: auto; 
+        }
+        .harmonic-panel-content {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+        .harmonic-toolbar-header.expanded .harmonic-toolbar-toggle {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+        #harmonicArrow.rotated {
+            transform: rotate(180deg);
+        }
+        .harmonic-card {
+            background: #1e293b;
+            border-radius: 6px;
+            padding: 12px;
+            border: 1px solid #334155;
+        }
+        .harmonic-card h5 {
+            color: #a5b4fc;
+            font-size: 11px;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .harmonic-card h5 .badge { background: #22c55e; padding: 2px 6px; border-radius: 8px; font-size: 8px; color: white; }
+        .harmonic-card-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .harmonic-card-row:last-child { margin-bottom: 0; }
+        .harmonic-card-row label { font-size: 10px; color: #94a3b8; min-width: 55px; }
+        .harmonic-card-row input[type="range"] { flex: 1; height: 4px; cursor: pointer; }
+        .harmonic-card-row input[type="number"] { width: 55px; padding: 3px 5px; font-size: 10px; background: #0f172a; border: 1px solid #475569; border-radius: 3px; color: #e2e8f0; }
+        .harmonic-card-row select { flex: 1; padding: 4px 6px; font-size: 10px; background: #0f172a; border: 1px solid #475569; border-radius: 3px; color: #e2e8f0; }
+        .harmonic-card-row .val { font-size: 10px; color: #8b5cf6; font-weight: 600; min-width: 40px; text-align: right; font-family: monospace; }
+        
+        .interval-grid-compact { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
+        .interval-btn-sm { padding: 5px 3px; font-size: 9px; background: #0f172a; border: 1px solid #475569; border-radius: 3px; color: #e2e8f0; cursor: pointer; text-align: center; transition: all 0.2s; font-family: monospace; }
+        .interval-btn-sm:hover { background: #334155; border-color: #6366f1; transform: translateY(-1px); }
+        .interval-btn-sm.active { background: #6366f1; border-color: #8b5cf6; color: white; }
+        
+        .mode-badge { display: inline-block; padding: 2px 6px; border-radius: 6px; font-size: 9px; font-weight: 600; }
+        .mode-badge.unison { background: #22c55e30; color: #4ade80; }
+        .mode-badge.consonant { background: #3b82f630; color: #60a5fa; }
+        .mode-badge.complex { background: #f59e0b30; color: #fbbf24; }
+        .mode-badge.dissonant { background: #ef444430; color: #f87171; }
+        
+        .freq-box { background: #0f172a; padding: 10px; border-radius: 5px; text-align: center; border: 1px solid #334155; }
+        .freq-box .big { font-size: 20px; font-weight: bold; color: #8b5cf6; font-family: monospace; }
+        .freq-box .small { font-size: 11px; color: #64748b; margin-top: 2px; }
+        
+        .arnold-canvas-sm { width: 100%; height: 70px; background: #0f172a; border-radius: 4px; border: 1px solid #334155; display: block; }
+        .spectrum-canvas-sm { width: 100%; height: 40px; background: #0f172a; border-radius: 4px; border: 1px solid #334155; display: block; }
+        
+        .keyboard-row { display: flex; gap: 1px; height: 28px; }
+        .key-white { flex: 1; background: linear-gradient(180deg, #f1f5f9, #cbd5e1); border-radius: 0 0 2px 2px; cursor: pointer; min-width: 14px; }
+        .key-white:hover { background: #a5b4fc; }
+        .key-white.active { background: #6366f1; }
+        .key-black { width: 12px; background: linear-gradient(180deg, #1e293b, #0f172a); margin: 0 -6px; z-index: 1; height: 18px; border-radius: 0 0 2px 2px; cursor: pointer; }
+        .key-black:hover { background: #475569; }
+        .key-black.active { background: #8b5cf6; }
         
         .nav-links { background: linear-gradient(90deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%); padding: 8px 15px; border-bottom: 1px solid #4338ca; overflow-x: auto; white-space: nowrap; position: sticky; top: 0; z-index: 500; }
         .nav-links::-webkit-scrollbar { height: 4px; }
@@ -250,103 +311,156 @@
     <a href="https://wessengetachew.github.io/Goldbach/" target="_blank">Goldbach</a>
 </div>
 
-<!-- GLOBAL HARMONIC ANALYSIS PANEL -->
-<div class="harmonic-global-panel" id="harmonicPanel">
-    <button class="harmonic-toggle" onclick="toggleHarmonicPanel()">
-        <span class="icon">♪</span>
-        HARMONIC
-    </button>
-    <div class="harmonic-panel-header">
-        <h3>Global Harmonic Control</h3>
-        <button class="harmonic-btn secondary" onclick="resetHarmonicDefaults()" title="Reset">Reset</button>
+<!-- GLOBAL HARMONIC ANALYSIS PANEL - COMPLETE -->
+<!-- HARMONIC TOOLBAR - COLLAPSED BY DEFAULT -->
+<div class="harmonic-toolbar" id="harmonicToolbar">
+    <div class="harmonic-toolbar-header" onclick="toggleHarmonicDropdown()">
+        <button class="harmonic-toolbar-toggle" id="harmonicToggle">
+            <span class="icon">♪</span>
+            HARMONIC ANALYSIS
+            <span id="harmonicArrow" style="margin-left:8px;transition:transform 0.3s;">▼</span>
+        </button>
+        <div class="harmonic-quick-display">
+            <div class="harmonic-quick-item">
+                <label>Selected:</label>
+                <span class="value" id="quickFraction">1/2</span>
+            </div>
+            <div class="harmonic-quick-item">
+                <label>Freq:</label>
+                <span class="value" id="quickFreq">110 Hz</span>
+            </div>
+            <div class="harmonic-quick-item">
+                <label>Note:</label>
+                <span class="note" id="quickNote">A2</span>
+            </div>
+            <div class="harmonic-quick-btns">
+                <button class="harmonic-quick-btn play" onclick="event.stopPropagation(); playSelectedFraction();">▶</button>
+                <button class="harmonic-quick-btn stop" onclick="event.stopPropagation(); stopAudio();">■</button>
+            </div>
+        </div>
     </div>
-    <div class="harmonic-panel-body">
-        <div class="harmonic-section">
-            <h4>Audio Engine</h4>
-            <div class="harmonic-row">
-                <label>Base Freq:</label>
-                <input type="range" id="baseFreq" min="110" max="880" value="220" oninput="updateBaseFreq()">
-                <span class="harmonic-value" id="baseFreqVal">220 Hz</span>
+    <div class="harmonic-panel-dropdown" id="harmonicDropdown">
+        <div class="harmonic-panel-content">
+            <!-- AUDIO ENGINE -->
+            <div class="harmonic-card">
+                <h5>Audio Engine <span class="badge">LIVE</span></h5>
+                <div class="harmonic-card-row">
+                    <label>Base Hz:</label>
+                    <input type="range" id="baseFreq" min="55" max="880" value="220" oninput="updateBaseFreq()">
+                    <span class="val" id="baseFreqVal">220</span>
+                </div>
+                <div class="harmonic-card-row">
+                    <label>Volume:</label>
+                    <input type="range" id="harmonicVolume" min="0" max="100" value="30" oninput="updateHarmonicVolume()">
+                    <span class="val" id="volumeVal">30%</span>
+                </div>
+                <div class="harmonic-card-row">
+                    <label>Wave:</label>
+                    <select id="waveform" onchange="updateWaveform()">
+                        <option value="sine">Sine</option>
+                        <option value="triangle">Triangle</option>
+                        <option value="square">Square</option>
+                        <option value="sawtooth">Sawtooth</option>
+                    </select>
+                </div>
+                <div class="freq-box" style="margin-top:8px;">
+                    <div class="big" id="currentFreqDisplay">110 Hz</div>
+                    <div class="small" id="currentNoteDisplay">1/2 = A2</div>
+                </div>
             </div>
-            <div class="harmonic-row">
-                <label>Volume:</label>
-                <input type="range" id="harmonicVolume" min="0" max="100" value="30" oninput="updateHarmonicVolume()">
-                <span class="harmonic-value" id="volumeVal">30%</span>
+            
+            <!-- MUSICAL INTERVALS -->
+            <div class="harmonic-card">
+                <h5>Musical Intervals</h5>
+                <div class="interval-grid-compact">
+                    <button class="interval-btn-sm" onclick="setInterval(1,1)" title="Unison">1:1</button>
+                    <button class="interval-btn-sm" onclick="setInterval(16,15)" title="m2">16:15</button>
+                    <button class="interval-btn-sm" onclick="setInterval(9,8)" title="M2">9:8</button>
+                    <button class="interval-btn-sm" onclick="setInterval(6,5)" title="m3">6:5</button>
+                    <button class="interval-btn-sm" onclick="setInterval(5,4)" title="M3">5:4</button>
+                    <button class="interval-btn-sm" onclick="setInterval(4,3)" title="P4">4:3</button>
+                    <button class="interval-btn-sm" onclick="setInterval(45,32)" title="TT">45:32</button>
+                    <button class="interval-btn-sm" onclick="setInterval(3,2)" title="P5">3:2</button>
+                    <button class="interval-btn-sm" onclick="setInterval(8,5)" title="m6">8:5</button>
+                    <button class="interval-btn-sm" onclick="setInterval(5,3)" title="M6">5:3</button>
+                    <button class="interval-btn-sm" onclick="setInterval(9,5)" title="m7">9:5</button>
+                    <button class="interval-btn-sm" onclick="setInterval(15,8)" title="M7">15:8</button>
+                    <button class="interval-btn-sm" onclick="setInterval(2,1)" title="Oct">2:1</button>
+                    <button class="interval-btn-sm" onclick="setInterval(5,2)" title="10th">5:2</button>
+                    <button class="interval-btn-sm" onclick="setInterval(3,1)" title="12th">3:1</button>
+                    <button class="interval-btn-sm" onclick="setInterval(4,1)" title="2Oct">4:1</button>
+                </div>
+                <div style="margin-top:8px;display:flex;gap:4px;justify-content:center;">
+                    <button class="harmonic-quick-btn play" onclick="playSelectedFraction()">▶ Play</button>
+                    <button class="harmonic-quick-btn" onclick="playArpeggio()">Arpeggio</button>
+                    <button class="harmonic-quick-btn" onclick="playChord()">Chord</button>
+                    <button class="harmonic-quick-btn stop" onclick="stopAudio()">■ Stop</button>
+                </div>
             </div>
-            <div class="harmonic-row">
-                <label>Waveform:</label>
-                <select id="waveform" onchange="updateWaveform()">
-                    <option value="sine">Sine</option>
-                    <option value="triangle">Triangle</option>
-                    <option value="square">Square</option>
-                    <option value="sawtooth">Sawtooth</option>
-                </select>
+            
+            <!-- HARMONIC MODE -->
+            <div class="harmonic-card">
+                <h5>Harmonic Mode</h5>
+                <div style="text-align:center;margin:8px 0;">
+                    <span class="mode-badge consonant" id="harmonicModeIndicator">Consonant</span>
+                    <span style="font-size:10px;color:#64748b;margin-left:6px;" id="modeQValue">q ≤ 4</span>
+                </div>
+                <div style="font-size:9px;color:#64748b;display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;">
+                    <div><span class="mode-badge unison" style="font-size:8px;">Unison</span> q=1</div>
+                    <div><span class="mode-badge consonant" style="font-size:8px;">Consonant</span> q≤4</div>
+                    <div><span class="mode-badge complex" style="font-size:8px;">Complex</span> q≤16</div>
+                    <div><span class="mode-badge dissonant" style="font-size:8px;">Dissonant</span> q>16</div>
+                </div>
             </div>
-            <div class="harmonic-row" style="margin-top:8px;">
-                <button class="harmonic-btn primary" id="playBtn" onclick="playSelectedFraction()">Play Fraction</button>
-                <button class="harmonic-btn secondary" onclick="playArpeggio()">Arpeggio</button>
-                <button class="harmonic-btn secondary" onclick="stopAudio()">Stop</button>
+            
+            <!-- ARNOLD TONGUE PREVIEW -->
+            <div class="harmonic-card">
+                <h5>Arnold Tongue</h5>
+                <canvas id="arnoldMiniCanvas" class="arnold-canvas-sm" width="200" height="70"></canvas>
+                <div class="harmonic-card-row" style="margin-top:6px;">
+                    <label>K:</label>
+                    <input type="range" id="arnoldK" min="0" max="100" value="50" oninput="updateArnoldTongue()">
+                    <span class="val" id="arnoldKVal">0.50</span>
+                </div>
             </div>
-            <div class="freq-display">
-                <div class="freq" id="currentFreqDisplay">-- Hz</div>
-                <div class="note" id="currentNoteDisplay">Select a fraction</div>
+            
+            <!-- HARMONIC SERIES -->
+            <div class="harmonic-card">
+                <h5>Harmonic Series</h5>
+                <div class="harmonic-card-row">
+                    <label>Partials:</label>
+                    <input type="range" id="numPartials" min="1" max="16" value="8" oninput="updateHarmonicSeries()">
+                    <span class="val" id="partialsVal">8</span>
+                </div>
+                <canvas id="harmonicSeriesCanvas" class="spectrum-canvas-sm" width="200" height="40"></canvas>
+                <div style="margin-top:6px;display:flex;gap:4px;">
+                    <button class="harmonic-quick-btn" onclick="playHarmonicSeries()" style="flex:1;">Harmonic</button>
+                    <button class="harmonic-quick-btn" onclick="playSubharmonicSeries()" style="flex:1;">Subharmonic</button>
+                </div>
             </div>
-        </div>
+            
+            <!-- GLOBAL OPTIONS -->
+            <div class="harmonic-card">
+                <h5>Options</h5>
+                <div style="font-size:10px;display:flex;flex-direction:column;gap:4px;">
+                    <label><input type="checkbox" id="applyHarmonicColor" onchange="applyHarmonicColoring()"> Color by consonance</label>
+                    <label><input type="checkbox" id="showArnoldOnTree" onchange="drawSectorTree()"> Arnold on tree</label>
+                    <label><input type="checkbox" id="autoPlayOnClick" checked> Auto-play on click</label>
+                    <label><input type="checkbox" id="showFreqOnHover"> Show freq on hover</label>
+                </div>
+            </div>
         
-        <div class="harmonic-section">
-            <h4>Musical Intervals</h4>
-            <div class="interval-grid">
-                <button class="interval-btn" onclick="setInterval(1,1)" title="Unison">1:1</button>
-                <button class="interval-btn" onclick="setInterval(2,1)" title="Octave">2:1</button>
-                <button class="interval-btn" onclick="setInterval(3,2)" title="Perfect Fifth">3:2</button>
-                <button class="interval-btn" onclick="setInterval(4,3)" title="Perfect Fourth">4:3</button>
-                <button class="interval-btn" onclick="setInterval(5,4)" title="Major Third">5:4</button>
-                <button class="interval-btn" onclick="setInterval(6,5)" title="Minor Third">6:5</button>
-                <button class="interval-btn" onclick="setInterval(5,3)" title="Major Sixth">5:3</button>
-                <button class="interval-btn" onclick="setInterval(8,5)" title="Minor Sixth">8:5</button>
-                <button class="interval-btn" onclick="setInterval(9,8)" title="Major Second">9:8</button>
+            <!-- SELECTED FRACTION -->
+            <div class="harmonic-card">
+                <h5>Selected Fraction</h5>
+                <div id="selectedFractionInfo" style="font-size:10px;color:#94a3b8;">
+                    Click any point to select
+                </div>
             </div>
-        </div>
-        
-        <div class="harmonic-section">
-            <h4>Harmonic Mode</h4>
-            <div class="harmonic-row">
-                <label>Current:</label>
-                <span class="mode-indicator mode-consonant" id="harmonicModeIndicator">Consonant</span>
-            </div>
-            <div style="font-size:10px; color:#64748b; margin-top:6px;">
-                <div><span class="mode-indicator mode-unison">Unison</span> q = 1</div>
-                <div style="margin-top:3px;"><span class="mode-indicator mode-consonant">Consonant</span> q ≤ 4</div>
-                <div style="margin-top:3px;"><span class="mode-indicator mode-complex">Complex</span> q ≤ 16</div>
-                <div style="margin-top:3px;"><span class="mode-indicator mode-dissonant">Dissonant</span> q > 16</div>
-            </div>
-        </div>
-        
-        <div class="harmonic-section">
-            <h4>Arnold Tongue Preview</h4>
-            <canvas id="arnoldMiniCanvas" class="arnold-mini-canvas"></canvas>
-            <div class="harmonic-row" style="margin-top:6px;">
-                <label>Coupling K:</label>
-                <input type="range" id="arnoldK" min="0" max="100" value="50" oninput="updateArnoldTongue()">
-                <span class="harmonic-value" id="arnoldKVal">0.50</span>
-            </div>
-        </div>
-        
-        <div class="harmonic-section">
-            <h4>Frequency Spectrum</h4>
-            <canvas id="harmonicSpectrum" class="harmonic-spectrum"></canvas>
-            <div class="harmonic-row" style="margin-top:6px;">
-                <label><input type="checkbox" id="applyHarmonicColor" onchange="applyHarmonicColoring()"> Color by consonance</label>
-            </div>
-            <div class="harmonic-row">
-                <label><input type="checkbox" id="showArnoldOnTree" onchange="drawSectorTree()"> Arnold on tree</label>
-            </div>
-        </div>
-        
-        <div class="harmonic-section">
-            <h4>Selected Fraction</h4>
-            <div id="selectedFractionInfo" style="font-size:11px; color:#94a3b8;">
-                Click a point on any visualization to select
+            
+            <!-- RESET BUTTON -->
+            <div class="harmonic-card" style="text-align:center;">
+                <button class="harmonic-quick-btn" onclick="resetHarmonicDefaults()" style="padding:6px 12px;">Reset Defaults</button>
             </div>
         </div>
     </div>
@@ -449,6 +563,8 @@
                 <label><input type="checkbox" id="showTreeGrid" onchange="drawSectorTree()"> Grid</label>
                 <label><input type="checkbox" id="animatePath" checked> Animate</label>
                 <button class="secondary" onclick="clearTreePath()">Clear Path</button>
+                <button style="background:linear-gradient(135deg,#22c55e,#16a34a);" onclick="playTreeFraction()" id="treePlayBtn" title="Play selected fraction">▶ Play</button>
+                <button class="secondary" onclick="playTreeScale()" title="Play all fractions in path">♪ Scale</button>
             </div>
             <div style="text-align:center;position:relative;">
                 <canvas id="sectorTreeCanvas" class="ring-canvas" width="900" height="500"></canvas>
@@ -754,8 +870,23 @@
         <div class="panel">
             <h3>Continued Fractions</h3>
             <div class="theorem-box"><strong>Stern-Brocot Encoding:</strong> Path L^a R^b L^c... encodes CF [0; a, b, c, ...]</div>
-            <div class="control-row" style="margin:12px 0;"><label>Sector: <input type="number" id="cfSector" value="2" min="1" onchange="updateCFDisplay()"></label><label>Max terms: <input type="number" id="cfMaxTerms" value="50" onchange="updateCFDisplay()"></label></div>
-            <div class="panel" style="background:#0f172a;"><h4>Continued Fraction Expansions</h4><div class="table-scroll"><table id="cfTable"><thead><tr><th>r/m</th><th>CF [a0; a1, a2, ...]</th><th>Path</th><th>Length</th><th>Sum(a_i)</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="control-row" style="margin:12px 0;">
+                <label>Sector: <input type="number" id="cfSector" value="2" min="1" onchange="updateCFDisplay()"></label>
+                <label>Max terms: <input type="number" id="cfMaxTerms" value="50" onchange="updateCFDisplay()"></label>
+                <button onclick="updateCFDisplay()">Refresh</button>
+                <button style="background:linear-gradient(135deg,#22c55e,#16a34a);" onclick="playCFSelected()" title="Play selected CF fraction">▶ Play</button>
+                <button class="secondary" onclick="playCFConvergents()" title="Play convergents as scale">♪ Convergents</button>
+                <button class="secondary" onclick="playCFAll()" title="Play all fractions in sector">♪ All</button>
+            </div>
+            
+            <div class="panel" style="background:#1e1b4b; border:1px solid #6366f1; margin-bottom:15px;">
+                <h4 style="color:#a5b4fc; margin-top:0;">Selected Fraction</h4>
+                <div id="cfSelectedInfo" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:12px;">
+                    <div style="color:#64748b; grid-column:1/-1;">Click a row in the table below to select a fraction</div>
+                </div>
+            </div>
+            
+            <div class="panel" style="background:#0f172a;"><h4>Continued Fraction Expansions <span style="font-weight:normal;color:#64748b;">(click row to select & play)</span></h4><div class="table-scroll"><table id="cfTable"><thead><tr><th>r/m</th><th>CF [a0; a1, a2, ...]</th><th>Path</th><th>Length</th><th>Sum(a_i)</th><th>Freq</th><th>Play</th></tr></thead><tbody></tbody></table></div></div>
             <div class="grid-2" style="margin-top:15px;">
                 <div class="chart-box"><h4>CF Length Distribution</h4><canvas id="cfLengthChart"></canvas></div>
                 <div class="chart-box"><h4>First Partial Quotient</h4><canvas id="cfFirstChart"></canvas></div>
@@ -3292,6 +3423,76 @@ function clearTreePath() {
     document.getElementById('treePathInfo').innerHTML = '<span style="color:#64748b;">Click a point on the ring above to see its tree path</span>';
 }
 
+function playTreeFraction() {
+    if (selectedTreePoint) {
+        playFraction(selectedTreePoint.r, selectedTreePoint.m, 0.8);
+        
+        // Visual feedback
+        const btn = document.getElementById('treePlayBtn');
+        btn.style.transform = 'scale(1.1)';
+        setTimeout(() => btn.style.transform = 'scale(1)', 150);
+    } else {
+        alert('Select a point on the ring first to play its frequency');
+    }
+}
+
+function playTreeScale() {
+    if (!selectedTreePoint) {
+        alert('Select a point on the ring first');
+        return;
+    }
+    
+    initAudioContext();
+    
+    // Get all fractions along the path to the selected point
+    const path = getPathToFraction(selectedTreePoint.r, selectedTreePoint.m);
+    const fractions = [{ r: 1, m: 2 }]; // Start with root
+    
+    let leftR = 0, leftM = 1;
+    let rightR = 1, rightM = 1;
+    let medR = 1, medM = 2;
+    
+    for (let i = 0; i < path.length; i++) {
+        if (path[i] === 'L') {
+            rightR = medR;
+            rightM = medM;
+        } else {
+            leftR = medR;
+            leftM = medM;
+        }
+        medR = leftR + rightR;
+        medM = leftM + rightM;
+        fractions.push({ r: medR, m: medM });
+    }
+    
+    // Play each fraction in sequence
+    let delay = 0;
+    fractions.forEach((f, i) => {
+        setTimeout(() => {
+            playFraction(f.r, f.m, 0.35);
+            
+            // Highlight in tree path info
+            const info = document.getElementById('treePathInfo');
+            if (info) {
+                const highlight = document.createElement('span');
+                highlight.style.cssText = 'background:#6366f1;padding:2px 6px;border-radius:3px;margin-left:5px;';
+                highlight.textContent = `Playing: ${f.r}/${f.m}`;
+                const existing = info.querySelector('.playing-indicator');
+                if (existing) existing.remove();
+                highlight.className = 'playing-indicator';
+                info.appendChild(highlight);
+            }
+        }, delay);
+        delay += 300;
+    });
+    
+    // Clean up indicator after all notes played
+    setTimeout(() => {
+        const indicator = document.querySelector('.playing-indicator');
+        if (indicator) indicator.remove();
+    }, delay + 500);
+}
+
 function selectPointForTree(point) {
     selectedTreePoint = point;
     updateTreePathInfo(point);
@@ -3612,6 +3813,8 @@ function computeDedekind() {
 }
 
 // CONTINUED FRACTIONS
+let selectedCFFraction = null;
+
 function updateCFDisplay() {
     const sector = +document.getElementById('cfSector').value;
     const maxTerms = +document.getElementById('cfMaxTerms').value;
@@ -3619,10 +3822,38 @@ function updateCFDisplay() {
     
     const cfData = residues.map(res => {
         const cf = toCF(res.r, res.m);
-        return { r:res.r, m:res.m, cf, path:cfPath(cf), len:cf.length, sum:cf.reduce((a,b)=>a+b,0) };
+        const freq = harmonicSettings.baseFreq * (res.r / res.m);
+        const note = frequencyToNote(freq);
+        const mode = getHarmonicMode(res.m);
+        return { 
+            r: res.r, 
+            m: res.m, 
+            cf, 
+            path: cfPath(cf), 
+            len: cf.length, 
+            sum: cf.reduce((a,b)=>a+b,0),
+            freq,
+            note,
+            mode
+        };
     });
     
-    document.querySelector('#cfTable tbody').innerHTML = cfData.map(d=>`<tr><td>${d.r}/${d.m}</td><td>[${d.cf.join(';')}]</td><td class="cf-path">${d.path.slice(0,20)}${d.path.length>20?'...':''}</td><td>${d.len}</td><td>${d.sum}</td></tr>`).join('');
+    // Store for later use
+    window.cfDataCache = cfData;
+    
+    document.querySelector('#cfTable tbody').innerHTML = cfData.map((d, idx) => `
+        <tr onclick="selectCFFraction(${idx})" style="cursor:pointer;" class="cf-row" data-idx="${idx}">
+            <td><strong>${d.r}/${d.m}</strong></td>
+            <td style="font-family:monospace;font-size:0.85em;">[${d.cf.join('; ')}]</td>
+            <td class="cf-path" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;">${d.path.slice(0,15)}${d.path.length>15?'...':''}</td>
+            <td>${d.len}</td>
+            <td>${d.sum}</td>
+            <td style="color:#8b5cf6;">${d.freq.toFixed(1)}</td>
+            <td>
+                <button onclick="event.stopPropagation(); playCFFractionByIndex(${idx})" style="padding:3px 8px;font-size:10px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:3px;color:white;cursor:pointer;">▶</button>
+            </td>
+        </tr>
+    `).join('');
     
     const lenDist = {};
     cfData.forEach(d => { lenDist[d.len] = (lenDist[d.len]||0)+1; });
@@ -3635,6 +3866,178 @@ function updateCFDisplay() {
     const firstLabels = Object.keys(firstDist).sort((a,b)=>a-b).slice(0,15);
     if(state.charts.cfFirst) state.charts.cfFirst.destroy();
     state.charts.cfFirst = new Chart(document.getElementById('cfFirstChart'),{type:'bar',data:{labels:firstLabels,datasets:[{label:'Count',data:firstLabels.map(l=>firstDist[l]),backgroundColor:'rgba(139,92,246,0.7)'}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    
+    // Clear selection info
+    if (!selectedCFFraction) {
+        document.getElementById('cfSelectedInfo').innerHTML = '<div style="color:#64748b; grid-column:1/-1;">Click a row in the table below to select a fraction</div>';
+    }
+}
+
+function selectCFFraction(idx) {
+    const cfData = window.cfDataCache;
+    if (!cfData || !cfData[idx]) return;
+    
+    const d = cfData[idx];
+    selectedCFFraction = d;
+    
+    // Highlight selected row
+    document.querySelectorAll('.cf-row').forEach(row => row.style.background = '');
+    document.querySelector(`.cf-row[data-idx="${idx}"]`).style.background = 'rgba(99,102,241,0.2)';
+    
+    // Update selection info panel
+    document.getElementById('cfSelectedInfo').innerHTML = `
+        <div>
+            <div style="color:#94a3b8; font-size:0.8em;">Fraction</div>
+            <div style="color:#22c55e; font-size:1.5em; font-weight:bold;">${d.r}/${d.m}</div>
+            <div style="color:#64748b; font-size:0.85em;">= ${(d.r/d.m).toFixed(8)}</div>
+        </div>
+        <div>
+            <div style="color:#94a3b8; font-size:0.8em;">Continued Fraction</div>
+            <div style="color:#8b5cf6; font-size:1.1em; font-family:monospace;">[${d.cf.join('; ')}]</div>
+            <div style="color:#64748b; font-size:0.85em;">Length: ${d.len} terms</div>
+        </div>
+        <div>
+            <div style="color:#94a3b8; font-size:0.8em;">Stern-Brocot Path</div>
+            <div style="font-size:0.9em; word-break:break-all;">${formatColoredPath(d.path)}</div>
+        </div>
+        <div>
+            <div style="color:#94a3b8; font-size:0.8em;">Frequency</div>
+            <div style="color:#8b5cf6; font-size:1.3em; font-weight:bold;">${d.freq.toFixed(2)} Hz</div>
+            <div style="color:#22c55e;">${d.note.name} <span class="mode-badge ${d.mode.class}" style="font-size:9px;">${d.mode.name}</span></div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px; justify-content:center;">
+            <button onclick="playCFSelected()" style="padding:8px 12px;font-size:12px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;cursor:pointer;font-weight:bold;">▶ Play Fraction</button>
+            <button onclick="playCFConvergents()" style="padding:8px 12px;font-size:12px;background:#6366f1;border:none;border-radius:4px;color:white;cursor:pointer;">♪ Convergents</button>
+        </div>
+    `;
+    
+    // Trigger global harmonic
+    triggerGlobalHarmonic(d.r, d.m);
+}
+
+function formatColoredPath(path) {
+    if (!path || path.length === 0) return '<span style="color:#22c55e;">ROOT</span>';
+    const maxShow = 30;
+    const truncated = path.length > maxShow;
+    const showPath = truncated ? path.slice(0, maxShow) : path;
+    
+    const colored = showPath.split('').map(c => 
+        `<span style="color:${c === 'L' ? '#ef4444' : '#3b82f6'}; font-weight:bold;">${c}</span>`
+    ).join('');
+    
+    return colored + (truncated ? '<span style="color:#64748b;">...</span>' : '');
+}
+
+function playCFFractionByIndex(idx) {
+    const cfData = window.cfDataCache;
+    if (!cfData || !cfData[idx]) return;
+    
+    const d = cfData[idx];
+    playFraction(d.r, d.m, 0.6);
+    
+    // Also select it
+    selectCFFraction(idx);
+}
+
+function playCFSelected() {
+    if (!selectedCFFraction) {
+        alert('Select a fraction from the table first');
+        return;
+    }
+    playFraction(selectedCFFraction.r, selectedCFFraction.m, 0.8);
+}
+
+function playCFConvergents() {
+    if (!selectedCFFraction) {
+        alert('Select a fraction from the table first');
+        return;
+    }
+    
+    initAudioContext();
+    
+    // Compute convergents from the continued fraction
+    const cf = selectedCFFraction.cf;
+    const convergents = [];
+    
+    let p_prev = 1, q_prev = 0;
+    let p_curr = cf[0], q_curr = 1;
+    
+    convergents.push({ r: p_curr, m: q_curr });
+    
+    for (let i = 1; i < cf.length; i++) {
+        const a = cf[i];
+        const p_next = a * p_curr + p_prev;
+        const q_next = a * q_curr + q_prev;
+        
+        convergents.push({ r: p_next, m: q_next });
+        
+        p_prev = p_curr;
+        q_prev = q_curr;
+        p_curr = p_next;
+        q_curr = q_next;
+    }
+    
+    // Play each convergent
+    let delay = 0;
+    convergents.forEach((conv, i) => {
+        setTimeout(() => {
+            playFraction(conv.r, conv.m, 0.35);
+            
+            // Show which convergent is playing
+            const info = document.getElementById('cfSelectedInfo');
+            if (info) {
+                let indicator = info.querySelector('.playing-indicator');
+                if (!indicator) {
+                    indicator = document.createElement('div');
+                    indicator.className = 'playing-indicator';
+                    indicator.style.cssText = 'grid-column:1/-1; margin-top:10px; padding:8px; background:#0f172a; border-radius:4px; text-align:center;';
+                    info.appendChild(indicator);
+                }
+                indicator.innerHTML = `<span style="color:#22c55e;">Playing convergent ${i+1}/${convergents.length}:</span> <strong style="color:#8b5cf6;">${conv.r}/${conv.m}</strong> <span style="color:#64748b;">= ${(conv.r/conv.m).toFixed(6)}</span>`;
+            }
+        }, delay);
+        delay += 400;
+    });
+    
+    // Clean up indicator
+    setTimeout(() => {
+        const indicator = document.querySelector('#cfSelectedInfo .playing-indicator');
+        if (indicator) {
+            indicator.innerHTML = '<span style="color:#22c55e;">✓ Played all convergents</span>';
+            setTimeout(() => indicator.remove(), 1500);
+        }
+    }, delay + 500);
+}
+
+function playCFAll() {
+    const cfData = window.cfDataCache;
+    if (!cfData || cfData.length === 0) {
+        alert('No fractions to play. Run computation first.');
+        return;
+    }
+    
+    initAudioContext();
+    
+    // Sort by value for ascending scale
+    const sorted = [...cfData].sort((a, b) => (a.r / a.m) - (b.r / b.m));
+    const toPlay = sorted.slice(0, 20); // Limit to 20 for reasonable duration
+    
+    let delay = 0;
+    toPlay.forEach((d, i) => {
+        setTimeout(() => {
+            playFraction(d.r, d.m, 0.25);
+            
+            // Highlight row
+            document.querySelectorAll('.cf-row').forEach(row => {
+                const idx = parseInt(row.dataset.idx);
+                if (cfData[idx] && cfData[idx].r === d.r && cfData[idx].m === d.m) {
+                    row.style.background = 'rgba(34,197,94,0.3)';
+                    setTimeout(() => row.style.background = '', 200);
+                }
+            });
+        }, delay);
+        delay += 200;
+    });
 }
 
 // PSL(2,Z)
@@ -4656,8 +5059,18 @@ function initAudioContext() {
     }
 }
 
+function toggleHarmonicDropdown() {
+    const dropdown = document.getElementById('harmonicDropdown');
+    const arrow = document.getElementById('harmonicArrow');
+    const header = document.querySelector('.harmonic-toolbar-header');
+    
+    dropdown.classList.toggle('expanded');
+    arrow.classList.toggle('rotated');
+    header.classList.toggle('expanded');
+}
+
 function toggleHarmonicPanel() {
-    document.getElementById('harmonicPanel').classList.toggle('expanded');
+    toggleHarmonicDropdown();
 }
 
 function updateBaseFreq() {
@@ -4684,10 +5097,10 @@ function updateWaveform() {
 }
 
 function getHarmonicMode(q) {
-    if (q === 1) return { name: 'Unison', class: 'mode-unison', color: '#22c55e' };
-    if (q <= 4) return { name: 'Consonant', class: 'mode-consonant', color: '#3b82f6' };
-    if (q <= 16) return { name: 'Complex', class: 'mode-complex', color: '#f59e0b' };
-    return { name: 'Dissonant', class: 'mode-dissonant', color: '#ef4444' };
+    if (q === 1) return { name: 'Unison', class: 'unison', color: '#22c55e' };
+    if (q <= 4) return { name: 'Consonant', class: 'consonant', color: '#3b82f6' };
+    if (q <= 16) return { name: 'Complex', class: 'complex', color: '#f59e0b' };
+    return { name: 'Dissonant', class: 'dissonant', color: '#ef4444' };
 }
 
 function frequencyToCents(f1, f2) {
@@ -4807,6 +5220,11 @@ function selectFractionForHarmonic(r, m) {
     const note = frequencyToNote(freq);
     const mode = getHarmonicMode(m);
     
+    // Update quick display in toolbar
+    document.getElementById('quickFraction').textContent = r + '/' + m;
+    document.getElementById('quickFreq').textContent = freq.toFixed(1) + ' Hz';
+    document.getElementById('quickNote').textContent = note.name;
+    
     document.getElementById('selectedFractionInfo').innerHTML = `
         <div style="font-size:16px; color:#8b5cf6; font-weight:bold;">${r}/${m}</div>
         <div>Frequency: <strong>${freq.toFixed(2)} Hz</strong></div>
@@ -4822,15 +5240,32 @@ function updateHarmonicDisplays() {
     const note = frequencyToNote(freq);
     const mode = getHarmonicMode(m);
     
-    document.getElementById('currentFreqDisplay').textContent = freq.toFixed(2) + ' Hz';
-    document.getElementById('currentNoteDisplay').textContent = `${r}/${m} = ${note.name} (${note.cents >= 0 ? '+' : ''}${note.cents}¢)`;
+    // Update main displays
+    const freqDisplay = document.getElementById('currentFreqDisplay');
+    const noteDisplay = document.getElementById('currentNoteDisplay');
+    if (freqDisplay) freqDisplay.textContent = freq.toFixed(2) + ' Hz';
+    if (noteDisplay) noteDisplay.textContent = `${r}/${m} = ${note.name} (${note.cents >= 0 ? '+' : ''}${note.cents}¢)`;
     
+    // Update quick display in toolbar
+    const quickFrac = document.getElementById('quickFraction');
+    const quickFreq = document.getElementById('quickFreq');
+    const quickNote = document.getElementById('quickNote');
+    if (quickFrac) quickFrac.textContent = r + '/' + m;
+    if (quickFreq) quickFreq.textContent = freq.toFixed(1) + ' Hz';
+    if (quickNote) quickNote.textContent = note.name;
+    
+    // Update mode indicator
     const indicator = document.getElementById('harmonicModeIndicator');
-    indicator.className = 'mode-indicator ' + mode.class;
-    indicator.textContent = mode.name;
+    if (indicator) {
+        indicator.className = 'mode-badge ' + mode.class.replace('mode-', '');
+        indicator.textContent = mode.name;
+    }
+    
+    const modeQ = document.getElementById('modeQValue');
+    if (modeQ) modeQ.textContent = m === 1 ? 'q=1' : m <= 4 ? 'q≤4' : m <= 16 ? 'q≤16' : 'q>' + m;
     
     drawArnoldMini();
-    drawHarmonicSpectrum();
+    drawHarmonicSeriesViz();
 }
 
 function updateArnoldTongue() {
@@ -5303,10 +5738,521 @@ function updateIntervalTable() {
 
 // Initialize harmonic panel on load
 setTimeout(() => {
+    updateHarmonicDisplays();
     drawArnoldMini();
-    drawHarmonicSpectrum();
-}, 100);
+    drawHarmonicSeriesViz();
+    setupGlobalFractionListeners();
+}, 200);
+
+// =============================================
+// GLOBAL FRACTION CLICK INTEGRATION
+// =============================================
+function setupGlobalFractionListeners() {
+    // This makes harmonic work for ALL tabs with fractions
+    
+    // Smith Chart Canvas
+    const smithCanvas = document.getElementById('smithCanvas');
+    if (smithCanvas) {
+        smithCanvas.addEventListener('click', handleSmithClick);
+    }
+    
+    // Hyperbolic Canvas
+    const hypCanvas = document.getElementById('hypCanvas');
+    if (hypCanvas) {
+        hypCanvas.addEventListener('click', handleHyperbolicClick);
+    }
+    
+    // Animation Canvas
+    const animCanvas = document.getElementById('animCanvas');
+    if (animCanvas) {
+        animCanvas.addEventListener('click', handleAnimationClick);
+    }
+    
+    // 3D Canvas
+    const canvas3d = document.getElementById('canvas3d');
+    if (canvas3d) {
+        canvas3d.addEventListener('click', handle3DClick);
+    }
+    
+    // Ford Circles Canvas (PSL tab)
+    const fordCanvas = document.getElementById('fordCanvas');
+    if (fordCanvas) {
+        fordCanvas.addEventListener('click', handleFordClick);
+    }
+    
+    // Arnold Tongue Canvas (Harmonic tab)
+    const arnoldCanvas = document.getElementById('arnoldTongueCanvas');
+    if (arnoldCanvas) {
+        arnoldCanvas.addEventListener('click', handleArnoldClick);
+    }
+    
+    // Interval Circle Canvas
+    const intervalCanvas = document.getElementById('intervalCircleCanvas');
+    if (intervalCanvas) {
+        intervalCanvas.addEventListener('click', handleIntervalCircleClick);
+    }
+    
+    // Lattice Viz Canvas (Theory Viz)
+    const latticeCanvas = document.getElementById('latticeVizCanvas');
+    if (latticeCanvas) {
+        latticeCanvas.addEventListener('click', handleLatticeClick);
+    }
+    
+    // Add click handlers to tables with fractions
+    document.addEventListener('click', handleTableFractionClick);
+    
+    console.log('Global harmonic listeners initialized');
+}
+
+// Store points for each visualization for click detection
+const vizPoints = {
+    smith: [],
+    hyperbolic: [],
+    animation: [],
+    threeDim: [],
+    ford: [],
+    arnold: [],
+    intervalCircle: [],
+    lattice: []
+};
+
+function handleSmithClick(e) {
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    const sector = +(document.getElementById('smithSector')?.value || 2);
+    const residues = state.residuesBySector[sector] || [];
+    
+    // Find closest point
+    let closest = null, minDist = 20;
+    residues.forEach(res => {
+        // Approximate screen position (simplified)
+        const angle = (res.r / res.m) * 2 * Math.PI;
+        const cx = e.target.width / 2, cy = e.target.height / 2;
+        const maxR = Math.min(e.target.width, e.target.height) / 2 - 40;
+        const px = cx + Math.cos(angle) * maxR * 0.7;
+        const py = cy - Math.sin(angle) * maxR * 0.7;
+        const dist = Math.sqrt((px - x) ** 2 + (py - y) ** 2);
+        if (dist < minDist) { minDist = dist; closest = res; }
+    });
+    
+    if (closest) triggerGlobalHarmonic(closest.r, closest.m, closest);
+}
+
+function handleHyperbolicClick(e) {
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    const maxDenom = +(document.getElementById('hypMaxDenom')?.value || 15);
+    const W = e.target.width, H = e.target.height;
+    const cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 - 30;
+    
+    // Build Farey fractions on boundary
+    let closest = null, minDist = 15;
+    for (let m = 2; m <= maxDenom; m++) {
+        for (let r = 1; r < m; r++) {
+            if (gcd(r, m) === 1) {
+                const angle = (r / m) * Math.PI - Math.PI / 2;
+                const px = cx + R * Math.cos(angle);
+                const py = cy + R * Math.sin(angle);
+                const dist = Math.sqrt((px - x) ** 2 + (py - y) ** 2);
+                if (dist < minDist) { minDist = dist; closest = { r, m }; }
+            }
+        }
+    }
+    
+    if (closest) triggerGlobalHarmonic(closest.r, closest.m);
+}
+
+function handleAnimationClick(e) {
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    const W = e.target.width, H = e.target.height;
+    const cx = W / 2, cy = H / 2, maxR = Math.min(W, H) / 2 - 30;
+    const maxN = +(document.getElementById('animMaxN')?.value || 50);
+    
+    let closest = null, minDist = 15;
+    for (let m = 2; m <= maxN; m++) {
+        for (let r = 1; r < m; r++) {
+            if (gcd(r, m) === 1) {
+                const angle = (r / m) * 2 * Math.PI;
+                const rad = (m / maxN) * maxR;
+                const px = cx + rad * Math.cos(angle);
+                const py = cy - rad * Math.sin(angle);
+                const dist = Math.sqrt((px - x) ** 2 + (py - y) ** 2);
+                if (dist < minDist) { minDist = dist; closest = { r, m }; }
+            }
+        }
+    }
+    
+    if (closest) triggerGlobalHarmonic(closest.r, closest.m);
+}
+
+function handle3DClick(e) {
+    // 3D is more complex, use current sector data
+    const sector = +(document.getElementById('viewSector')?.value || 2);
+    const residues = state.residuesBySector[sector] || [];
+    if (residues.length > 0) {
+        const randomRes = residues[Math.floor(Math.random() * Math.min(residues.length, 20))];
+        triggerGlobalHarmonic(randomRes.r, randomRes.m, randomRes);
+    }
+}
+
+function handleFordClick(e) {
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const W = e.target.width;
+    const margin = 30, scale = W - 2 * margin;
+    const maxDenom = +(document.getElementById('pslMaxDenom')?.value || 12);
+    
+    // Find fraction closest to click x position
+    let closest = null, minDist = 20;
+    for (let m = 1; m <= maxDenom; m++) {
+        for (let r = 0; r <= m; r++) {
+            if (gcd(r, m) === 1) {
+                const fx = margin + (r / m) * scale;
+                const dist = Math.abs(fx - x);
+                if (dist < minDist) { minDist = dist; closest = { r, m }; }
+            }
+        }
+    }
+    
+    if (closest && closest.r > 0) triggerGlobalHarmonic(closest.r, closest.m);
+}
+
+function handleArnoldClick(e) {
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const W = e.target.width;
+    const margin = { l: 50, r: 20 };
+    const plotW = W - margin.l - margin.r;
+    const maxDenom = +(document.getElementById('harmonicMaxDenom')?.value || 32);
+    
+    // Convert x to omega value
+    const omega = (x - margin.l) / plotW;
+    if (omega < 0 || omega > 1) return;
+    
+    // Find closest Farey fraction
+    let closest = null, minDist = 0.05;
+    for (let m = 1; m <= maxDenom; m++) {
+        for (let r = 0; r <= m; r++) {
+            if (gcd(r, m) === 1) {
+                const dist = Math.abs(omega - r / m);
+                if (dist < minDist) { minDist = dist; closest = { r, m }; }
+            }
+        }
+    }
+    
+    if (closest && closest.r > 0) triggerGlobalHarmonic(closest.r, closest.m);
+}
+
+function handleIntervalCircleClick(e) {
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    const W = e.target.width, H = e.target.height;
+    const cx = W / 2, cy = H / 2, radius = Math.min(W, H) / 2 - 50;
+    const sector = +(document.getElementById('harmonicSector')?.value || 2);
+    
+    const fractions = (state.residuesBySector[sector] || []).slice(0, 30);
+    let closest = null, minDist = 15;
+    
+    fractions.forEach(f => {
+        const cents = 1200 * Math.log2(f.r / f.m);
+        const normalizedCents = ((cents % 1200) + 1200) % 1200;
+        const angle = (normalizedCents / 1200) * 2 * Math.PI - Math.PI / 2;
+        const px = cx + Math.cos(angle) * radius * 0.85;
+        const py = cy + Math.sin(angle) * radius * 0.85;
+        const dist = Math.sqrt((px - x) ** 2 + (py - y) ** 2);
+        if (dist < minDist) { minDist = dist; closest = f; }
+    });
+    
+    if (closest) triggerGlobalHarmonic(closest.r, closest.m, closest);
+}
+
+function handleLatticeClick(e) {
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    const W = e.target.width, H = e.target.height;
+    const maxB = +(document.getElementById('tvLatticeSize')?.value || 22);
+    const margin = 45;
+    const scale = (Math.min(W, H) - 2 * margin) / maxB;
+    
+    // Convert screen coords to lattice coords
+    const a = Math.round((x - margin) / scale);
+    const b = Math.round((H - margin - y) / scale);
+    
+    if (a >= 1 && b >= 1 && a < b && gcd(a, b) === 1) {
+        triggerGlobalHarmonic(a, b);
+    }
+}
+
+function handleTableFractionClick(e) {
+    // Handle clicks on fraction text in tables (e.g., "3/7")
+    const target = e.target;
+    const text = target.textContent.trim();
+    const match = text.match(/^(\d+)\/(\d+)$/);
+    
+    if (match) {
+        const r = parseInt(match[1]);
+        const m = parseInt(match[2]);
+        if (r > 0 && m > 0 && gcd(r, m) === 1) {
+            triggerGlobalHarmonic(r, m);
+            e.preventDefault();
+        }
+    }
+}
+
+// CENTRAL FUNCTION - triggers harmonic for any fraction from any source
+function triggerGlobalHarmonic(r, m, extraData = null) {
+    selectedHarmonicFraction = { r, m };
+    
+    // Update all harmonic displays
+    updateHarmonicDisplays();
+    selectFractionForHarmonic(r, m);
+    
+    // Auto-play if enabled
+    if (document.getElementById('autoPlayOnClick')?.checked) {
+        playFraction(r, m, 0.6);
+    }
+    
+    // Highlight the toggle button briefly
+    const toggle = document.getElementById('harmonicToggle');
+    if (toggle) {
+        toggle.classList.add('playing');
+        setTimeout(() => toggle.classList.remove('playing'), 600);
+    }
+    
+    // Open panel if closed and significant fraction
+    if (m <= 8 && !document.getElementById('harmonicPanel').classList.contains('expanded')) {
+        // Optionally auto-expand for interesting fractions
+    }
+    
+    console.log(`Harmonic: ${r}/${m} = ${(r/m).toFixed(6)}, freq = ${(harmonicSettings.baseFreq * r / m).toFixed(2)} Hz`);
+}
+
+// Build mini keyboard
+function buildMiniKeyboard() {
+    const keyboard = document.getElementById('miniKeyboard');
+    if (!keyboard) return;
+    
+    const notes = [
+        { note: 'C', black: false, ratio: 1 },
+        { note: 'C#', black: true, ratio: 16/15 },
+        { note: 'D', black: false, ratio: 9/8 },
+        { note: 'D#', black: true, ratio: 6/5 },
+        { note: 'E', black: false, ratio: 5/4 },
+        { note: 'F', black: false, ratio: 4/3 },
+        { note: 'F#', black: true, ratio: 45/32 },
+        { note: 'G', black: false, ratio: 3/2 },
+        { note: 'G#', black: true, ratio: 8/5 },
+        { note: 'A', black: false, ratio: 5/3 },
+        { note: 'A#', black: true, ratio: 9/5 },
+        { note: 'B', black: false, ratio: 15/8 },
+        { note: 'C2', black: false, ratio: 2 }
+    ];
+    
+    keyboard.innerHTML = '';
+    notes.forEach(n => {
+        const key = document.createElement('div');
+        key.className = n.black ? 'black-key' : 'white-key';
+        key.title = n.note;
+        key.onclick = () => {
+            // Convert ratio to fraction
+            const [num, den] = ratioToFraction(n.ratio);
+            triggerGlobalHarmonic(num, den);
+            
+            // Visual feedback
+            key.classList.add('active');
+            setTimeout(() => key.classList.remove('active'), 200);
+        };
+        keyboard.appendChild(key);
+    });
+}
+
+function ratioToFraction(ratio) {
+    // Convert decimal ratio to simplified fraction
+    const tolerance = 1e-6;
+    let bestNum = 1, bestDen = 1, bestErr = Math.abs(ratio - 1);
+    
+    for (let den = 1; den <= 32; den++) {
+        const num = Math.round(ratio * den);
+        const err = Math.abs(ratio - num / den);
+        if (err < bestErr) {
+            bestErr = err;
+            bestNum = num;
+            bestDen = den;
+        }
+        if (err < tolerance) break;
+    }
+    
+    const g = gcd(bestNum, bestDen);
+    return [bestNum / g, bestDen / g];
+}
+
+// Draw harmonic series visualization
+function drawHarmonicSeriesViz() {
+    const canvas = document.getElementById('harmonicSeriesCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const numPartials = +(document.getElementById('numPartials')?.value || 8);
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    const barWidth = (W - 20) / numPartials;
+    
+    for (let i = 1; i <= numPartials; i++) {
+        const amplitude = 1 / i; // Natural harmonic decay
+        const height = amplitude * (H - 10);
+        const x = 10 + (i - 1) * barWidth;
+        
+        // Color by harmonic number
+        const hue = 260 - (i - 1) * 15;
+        ctx.fillStyle = `hsl(${hue}, 70%, 60%)`;
+        ctx.fillRect(x, H - height - 5, barWidth - 2, height);
+        
+        // Label
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '8px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText(i + 'f', x + barWidth / 2, H - 1);
+    }
+}
+
+function updateHarmonicSeries() {
+    const val = document.getElementById('numPartials')?.value || 8;
+    document.getElementById('partialsVal').textContent = val;
+    drawHarmonicSeriesViz();
+}
+
+function playHarmonicSeries() {
+    initAudioContext();
+    const numPartials = +(document.getElementById('numPartials')?.value || 8);
+    const baseFreq = harmonicSettings.baseFreq;
+    
+    for (let i = 1; i <= numPartials; i++) {
+        setTimeout(() => {
+            const freq = baseFreq * i;
+            playTone(freq, 0.3, 0.15 / i);
+        }, (i - 1) * 200);
+    }
+}
+
+function playSubharmonicSeries() {
+    initAudioContext();
+    const numPartials = +(document.getElementById('numPartials')?.value || 8);
+    const baseFreq = harmonicSettings.baseFreq * 4; // Start higher
+    
+    for (let i = 1; i <= numPartials; i++) {
+        setTimeout(() => {
+            const freq = baseFreq / i;
+            playTone(freq, 0.3, 0.2);
+        }, (i - 1) * 200);
+    }
+}
+
+function playTone(freq, duration, volume) {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.type = harmonicSettings.waveform;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(volume * harmonicSettings.volume, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+}
+
+function playChord() {
+    initAudioContext();
+    const { r, m } = selectedHarmonicFraction;
+    const baseFreq = harmonicSettings.baseFreq;
+    
+    // Play root, third, fifth
+    playTone(baseFreq, 1.0, harmonicSettings.volume);
+    playTone(baseFreq * 5 / 4, 1.0, harmonicSettings.volume * 0.8); // Major third
+    playTone(baseFreq * 3 / 2, 1.0, harmonicSettings.volume * 0.8); // Perfect fifth
+    playTone(baseFreq * r / m, 1.0, harmonicSettings.volume); // Selected fraction
+}
+
+function updateBeatFrequency() {
+    const f1 = harmonicSettings.baseFreq * selectedHarmonicFraction.r / selectedHarmonicFraction.m;
+    const f2 = +(document.getElementById('beatFreq2')?.value || 330);
+    const beat = Math.abs(f1 - f2);
+    document.getElementById('beatFreqResult').textContent = beat.toFixed(2);
+}
+
+function playBeatDemo() {
+    initAudioContext();
+    const f1 = harmonicSettings.baseFreq * selectedHarmonicFraction.r / selectedHarmonicFraction.m;
+    const f2 = +(document.getElementById('beatFreq2')?.value || 330);
+    
+    // Play both frequencies simultaneously to hear beats
+    playTone(f1, 2.0, harmonicSettings.volume * 0.5);
+    playTone(f2, 2.0, harmonicSettings.volume * 0.5);
+}
+
+function updateADSR() {
+    // Store ADSR values for envelope shaping
+    harmonicSettings.adsr = {
+        attack: (document.getElementById('adsrA')?.value || 10) / 100,
+        decay: (document.getElementById('adsrD')?.value || 20) / 100,
+        sustain: (document.getElementById('adsrS')?.value || 70) / 100,
+        release: (document.getElementById('adsrR')?.value || 30) / 100
+    };
+}
+
+function updateTuningSystem() {
+    harmonicSettings.tuning = document.getElementById('tuningSystem')?.value || 'just';
+}
+
+function drawWaveformDisplay() {
+    const canvas = document.getElementById('waveformDisplay');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    // Draw waveform based on selected type
+    ctx.strokeStyle = '#8b5cf6';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    
+    const waveform = harmonicSettings.waveform;
+    const cycles = 3;
+    
+    for (let x = 0; x < W; x++) {
+        const t = (x / W) * cycles * 2 * Math.PI;
+        let y;
+        
+        switch (waveform) {
+            case 'sine':
+                y = Math.sin(t);
+                break;
+            case 'triangle':
+                y = 2 * Math.abs(2 * (t / (2 * Math.PI) - Math.floor(t / (2 * Math.PI) + 0.5))) - 1;
+                break;
+            case 'square':
+                y = Math.sin(t) >= 0 ? 1 : -1;
+                break;
+            case 'sawtooth':
+                y = 2 * (t / (2 * Math.PI) - Math.floor(t / (2 * Math.PI) + 0.5));
+                break;
+            default:
+                y = Math.sin(t);
+        }
+        
+        const screenY = H / 2 - y * (H / 2 - 4);
+        x === 0 ? ctx.moveTo(x, screenY) : ctx.lineTo(x, screenY);
+    }
+    ctx.stroke();
+}
 
 setTimeout(addZoomControlsToCharts, 500);</script>
 </body>
-                                                                                                                                                             </html>
+    </html>
