@@ -2,133 +2,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farey Sector Formula - Complete Research Platform with Harmonic Analysis</title>
+    <title>Farey Sector Formula with Harmonic Analysis</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1a; color: #e2e8f0; line-height: 1.6; font-size: 14px; }
         
-        .nav-links { background: linear-gradient(90deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%); padding: 8px 15px; border-bottom: 1px solid #4338ca; overflow-x: auto; white-space: nowrap; position: sticky; top: 0; z-index: 500; }
-        .nav-links a { display: inline-block; padding: 4px 10px; margin: 2px 3px; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); border-radius: 4px; color: #a5b4fc; text-decoration: none; font-size: 11px; font-weight: 500; transition: all 0.2s; }
-        .nav-links a:hover { background: rgba(99, 102, 241, 0.4); color: #e0e7ff; }
+        /* HARMONIC DROPDOWN PANEL */
+        .harmonic-dropdown { background: linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%); border-bottom: 2px solid #6366f1; }
+        .harmonic-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; cursor: pointer; background: linear-gradient(90deg, #312e81, #1e1b4b); }
+        .harmonic-header:hover { background: linear-gradient(90deg, #3730a3, #312e81); }
+        .harmonic-header h3 { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+        .harmonic-header h3 span { font-size: 20px; }
+        .harmonic-toggle-icon { font-size: 18px; transition: transform 0.3s; }
+        .harmonic-dropdown.open .harmonic-toggle-icon { transform: rotate(180deg); }
+        .harmonic-body { display: none; padding: 15px 20px; }
+        .harmonic-dropdown.open .harmonic-body { display: block; }
+        
+        .harmonic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .harmonic-section { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; padding: 12px; }
+        .harmonic-section h4 { color: #a5b4fc; font-size: 11px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(99,102,241,0.3); padding-bottom: 6px; }
+        .harmonic-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+        .harmonic-row:last-child { margin-bottom: 0; }
+        .harmonic-row label { font-size: 11px; color: #94a3b8; min-width: 60px; }
+        .harmonic-row input[type="number"], .harmonic-row select { padding: 5px 8px; font-size: 12px; background: #0f172a; border: 1px solid #475569; border-radius: 4px; color: #e2e8f0; width: 80px; }
+        .harmonic-row input[type="range"] { flex: 1; min-width: 100px; }
+        .harmonic-row input[type="checkbox"] { margin-right: 4px; }
+        
+        .freq-display { font-family: monospace; font-size: 24px; color: #22c55e; text-align: center; padding: 10px; background: #0f172a; border-radius: 6px; margin-bottom: 10px; }
+        .freq-display small { font-size: 11px; color: #64748b; display: block; margin-top: 4px; }
+        
+        .interval-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .interval-btn { padding: 8px 4px; font-size: 10px; background: #334155; border: 1px solid #475569; border-radius: 4px; color: #e2e8f0; cursor: pointer; text-align: center; transition: all 0.2s; }
+        .interval-btn:hover { background: #475569; border-color: #6366f1; }
+        .interval-btn.playing { background: #6366f1; border-color: #8b5cf6; animation: pulse 0.5s ease-in-out; }
+        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        
+        .harmonic-btn { padding: 6px 12px; font-size: 11px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none; border-radius: 4px; color: white; cursor: pointer; }
+        .harmonic-btn:hover { opacity: 0.9; }
+        .harmonic-btn.stop { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .harmonic-btn.active { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        
+        .harmonic-legend { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; font-size: 10px; }
+        .harmonic-legend-item { display: flex; align-items: center; gap: 6px; padding: 4px 8px; background: rgba(0,0,0,0.3); border-radius: 3px; }
+        .harmonic-swatch { width: 14px; height: 14px; border-radius: 3px; }
+        
+        .waveform-box { background: #0f172a; border-radius: 6px; padding: 8px; margin-top: 10px; }
+        .waveform-box canvas { width: 100%; height: 50px; display: block; }
+        
+        .nav-links { background: linear-gradient(90deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%); padding: 8px 15px; border-bottom: 1px solid #4338ca; overflow-x: auto; white-space: nowrap; }
+        .nav-links a { display: inline-block; padding: 4px 10px; margin: 2px 3px; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); border-radius: 4px; color: #a5b4fc; text-decoration: none; font-size: 11px; }
+        .nav-links a:hover { background: rgba(99, 102, 241, 0.4); }
         .nav-links-label { color: #64748b; font-size: 10px; margin-right: 8px; text-transform: uppercase; }
         
-        /* GLOBAL HARMONIC CONTROL PANEL */
-        .harmonic-global-panel { 
-            position: fixed; 
-            top: 50px; 
-            right: 0; 
-            width: 320px; 
-            max-height: calc(100vh - 60px);
-            background: linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%); 
-            border-left: 2px solid #6366f1; 
-            border-bottom: 2px solid #6366f1;
-            border-radius: 0 0 0 12px;
-            z-index: 1000; 
-            transform: translateX(280px);
-            transition: transform 0.3s ease;
-            box-shadow: -5px 5px 20px rgba(0,0,0,0.5);
-            overflow-y: auto;
-        }
-        .harmonic-global-panel.expanded { transform: translateX(0); }
-        .harmonic-toggle { 
-            position: absolute; 
-            left: -40px; 
-            top: 10px; 
-            width: 40px; 
-            height: 80px; 
-            background: linear-gradient(135deg, #6366f1, #8b5cf6); 
-            border: none; 
-            border-radius: 8px 0 0 8px; 
-            color: white; 
-            cursor: pointer; 
-            writing-mode: vertical-rl;
-            font-size: 11px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .harmonic-toggle:hover { background: linear-gradient(135deg, #8b5cf6, #a855f7); }
-        .harmonic-panel-content { padding: 12px; }
-        .harmonic-panel-header { 
-            background: linear-gradient(135deg, #6366f1, #8b5cf6); 
-            padding: 10px 15px; 
-            font-weight: bold; 
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .harmonic-panel-header span { font-size: 18px; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 15px; }
+        h1 { color: #f8fafc; font-size: 1.4em; margin-bottom: 4px; }
+        .subtitle { color: #94a3b8; margin-bottom: 15px; font-size: 0.85em; }
         
-        .harmonic-section { margin-bottom: 12px; padding: 10px; background: rgba(99,102,241,0.1); border-radius: 6px; border: 1px solid rgba(99,102,241,0.3); }
-        .harmonic-section h4 { color: #a5b4fc; font-size: 11px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .harmonic-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
-        .harmonic-row label { font-size: 11px; color: #94a3b8; min-width: 70px; }
-        .harmonic-row input[type="number"], .harmonic-row input[type="range"], .harmonic-row select { 
-            flex: 1; 
-            padding: 4px 6px; 
-            font-size: 11px; 
-            background: #0f172a; 
-            border: 1px solid #475569; 
-            border-radius: 4px; 
-            color: #e2e8f0; 
-        }
-        .harmonic-row input[type="range"] { padding: 0; }
-        .harmonic-btn { 
-            padding: 6px 10px; 
-            font-size: 10px; 
-            background: linear-gradient(135deg, #6366f1, #8b5cf6); 
-            border: none; 
-            border-radius: 4px; 
-            color: white; 
-            cursor: pointer; 
-            flex: 1;
-        }
-        .harmonic-btn:hover { opacity: 0.9; }
-        .harmonic-btn.active { background: linear-gradient(135deg, #22c55e, #16a34a); }
-        .harmonic-btn.stop { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        
-        .freq-display { 
-            font-family: monospace; 
-            font-size: 20px; 
-            color: #22c55e; 
-            text-align: center; 
-            padding: 8px; 
-            background: #0f172a; 
-            border-radius: 4px; 
-            margin-bottom: 8px;
-        }
-        .freq-display small { font-size: 10px; color: #64748b; display: block; }
-        
-        .harmonic-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 10px; }
-        .harmonic-legend-item { display: flex; align-items: center; gap: 4px; padding: 3px 6px; background: rgba(0,0,0,0.3); border-radius: 3px; }
-        .harmonic-swatch { width: 12px; height: 12px; border-radius: 2px; }
-        
-        .interval-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
-        .interval-btn { padding: 8px 4px; font-size: 9px; background: #334155; border: 1px solid #475569; border-radius: 4px; color: #e2e8f0; cursor: pointer; text-align: center; }
-        .interval-btn:hover { background: #475569; }
-        .interval-btn.playing { background: #6366f1; border-color: #8b5cf6; }
-        
-        .waveform-canvas { width: 100%; height: 60px; background: #0f172a; border-radius: 4px; margin-top: 8px; }
-        
-        .container { max-width: 1500px; margin: 0 auto; padding: 15px; padding-right: 60px; }
-        h1 { color: #f8fafc; font-size: 1.5em; margin-bottom: 4px; }
-        .subtitle { color: #94a3b8; margin-bottom: 15px; font-size: 0.9em; }
-        h2 { color: #f1f5f9; font-size: 1.1em; margin: 20px 0 12px 0; border-bottom: 1px solid #334155; padding-bottom: 6px; }
-        h3 { color: #cbd5e1; font-size: 1em; margin: 12px 0 8px 0; }
-        
-        .formula-box { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 15px; border-radius: 10px; margin-bottom: 15px; }
-        .formula-main { font-size: 1.3em; font-weight: bold; font-family: 'Cambria Math', serif; text-align: center; margin: 8px 0; }
+        .formula-box { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; }
+        .formula-main { font-size: 1.2em; font-weight: bold; font-family: 'Cambria Math', serif; text-align: center; }
         
         .control-panel { background: #1e293b; padding: 12px 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #334155; }
         .control-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
         .control-row:last-child { margin-bottom: 0; }
         .control-group { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: #0f172a; border-radius: 5px; }
         .control-group.highlight { border: 1px solid #6366f1; background: #1e1b4b; }
-        label { font-weight: 600; color: #cbd5e1; font-size: 0.8em; white-space: nowrap; }
-        input[type="number"], input[type="text"], select { padding: 6px 8px; font-size: 13px; border: 1px solid #475569; border-radius: 5px; background: #1e293b; color: #e2e8f0; }
+        label { font-weight: 600; color: #cbd5e1; font-size: 0.8em; }
+        input[type="number"], select { padding: 6px 8px; font-size: 13px; border: 1px solid #475569; border-radius: 5px; background: #1e293b; color: #e2e8f0; }
         input[type="number"] { width: 70px; }
         input:focus, select:focus { outline: none; border-color: #6366f1; }
         button { padding: 8px 14px; font-size: 12px; font-weight: 600; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none; border-radius: 5px; cursor: pointer; }
@@ -149,222 +89,173 @@
         
         .panel { background: #1e293b; border-radius: 8px; padding: 15px; border: 1px solid #334155; margin-bottom: 15px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-        @media (max-width: 1200px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+        @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
         
-        .chart-box { background: #0f172a; border-radius: 6px; padding: 12px; border: 1px solid #334155; position: relative; }
-        .chart-box h4 { margin-top: 0; }
-        canvas { max-width: 100%; }
+        .chart-box { background: #0f172a; border-radius: 6px; padding: 12px; border: 1px solid #334155; }
+        .chart-box h4 { margin: 0 0 10px 0; font-size: 0.9em; color: #cbd5e1; }
         
         table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
         thead { background: #334155; }
         th { padding: 8px; text-align: left; font-weight: 600; color: #e2e8f0; }
         td { padding: 6px 8px; border-bottom: 1px solid #334155; }
-        tbody tr:hover { background: #334155; }
-        .table-scroll { max-height: 350px; overflow-y: auto; }
+        tbody tr:hover { background: #334155; cursor: pointer; }
+        .table-scroll { max-height: 300px; overflow-y: auto; }
         
-        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; }
         .stat-card { background: #0f172a; padding: 10px; border-radius: 5px; border: 1px solid #334155; text-align: center; }
         .stat-value { font-size: 1.1em; font-weight: bold; color: #6366f1; }
         .stat-label { font-size: 0.7em; color: #94a3b8; margin-top: 3px; }
         
         .theorem-box { background: #1e1b4b; border-left: 3px solid #6366f1; padding: 10px 12px; margin: 10px 0; border-radius: 0 5px 5px 0; font-size: 0.9em; }
-        .derivation-box { background: #422006; border-left: 3px solid #f59e0b; padding: 10px 12px; margin: 10px 0; border-radius: 0 5px 5px 0; font-size: 0.9em; }
         
-        .ring-canvas { background: #0f172a; border-radius: 6px; border: 1px solid #334155; cursor: crosshair; }
-        .point-tooltip { position: absolute; background: #1e293b; border: 1px solid #6366f1; padding: 8px 12px; border-radius: 6px; font-size: 0.8em; pointer-events: none; z-index: 100; display: none; min-width: 180px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .ring-canvas { background: #0f172a; border-radius: 6px; border: 1px solid #334155; cursor: crosshair; display: block; margin: 0 auto; }
+        .point-tooltip { position: absolute; background: #1e293b; border: 1px solid #6366f1; padding: 8px 12px; border-radius: 6px; font-size: 0.8em; pointer-events: none; z-index: 100; display: none; min-width: 160px; }
         .point-tooltip.visible { display: block; }
         
-        .color-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; padding: 8px; background: #0f172a; border-radius: 5px; font-size: 0.75em; }
+        .color-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; padding: 8px; background: #0f172a; border-radius: 5px; font-size: 0.75em; }
         .color-legend-item { display: flex; align-items: center; gap: 5px; }
-        .color-swatch { width: 14px; height: 14px; border-radius: 3px; border: 1px solid #475569; }
+        .color-swatch { width: 12px; height: 12px; border-radius: 2px; }
         
         .progress-bar { width: 100%; height: 5px; background: #334155; border-radius: 3px; overflow: hidden; margin: 8px 0; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6); transition: width 0.3s; }
-        
-        /* Harmonic Colors */
-        .harmonic-unison { color: #22c55e; }
-        .harmonic-consonant { color: #3b82f6; }
-        .harmonic-complex { color: #f59e0b; }
-        .harmonic-dissonant { color: #ef4444; }
-        
-        .arnold-tongue { fill: rgba(139, 92, 246, 0.3); stroke: #8b5cf6; }
-        
-        .tree-node { cursor: pointer; transition: all 0.2s; }
-        .tree-node:hover { filter: brightness(1.3); }
-        .tree-node.playing { animation: pulse 0.5s ease-in-out infinite; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
-        
-        .freq-spectrum { height: 100px; background: #0f172a; border-radius: 4px; margin-top: 8px; }
     </style>
 </head>
 <body>
 
-<!-- GLOBAL HARMONIC ANALYSIS PANEL -->
-<div class="harmonic-global-panel" id="harmonicPanel">
-    <button class="harmonic-toggle" onclick="toggleHarmonicPanel()">HARMONIC</button>
-    <div class="harmonic-panel-header">
-        <span>♪</span> Global Harmonic Analysis
+<!-- HARMONIC DROPDOWN -->
+<div class="harmonic-dropdown" id="harmonicDropdown">
+    <div class="harmonic-header" onclick="toggleHarmonicPanel()">
+        <h3><span>♪</span> Global Harmonic Analysis Control</h3>
+        <span class="harmonic-toggle-icon">▼</span>
     </div>
-    <div class="harmonic-panel-content">
-        <div class="freq-display" id="currentFreqDisplay">
-            440.00 Hz
-            <small>A4 - Unison</small>
-        </div>
-        
-        <div class="harmonic-section">
-            <h4>Base Frequency</h4>
-            <div class="harmonic-row">
-                <label>Freq (Hz):</label>
-                <input type="number" id="baseFreq" value="440" min="20" max="2000" onchange="updateGlobalHarmonic()">
+    <div class="harmonic-body">
+        <div class="harmonic-grid">
+            <!-- Frequency Display & Base -->
+            <div class="harmonic-section">
+                <h4>Current Frequency</h4>
+                <div class="freq-display" id="currentFreqDisplay">440.00 Hz<small>A4 - Base</small></div>
+                <div class="harmonic-row">
+                    <label>Base Hz:</label>
+                    <input type="number" id="baseFreq" value="440" min="20" max="2000" onchange="updateHarmonicDisplay()">
+                    <input type="range" id="baseFreqSlider" min="20" max="2000" value="440" oninput="document.getElementById('baseFreq').value=this.value; updateHarmonicDisplay()">
+                </div>
+                <div class="harmonic-row">
+                    <label>Wave:</label>
+                    <select id="waveformType">
+                        <option value="sine">Sine</option>
+                        <option value="triangle">Triangle</option>
+                        <option value="square">Square</option>
+                        <option value="sawtooth">Sawtooth</option>
+                    </select>
+                </div>
             </div>
-            <div class="harmonic-row">
-                <input type="range" id="baseFreqSlider" min="20" max="2000" value="440" onchange="document.getElementById('baseFreq').value=this.value; updateGlobalHarmonic()">
+            
+            <!-- Musical Intervals -->
+            <div class="harmonic-section">
+                <h4>Musical Intervals</h4>
+                <div class="interval-grid">
+                    <button class="interval-btn" onclick="playInterval(1,1)">Unison<br><small>1:1</small></button>
+                    <button class="interval-btn" onclick="playInterval(3,2)">Fifth<br><small>3:2</small></button>
+                    <button class="interval-btn" onclick="playInterval(4,3)">Fourth<br><small>4:3</small></button>
+                    <button class="interval-btn" onclick="playInterval(5,4)">Maj 3<br><small>5:4</small></button>
+                    <button class="interval-btn" onclick="playInterval(6,5)">Min 3<br><small>6:5</small></button>
+                    <button class="interval-btn" onclick="playInterval(8,5)">Min 6<br><small>8:5</small></button>
+                    <button class="interval-btn" onclick="playInterval(9,8)">Maj 2<br><small>9:8</small></button>
+                    <button class="interval-btn" onclick="playInterval(2,1)">Octave<br><small>2:1</small></button>
+                </div>
             </div>
-            <div class="harmonic-row">
-                <label>Waveform:</label>
-                <select id="waveformType" onchange="updateGlobalHarmonic()">
-                    <option value="sine">Sine</option>
-                    <option value="triangle">Triangle</option>
-                    <option value="square">Square</option>
-                    <option value="sawtooth">Sawtooth</option>
-                </select>
+            
+            <!-- Playback Controls -->
+            <div class="harmonic-section">
+                <h4>Playback</h4>
+                <div class="harmonic-row">
+                    <button class="harmonic-btn" onclick="playFareySweep()">Farey Sweep</button>
+                    <button class="harmonic-btn" onclick="playSectorChord()">Sector Chord</button>
+                </div>
+                <div class="harmonic-row">
+                    <button class="harmonic-btn" onclick="playTreePath()">Tree Path</button>
+                    <button class="harmonic-btn stop" onclick="stopAllAudio()">Stop All</button>
+                </div>
+                <div class="harmonic-row">
+                    <label>Tempo:</label>
+                    <input type="range" id="tempoSlider" min="60" max="300" value="120" oninput="document.getElementById('tempoVal').textContent=this.value">
+                    <span id="tempoVal">120</span> BPM
+                </div>
             </div>
-        </div>
-        
-        <div class="harmonic-section">
-            <h4>Musical Intervals</h4>
-            <div class="interval-btns">
-                <button class="interval-btn" onclick="playInterval(1, 1)" data-ratio="1/1">Unison<br>1:1</button>
-                <button class="interval-btn" onclick="playInterval(3, 2)" data-ratio="3/2">Fifth<br>3:2</button>
-                <button class="interval-btn" onclick="playInterval(4, 3)" data-ratio="4/3">Fourth<br>4:3</button>
-                <button class="interval-btn" onclick="playInterval(5, 4)" data-ratio="5/4">Maj 3<br>5:4</button>
-                <button class="interval-btn" onclick="playInterval(6, 5)" data-ratio="6/5">Min 3<br>6:5</button>
-                <button class="interval-btn" onclick="playInterval(8, 5)" data-ratio="8/5">Min 6<br>8:5</button>
-                <button class="interval-btn" onclick="playInterval(9, 8)" data-ratio="9/8">Maj 2<br>9:8</button>
-                <button class="interval-btn" onclick="playInterval(2, 1)" data-ratio="2/1">Octave<br>2:1</button>
+            
+            <!-- Harmonic Legend -->
+            <div class="harmonic-section">
+                <h4>Harmonic Classification</h4>
+                <div class="harmonic-legend">
+                    <div class="harmonic-legend-item"><div class="harmonic-swatch" style="background:#22c55e"></div>Unison (q=1)</div>
+                    <div class="harmonic-legend-item"><div class="harmonic-swatch" style="background:#3b82f6"></div>Consonant (q≤4)</div>
+                    <div class="harmonic-legend-item"><div class="harmonic-swatch" style="background:#f59e0b"></div>Complex (q≤16)</div>
+                    <div class="harmonic-legend-item"><div class="harmonic-swatch" style="background:#ef4444"></div>Dissonant (q>16)</div>
+                </div>
+                <div class="harmonic-row" style="margin-top:10px;">
+                    <label><input type="checkbox" id="harmonicColorMode" checked onchange="redrawAll()"> Harmonic Colors</label>
+                    <label><input type="checkbox" id="showArnoldTongues" checked onchange="redrawAll()"> Arnold Tongues</label>
+                </div>
             </div>
-        </div>
-        
-        <div class="harmonic-section">
-            <h4>Playback Controls</h4>
-            <div class="harmonic-row">
-                <button class="harmonic-btn" id="playPathBtn" onclick="playTreePath()">Play Tree Path</button>
-                <button class="harmonic-btn" onclick="playFareySweep()">Farey Sweep</button>
+            
+            <!-- Waveform Display -->
+            <div class="harmonic-section">
+                <h4>Live Waveform</h4>
+                <div class="waveform-box">
+                    <canvas id="waveformCanvas" width="280" height="50"></canvas>
+                </div>
             </div>
-            <div class="harmonic-row">
-                <button class="harmonic-btn stop" onclick="stopAllAudio()">Stop All</button>
-                <button class="harmonic-btn" onclick="playSectorChord()">Sector Chord</button>
+            
+            <!-- Spectrum Display -->
+            <div class="harmonic-section">
+                <h4>Frequency Spectrum</h4>
+                <div class="waveform-box">
+                    <canvas id="spectrumCanvas" width="280" height="60"></canvas>
+                </div>
             </div>
-            <div class="harmonic-row">
-                <label>Tempo:</label>
-                <input type="range" id="tempoSlider" min="60" max="300" value="120">
-                <span id="tempoValue">120 BPM</span>
-            </div>
-        </div>
-        
-        <div class="harmonic-section">
-            <h4>Harmonic Classification</h4>
-            <div class="harmonic-legend">
-                <div class="harmonic-legend-item"><div class="harmonic-swatch" style="background:#22c55e"></div>Unison (q=1)</div>
-                <div class="harmonic-legend-item"><div class="harmonic-swatch" style="background:#3b82f6"></div>Consonant (q≤4)</div>
-                <div class="harmonic-legend-item"><div class="harmonic-swatch" style="background:#f59e0b"></div>Complex (q≤16)</div>
-                <div class="harmonic-legend-item"><div class="harmonic-swatch" style="background:#ef4444"></div>Dissonant (q>16)</div>
-            </div>
-        </div>
-        
-        <div class="harmonic-section">
-            <h4>Arnold Tongues</h4>
-            <div class="harmonic-row">
-                <label><input type="checkbox" id="showArnoldTongues" checked onchange="applyHarmonicToAll()"> Show Tongues</label>
-            </div>
-            <div class="harmonic-row">
-                <label>Width:</label>
-                <input type="range" id="tongueWidth" min="1" max="20" value="8" onchange="applyHarmonicToAll()">
-            </div>
-            <div class="harmonic-row">
-                <label>Depth:</label>
-                <input type="range" id="tongueDepth" min="0" max="100" value="50" onchange="applyHarmonicToAll()">
-            </div>
-        </div>
-        
-        <div class="harmonic-section">
-            <h4>Apply to Visualizations</h4>
-            <div class="harmonic-row">
-                <label><input type="checkbox" id="harmonicColorMode" checked onchange="applyHarmonicToAll()"> Harmonic Colors</label>
-            </div>
-            <div class="harmonic-row">
-                <label><input type="checkbox" id="showFreqLabels" onchange="applyHarmonicToAll()"> Frequency Labels</label>
-            </div>
-            <div class="harmonic-row">
-                <button class="harmonic-btn" onclick="applyHarmonicToAll()" style="width:100%">Refresh All Visualizations</button>
-            </div>
-        </div>
-        
-        <div class="harmonic-section">
-            <h4>Live Waveform</h4>
-            <canvas id="waveformCanvas" class="waveform-canvas" width="280" height="60"></canvas>
-        </div>
-        
-        <div class="harmonic-section">
-            <h4>Frequency Spectrum</h4>
-            <canvas id="spectrumCanvas" class="freq-spectrum" width="280" height="100"></canvas>
         </div>
     </div>
 </div>
 
 <div class="nav-links">
     <span class="nav-links-label">Projects:</span>
-    <a href="https://wessengetachew.github.io/2025/" target="_blank">2025</a>
     <a href="https://wessengetachew.github.io/Transform/" target="_blank">Transform</a>
-    <a href="https://wessengetachew.github.io/finite/" target="_blank">Finite</a>
-    <a href="https://wessengetachew.github.io/Primes/" target="_blank">Primes</a>
     <a href="https://wessengetachew.github.io/Farey/" target="_blank">Farey</a>
+    <a href="https://wessengetachew.github.io/Primes/" target="_blank">Primes</a>
     <a href="https://wessengetachew.github.io/Composite/" target="_blank">Composite</a>
 </div>
 
 <div class="container">
-    <h1>Farey Sector Formula - Complete Research Platform</h1>
-    <p class="subtitle">With Global Harmonic Analysis & Arnold Tongues Visualization</p>
+    <h1>Farey Sector Formula with Harmonic Analysis</h1>
+    <p class="subtitle">Click fractions to hear frequencies | Arnold Tongues visualization</p>
     
     <div class="formula-box">
-        <div class="formula-main">C(n, N) = 3N² / (π² n(n+1)) | f(r/m) = f₀ × (r/m)</div>
-        <p style="text-align:center; font-size:0.85em; opacity:0.9;">Sector counting formula with harmonic frequency mapping</p>
+        <div class="formula-main">C(n, N) = 3N² / (π² n(n+1)) &nbsp;|&nbsp; f(r/m) = f₀ × (r/m)</div>
     </div>
     
     <div class="control-panel">
         <div class="control-row">
-            <label>Mode:</label>
-            <div class="mode-selector">
-                <div class="mode-btn active" onclick="setMode('exact')" id="mode-exact">Exact</div>
-                <div class="mode-btn" onclick="setMode('formula')" id="mode-formula">Formula</div>
-            </div>
-            <span class="info-badge" id="modeDescription">Exact enumeration</span>
-        </div>
-        <div class="control-row">
             <div class="control-group highlight">
                 <label>N:</label>
-                <input type="number" id="nMax" value="100" min="2">
+                <input type="number" id="nMax" value="80" min="10" max="500">
             </div>
             <div class="control-group highlight">
                 <label>Sectors:</label>
                 <input type="number" id="sectorMin" value="1" min="1"> to
-                <input type="number" id="sectorMax" value="12" min="1">
+                <input type="number" id="sectorMax" value="10" min="1">
             </div>
             <button onclick="computeAll()">Compute</button>
-            <button class="secondary" onclick="exportAllData()">Export</button>
+            <button class="secondary" onclick="exportData()">Export CSV</button>
+            <span class="info-badge" id="statusArea">Ready</span>
         </div>
         <div class="progress-bar" id="progressBar" style="display:none;"><div class="progress-fill" id="progressFill"></div></div>
-        <div id="statusArea"></div>
     </div>
     
     <div class="tabs">
-        <div class="tab active" onclick="switchTab('main')">Main</div>
+        <div class="tab active" onclick="switchTab('main')">Main Analysis</div>
         <div class="tab" onclick="switchTab('tree')">Harmonic Tree</div>
         <div class="tab" onclick="switchTab('spectrum')">Frequency Spectrum</div>
-        <div class="tab" onclick="switchTab('theory')">Theory</div>
-        <div class="tab" onclick="switchTab('gaps')">Gaps</div>
-        <div class="tab" onclick="switchTab('franel')">Franel-Landau</div>
+        <div class="tab" onclick="switchTab('gaps')">Gap Analysis</div>
         <div class="tab" onclick="switchTab('euler')">Euler Product</div>
     </div>
     
@@ -372,27 +263,27 @@
     <div id="tab-main" class="tab-content active">
         <div class="stat-grid" id="mainStats"></div>
         <div class="grid-2" style="margin-top:15px;">
-            <div class="chart-box"><h4>Exact vs Predicted (Harmonic Colored)</h4><canvas id="mainCountChart"></canvas></div>
+            <div class="chart-box"><h4>Exact vs Predicted</h4><canvas id="mainCountChart"></canvas></div>
             <div class="chart-box"><h4>Relative Error %</h4><canvas id="mainErrorChart"></canvas></div>
         </div>
         <div class="panel" style="margin-top:15px;">
-            <h4>Sector Data <span style="font-weight:normal; color:#64748b;">(click row to play frequency)</span></h4>
-            <div class="table-scroll"><table id="mainTable"><thead><tr><th>n</th><th>Interval</th><th>Exact</th><th>Pred</th><th>Err%</th><th>Freq (Hz)</th><th>Harmonic</th></tr></thead><tbody></tbody></table></div>
+            <h4>Sector Data <small style="color:#64748b;font-weight:normal;">(click row to play)</small></h4>
+            <div class="table-scroll"><table id="mainTable"><thead><tr><th>n</th><th>Interval</th><th>Exact</th><th>Predicted</th><th>Error%</th><th>Frequency</th><th>Class</th></tr></thead><tbody></tbody></table></div>
         </div>
         <div class="panel">
-            <h4>Sector Ring with Harmonic Coloring</h4>
+            <h4>Sector Ring <small style="color:#64748b;font-weight:normal;">(click points to play)</small></h4>
             <div class="control-row" style="margin-bottom:10px;">
-                <label>Sector: <input type="number" id="viewSector" value="1" min="1" onchange="drawMainRing()"></label>
+                <label>Sector: <input type="number" id="viewSector" value="2" min="1" style="width:50px;" onchange="drawMainRing()"></label>
                 <label>Color: <select id="colorMode" onchange="drawMainRing()">
                     <option value="harmonic">Harmonic</option>
                     <option value="sector">Sector</option>
-                    <option value="prime">Prime</option>
+                    <option value="prime">Prime/Composite</option>
                 </select></label>
-                <label><input type="checkbox" id="showAllSectors" onchange="drawMainRing()"> All</label>
+                <label><input type="checkbox" id="showAllSectors" onchange="drawMainRing()"> Show All</label>
                 <button class="secondary" onclick="playRingSequence()">Play Ring</button>
             </div>
-            <div style="text-align:center;position:relative;">
-                <canvas id="mainRing" class="ring-canvas" width="600" height="600"></canvas>
+            <div style="position:relative;">
+                <canvas id="mainRing" class="ring-canvas" width="550" height="550"></canvas>
                 <div class="point-tooltip" id="pointTooltip"></div>
             </div>
             <div class="color-legend" id="colorLegend"></div>
@@ -402,232 +293,243 @@
     <!-- HARMONIC TREE TAB -->
     <div id="tab-tree" class="tab-content">
         <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid #6366f1;">
-            <h3 style="color:#c7d2fe;margin-top:0;">Stern-Brocot Tree with Arnold Tongues</h3>
-            <p style="color:#a5b4fc;font-size:0.9em;">Each node represents a fraction r/m with frequency f₀ × (r/m). Click nodes to play. Arnold tongues show frequency locking regions.</p>
+            <h3 style="color:#c7d2fe;">Stern-Brocot Tree with Arnold Tongues</h3>
+            <p style="color:#a5b4fc;font-size:0.85em;margin-top:5px;">Each node = fraction r/m with frequency f₀×(r/m). Arnold tongues show frequency locking regions.</p>
         </div>
-        
-        <div class="control-panel">
+        <div class="control-panel" style="margin-top:15px;">
             <div class="control-row">
-                <div class="control-group">
-                    <label>Tree Depth:</label>
-                    <input type="number" id="treeDepth" value="6" min="3" max="10" onchange="drawHarmonicTree()">
-                </div>
-                <div class="control-group">
-                    <label>View:</label>
-                    <select id="treeViewMode" onchange="drawHarmonicTree()">
-                        <option value="standard">Standard Tree</option>
-                        <option value="arnold">Arnold Tongues</option>
-                        <option value="both" selected>Both</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label><input type="checkbox" id="treeShowFreq" checked onchange="drawHarmonicTree()"> Freq Labels</label>
-                </div>
-                <div class="control-group">
-                    <label><input type="checkbox" id="treeAnimatePath" checked> Animate</label>
-                </div>
-                <button onclick="playTreePath()">Play Path</button>
-                <button class="secondary" onclick="playAllNodes()">Play All Nodes</button>
+                <label>Depth: <input type="number" id="treeDepth" value="6" min="3" max="9" style="width:50px;" onchange="drawHarmonicTree()"></label>
+                <label>Tongue Width: <input type="range" id="tongueWidth" min="1" max="30" value="12" onchange="drawHarmonicTree()"></label>
+                <label><input type="checkbox" id="showFreqLabels" onchange="drawHarmonicTree()"> Freq Labels</label>
+                <button onclick="playTreePath()">Play Selected Path</button>
+                <button class="secondary" onclick="playAllTreeNodes()">Play All</button>
             </div>
         </div>
-        
-        <div class="stat-grid" id="treeStats" style="margin-bottom:15px;"></div>
-        
+        <div class="stat-grid" id="treeStats" style="margin:15px 0;"></div>
         <div class="chart-box">
-            <h4>Harmonic Stern-Brocot Tree</h4>
-            <div style="text-align:center;position:relative;">
-                <canvas id="harmonicTreeCanvas" class="ring-canvas" width="1100" height="600"></canvas>
-            </div>
-            <div class="color-legend">
-                <div class="color-legend-item"><div class="color-swatch" style="background:#22c55e"></div>Unison (q=1)</div>
-                <div class="color-legend-item"><div class="color-swatch" style="background:#3b82f6"></div>Consonant (q≤4)</div>
-                <div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Complex (q≤16)</div>
-                <div class="color-legend-item"><div class="color-swatch" style="background:#ef4444"></div>Dissonant (q>16)</div>
-                <div class="color-legend-item"><div class="color-swatch" style="background:rgba(139,92,246,0.3);border:1px solid #8b5cf6"></div>Arnold Tongue</div>
+            <h4>Click nodes to hear frequencies and select path</h4>
+            <canvas id="harmonicTreeCanvas" class="ring-canvas" width="1000" height="500"></canvas>
+            <div class="color-legend" style="margin-top:10px;">
+                <div class="color-legend-item"><div class="color-swatch" style="background:#22c55e"></div>Unison</div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:#3b82f6"></div>Consonant</div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Complex</div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:#ef4444"></div>Dissonant</div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:rgba(139,92,246,0.4);border:1px solid #8b5cf6"></div>Arnold Tongue</div>
             </div>
         </div>
-        
         <div class="panel" style="margin-top:15px;">
-            <h4>Selected Node Info</h4>
-            <div id="selectedNodeInfo" style="padding:10px;background:#0f172a;border-radius:5px;font-family:monospace;">
-                <span style="color:#64748b;">Click a node on the tree to see details and hear its frequency</span>
-            </div>
+            <h4>Selected Node</h4>
+            <div id="selectedNodeInfo" style="padding:10px;background:#0f172a;border-radius:5px;font-family:monospace;color:#64748b;">Click a tree node to see details</div>
         </div>
-        
         <div class="grid-2" style="margin-top:15px;">
-            <div class="chart-box">
-                <h4>Frequency Distribution by Harmonic Class</h4>
-                <canvas id="freqDistChart"></canvas>
-            </div>
-            <div class="chart-box">
-                <h4>Consonance Score by Depth</h4>
-                <canvas id="consonanceChart"></canvas>
-            </div>
+            <div class="chart-box"><h4>Harmonic Class Distribution</h4><canvas id="treeClassChart"></canvas></div>
+            <div class="chart-box"><h4>Consonance by Depth</h4><canvas id="treeConsonanceChart"></canvas></div>
         </div>
     </div>
     
     <!-- FREQUENCY SPECTRUM TAB -->
     <div id="tab-spectrum" class="tab-content">
         <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid #6366f1;">
-            <h3 style="color:#c7d2fe;margin-top:0;">Frequency Spectrum Analysis</h3>
-            <p style="color:#a5b4fc;font-size:0.9em;">Mapping Farey fractions to frequencies: f(r/m) = f₀ × (r/m)</p>
+            <h3 style="color:#c7d2fe;">Frequency Spectrum Analysis</h3>
+            <p style="color:#a5b4fc;font-size:0.85em;margin-top:5px;">Mapping: f(r/m) = f₀ × (r/m)</p>
         </div>
-        
-        <div class="control-panel">
+        <div class="control-panel" style="margin-top:15px;">
             <div class="control-row">
-                <div class="control-group highlight">
-                    <label>Base Freq:</label>
-                    <input type="number" id="spectrumBaseFreq" value="440" min="20" max="2000" onchange="updateSpectrumAnalysis()">
-                </div>
-                <div class="control-group">
-                    <label>Scale:</label>
-                    <select id="spectrumScale" onchange="updateSpectrumAnalysis()">
-                        <option value="linear">Linear</option>
-                        <option value="log" selected>Logarithmic</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>Sector:</label>
-                    <input type="number" id="spectrumSector" value="2" min="1" max="15" onchange="updateSpectrumAnalysis()">
-                </div>
+                <label>Base Freq: <input type="number" id="specBaseFreq" value="440" min="20" max="2000" style="width:70px;" onchange="updateSpectrumTab()"> Hz</label>
+                <label>Sector: <input type="number" id="specSector" value="2" min="1" style="width:50px;" onchange="updateSpectrumTab()"></label>
+                <label>Scale: <select id="specScale" onchange="updateSpectrumTab()"><option value="linear">Linear</option><option value="log">Log</option></select></label>
                 <button onclick="playSpectrumSweep()">Play Sweep</button>
             </div>
         </div>
-        
-        <div class="stat-grid" id="spectrumStats" style="margin-bottom:15px;"></div>
-        
+        <div class="stat-grid" id="specStats" style="margin:15px 0;"></div>
         <div class="chart-box">
-            <h4>Frequency Histogram (Farey Fractions → Hz)</h4>
-            <canvas id="freqHistogramChart" height="300"></canvas>
+            <h4>Frequency Histogram</h4>
+            <canvas id="specHistChart"></canvas>
         </div>
-        
         <div class="grid-2" style="margin-top:15px;">
-            <div class="chart-box">
-                <h4>Harmonic Series Alignment</h4>
-                <canvas id="harmonicAlignChart"></canvas>
-            </div>
-            <div class="chart-box">
-                <h4>Consonance Map</h4>
-                <canvas id="consonanceMapCanvas" width="500" height="400"></canvas>
-            </div>
+            <div class="chart-box"><h4>Harmonic Series Alignment</h4><canvas id="specAlignChart"></canvas></div>
+            <div class="chart-box"><h4>Consonance Map</h4><canvas id="specConsonanceMap" width="450" height="350"></canvas></div>
         </div>
-        
         <div class="panel" style="margin-top:15px;">
-            <h4>Frequency Table</h4>
-            <div class="table-scroll" style="max-height:300px;">
-                <table id="freqTable">
-                    <thead><tr><th>r/m</th><th>Freq (Hz)</th><th>Note</th><th>Cents</th><th>Harmonic Class</th><th>Play</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
+            <h4>Frequency Table <small style="color:#64748b;font-weight:normal;">(click to play)</small></h4>
+            <div class="table-scroll" style="max-height:250px;"><table id="specTable"><thead><tr><th>r/m</th><th>Freq (Hz)</th><th>Note</th><th>Cents</th><th>Class</th></tr></thead><tbody></tbody></table></div>
         </div>
     </div>
     
-    <!-- THEORY TAB -->
-    <div id="tab-theory" class="tab-content">
-        <div class="panel">
-            <h2 style="text-align:center;">Farey Sector Formula with Harmonic Analysis</h2>
-            <div class="theorem-box">
-                <strong>Sector Counting:</strong> C(n, N) = 3N² / (π² n(n+1))
-            </div>
-            <div class="theorem-box">
-                <strong>Frequency Mapping:</strong> f(r/m) = f₀ × (r/m) where f₀ is the base frequency
-            </div>
-            <div class="theorem-box">
-                <strong>Harmonic Classification:</strong>
-                <ul style="margin:10px 0 0 20px;list-style:disc;">
-                    <li><span class="harmonic-unison">Unison</span>: denominator q = 1</li>
-                    <li><span class="harmonic-consonant">Consonant</span>: denominator q ≤ 4 (perfect intervals)</li>
-                    <li><span class="harmonic-complex">Complex</span>: denominator q ≤ 16 (recognizable ratios)</li>
-                    <li><span class="harmonic-dissonant">Dissonant</span>: denominator q > 16 (complex ratios)</li>
-                </ul>
-            </div>
-            <div class="derivation-box">
-                <strong>Arnold Tongues:</strong> In nonlinear dynamics, Arnold tongues are regions in parameter space where frequency locking occurs. For a Farey fraction p/q, the tongue width is approximately proportional to 1/q, meaning simpler ratios have wider stability regions.
-            </div>
-        </div>
-    </div>
-    
-    <!-- GAPS TAB -->
+    <!-- GAP TAB -->
     <div id="tab-gaps" class="tab-content">
-        <div class="stat-grid" id="gapStats"></div>
-        <div class="grid-2" style="margin-top:15px;">
-            <div class="chart-box"><h4>Gap Distribution</h4><canvas id="gapDistChart"></canvas></div>
-            <div class="chart-box"><h4>Gap vs Denom Product</h4><canvas id="gapVsDenomChart"></canvas></div>
-        </div>
-    </div>
-    
-    <!-- FRANEL TAB -->
-    <div id="tab-franel" class="tab-content">
-        <div class="theorem-box">
-            <strong>Franel-Landau:</strong> Σ|δₖ| = O(N^(1/2+ε)) ⟺ RH
-        </div>
-        <div class="stat-grid" id="franelStats" style="margin-top:15px;"></div>
-        <div class="grid-2" style="margin-top:15px;">
-            <div class="chart-box"><h4>Deviation δₖ</h4><canvas id="franelDeviationChart"></canvas></div>
-            <div class="chart-box"><h4>Cumulative |δ|/√N</h4><canvas id="franelCumulativeChart"></canvas></div>
+        <div class="theorem-box"><strong>Gap Formula:</strong> gap(a/b, c/d) = 1/(b×d) for consecutive Farey fractions</div>
+        <div class="stat-grid" id="gapStats" style="margin:15px 0;"></div>
+        <div class="grid-2">
+            <div class="chart-box"><h4>Gap Size Distribution</h4><canvas id="gapDistChart"></canvas></div>
+            <div class="chart-box"><h4>Gap vs Denominator Product</h4><canvas id="gapScatterChart"></canvas></div>
         </div>
     </div>
     
     <!-- EULER TAB -->
     <div id="tab-euler" class="tab-content">
-        <div class="theorem-box">
-            <strong>Euler Product:</strong> ζ(2) = Πₚ 1/(1-1/p²) = π²/6, hence 6/π² = Πₚ(1-1/p²)
-        </div>
-        <div class="stat-grid" id="eulerStats" style="margin-top:15px;"></div>
-        <div class="grid-2" style="margin-top:15px;">
-            <div class="chart-box"><h4>Partial Product → 6/π²</h4><canvas id="eulerProductChart"></canvas></div>
+        <div class="theorem-box"><strong>Euler Product:</strong> 6/π² = ∏ₚ(1 - 1/p²) ≈ 0.6079</div>
+        <div class="stat-grid" id="eulerStats" style="margin:15px 0;"></div>
+        <div class="grid-2">
+            <div class="chart-box"><h4>Partial Product → 6/π²</h4><canvas id="eulerProdChart"></canvas></div>
             <div class="chart-box"><h4>Partial Sum → π²/6</h4><canvas id="eulerSumChart"></canvas></div>
         </div>
     </div>
 </div>
 
 <script>
-// ============ AUDIO CONTEXT & GLOBAL STATE ============
+// ========== AUDIO SYSTEM ==========
 let audioCtx = null;
-let currentOscillator = null;
 let analyser = null;
-let animationFrameId = null;
+let animFrameId = null;
 
-const state = {
-    mode: 'exact',
-    nMax: 100,
-    sectorMin: 1,
-    sectorMax: 12,
-    sectors: [],
-    residuesBySector: {},
-    allResidues: [],
-    gaps: [],
-    farey: [],
-    charts: {},
-    ringPoints: [],
-    selectedTreeNode: null,
-    treeNodes: [],
-    playingPath: []
-};
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.connect(audioCtx.destination);
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+}
 
-const sectorColors = ['#6366f1','#8b5cf6','#a855f7','#d946ef','#ec4899','#f43f5e','#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e'];
+function playFrequency(freq, duration = 0.5) {
+    initAudio();
+    const waveform = document.getElementById('waveformType').value;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.type = waveform;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    
+    osc.connect(gain);
+    gain.connect(analyser);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+    
+    updateFreqDisplay(freq);
+    drawWaveformAndSpectrum();
+}
 
-// ============ UTILITY FUNCTIONS ============
-function gcd(a, b) { while(b) { [a,b] = [b, a%b]; } return a; }
-function isPrime(n) { if(n<2) return false; if(n===2) return true; if(n%2===0) return false; for(let i=3;i*i<=n;i+=2) if(n%i===0) return false; return true; }
-function getSector(r,m) { const f=r/m; if(f<=0||f>1) return null; return Math.floor(1/f); }
-function formula(n,N) { return (3*N*N)/(Math.PI*Math.PI*n*(n+1)); }
-function fmt(x) { if(x>=1e6) return (x/1e6).toFixed(1)+'M'; if(x>=1e3) return (x/1e3).toFixed(1)+'K'; return x.toFixed(x<10?2:0); }
+function playInterval(p, q) {
+    const baseFreq = +document.getElementById('baseFreq').value;
+    playFrequency(baseFreq * p / q, 0.8);
+    
+    // Visual feedback
+    const btns = document.querySelectorAll('.interval-btn');
+    btns.forEach(btn => btn.classList.remove('playing'));
+    if (event && event.target) {
+        event.target.classList.add('playing');
+        setTimeout(() => event.target.classList.remove('playing'), 500);
+    }
+}
 
-// ============ HARMONIC CLASSIFICATION ============
+function stopAllAudio() {
+    if (audioCtx) {
+        audioCtx.close();
+        audioCtx = null;
+        analyser = null;
+    }
+    state.isPlaying = false;
+}
+
+function updateFreqDisplay(freq) {
+    const noteInfo = freqToNote(freq);
+    const harmonic = getHarmonicClassByFreq(freq);
+    document.getElementById('currentFreqDisplay').innerHTML = 
+        `${freq.toFixed(2)} Hz<small>${noteInfo.note} (${noteInfo.cents >= 0 ? '+' : ''}${noteInfo.cents}¢) - ${harmonic.label}</small>`;
+}
+
+function updateHarmonicDisplay() {
+    const baseFreq = +document.getElementById('baseFreq').value;
+    document.getElementById('baseFreqSlider').value = baseFreq;
+    updateFreqDisplay(baseFreq);
+}
+
+function drawWaveformAndSpectrum() {
+    if (!analyser) return;
+    
+    const waveCanvas = document.getElementById('waveformCanvas');
+    const specCanvas = document.getElementById('spectrumCanvas');
+    if (!waveCanvas || !specCanvas) return;
+    
+    const wCtx = waveCanvas.getContext('2d');
+    const sCtx = specCanvas.getContext('2d');
+    const bufLen = analyser.frequencyBinCount;
+    const timeData = new Uint8Array(bufLen);
+    const freqData = new Uint8Array(bufLen);
+    
+    function draw() {
+        analyser.getByteTimeDomainData(timeData);
+        analyser.getByteFrequencyData(freqData);
+        
+        // Waveform
+        wCtx.fillStyle = '#0f172a';
+        wCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
+        wCtx.strokeStyle = '#6366f1';
+        wCtx.lineWidth = 2;
+        wCtx.beginPath();
+        const sliceW = waveCanvas.width / bufLen;
+        for (let i = 0; i < bufLen; i++) {
+            const y = (timeData[i] / 128.0) * (waveCanvas.height / 2);
+            i === 0 ? wCtx.moveTo(i * sliceW, y) : wCtx.lineTo(i * sliceW, y);
+        }
+        wCtx.stroke();
+        
+        // Spectrum
+        sCtx.fillStyle = '#0f172a';
+        sCtx.fillRect(0, 0, specCanvas.width, specCanvas.height);
+        const barW = specCanvas.width / bufLen * 2.5;
+        for (let i = 0; i < bufLen; i++) {
+            const barH = (freqData[i] / 255) * specCanvas.height;
+            const hue = 260 - (freqData[i] / 255) * 60;
+            sCtx.fillStyle = `hsl(${hue}, 70%, 50%)`;
+            sCtx.fillRect(i * (barW + 1), specCanvas.height - barH, barW, barH);
+        }
+        
+        animFrameId = requestAnimationFrame(draw);
+    }
+    
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+    draw();
+    setTimeout(() => { if (animFrameId) cancelAnimationFrame(animFrameId); }, 2000);
+}
+
+// ========== UTILITY FUNCTIONS ==========
+function gcd(a, b) { while (b) { [a, b] = [b, a % b]; } return a; }
+function isPrime(n) { if (n < 2) return false; if (n === 2) return true; if (n % 2 === 0) return false; for (let i = 3; i * i <= n; i += 2) if (n % i === 0) return false; return true; }
+function getSector(r, m) { const f = r / m; return f > 0 && f <= 1 ? Math.floor(1 / f) : null; }
+function formula(n, N) { return (3 * N * N) / (Math.PI * Math.PI * n * (n + 1)); }
+function fmt(x) { return x >= 1e6 ? (x/1e6).toFixed(1)+'M' : x >= 1e3 ? (x/1e3).toFixed(1)+'K' : x.toFixed(x < 10 ? 2 : 0); }
+
 function getHarmonicClass(r, m) {
     const g = gcd(r, m);
-    const q = m / g; // reduced denominator
+    const q = m / g;
     if (q === 1) return { class: 'unison', color: '#22c55e', label: 'Unison' };
     if (q <= 4) return { class: 'consonant', color: '#3b82f6', label: 'Consonant' };
     if (q <= 16) return { class: 'complex', color: '#f59e0b', label: 'Complex' };
     return { class: 'dissonant', color: '#ef4444', label: 'Dissonant' };
 }
 
-function fractionToFreq(r, m, baseFreq = 440) {
-    return baseFreq * (r / m);
+function getHarmonicClassByFreq(freq) {
+    const baseFreq = +document.getElementById('baseFreq').value;
+    const ratio = freq / baseFreq;
+    if (Math.abs(ratio - 1) < 0.01) return { class: 'unison', color: '#22c55e', label: 'Unison' };
+    // Simple approximation
+    for (let q = 1; q <= 16; q++) {
+        for (let p = 1; p <= q * 2; p++) {
+            if (Math.abs(ratio - p/q) < 0.02) {
+                if (q <= 4) return { class: 'consonant', color: '#3b82f6', label: 'Consonant' };
+                return { class: 'complex', color: '#f59e0b', label: 'Complex' };
+            }
+        }
+    }
+    return { class: 'dissonant', color: '#ef4444', label: 'Dissonant' };
 }
+
+function fractionToFreq(r, m, baseFreq) { return baseFreq * (r / m); }
 
 function freqToNote(freq) {
     const A4 = 440;
@@ -640,673 +542,28 @@ function freqToNote(freq) {
     return { note: notes[noteIndex] + octave, cents };
 }
 
-// ============ AUDIO FUNCTIONS ============
-function initAudio() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.connect(audioCtx.destination);
-    }
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
-}
+// ========== STATE ==========
+const state = {
+    nMax: 80, sectorMin: 1, sectorMax: 10,
+    sectors: [], residuesBySector: {}, allResidues: [], gaps: [], farey: [],
+    charts: {}, ringPoints: [], treeNodes: [], selectedNode: null, isPlaying: false
+};
 
-function playFrequency(freq, duration = 0.5, waveform = 'sine') {
-    initAudio();
-    
-    if (currentOscillator) {
-        currentOscillator.stop();
-    }
-    
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    
-    oscillator.type = waveform;
-    oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    
-    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(analyser);
-    
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + duration);
-    
-    currentOscillator = oscillator;
-    
-    // Update display
-    const noteInfo = freqToNote(freq);
-    document.getElementById('currentFreqDisplay').innerHTML = `
-        ${freq.toFixed(2)} Hz
-        <small>${noteInfo.note} (${noteInfo.cents > 0 ? '+' : ''}${noteInfo.cents} cents)</small>
-    `;
-    
-    drawWaveform();
-}
+const sectorColors = ['#6366f1','#8b5cf6','#a855f7','#d946ef','#ec4899','#f43f5e','#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e'];
 
-function playInterval(p, q) {
-    const baseFreq = +document.getElementById('baseFreq').value;
-    const freq = baseFreq * p / q;
-    const waveform = document.getElementById('waveformType').value;
-    playFrequency(freq, 1, waveform);
-    
-    // Highlight button
-    document.querySelectorAll('.interval-btn').forEach(btn => btn.classList.remove('playing'));
-    event.target.classList.add('playing');
-    setTimeout(() => event.target.classList.remove('playing'), 1000);
-}
-
-function stopAllAudio() {
-    if (currentOscillator) {
-        try { currentOscillator.stop(); } catch(e) {}
-        currentOscillator = null;
-    }
-    state.playingPath = [];
-    document.querySelectorAll('.interval-btn, .tree-node').forEach(el => el.classList.remove('playing'));
-}
-
-function drawWaveform() {
-    if (!analyser) return;
-    
-    const canvas = document.getElementById('waveformCanvas');
-    const ctx = canvas.getContext('2d');
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    
-    function draw() {
-        analyser.getByteTimeDomainData(dataArray);
-        
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#6366f1';
-        ctx.beginPath();
-        
-        const sliceWidth = canvas.width / bufferLength;
-        let x = 0;
-        
-        for (let i = 0; i < bufferLength; i++) {
-            const v = dataArray[i] / 128.0;
-            const y = v * canvas.height / 2;
-            
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-            x += sliceWidth;
-        }
-        
-        ctx.lineTo(canvas.width, canvas.height / 2);
-        ctx.stroke();
-        
-        animationFrameId = requestAnimationFrame(draw);
-    }
-    
-    if (animationFrameId) cancelAnimationFrame(animationFrameId);
-    draw();
-}
-
-function drawSpectrum() {
-    if (!analyser) return;
-    
-    const canvas = document.getElementById('spectrumCanvas');
-    const ctx = canvas.getContext('2d');
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    
-    analyser.getByteFrequencyData(dataArray);
-    
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    const barWidth = canvas.width / bufferLength * 2.5;
-    let x = 0;
-    
-    for (let i = 0; i < bufferLength; i++) {
-        const barHeight = (dataArray[i] / 255) * canvas.height;
-        const hue = 260 - (dataArray[i] / 255) * 60;
-        ctx.fillStyle = `hsl(${hue}, 70%, 50%)`;
-        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-        x += barWidth + 1;
-    }
-}
-
-// ============ GLOBAL HARMONIC PANEL ============
+// ========== PANEL TOGGLE ==========
 function toggleHarmonicPanel() {
-    document.getElementById('harmonicPanel').classList.toggle('expanded');
+    document.getElementById('harmonicDropdown').classList.toggle('open');
 }
 
-function updateGlobalHarmonic() {
-    const baseFreq = +document.getElementById('baseFreq').value;
-    document.getElementById('baseFreqSlider').value = baseFreq;
-    applyHarmonicToAll();
-}
-
-function applyHarmonicToAll() {
-    // Redraw all visualizations with harmonic coloring
-    if (state.allResidues.length > 0) {
-        drawMainRing();
-    }
-    if (state.treeNodes.length > 0) {
-        drawHarmonicTree();
-    }
-    updateSpectrumAnalysis();
-}
-
-document.getElementById('tempoSlider')?.addEventListener('input', function() {
-    document.getElementById('tempoValue').textContent = this.value + ' BPM';
-});
-
-// ============ TREE PATH PLAYBACK ============
-async function playTreePath() {
-    if (state.playingPath.length === 0 && state.selectedTreeNode) {
-        // Build path to selected node
-        state.playingPath = buildPathToNode(state.selectedTreeNode);
-    }
-    
-    if (state.playingPath.length === 0) {
-        alert('Select a node on the tree first, or the path will play the default sequence.');
-        state.playingPath = state.treeNodes.slice(0, 10);
-    }
-    
-    const tempo = +document.getElementById('tempoSlider').value;
-    const duration = 60 / tempo;
-    const baseFreq = +document.getElementById('baseFreq').value;
-    const waveform = document.getElementById('waveformType').value;
-    
-    document.getElementById('playPathBtn').classList.add('active');
-    
-    for (let i = 0; i < state.playingPath.length; i++) {
-        const node = state.playingPath[i];
-        const freq = fractionToFreq(node.r, node.m, baseFreq);
-        playFrequency(freq, duration * 0.9, waveform);
-        await new Promise(r => setTimeout(r, duration * 1000));
-    }
-    
-    document.getElementById('playPathBtn').classList.remove('active');
-}
-
-function buildPathToNode(node) {
-    const path = [];
-    let current = node;
-    while (current) {
-        path.unshift(current);
-        current = current.parent;
-    }
-    return path;
-}
-
-async function playAllNodes() {
-    const tempo = +document.getElementById('tempoSlider').value;
-    const duration = 60 / tempo / 2;
-    const baseFreq = +document.getElementById('baseFreq').value;
-    const waveform = document.getElementById('waveformType').value;
-    
-    const sortedNodes = [...state.treeNodes].sort((a, b) => a.r/a.m - b.r/b.m);
-    
-    for (const node of sortedNodes.slice(0, 30)) {
-        const freq = fractionToFreq(node.r, node.m, baseFreq);
-        playFrequency(freq, duration * 0.9, waveform);
-        await new Promise(r => setTimeout(r, duration * 1000));
-    }
-}
-
-async function playFareySweep() {
-    const baseFreq = +document.getElementById('baseFreq').value;
-    const waveform = document.getElementById('waveformType').value;
-    const duration = 0.15;
-    
-    const sorted = [...state.allResidues].slice(0, 50).sort((a, b) => a.value - b.value);
-    
-    for (const res of sorted) {
-        const freq = fractionToFreq(res.r, res.m, baseFreq);
-        playFrequency(freq, duration, waveform);
-        await new Promise(r => setTimeout(r, duration * 1000));
-    }
-}
-
-async function playSectorChord() {
-    const sector = +document.getElementById('viewSector').value;
-    const residues = state.residuesBySector[sector] || [];
-    const baseFreq = +document.getElementById('baseFreq').value;
-    
-    initAudio();
-    
-    // Play multiple frequencies simultaneously
-    const sample = residues.slice(0, 5);
-    sample.forEach((res, i) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.frequency.value = fractionToFreq(res.r, res.m, baseFreq);
-        gain.gain.value = 0.15;
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 2);
-    });
-}
-
-async function playRingSequence() {
-    const baseFreq = +document.getElementById('baseFreq').value;
-    const waveform = document.getElementById('waveformType').value;
-    
-    for (const pt of state.ringPoints.slice(0, 30)) {
-        const freq = fractionToFreq(pt.r, pt.m, baseFreq);
-        playFrequency(freq, 0.2, waveform);
-        await new Promise(r => setTimeout(r, 200));
-    }
-}
-
-// ============ HARMONIC TREE ============
-function drawHarmonicTree() {
-    const canvas = document.getElementById('harmonicTreeCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    const depth = +document.getElementById('treeDepth').value;
-    const viewMode = document.getElementById('treeViewMode').value;
-    const showFreq = document.getElementById('treeShowFreq')?.checked;
-    const showTongues = document.getElementById('showArnoldTongues')?.checked ?? true;
-    const tongueWidth = +document.getElementById('tongueWidth')?.value || 8;
-    const tongueDepth = +document.getElementById('tongueDepth')?.value || 50;
-    const baseFreq = +document.getElementById('baseFreq').value;
-    
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, W, H);
-    
-    // Build tree
-    state.treeNodes = [];
-    const root = { r: 1, m: 2, depth: 1, x: W/2, y: 50, parent: null, leftAncestor: {r:0,m:1}, rightAncestor: {r:1,m:1} };
-    state.treeNodes.push(root);
-    
-    const queue = [root];
-    while (queue.length > 0) {
-        const node = queue.shift();
-        if (node.depth >= depth) continue;
-        
-        const nextDepth = node.depth + 1;
-        const levelY = 40 + (nextDepth / depth) * (H - 100);
-        const spreadFactor = Math.pow(0.5, nextDepth) * W * 0.42;
-        
-        // Left child
-        const leftR = node.leftAncestor.r + node.r;
-        const leftM = node.leftAncestor.m + node.m;
-        if (leftM <= 100) {
-            const leftChild = {
-                r: leftR, m: leftM, depth: nextDepth,
-                x: node.x - spreadFactor, y: levelY,
-                parent: node,
-                leftAncestor: node.leftAncestor,
-                rightAncestor: { r: node.r, m: node.m }
-            };
-            state.treeNodes.push(leftChild);
-            queue.push(leftChild);
-        }
-        
-        // Right child
-        const rightR = node.r + node.rightAncestor.r;
-        const rightM = node.m + node.rightAncestor.m;
-        if (rightM <= 100) {
-            const rightChild = {
-                r: rightR, m: rightM, depth: nextDepth,
-                x: node.x + spreadFactor, y: levelY,
-                parent: node,
-                leftAncestor: { r: node.r, m: node.m },
-                rightAncestor: node.rightAncestor
-            };
-            state.treeNodes.push(rightChild);
-            queue.push(rightChild);
-        }
-    }
-    
-    // Draw Arnold Tongues first (behind nodes)
-    if ((viewMode === 'arnold' || viewMode === 'both') && showTongues) {
-        state.treeNodes.forEach(node => {
-            const harmonic = getHarmonicClass(node.r, node.m);
-            const tongueH = (tongueDepth / 100) * (H - node.y - 20);
-            const tongueW = tongueWidth * (5 / node.m);
-            
-            ctx.fillStyle = harmonic.color + '30';
-            ctx.strokeStyle = harmonic.color + '60';
-            ctx.lineWidth = 1;
-            
-            ctx.beginPath();
-            ctx.moveTo(node.x, node.y);
-            ctx.lineTo(node.x - tongueW, node.y + tongueH);
-            ctx.lineTo(node.x + tongueW, node.y + tongueH);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-        });
-    }
-    
-    // Draw edges
-    if (viewMode === 'standard' || viewMode === 'both') {
-        ctx.strokeStyle = '#334155';
-        ctx.lineWidth = 1;
-        state.treeNodes.forEach(node => {
-            if (node.parent) {
-                ctx.beginPath();
-                ctx.moveTo(node.parent.x, node.parent.y);
-                ctx.lineTo(node.x, node.y);
-                ctx.stroke();
-            }
-        });
-    }
-    
-    // Draw nodes
-    state.treeNodes.forEach(node => {
-        const harmonic = getHarmonicClass(node.r, node.m);
-        const isSelected = state.selectedTreeNode && 
-            state.selectedTreeNode.r === node.r && 
-            state.selectedTreeNode.m === node.m;
-        
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, isSelected ? 12 : 8, 0, 2 * Math.PI);
-        ctx.fillStyle = harmonic.color;
-        ctx.fill();
-        
-        if (isSelected) {
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        }
-        
-        // Labels
-        ctx.fillStyle = '#e2e8f0';
-        ctx.font = node.depth <= 3 ? 'bold 10px system-ui' : '8px system-ui';
-        ctx.textAlign = 'center';
-        
-        if (node.depth <= 4) {
-            ctx.fillText(`${node.r}/${node.m}`, node.x, node.y - 14);
-        }
-        
-        if (showFreq && node.depth <= 3) {
-            const freq = fractionToFreq(node.r, node.m, baseFreq);
-            ctx.fillStyle = '#64748b';
-            ctx.font = '8px system-ui';
-            ctx.fillText(`${freq.toFixed(0)}Hz`, node.x, node.y + 20);
-        }
-    });
-    
-    // Update stats
-    const classes = { unison: 0, consonant: 0, complex: 0, dissonant: 0 };
-    state.treeNodes.forEach(n => {
-        const h = getHarmonicClass(n.r, n.m);
-        classes[h.class]++;
-    });
-    
-    document.getElementById('treeStats').innerHTML = `
-        <div class="stat-card"><div class="stat-value">${state.treeNodes.length}</div><div class="stat-label">Nodes</div></div>
-        <div class="stat-card"><div class="stat-value" style="color:#22c55e">${classes.unison}</div><div class="stat-label">Unison</div></div>
-        <div class="stat-card"><div class="stat-value" style="color:#3b82f6">${classes.consonant}</div><div class="stat-label">Consonant</div></div>
-        <div class="stat-card"><div class="stat-value" style="color:#f59e0b">${classes.complex}</div><div class="stat-label">Complex</div></div>
-        <div class="stat-card"><div class="stat-value" style="color:#ef4444">${classes.dissonant}</div><div class="stat-label">Dissonant</div></div>
-    `;
-    
-    updateTreeCharts();
-}
-
-// Tree click handler
-document.getElementById('harmonicTreeCanvas')?.addEventListener('click', function(e) {
-    const rect = this.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    let closest = null, minDist = 20;
-    state.treeNodes.forEach(node => {
-        const d = Math.sqrt((node.x - x)**2 + (node.y - y)**2);
-        if (d < minDist) { minDist = d; closest = node; }
-    });
-    
-    if (closest) {
-        state.selectedTreeNode = closest;
-        state.playingPath = buildPathToNode(closest);
-        
-        const baseFreq = +document.getElementById('baseFreq').value;
-        const freq = fractionToFreq(closest.r, closest.m, baseFreq);
-        const harmonic = getHarmonicClass(closest.r, closest.m);
-        const noteInfo = freqToNote(freq);
-        
-        playFrequency(freq, 0.8, document.getElementById('waveformType').value);
-        
-        document.getElementById('selectedNodeInfo').innerHTML = `
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:15px;">
-                <div><span style="color:#64748b;">Fraction:</span><br><strong style="color:#6366f1;font-size:1.3em;">${closest.r}/${closest.m}</strong></div>
-                <div><span style="color:#64748b;">Frequency:</span><br><strong style="color:#22c55e;font-size:1.3em;">${freq.toFixed(2)} Hz</strong></div>
-                <div><span style="color:#64748b;">Note:</span><br><strong style="font-size:1.3em;">${noteInfo.note}</strong> <small>(${noteInfo.cents > 0 ? '+' : ''}${noteInfo.cents}¢)</small></div>
-                <div><span style="color:#64748b;">Class:</span><br><strong style="color:${harmonic.color};font-size:1.3em;">${harmonic.label}</strong></div>
-            </div>
-            <div style="margin-top:10px;"><span style="color:#64748b;">Path:</span> ${state.playingPath.map(n => `${n.r}/${n.m}`).join(' → ')}</div>
-        `;
-        
-        drawHarmonicTree();
-    }
-});
-
-function updateTreeCharts() {
-    // Frequency distribution by harmonic class
-    const classes = ['unison', 'consonant', 'complex', 'dissonant'];
-    const counts = classes.map(c => state.treeNodes.filter(n => getHarmonicClass(n.r, n.m).class === c).length);
-    
-    if (state.charts.freqDist) state.charts.freqDist.destroy();
-    state.charts.freqDist = new Chart(document.getElementById('freqDistChart'), {
-        type: 'bar',
-        data: {
-            labels: ['Unison', 'Consonant', 'Complex', 'Dissonant'],
-            datasets: [{
-                label: 'Count',
-                data: counts,
-                backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444']
-            }]
-        },
-        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } } }
-    });
-    
-    // Consonance by depth
-    const depthData = {};
-    state.treeNodes.forEach(n => {
-        if (!depthData[n.depth]) depthData[n.depth] = { total: 0, consonant: 0 };
-        depthData[n.depth].total++;
-        const h = getHarmonicClass(n.r, n.m);
-        if (h.class === 'unison' || h.class === 'consonant') depthData[n.depth].consonant++;
-    });
-    
-    const depths = Object.keys(depthData).map(Number).sort((a,b) => a-b);
-    const consonanceRatios = depths.map(d => (depthData[d].consonant / depthData[d].total * 100).toFixed(1));
-    
-    if (state.charts.consonance) state.charts.consonance.destroy();
-    state.charts.consonance = new Chart(document.getElementById('consonanceChart'), {
-        type: 'line',
-        data: {
-            labels: depths.map(d => `Depth ${d}`),
-            datasets: [{
-                label: 'Consonance %',
-                data: consonanceRatios,
-                borderColor: '#6366f1',
-                backgroundColor: 'rgba(99,102,241,0.1)',
-                fill: true
-            }]
-        },
-        options: { responsive: true, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' }, max: 100 } } }
-    });
-}
-
-// ============ SPECTRUM ANALYSIS ============
-function updateSpectrumAnalysis() {
-    const baseFreq = +document.getElementById('spectrumBaseFreq')?.value || 440;
-    const scale = document.getElementById('spectrumScale')?.value || 'log';
-    const sector = +document.getElementById('spectrumSector')?.value || 2;
-    
-    const residues = state.residuesBySector[sector] || state.allResidues.slice(0, 100);
-    
-    // Stats
-    const freqs = residues.map(r => fractionToFreq(r.r, r.m, baseFreq));
-    const classes = { unison: 0, consonant: 0, complex: 0, dissonant: 0 };
-    residues.forEach(r => {
-        const h = getHarmonicClass(r.r, r.m);
-        classes[h.class]++;
-    });
-    
-    document.getElementById('spectrumStats').innerHTML = `
-        <div class="stat-card"><div class="stat-value">${residues.length}</div><div class="stat-label">Fractions</div></div>
-        <div class="stat-card"><div class="stat-value">${freqs.length > 0 ? freqs[0].toFixed(0) : '-'}</div><div class="stat-label">Min Hz</div></div>
-        <div class="stat-card"><div class="stat-value">${freqs.length > 0 ? freqs[freqs.length-1].toFixed(0) : '-'}</div><div class="stat-label">Max Hz</div></div>
-        <div class="stat-card"><div class="stat-value" style="color:#22c55e">${classes.consonant + classes.unison}</div><div class="stat-label">Consonant</div></div>
-    `;
-    
-    // Histogram
-    if (freqs.length > 0) {
-        const bins = 20;
-        const minF = Math.min(...freqs), maxF = Math.max(...freqs);
-        const binWidth = (maxF - minF) / bins;
-        const hist = new Array(bins).fill(0);
-        freqs.forEach(f => {
-            const b = Math.min(bins-1, Math.floor((f - minF) / binWidth));
-            hist[b]++;
-        });
-        
-        if (state.charts.freqHistogram) state.charts.freqHistogram.destroy();
-        state.charts.freqHistogram = new Chart(document.getElementById('freqHistogramChart'), {
-            type: 'bar',
-            data: {
-                labels: hist.map((_, i) => (minF + i * binWidth).toFixed(0)),
-                datasets: [{
-                    label: 'Frequency Count',
-                    data: hist,
-                    backgroundColor: 'rgba(99,102,241,0.7)'
-                }]
-            },
-            options: { responsive: true, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } } }
-        });
-    }
-    
-    // Harmonic alignment chart
-    const harmonics = [1, 2, 3, 4, 5, 6, 7, 8].map(n => baseFreq * n);
-    const alignmentData = harmonics.map(h => {
-        return freqs.filter(f => Math.abs(f - h) < baseFreq * 0.05).length;
-    });
-    
-    if (state.charts.harmonicAlign) state.charts.harmonicAlign.destroy();
-    state.charts.harmonicAlign = new Chart(document.getElementById('harmonicAlignChart'), {
-        type: 'bar',
-        data: {
-            labels: harmonics.map((h, i) => `${i+1}× (${h.toFixed(0)}Hz)`),
-            datasets: [{
-                label: 'Aligned Fractions',
-                data: alignmentData,
-                backgroundColor: 'rgba(34,197,94,0.7)'
-            }]
-        },
-        options: { responsive: true, scales: { x: { ticks: { color: '#94a3b8', maxRotation: 45 } }, y: { ticks: { color: '#94a3b8' } } } }
-    });
-    
-    // Consonance map
-    drawConsonanceMap(residues, baseFreq);
-    
-    // Frequency table
-    updateFreqTable(residues, baseFreq);
-}
-
-function drawConsonanceMap(residues, baseFreq) {
-    const canvas = document.getElementById('consonanceMapCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, W, H);
-    
-    const margin = 40;
-    const plotW = W - 2 * margin;
-    const plotH = H - 2 * margin;
-    
-    // Draw grid
-    ctx.strokeStyle = '#334155';
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i <= 10; i++) {
-        const x = margin + (i / 10) * plotW;
-        const y = margin + (i / 10) * plotH;
-        ctx.beginPath(); ctx.moveTo(x, margin); ctx.lineTo(x, H - margin); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(margin, y); ctx.lineTo(W - margin, y); ctx.stroke();
-    }
-    
-    // Plot points
-    residues.slice(0, 200).forEach(res => {
-        const x = margin + (res.r / res.m) * plotW;
-        const y = H - margin - (1 / res.m) * plotH * 10;
-        const harmonic = getHarmonicClass(res.r, res.m);
-        
-        ctx.fillStyle = harmonic.color;
-        ctx.beginPath();
-        ctx.arc(x, Math.max(margin, y), 4, 0, 2 * Math.PI);
-        ctx.fill();
-    });
-    
-    // Labels
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '10px system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText('Fraction Value (r/m)', W / 2, H - 10);
-    ctx.save();
-    ctx.translate(12, H / 2);
-    ctx.rotate(-Math.PI / 2);
-    ctx.fillText('1/m (Consonance)', 0, 0);
-    ctx.restore();
-}
-
-function updateFreqTable(residues, baseFreq) {
-    const tbody = document.querySelector('#freqTable tbody');
-    if (!tbody) return;
-    
-    tbody.innerHTML = residues.slice(0, 50).map(res => {
-        const freq = fractionToFreq(res.r, res.m, baseFreq);
-        const noteInfo = freqToNote(freq);
-        const harmonic = getHarmonicClass(res.r, res.m);
-        
-        return `<tr>
-            <td>${res.r}/${res.m}</td>
-            <td>${freq.toFixed(2)}</td>
-            <td>${noteInfo.note}</td>
-            <td>${noteInfo.cents > 0 ? '+' : ''}${noteInfo.cents}</td>
-            <td style="color:${harmonic.color}">${harmonic.label}</td>
-            <td><button class="harmonic-btn" onclick="playFrequency(${freq}, 0.5)">Play</button></td>
-        </tr>`;
-    }).join('');
-}
-
-async function playSpectrumSweep() {
-    const baseFreq = +document.getElementById('spectrumBaseFreq').value;
-    const sector = +document.getElementById('spectrumSector').value;
-    const residues = (state.residuesBySector[sector] || state.allResidues.slice(0, 30))
-        .slice(0, 30)
-        .sort((a, b) => a.r/a.m - b.r/b.m);
-    
-    for (const res of residues) {
-        const freq = fractionToFreq(res.r, res.m, baseFreq);
-        playFrequency(freq, 0.15);
-        await new Promise(r => setTimeout(r, 150));
-    }
-}
-
-// ============ COMPUTATION ============
-function setMode(mode) {
-    state.mode = mode;
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('mode-'+mode).classList.add('active');
-    document.getElementById('modeDescription').textContent = mode === 'exact' ? 'Exact enumeration' : 'Formula only';
-}
-
+// ========== COMPUTATION ==========
 async function computeAll() {
     state.nMax = +document.getElementById('nMax').value;
     state.sectorMin = +document.getElementById('sectorMin').value;
     state.sectorMax = +document.getElementById('sectorMax').value;
     
     document.getElementById('progressBar').style.display = 'block';
-    document.getElementById('statusArea').innerHTML = '<span class="info-badge">Computing...</span>';
+    document.getElementById('statusArea').textContent = 'Computing...';
     
     state.sectors = [];
     state.residuesBySector = {};
@@ -1316,46 +573,41 @@ async function computeAll() {
     
     const N = state.nMax;
     
-    if (state.mode === 'exact' && N <= 1000) {
-        for (let m = 2; m <= N; m++) {
-            for (let r = 1; r < m; r++) {
-                if (gcd(r, m) === 1) {
-                    const s = getSector(r, m);
-                    const res = { r, m, sector: s, isPrime: isPrime(m), value: r/m };
-                    state.allResidues.push(res);
-                    if (s && s >= state.sectorMin && s <= state.sectorMax) {
-                        if (!state.residuesBySector[s]) state.residuesBySector[s] = [];
-                        state.residuesBySector[s].push(res);
-                    }
+    for (let m = 2; m <= N; m++) {
+        for (let r = 1; r < m; r++) {
+            if (gcd(r, m) === 1) {
+                const s = getSector(r, m);
+                const res = { r, m, sector: s, isPrime: isPrime(m), value: r / m };
+                state.allResidues.push(res);
+                if (s && s >= state.sectorMin && s <= state.sectorMax) {
+                    if (!state.residuesBySector[s]) state.residuesBySector[s] = [];
+                    state.residuesBySector[s].push(res);
                 }
             }
-            if (m % 100 === 0) {
-                document.getElementById('progressFill').style.width = (m/N*100) + '%';
-                await new Promise(r => setTimeout(r, 0));
-            }
         }
-        
-        state.allResidues.sort((a, b) => a.value - b.value);
-        state.farey = state.allResidues.map(r => ({ r: r.r, m: r.m, value: r.value }));
-        
-        // Compute gaps
-        for (let i = 0; i < state.allResidues.length - 1; i++) {
-            const l = state.allResidues[i], r = state.allResidues[i+1];
-            const gap = r.value - l.value;
-            state.gaps.push({ left: l, right: r, gap, theoretical: 1/(l.m * r.m) });
-            state.allResidues[i].gapRight = gap;
+        if (m % 50 === 0) {
+            document.getElementById('progressFill').style.width = (m / N * 100) + '%';
+            await new Promise(r => setTimeout(r, 0));
         }
-        state.gaps.sort((a, b) => b.gap - a.gap);
     }
     
+    state.allResidues.sort((a, b) => a.value - b.value);
+    state.farey = state.allResidues;
+    
+    // Compute gaps
+    for (let i = 0; i < state.allResidues.length - 1; i++) {
+        const l = state.allResidues[i], right = state.allResidues[i + 1];
+        state.gaps.push({ left: l, right, gap: right.value - l.value, theoretical: 1 / (l.m * right.m) });
+    }
+    state.gaps.sort((a, b) => b.gap - a.gap);
+    
+    // Build sectors
     for (let n = state.sectorMin; n <= state.sectorMax; n++) {
         const res = state.residuesBySector[n] || [];
-        const exact = res.length;
         const pred = formula(n, N);
         state.sectors.push({
-            n, exact, predicted: pred,
-            error: exact - pred,
-            relError: exact > 0 ? ((exact - pred) / exact) * 100 : 0,
+            n, exact: res.length, predicted: pred,
+            relError: res.length > 0 ? ((res.length - pred) / res.length) * 100 : 0,
             primeCount: res.filter(x => x.isPrime).length
         });
     }
@@ -1363,45 +615,35 @@ async function computeAll() {
     document.getElementById('progressBar').style.display = 'none';
     document.getElementById('statusArea').innerHTML = '<span class="info-badge success">Done</span>';
     
-    updateAllDisplays();
+    redrawAll();
 }
 
-function updateAllDisplays() {
-    updateMainStats();
-    updateMainCharts();
-    updateMainTable();
+function redrawAll() {
+    updateMainTab();
     drawMainRing();
     drawHarmonicTree();
-    updateSpectrumAnalysis();
-    updateGapAnalysis();
-    computeFranel();
-    computeEuler();
+    updateSpectrumTab();
+    updateGapTab();
+    updateEulerTab();
 }
 
-function updateMainStats() {
-    const total = state.sectors.reduce((s, x) => s + (x.exact || 0), 0);
+// ========== MAIN TAB ==========
+function updateMainTab() {
+    const total = state.sectors.reduce((s, x) => s + x.exact, 0);
     const totalPred = state.sectors.reduce((s, x) => s + x.predicted, 0);
     
     document.getElementById('mainStats').innerHTML = `
-        <div class="stat-card"><div class="stat-value">${fmt(state.nMax)}</div><div class="stat-label">N</div></div>
-        <div class="stat-card"><div class="stat-value">${state.sectorMax}</div><div class="stat-label">Sectors</div></div>
-        <div class="stat-card"><div class="stat-value">${fmt(total)}</div><div class="stat-label">Exact</div></div>
+        <div class="stat-card"><div class="stat-value">${state.nMax}</div><div class="stat-label">N</div></div>
+        <div class="stat-card"><div class="stat-value">${state.sectors.length}</div><div class="stat-label">Sectors</div></div>
+        <div class="stat-card"><div class="stat-value">${fmt(total)}</div><div class="stat-label">Exact Total</div></div>
         <div class="stat-card"><div class="stat-value">${fmt(totalPred)}</div><div class="stat-label">Predicted</div></div>
         <div class="stat-card"><div class="stat-value">${(6/Math.PI/Math.PI).toFixed(4)}</div><div class="stat-label">6/π²</div></div>
     `;
-}
-
-function updateMainCharts() {
+    
+    // Charts
     const labels = state.sectors.map(s => s.n);
     const useHarmonic = document.getElementById('harmonicColorMode')?.checked;
-    
-    const colors = state.sectors.map(s => {
-        if (useHarmonic) {
-            const h = getHarmonicClass(1, s.n + 1);
-            return h.color;
-        }
-        return sectorColors[(s.n - 1) % sectorColors.length];
-    });
+    const colors = state.sectors.map(s => useHarmonic ? getHarmonicClass(1, s.n + 1).color : sectorColors[(s.n - 1) % sectorColors.length]);
     
     if (state.charts.mainCount) state.charts.mainCount.destroy();
     state.charts.mainCount = new Chart(document.getElementById('mainCountChart'), {
@@ -1410,7 +652,7 @@ function updateMainCharts() {
             labels,
             datasets: [
                 { label: 'Exact', data: state.sectors.map(s => s.exact), backgroundColor: colors },
-                { label: 'Predicted', data: state.sectors.map(s => s.predicted), type: 'line', borderColor: '#22c55e', borderDash: [5,5], fill: false }
+                { label: 'Predicted', data: state.sectors.map(s => s.predicted), type: 'line', borderColor: '#22c55e', borderDash: [5, 5], fill: false, pointRadius: 3 }
             ]
         },
         options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' } } }, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } } }
@@ -1419,39 +661,32 @@ function updateMainCharts() {
     if (state.charts.mainError) state.charts.mainError.destroy();
     state.charts.mainError = new Chart(document.getElementById('mainErrorChart'), {
         type: 'bar',
-        data: {
-            labels,
-            datasets: [{ label: 'Rel Err%', data: state.sectors.map(s => s.relError), backgroundColor: 'rgba(245,158,11,0.7)' }]
-        },
+        data: { labels, datasets: [{ label: 'Error %', data: state.sectors.map(s => s.relError), backgroundColor: 'rgba(245,158,11,0.7)' }] },
         options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } } }
     });
-}
-
-function updateMainTable() {
-    const baseFreq = +document.getElementById('baseFreq').value;
-    const tbody = document.querySelector('#mainTable tbody');
     
-    tbody.innerHTML = state.sectors.map(s => {
+    // Table
+    const baseFreq = +document.getElementById('baseFreq').value;
+    document.querySelector('#mainTable tbody').innerHTML = state.sectors.map(s => {
         const freq = fractionToFreq(1, s.n + 1, baseFreq);
-        const harmonic = getHarmonicClass(1, s.n + 1);
-        const errColor = Math.abs(s.relError) > 10 ? '#f87171' : '#4ade80';
-        
-        return `<tr onclick="playFrequency(${freq}, 0.5)" style="cursor:pointer">
+        const h = getHarmonicClass(1, s.n + 1);
+        return `<tr onclick="playFrequency(${freq})">
             <td><strong>${s.n}</strong></td>
             <td>(1/${s.n+1}, 1/${s.n}]</td>
             <td>${s.exact}</td>
-            <td>${fmt(s.predicted)}</td>
-            <td style="color:${errColor}">${s.relError.toFixed(1)}%</td>
+            <td>${s.predicted.toFixed(1)}</td>
+            <td style="color:${Math.abs(s.relError) > 10 ? '#f87171' : '#4ade80'}">${s.relError.toFixed(1)}%</td>
             <td>${freq.toFixed(1)} Hz</td>
-            <td style="color:${harmonic.color}">${harmonic.label}</td>
+            <td style="color:${h.color}">${h.label}</td>
         </tr>`;
     }).join('');
 }
 
 function drawMainRing() {
     const canvas = document.getElementById('mainRing');
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height, cx = W/2, cy = H/2, maxR = Math.min(W,H)/2 - 35;
+    const W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2, maxR = Math.min(W, H) / 2 - 30;
     const sector = +document.getElementById('viewSector').value;
     const colorMode = document.getElementById('colorMode').value;
     const showAll = document.getElementById('showAllSectors').checked;
@@ -1460,25 +695,23 @@ function drawMainRing() {
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, W, H);
     
-    // Draw sector lines
+    // Sector lines
     ctx.strokeStyle = '#334155';
     ctx.lineWidth = 1;
-    for (let n = 1; n <= Math.min(15, state.sectorMax); n++) {
-        const angle = (1/n) * 2 * Math.PI;
+    for (let n = 1; n <= Math.min(12, state.sectorMax); n++) {
+        const angle = (1 / n) * 2 * Math.PI;
         ctx.beginPath();
         ctx.moveTo(cx, cy);
         ctx.lineTo(cx + Math.cos(angle) * maxR, cy - Math.sin(angle) * maxR);
         ctx.stroke();
-        
         ctx.fillStyle = '#64748b';
         ctx.font = '9px system-ui';
-        ctx.fillText(`1/${n}`, cx + Math.cos(angle) * (maxR + 12) - 8, cy - Math.sin(angle) * (maxR + 12));
+        ctx.fillText(`1/${n}`, cx + Math.cos(angle) * (maxR + 10) - 8, cy - Math.sin(angle) * (maxR + 10));
     }
     
-    // Highlight current sector
+    // Highlight sector
     if (!showAll) {
-        const a1 = (1/(sector+1)) * 2 * Math.PI;
-        const a2 = (1/sector) * 2 * Math.PI;
+        const a1 = (1 / (sector + 1)) * 2 * Math.PI, a2 = (1 / sector) * 2 * Math.PI;
         ctx.fillStyle = 'rgba(99,102,241,0.1)';
         ctx.beginPath();
         ctx.moveTo(cx, cy);
@@ -1491,31 +724,24 @@ function drawMainRing() {
     const residues = showAll ? Object.values(state.residuesBySector).flat() : (state.residuesBySector[sector] || []);
     
     residues.forEach(res => {
-        const { r, m, sector: s, isPrime: ip } = res;
-        const angle = (r/m) * 2 * Math.PI;
-        const rad = (m / state.nMax) * maxR;
-        const x = cx + rad * Math.cos(angle);
-        const y = cy - rad * Math.sin(angle);
+        const angle = (res.r / res.m) * 2 * Math.PI;
+        const rad = (res.m / state.nMax) * maxR;
+        const x = cx + rad * Math.cos(angle), y = cy - rad * Math.sin(angle);
         
         let color;
-        if (colorMode === 'harmonic') {
-            color = getHarmonicClass(r, m).color;
-        } else if (colorMode === 'prime') {
-            color = ip ? '#f59e0b' : '#6366f1';
-        } else {
-            color = sectorColors[(s-1) % sectorColors.length];
-        }
+        if (colorMode === 'harmonic') color = getHarmonicClass(res.r, res.m).color;
+        else if (colorMode === 'prime') color = res.isPrime ? '#f59e0b' : '#6366f1';
+        else color = sectorColors[(res.sector - 1) % sectorColors.length];
         
         ctx.fillStyle = color;
         ctx.beginPath();
         ctx.arc(x, y, 3, 0, 2 * Math.PI);
         ctx.fill();
         
-        state.ringPoints.push({ x, y, r, m, sector: s, isPrime: ip, color });
+        state.ringPoints.push({ x, y, ...res, color });
     });
     
-    // Center point
-    ctx.fillStyle = '#e2e8f0';
+    ctx.fillStyle = '#fff';
     ctx.beginPath();
     ctx.arc(cx, cy, 4, 0, 2 * Math.PI);
     ctx.fill();
@@ -1523,37 +749,26 @@ function drawMainRing() {
     // Legend
     const legend = document.getElementById('colorLegend');
     if (colorMode === 'harmonic') {
-        legend.innerHTML = `
-            <div class="color-legend-item"><div class="color-swatch" style="background:#22c55e"></div>Unison</div>
-            <div class="color-legend-item"><div class="color-swatch" style="background:#3b82f6"></div>Consonant</div>
-            <div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Complex</div>
-            <div class="color-legend-item"><div class="color-swatch" style="background:#ef4444"></div>Dissonant</div>
-        `;
+        legend.innerHTML = '<div class="color-legend-item"><div class="color-swatch" style="background:#22c55e"></div>Unison</div><div class="color-legend-item"><div class="color-swatch" style="background:#3b82f6"></div>Consonant</div><div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Complex</div><div class="color-legend-item"><div class="color-swatch" style="background:#ef4444"></div>Dissonant</div>';
     } else if (colorMode === 'prime') {
-        legend.innerHTML = `
-            <div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Prime</div>
-            <div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Composite</div>
-        `;
+        legend.innerHTML = '<div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Prime</div><div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Composite</div>';
     } else {
-        legend.innerHTML = '';
+        legend.innerHTML = state.sectors.slice(0, 6).map(s => `<div class="color-legend-item"><div class="color-swatch" style="background:${sectorColors[(s.n-1)%sectorColors.length]}"></div>S${s.n}</div>`).join('');
     }
 }
 
-// Ring click handler
+// Ring click
 document.getElementById('mainRing')?.addEventListener('click', function(e) {
     const rect = this.getBoundingClientRect();
     const x = e.clientX - rect.left, y = e.clientY - rect.top;
-    
     let closest = null, minDist = 15;
     state.ringPoints.forEach(p => {
-        const d = Math.sqrt((p.x - x)**2 + (p.y - y)**2);
+        const d = Math.sqrt((p.x - x) ** 2 + (p.y - y) ** 2);
         if (d < minDist) { minDist = d; closest = p; }
     });
-    
     if (closest) {
         const baseFreq = +document.getElementById('baseFreq').value;
-        const freq = fractionToFreq(closest.r, closest.m, baseFreq);
-        playFrequency(freq, 0.5, document.getElementById('waveformType').value);
+        playFrequency(fractionToFreq(closest.r, closest.m, baseFreq));
     }
 });
 
@@ -1561,163 +776,412 @@ document.getElementById('mainRing')?.addEventListener('click', function(e) {
 document.getElementById('mainRing')?.addEventListener('mousemove', function(e) {
     const rect = this.getBoundingClientRect();
     const x = e.clientX - rect.left, y = e.clientY - rect.top;
-    
     let closest = null, minDist = 12;
     state.ringPoints.forEach(p => {
-        const d = Math.sqrt((p.x - x)**2 + (p.y - y)**2);
+        const d = Math.sqrt((p.x - x) ** 2 + (p.y - y) ** 2);
         if (d < minDist) { minDist = d; closest = p; }
     });
-    
     const tooltip = document.getElementById('pointTooltip');
     if (closest) {
         const baseFreq = +document.getElementById('baseFreq').value;
         const freq = fractionToFreq(closest.r, closest.m, baseFreq);
-        const harmonic = getHarmonicClass(closest.r, closest.m);
-        const noteInfo = freqToNote(freq);
-        
-        tooltip.innerHTML = `
-            <h5>${closest.r}/${closest.m}</h5>
-            <div class="row"><span class="label">Freq:</span><span class="val">${freq.toFixed(2)} Hz</span></div>
-            <div class="row"><span class="label">Note:</span><span class="val">${noteInfo.note}</span></div>
-            <div class="row"><span class="label">Class:</span><span class="val" style="color:${harmonic.color}">${harmonic.label}</span></div>
-            <div class="row"><span class="label">Sector:</span><span class="val">${closest.sector}</span></div>
-        `;
-        tooltip.style.left = (e.clientX - rect.left + 10) + 'px';
-        tooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+        const h = getHarmonicClass(closest.r, closest.m);
+        tooltip.innerHTML = `<strong>${closest.r}/${closest.m}</strong><br>Freq: ${freq.toFixed(1)} Hz<br>Class: <span style="color:${h.color}">${h.label}</span>`;
+        tooltip.style.left = (x + 15) + 'px';
+        tooltip.style.top = (y - 10) + 'px';
         tooltip.classList.add('visible');
     } else {
         tooltip.classList.remove('visible');
     }
 });
 
-// ============ GAP ANALYSIS ============
-function updateGapAnalysis() {
-    if (state.gaps.length === 0) return;
+async function playRingSequence() {
+    const baseFreq = +document.getElementById('baseFreq').value;
+    const tempo = +document.getElementById('tempoSlider').value;
+    const dur = 60 / tempo / 2;
+    for (const p of state.ringPoints.slice(0, 25)) {
+        playFrequency(fractionToFreq(p.r, p.m, baseFreq), dur * 0.9);
+        await new Promise(r => setTimeout(r, dur * 1000));
+    }
+}
+
+// ========== HARMONIC TREE ==========
+function drawHarmonicTree() {
+    const canvas = document.getElementById('harmonicTreeCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const depth = +document.getElementById('treeDepth').value;
+    const showTongues = document.getElementById('showArnoldTongues')?.checked ?? true;
+    const tongueW = +document.getElementById('tongueWidth')?.value || 12;
+    const showFreq = document.getElementById('showFreqLabels')?.checked;
+    const baseFreq = +document.getElementById('baseFreq').value;
     
-    const gaps = state.gaps.map(g => g.gap);
-    const mean = gaps.reduce((a, b) => a + b, 0) / gaps.length;
-    const maxGap = Math.max(...gaps);
-    const minGap = Math.min(...gaps);
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
     
-    document.getElementById('gapStats').innerHTML = `
-        <div class="stat-card"><div class="stat-value">${state.gaps.length}</div><div class="stat-label">Gaps</div></div>
-        <div class="stat-card"><div class="stat-value">${mean.toExponential(2)}</div><div class="stat-label">Mean</div></div>
-        <div class="stat-card"><div class="stat-value" style="color:#ef4444">${maxGap.toExponential(2)}</div><div class="stat-label">Max</div></div>
-        <div class="stat-card"><div class="stat-value" style="color:#22c55e">${minGap.toExponential(2)}</div><div class="stat-label">Min</div></div>
+    // Build tree
+    state.treeNodes = [];
+    const root = { r: 1, m: 2, depth: 1, x: W / 2, y: 45, parent: null, left: { r: 0, m: 1 }, right: { r: 1, m: 1 } };
+    state.treeNodes.push(root);
+    
+    const queue = [root];
+    while (queue.length > 0) {
+        const node = queue.shift();
+        if (node.depth >= depth) continue;
+        
+        const nextD = node.depth + 1;
+        const levelY = 35 + (nextD / depth) * (H - 80);
+        const spread = Math.pow(0.5, nextD) * W * 0.4;
+        
+        const lR = node.left.r + node.r, lM = node.left.m + node.m;
+        if (lM <= 80) {
+            const lChild = { r: lR, m: lM, depth: nextD, x: node.x - spread, y: levelY, parent: node, left: node.left, right: { r: node.r, m: node.m } };
+            state.treeNodes.push(lChild);
+            queue.push(lChild);
+        }
+        
+        const rR = node.r + node.right.r, rM = node.m + node.right.m;
+        if (rM <= 80) {
+            const rChild = { r: rR, m: rM, depth: nextD, x: node.x + spread, y: levelY, parent: node, left: { r: node.r, m: node.m }, right: node.right };
+            state.treeNodes.push(rChild);
+            queue.push(rChild);
+        }
+    }
+    
+    // Arnold Tongues
+    if (showTongues) {
+        state.treeNodes.forEach(node => {
+            const h = getHarmonicClass(node.r, node.m);
+            const tH = (H - node.y - 20) * 0.6;
+            const tW = tongueW * (4 / node.m);
+            ctx.fillStyle = h.color + '30';
+            ctx.strokeStyle = h.color + '50';
+            ctx.beginPath();
+            ctx.moveTo(node.x, node.y);
+            ctx.lineTo(node.x - tW, node.y + tH);
+            ctx.lineTo(node.x + tW, node.y + tH);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        });
+    }
+    
+    // Edges
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1;
+    state.treeNodes.forEach(node => {
+        if (node.parent) {
+            ctx.beginPath();
+            ctx.moveTo(node.parent.x, node.parent.y);
+            ctx.lineTo(node.x, node.y);
+            ctx.stroke();
+        }
+    });
+    
+    // Nodes
+    state.treeNodes.forEach(node => {
+        const h = getHarmonicClass(node.r, node.m);
+        const isSel = state.selectedNode && state.selectedNode.r === node.r && state.selectedNode.m === node.m;
+        
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, isSel ? 10 : 7, 0, 2 * Math.PI);
+        ctx.fillStyle = h.color;
+        ctx.fill();
+        if (isSel) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); }
+        
+        if (node.depth <= 4) {
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = node.depth <= 2 ? 'bold 11px system-ui' : '9px system-ui';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${node.r}/${node.m}`, node.x, node.y - 12);
+        }
+        
+        if (showFreq && node.depth <= 3) {
+            ctx.fillStyle = '#64748b';
+            ctx.font = '8px system-ui';
+            ctx.fillText(`${fractionToFreq(node.r, node.m, baseFreq).toFixed(0)}Hz`, node.x, node.y + 18);
+        }
+    });
+    
+    // Stats
+    const classes = { unison: 0, consonant: 0, complex: 0, dissonant: 0 };
+    state.treeNodes.forEach(n => classes[getHarmonicClass(n.r, n.m).class]++);
+    document.getElementById('treeStats').innerHTML = `
+        <div class="stat-card"><div class="stat-value">${state.treeNodes.length}</div><div class="stat-label">Nodes</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#22c55e">${classes.unison}</div><div class="stat-label">Unison</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#3b82f6">${classes.consonant}</div><div class="stat-label">Consonant</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#f59e0b">${classes.complex}</div><div class="stat-label">Complex</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#ef4444">${classes.dissonant}</div><div class="stat-label">Dissonant</div></div>
+    `;
+    
+    updateTreeCharts(classes);
+}
+
+function updateTreeCharts(classes) {
+    if (state.charts.treeClass) state.charts.treeClass.destroy();
+    state.charts.treeClass = new Chart(document.getElementById('treeClassChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Unison', 'Consonant', 'Complex', 'Dissonant'],
+            datasets: [{ data: [classes.unison, classes.consonant, classes.complex, classes.dissonant], backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444'] }]
+        },
+        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' } } } }
+    });
+    
+    // Consonance by depth
+    const depthData = {};
+    state.treeNodes.forEach(n => {
+        if (!depthData[n.depth]) depthData[n.depth] = { total: 0, cons: 0 };
+        depthData[n.depth].total++;
+        const h = getHarmonicClass(n.r, n.m);
+        if (h.class === 'unison' || h.class === 'consonant') depthData[n.depth].cons++;
+    });
+    const depths = Object.keys(depthData).map(Number).sort((a, b) => a - b);
+    
+    if (state.charts.treeCons) state.charts.treeCons.destroy();
+    state.charts.treeCons = new Chart(document.getElementById('treeConsonanceChart'), {
+        type: 'line',
+        data: {
+            labels: depths.map(d => `D${d}`),
+            datasets: [{ label: 'Consonance %', data: depths.map(d => (depthData[d].cons / depthData[d].total * 100).toFixed(1)), borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true }]
+        },
+        options: { responsive: true, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' }, max: 100 } } }
+    });
+}
+
+// Tree click
+document.getElementById('harmonicTreeCanvas')?.addEventListener('click', function(e) {
+    const rect = this.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    let closest = null, minDist = 15;
+    state.treeNodes.forEach(n => {
+        const d = Math.sqrt((n.x - x) ** 2 + (n.y - y) ** 2);
+        if (d < minDist) { minDist = d; closest = n; }
+    });
+    if (closest) {
+        state.selectedNode = closest;
+        const baseFreq = +document.getElementById('baseFreq').value;
+        const freq = fractionToFreq(closest.r, closest.m, baseFreq);
+        const h = getHarmonicClass(closest.r, closest.m);
+        const note = freqToNote(freq);
+        
+        playFrequency(freq, 0.6);
+        
+        // Build path
+        const path = [];
+        let cur = closest;
+        while (cur) { path.unshift(cur); cur = cur.parent; }
+        
+        document.getElementById('selectedNodeInfo').innerHTML = `
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center;">
+                <div><small style="color:#64748b;">Fraction</small><br><strong style="color:#6366f1;font-size:1.2em;">${closest.r}/${closest.m}</strong></div>
+                <div><small style="color:#64748b;">Frequency</small><br><strong style="color:#22c55e;font-size:1.2em;">${freq.toFixed(1)} Hz</strong></div>
+                <div><small style="color:#64748b;">Note</small><br><strong style="font-size:1.2em;">${note.note}</strong> <small>(${note.cents >= 0 ? '+' : ''}${note.cents}¢)</small></div>
+                <div><small style="color:#64748b;">Class</small><br><strong style="color:${h.color};font-size:1.2em;">${h.label}</strong></div>
+            </div>
+            <div style="margin-top:8px;"><small style="color:#64748b;">Path:</small> ${path.map(n => `<span style="color:${getHarmonicClass(n.r,n.m).color}">${n.r}/${n.m}</span>`).join(' → ')}</div>
+        `;
+        
+        drawHarmonicTree();
+    }
+});
+
+async function playTreePath() {
+    if (!state.selectedNode) { alert('Click a node first!'); return; }
+    const baseFreq = +document.getElementById('baseFreq').value;
+    const tempo = +document.getElementById('tempoSlider').value;
+    const dur = 60 / tempo;
+    
+    const path = [];
+    let cur = state.selectedNode;
+    while (cur) { path.unshift(cur); cur = cur.parent; }
+    
+    for (const n of path) {
+        playFrequency(fractionToFreq(n.r, n.m, baseFreq), dur * 0.9);
+        await new Promise(r => setTimeout(r, dur * 1000));
+    }
+}
+
+async function playAllTreeNodes() {
+    const baseFreq = +document.getElementById('baseFreq').value;
+    const sorted = [...state.treeNodes].sort((a, b) => a.r / a.m - b.r / b.m);
+    for (const n of sorted.slice(0, 25)) {
+        playFrequency(fractionToFreq(n.r, n.m, baseFreq), 0.15);
+        await new Promise(r => setTimeout(r, 150));
+    }
+}
+
+// ========== SPECTRUM TAB ==========
+function updateSpectrumTab() {
+    const baseFreq = +document.getElementById('specBaseFreq')?.value || 440;
+    const sector = +document.getElementById('specSector')?.value || 2;
+    const residues = state.residuesBySector[sector] || state.allResidues.slice(0, 100);
+    
+    if (residues.length === 0) return;
+    
+    const freqs = residues.map(r => fractionToFreq(r.r, r.m, baseFreq));
+    const classes = { unison: 0, consonant: 0, complex: 0, dissonant: 0 };
+    residues.forEach(r => classes[getHarmonicClass(r.r, r.m).class]++);
+    
+    document.getElementById('specStats').innerHTML = `
+        <div class="stat-card"><div class="stat-value">${residues.length}</div><div class="stat-label">Fractions</div></div>
+        <div class="stat-card"><div class="stat-value">${Math.min(...freqs).toFixed(0)}</div><div class="stat-label">Min Hz</div></div>
+        <div class="stat-card"><div class="stat-value">${Math.max(...freqs).toFixed(0)}</div><div class="stat-label">Max Hz</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#3b82f6">${classes.consonant + classes.unison}</div><div class="stat-label">Consonant</div></div>
     `;
     
     // Histogram
-    const bins = 15;
-    const binWidth = (maxGap - minGap) / bins;
+    const minF = Math.min(...freqs), maxF = Math.max(...freqs);
+    const bins = 15, binW = (maxF - minF) / bins || 1;
     const hist = new Array(bins).fill(0);
-    gaps.forEach(g => {
-        const b = Math.min(bins-1, Math.floor((g - minGap) / binWidth));
-        hist[b]++;
-    });
+    freqs.forEach(f => { const b = Math.min(bins - 1, Math.floor((f - minF) / binW)); hist[b]++; });
     
-    if (state.charts.gapDist) state.charts.gapDist.destroy();
-    state.charts.gapDist = new Chart(document.getElementById('gapDistChart'), {
+    if (state.charts.specHist) state.charts.specHist.destroy();
+    state.charts.specHist = new Chart(document.getElementById('specHistChart'), {
         type: 'bar',
         data: {
-            labels: hist.map((_, i) => (minGap + i * binWidth).toExponential(1)),
+            labels: hist.map((_, i) => (minF + i * binW).toFixed(0)),
             datasets: [{ label: 'Count', data: hist, backgroundColor: 'rgba(99,102,241,0.7)' }]
         },
         options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } } }
     });
     
-    // Gap vs denom
-    const scatter = state.gaps.slice(0, 300).map(g => ({ x: g.left.m * g.right.m, y: g.gap }));
+    // Harmonic alignment
+    const harmonics = [1, 2, 3, 4, 5, 6, 7, 8].map(n => baseFreq * n);
+    const alignment = harmonics.map(h => freqs.filter(f => Math.abs(f - h) < baseFreq * 0.05).length);
     
-    if (state.charts.gapVsDenom) state.charts.gapVsDenom.destroy();
-    state.charts.gapVsDenom = new Chart(document.getElementById('gapVsDenomChart'), {
-        type: 'scatter',
+    if (state.charts.specAlign) state.charts.specAlign.destroy();
+    state.charts.specAlign = new Chart(document.getElementById('specAlignChart'), {
+        type: 'bar',
         data: {
-            datasets: [{ label: 'Gaps', data: scatter, backgroundColor: 'rgba(99,102,241,0.5)', pointRadius: 2 }]
+            labels: harmonics.map((h, i) => `${i + 1}× (${h.toFixed(0)})`),
+            datasets: [{ label: 'Aligned', data: alignment, backgroundColor: 'rgba(34,197,94,0.7)' }]
         },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8', maxRotation: 45 } }, y: { ticks: { color: '#94a3b8' } } } }
+    });
+    
+    // Consonance map
+    const mapCanvas = document.getElementById('specConsonanceMap');
+    if (mapCanvas) {
+        const ctx = mapCanvas.getContext('2d');
+        const W = mapCanvas.width, H = mapCanvas.height, margin = 35;
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, W, H);
+        
+        ctx.strokeStyle = '#334155';
+        for (let i = 0; i <= 5; i++) {
+            const x = margin + (i / 5) * (W - 2 * margin);
+            ctx.beginPath(); ctx.moveTo(x, margin); ctx.lineTo(x, H - margin); ctx.stroke();
+        }
+        
+        residues.slice(0, 150).forEach(res => {
+            const x = margin + (res.r / res.m) * (W - 2 * margin);
+            const y = H - margin - (1 / res.m) * (H - 2 * margin) * 8;
+            ctx.fillStyle = getHarmonicClass(res.r, res.m).color;
+            ctx.beginPath();
+            ctx.arc(x, Math.max(margin, y), 4, 0, 2 * Math.PI);
+            ctx.fill();
+        });
+        
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('r/m value', W / 2, H - 8);
+    }
+    
+    // Table
+    document.querySelector('#specTable tbody').innerHTML = residues.slice(0, 40).map(res => {
+        const freq = fractionToFreq(res.r, res.m, baseFreq);
+        const note = freqToNote(freq);
+        const h = getHarmonicClass(res.r, res.m);
+        return `<tr onclick="playFrequency(${freq})">
+            <td>${res.r}/${res.m}</td>
+            <td>${freq.toFixed(1)}</td>
+            <td>${note.note}</td>
+            <td>${note.cents >= 0 ? '+' : ''}${note.cents}</td>
+            <td style="color:${h.color}">${h.label}</td>
+        </tr>`;
+    }).join('');
+}
+
+async function playSpectrumSweep() {
+    const baseFreq = +document.getElementById('specBaseFreq').value;
+    const sector = +document.getElementById('specSector').value;
+    const residues = (state.residuesBySector[sector] || state.allResidues.slice(0, 30)).slice(0, 30).sort((a, b) => a.value - b.value);
+    
+    for (const res of residues) {
+        playFrequency(fractionToFreq(res.r, res.m, baseFreq), 0.12);
+        await new Promise(r => setTimeout(r, 120));
+    }
+}
+
+// ========== GAP TAB ==========
+function updateGapTab() {
+    if (state.gaps.length === 0) return;
+    
+    const gaps = state.gaps.map(g => g.gap);
+    const mean = gaps.reduce((a, b) => a + b, 0) / gaps.length;
+    const maxG = Math.max(...gaps), minG = Math.min(...gaps);
+    
+    document.getElementById('gapStats').innerHTML = `
+        <div class="stat-card"><div class="stat-value">${state.gaps.length}</div><div class="stat-label">Gaps</div></div>
+        <div class="stat-card"><div class="stat-value">${mean.toExponential(2)}</div><div class="stat-label">Mean</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#ef4444">${maxG.toExponential(2)}</div><div class="stat-label">Max</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#22c55e">${minG.toExponential(2)}</div><div class="stat-label">Min</div></div>
+    `;
+    
+    const bins = 12, binW = (maxG - minG) / bins || 1;
+    const hist = new Array(bins).fill(0);
+    gaps.forEach(g => { const b = Math.min(bins - 1, Math.floor((g - minG) / binW)); hist[b]++; });
+    
+    if (state.charts.gapDist) state.charts.gapDist.destroy();
+    state.charts.gapDist = new Chart(document.getElementById('gapDistChart'), {
+        type: 'bar',
+        data: { labels: hist.map((_, i) => (minG + i * binW).toExponential(1)), datasets: [{ label: 'Count', data: hist, backgroundColor: 'rgba(99,102,241,0.7)' }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } } }
+    });
+    
+    const scatter = state.gaps.slice(0, 200).map(g => ({ x: g.left.m * g.right.m, y: g.gap }));
+    if (state.charts.gapScatter) state.charts.gapScatter.destroy();
+    state.charts.gapScatter = new Chart(document.getElementById('gapScatterChart'), {
+        type: 'scatter',
+        data: { datasets: [{ label: 'Gaps', data: scatter, backgroundColor: 'rgba(99,102,241,0.5)', pointRadius: 3 }] },
         options: { responsive: true, scales: { x: { type: 'logarithmic', ticks: { color: '#94a3b8' } }, y: { type: 'logarithmic', ticks: { color: '#94a3b8' } } } }
     });
 }
 
-// ============ FRANEL-LANDAU ============
-function computeFranel() {
-    if (state.farey.length === 0) return;
-    
-    const n = state.farey.length;
-    const deviations = state.farey.map((f, k) => ({ k, delta: f.value - (k+1)/n }));
-    const sumAbsDelta = deviations.reduce((s, d) => s + Math.abs(d.delta), 0);
-    const N = state.nMax;
-    
-    document.getElementById('franelStats').innerHTML = `
-        <div class="stat-card"><div class="stat-value">${n}</div><div class="stat-label">|F_N|</div></div>
-        <div class="stat-card"><div class="stat-value">${sumAbsDelta.toFixed(4)}</div><div class="stat-label">Sum|delta|</div></div>
-        <div class="stat-card"><div class="stat-value">${(sumAbsDelta/Math.sqrt(N)).toFixed(4)}</div><div class="stat-label">Sum|delta|/sqrt(N)</div></div>
-    `;
-    
-    const sampleRate = Math.max(1, Math.floor(n/150));
-    const sampled = deviations.filter((_, i) => i % sampleRate === 0);
-    
-    if (state.charts.franelDev) state.charts.franelDev.destroy();
-    state.charts.franelDev = new Chart(document.getElementById('franelDeviationChart'), {
-        type: 'line',
-        data: {
-            labels: sampled.map(d => d.k),
-            datasets: [{ label: 'delta_k', data: sampled.map(d => d.delta), borderColor: '#6366f1', fill: false, pointRadius: 0 }]
-        },
-        options: { responsive: true, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } } }
-    });
-    
-    let cumSum = 0;
-    const cumData = sampled.map(d => { cumSum += Math.abs(d.delta) * sampleRate; return cumSum / Math.sqrt(d.k + 1); });
-    
-    if (state.charts.franelCum) state.charts.franelCum.destroy();
-    state.charts.franelCum = new Chart(document.getElementById('franelCumulativeChart'), {
-        type: 'line',
-        data: {
-            labels: sampled.map(d => d.k),
-            datasets: [{ label: 'Cum|delta|/sqrt(k)', data: cumData, borderColor: '#8b5cf6', fill: false, pointRadius: 0 }]
-        },
-        options: { responsive: true, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } } }
-    });
-}
-
-// ============ EULER PRODUCT ============
-function computeEuler() {
+// ========== EULER TAB ==========
+function updateEulerTab() {
     const maxP = 50;
     const primes = [];
     for (let n = 2; n <= maxP; n++) if (isPrime(n)) primes.push(n);
     
-    let product = 1;
-    const productData = [];
+    let prod = 1;
+    const prodData = [];
     const target = 6 / (Math.PI * Math.PI);
-    
-    primes.forEach(p => {
-        product *= (1 - 1/(p*p));
-        productData.push({ p, product });
-    });
+    primes.forEach(p => { prod *= (1 - 1 / (p * p)); prodData.push({ p, prod }); });
     
     let sum = 0;
     const sumData = [];
     const targetSum = Math.PI * Math.PI / 6;
-    
-    for (let n = 1; n <= maxP; n++) {
-        sum += 1/(n*n);
-        sumData.push({ n, sum });
-    }
+    for (let n = 1; n <= maxP; n++) { sum += 1 / (n * n); sumData.push({ n, sum }); }
     
     document.getElementById('eulerStats').innerHTML = `
         <div class="stat-card"><div class="stat-value">${primes.length}</div><div class="stat-label">Primes</div></div>
-        <div class="stat-card"><div class="stat-value">${product.toFixed(6)}</div><div class="stat-label">Product(1-1/p²)</div></div>
+        <div class="stat-card"><div class="stat-value">${prod.toFixed(6)}</div><div class="stat-label">Product</div></div>
         <div class="stat-card"><div class="stat-value">${target.toFixed(6)}</div><div class="stat-label">6/π²</div></div>
+        <div class="stat-card"><div class="stat-value">${((prod - target) / target * 100).toFixed(2)}%</div><div class="stat-label">Error</div></div>
     `;
     
     if (state.charts.eulerProd) state.charts.eulerProd.destroy();
-    state.charts.eulerProd = new Chart(document.getElementById('eulerProductChart'), {
+    state.charts.eulerProd = new Chart(document.getElementById('eulerProdChart'), {
         type: 'line',
         data: {
-            labels: productData.map(d => d.p),
+            labels: prodData.map(d => d.p),
             datasets: [
-                { label: 'Product(1-1/p²)', data: productData.map(d => d.product), borderColor: '#6366f1', fill: false },
-                { label: '6/π²', data: productData.map(() => target), borderColor: '#22c55e', borderDash: [5,5], fill: false }
+                { label: '∏(1-1/p²)', data: prodData.map(d => d.prod), borderColor: '#6366f1', fill: false },
+                { label: '6/π²', data: prodData.map(() => target), borderColor: '#22c55e', borderDash: [5, 5], fill: false }
             ]
         },
         options: { responsive: true, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } } }
@@ -1729,30 +1193,61 @@ function computeEuler() {
         data: {
             labels: sumData.map(d => d.n),
             datasets: [
-                { label: 'Sum 1/n²', data: sumData.map(d => d.sum), borderColor: '#8b5cf6', fill: false },
-                { label: 'π²/6', data: sumData.map(() => targetSum), borderColor: '#22c55e', borderDash: [5,5], fill: false }
+                { label: 'Σ1/n²', data: sumData.map(d => d.sum), borderColor: '#8b5cf6', fill: false },
+                { label: 'π²/6', data: sumData.map(() => targetSum), borderColor: '#22c55e', borderDash: [5, 5], fill: false }
             ]
         },
         options: { responsive: true, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } } }
     });
 }
 
-// ============ TAB SWITCHING ============
+// ========== PLAYBACK FUNCTIONS ==========
+async function playFareySweep() {
+    const baseFreq = +document.getElementById('baseFreq').value;
+    const sorted = [...state.allResidues].slice(0, 40).sort((a, b) => a.value - b.value);
+    for (const res of sorted) {
+        playFrequency(fractionToFreq(res.r, res.m, baseFreq), 0.1);
+        await new Promise(r => setTimeout(r, 100));
+    }
+}
+
+async function playSectorChord() {
+    initAudio();
+    const baseFreq = +document.getElementById('baseFreq').value;
+    const sector = +document.getElementById('viewSector').value;
+    const residues = (state.residuesBySector[sector] || []).slice(0, 5);
+    
+    residues.forEach(res => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.value = fractionToFreq(res.r, res.m, baseFreq);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 2);
+    });
+}
+
+// ========== TAB SWITCHING ==========
 function switchTab(name) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');
-    document.getElementById(`tab-${name}`).classList.add('active');
+    document.querySelector(`.tab[onclick="switchTab('${name}')"]`)?.classList.add('active');
+    document.getElementById('tab-' + name)?.classList.add('active');
     
     if (name === 'tree') drawHarmonicTree();
-    if (name === 'spectrum') updateSpectrumAnalysis();
+    if (name === 'spectrum') updateSpectrumTab();
+    if (name === 'gaps') updateGapTab();
+    if (name === 'euler') updateEulerTab();
 }
 
-function exportAllData() {
-    let csv = 'n,exact,predicted,error,relError,freq\n';
+function exportData() {
     const baseFreq = +document.getElementById('baseFreq').value;
+    let csv = 'n,exact,predicted,error%,freq_hz\n';
     state.sectors.forEach(s => {
-        csv += `${s.n},${s.exact},${s.predicted.toFixed(2)},${s.error?.toFixed(2) || ''},${s.relError?.toFixed(2) || ''},${fractionToFreq(1, s.n+1, baseFreq).toFixed(2)}\n`;
+        csv += `${s.n},${s.exact},${s.predicted.toFixed(2)},${s.relError.toFixed(2)},${fractionToFreq(1, s.n + 1, baseFreq).toFixed(2)}\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a');
@@ -1761,14 +1256,11 @@ function exportAllData() {
     a.click();
 }
 
-// Initialize
+// ========== INIT ==========
 document.addEventListener('DOMContentLoaded', () => {
     computeAll();
-    
-    // Auto-expand harmonic panel after a short delay
-    setTimeout(() => {
-        document.getElementById('harmonicPanel').classList.add('expanded');
-    }, 1000);
+    // Open harmonic panel by default
+    document.getElementById('harmonicDropdown').classList.add('open');
 });
 </script>
 </body>
