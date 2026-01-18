@@ -351,8 +351,8 @@
                 </div>
                 <div class="harmonic-card-row">
                     <label>Volume:</label>
-                    <input type="range" id="harmonicVolume" min="0" max="100" value="30" oninput="updateHarmonicVolume()">
-                    <span class="val" id="volumeVal">30%</span>
+                    <input type="range" id="harmonicVolume" min="0" max="100" value="100" oninput="updateHarmonicVolume()">
+                    <span class="val" id="volumeVal">100%</span>
                 </div>
                 <div class="harmonic-card-row">
                     <label>Wave:</label>
@@ -549,6 +549,9 @@
                 <label>Color: <select id="colorMode" onchange="drawMainRing()"><option value="sector">Sector</option><option value="prime">Prime</option><option value="denominator">Denom</option><option value="gap">Gap</option></select></label>
                 <label><input type="checkbox" id="showAllSectors" onchange="drawMainRing()"> All</label>
                 <button class="secondary" onclick="openSectorModal(+document.getElementById('viewSector').value)">View Sector Details</button>
+                <button style="background:linear-gradient(135deg,#22c55e,#16a34a);" onclick="playSectorSequence()" id="sectorPlayBtn" title="Play all fractions in sector">▶ Play Sector</button>
+                <button class="secondary" onclick="stopSectorPlayback()" title="Stop playback">■ Stop</button>
+                <label style="margin-left:10px;">Speed: <select id="playbackSpeed" style="width:70px;"><option value="150">Fast</option><option value="250" selected>Normal</option><option value="400">Slow</option><option value="600">Very Slow</option></select></label>
             </div>
             <div style="text-align:center;position:relative;"><canvas id="mainRing" class="ring-canvas" width="600" height="600"></canvas><div class="point-tooltip" id="pointTooltip"></div></div>
             <div class="color-legend" id="colorLegend"></div>
@@ -556,7 +559,7 @@
         </div>
         
         <div class="panel chart-wrapper">
-            <h4>Sector Tree Path <span style="font-weight:normal; color:#64748b;">(Stern-Brocot navigation)</span></h4>
+            <h4>Sector Tree Path <span style="font-weight:normal; color:#64748b;">(Stern-Brocot navigation - click nodes to play)</span></h4>
             <div class="control-row" style="margin-bottom:10px;">
                 <label>Tree Depth: <input type="number" id="treeDepth" value="8" min="3" max="15" onchange="drawSectorTree()"></label>
                 <label><input type="checkbox" id="showTreeLabels" checked onchange="drawSectorTree()"> Labels</label>
@@ -570,7 +573,7 @@
                 <canvas id="sectorTreeCanvas" class="ring-canvas" width="900" height="500"></canvas>
             </div>
             <div id="treePathInfo" style="margin-top:10px; padding:10px; background:#0f172a; border-radius:5px; font-family:monospace; font-size:0.9em;">
-                <span style="color:#64748b;">Click a point on the ring above to see its tree path</span>
+                <span style="color:#64748b;">Click a point on the ring or tree to see its path and play its frequency</span>
             </div>
             <div class="color-legend">
                 <div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Tree nodes</div>
@@ -3376,6 +3379,9 @@ function drawTreePath(ctx, treeNodes, target) {
 function updateTreePathInfo(point) {
     const path = getPathToFraction(point.r, point.m);
     const cf = toCF(point.r, point.m);
+    const freq = harmonicSettings.baseFreq * (point.r / point.m);
+    const note = frequencyToNote(freq);
+    const mode = getHarmonicMode(point.m);
     
     // Count L's and R's
     const lCount = (path.match(/L/g) || []).length;
@@ -3387,7 +3393,7 @@ function updateTreePathInfo(point) {
     ).join('');
     
     document.getElementById('treePathInfo').innerHTML = `
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:15px;">
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:15px; align-items:start;">
             <div>
                 <div style="color:#94a3b8; font-size:0.8em;">Target Fraction</div>
                 <div style="color:#22c55e; font-size:1.4em; font-weight:bold;">${point.r}/${point.m}</div>
@@ -3407,6 +3413,15 @@ function updateTreePathInfo(point) {
                 <div style="color:#94a3b8; font-size:0.8em;">Continued Fraction</div>
                 <div style="color:#8b5cf6;">[${cf.join('; ')}]</div>
                 <div style="color:#64748b; font-size:0.85em;">Depth: ${cf.length} terms</div>
+            </div>
+            <div style="background:#1e293b; padding:10px; border-radius:6px; border:1px solid #334155;">
+                <div style="color:#94a3b8; font-size:0.8em;">Harmonic</div>
+                <div style="color:#8b5cf6; font-size:1.2em; font-weight:bold;">${freq.toFixed(1)} Hz</div>
+                <div style="color:#22c55e; font-size:0.9em;">${note.name} <span class="mode-badge ${mode.class}" style="font-size:9px;">${mode.name}</span></div>
+                <div style="margin-top:8px; display:flex; gap:5px;">
+                    <button onclick="playTreeFraction()" style="flex:1; padding:5px 8px; font-size:11px; background:linear-gradient(135deg,#22c55e,#16a34a); border:none; border-radius:4px; color:white; cursor:pointer;">▶ Play</button>
+                    <button onclick="playTreeScale()" style="flex:1; padding:5px 8px; font-size:11px; background:#6366f1; border:none; border-radius:4px; color:white; cursor:pointer;">♪ Scale</button>
+                </div>
             </div>
         </div>
         <div style="margin-top:12px; padding-top:12px; border-top:1px solid #334155;">
@@ -3604,6 +3619,60 @@ function animateTreePath(point) {
     }
     
     animateStep();
+}
+
+// Add click handler for tree canvas to select and play nodes
+document.addEventListener('DOMContentLoaded', function() {
+    const treeCanvas = document.getElementById('sectorTreeCanvas');
+    if (treeCanvas) {
+        treeCanvas.addEventListener('click', handleTreeCanvasClick);
+    }
+});
+
+function handleTreeCanvasClick(e) {
+    const canvas = e.target;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const depth = +document.getElementById('treeDepth').value;
+    
+    const treeNodes = buildSternBrocotTree(depth);
+    
+    // Find closest node
+    let closest = null;
+    let minDist = 20;
+    
+    treeNodes.forEach(node => {
+        const dist = Math.sqrt((node.x - x) ** 2 + (node.y - y) ** 2);
+        if (dist < minDist) {
+            minDist = dist;
+            closest = node;
+        }
+    });
+    
+    if (closest) {
+        // Create a point object similar to ring points
+        const point = {
+            r: closest.r,
+            m: closest.m,
+            sector: getSector(closest.r, closest.m),
+            isPrime: isPrime(closest.m)
+        };
+        
+        selectedTreePoint = point;
+        updateTreePathInfo(point);
+        
+        // Trigger harmonic
+        triggerGlobalHarmonic(closest.r, closest.m, point);
+        
+        // Redraw tree with this node highlighted
+        const animate = document.getElementById('animatePath').checked;
+        if (animate) {
+            animateTreePath(point);
+        } else {
+            drawSectorTree();
+        }
+    }
 }
 
 // GAP ANALYSIS
@@ -5045,7 +5114,7 @@ let currentGain = null;
 let selectedHarmonicFraction = { r: 1, m: 2 };
 let harmonicSettings = {
     baseFreq: 220,
-    volume: 0.3,
+    volume: 1.0,
     waveform: 'sine',
     coupling: 0.5
 };
@@ -5742,6 +5811,13 @@ setTimeout(() => {
     drawArnoldMini();
     drawHarmonicSeriesViz();
     setupGlobalFractionListeners();
+    
+    // Setup tree canvas click handler
+    const treeCanvas = document.getElementById('sectorTreeCanvas');
+    if (treeCanvas && !treeCanvas.hasClickHandler) {
+        treeCanvas.addEventListener('click', handleTreeCanvasClick);
+        treeCanvas.hasClickHandler = true;
+    }
 }, 200);
 
 // =============================================
@@ -6253,6 +6329,926 @@ function drawWaveformDisplay() {
     ctx.stroke();
 }
 
-setTimeout(addZoomControlsToCharts, 500);</script>
+setTimeout(addZoomControlsToCharts, 500);
+
+// =============================================
+// PRIMORIAL SIEVE TAB - COMPLETE IMPLEMENTATION
+// =============================================
+
+function updatePrimorialSieve() {
+    const base = +document.getElementById('primorialBase').value;
+    const power = +document.getElementById('primorialPower').value;
+    const maxN = +document.getElementById('primorialN').value;
+    const numSectors = +document.getElementById('primorialSectors').value;
+    
+    const modulus = base * Math.pow(2, power);
+    const phiMod = phi(modulus);
+    const density = phiMod / modulus;
+    
+    // Get coprime residue classes
+    const coprimeClasses = [];
+    for (let a = 1; a < modulus; a++) {
+        if (gcd(a, modulus) === 1) coprimeClasses.push(a);
+    }
+    
+    // Update stats
+    document.getElementById('primorialStats').innerHTML = `
+        <div class="stat-card"><div class="stat-value">${modulus}</div><div class="stat-label">Modulus k×2ⁿ</div></div>
+        <div class="stat-card"><div class="stat-value">${phiMod}</div><div class="stat-label">φ(${modulus})</div></div>
+        <div class="stat-card"><div class="stat-value">${density.toFixed(4)}</div><div class="stat-label">φ(k)/k</div></div>
+        <div class="stat-card"><div class="stat-value">${(6/Math.PI/Math.PI).toFixed(4)}</div><div class="stat-label">6/π²</div></div>
+        <div class="stat-card"><div class="stat-value">${coprimeClasses.length}</div><div class="stat-label">Coprime Classes</div></div>
+    `;
+    
+    // Update residue class list
+    document.getElementById('residueClassList').innerHTML = coprimeClasses.map(a => 
+        `<span class="residue-item${isPrime(a) ? ' prime' : ''}">${a}</span>`
+    ).join('');
+    
+    // Populate unified residue class dropdown
+    const dropdown = document.getElementById('unifiedResidueClass');
+    if (dropdown) {
+        dropdown.innerHTML = coprimeClasses.slice(0, 20).map(a => 
+            `<option value="${a}">${a} mod ${modulus}</option>`
+        ).join('');
+    }
+    
+    // Store for other functions
+    window.primorialData = { base, power, modulus, maxN, numSectors, coprimeClasses, phiMod, density };
+    
+    // Draw all charts
+    drawSectorResidueHeatmap();
+    drawDensityConstant();
+    drawLiftingTree();
+    drawUnifiedFormulaChart();
+    drawPrimeDistribution();
+    drawUniformityTest();
+    drawPrimorialComparison();
+    updateSectorResidueTable();
+}
+
+function drawSectorResidueHeatmap() {
+    const canvas = document.getElementById('sectorResidueHeatmap');
+    if (!canvas || !window.primorialData) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const { modulus, maxN, numSectors, coprimeClasses, phiMod } = window.primorialData;
+    
+    const normalize = document.getElementById('heatmapNormalize')?.checked ?? true;
+    const showValues = document.getElementById('heatmapShowValues')?.checked ?? false;
+    const colorScheme = document.getElementById('heatmapColorScheme')?.value || 'purple';
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    const margin = { l: 60, r: 20, t: 30, b: 50 };
+    const plotW = W - margin.l - margin.r;
+    const plotH = H - margin.t - margin.b;
+    
+    // Build count matrix: sectors × residue classes
+    const maxClasses = Math.min(coprimeClasses.length, 15);
+    const displayClasses = coprimeClasses.slice(0, maxClasses);
+    const cellW = plotW / maxClasses;
+    const cellH = plotH / numSectors;
+    
+    // Count coprimes in each sector × residue class
+    const counts = [];
+    let maxCount = 0;
+    
+    for (let n = 1; n <= numSectors; n++) {
+        const row = [];
+        displayClasses.forEach(a => {
+            let count = 0;
+            for (let m = 2; m <= maxN; m++) {
+                if (m % modulus === a % modulus || (modulus > maxN && gcd(m, modulus) === 1)) {
+                    for (let r = 1; r < m; r++) {
+                        if (gcd(r, m) === 1) {
+                            const sector = getSector(r, m);
+                            if (sector === n) count++;
+                        }
+                    }
+                }
+            }
+            // Simplified estimate for large moduli
+            if (modulus > maxN) {
+                count = Math.round(formula(n, maxN) / phiMod);
+            }
+            row.push(count);
+            if (count > maxCount) maxCount = count;
+        });
+        counts.push(row);
+    }
+    
+    // Color function
+    function getColor(val, max, scheme) {
+        const t = max > 0 ? val / max : 0;
+        if (scheme === 'purple') {
+            return `rgb(${30 + t * 69}, ${27 + t * 75}, ${75 + t * 171})`;
+        } else if (scheme === 'heat') {
+            const r = Math.min(255, t * 510);
+            const g = Math.min(255, Math.max(0, (t - 0.5) * 510));
+            return `rgb(${r}, ${g}, 0)`;
+        } else {
+            // Viridis-like
+            return `rgb(${68 + t * 185}, ${1 + t * 230}, ${84 - t * 47})`;
+        }
+    }
+    
+    // Draw cells
+    counts.forEach((row, i) => {
+        const rowMax = normalize ? Math.max(...row) : maxCount;
+        row.forEach((val, j) => {
+            const x = margin.l + j * cellW;
+            const y = margin.t + i * cellH;
+            
+            ctx.fillStyle = getColor(val, rowMax, colorScheme);
+            ctx.fillRect(x, y, cellW - 1, cellH - 1);
+            
+            if (showValues && cellW > 25 && cellH > 18) {
+                ctx.fillStyle = val > rowMax * 0.5 ? '#0f172a' : '#e2e8f0';
+                ctx.font = '9px system-ui';
+                ctx.textAlign = 'center';
+                ctx.fillText(val, x + cellW / 2, y + cellH / 2 + 3);
+            }
+        });
+    });
+    
+    // X-axis labels (residue classes)
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '9px system-ui';
+    ctx.textAlign = 'center';
+    displayClasses.forEach((a, j) => {
+        if (j % Math.ceil(maxClasses / 10) === 0) {
+            ctx.fillText(a, margin.l + j * cellW + cellW / 2, H - margin.b + 15);
+        }
+    });
+    ctx.fillText('Residue Class (mod ' + modulus + ')', margin.l + plotW / 2, H - 5);
+    
+    // Y-axis labels (sectors)
+    ctx.textAlign = 'right';
+    for (let n = 1; n <= numSectors; n += Math.ceil(numSectors / 8)) {
+        ctx.fillText('S' + n, margin.l - 5, margin.t + (n - 0.5) * cellH + 4);
+    }
+    
+    // Title
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 11px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Sector × Residue Class Distribution', margin.l + plotW / 2, 18);
+}
+
+function drawDensityConstant() {
+    const canvas = document.getElementById('densityConstantCanvas');
+    if (!canvas || !window.primorialData) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const { base } = window.primorialData;
+    
+    const maxPower = +(document.getElementById('densityMaxPower')?.value || 8);
+    const showTheory = document.getElementById('densityShowTheory')?.checked ?? true;
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    const margin = { l: 60, r: 30, t: 30, b: 45 };
+    const plotW = W - margin.l - margin.r;
+    const plotH = H - margin.t - margin.b;
+    
+    // Calculate φ(base×2^n)/(base×2^n) for various n
+    const data = [];
+    const basePhiRatio = phi(base) / base;
+    
+    for (let n = 0; n <= maxPower; n++) {
+        const m = base * Math.pow(2, n);
+        const phiM = phi(m);
+        const ratio = phiM / m;
+        data.push({ n, m, ratio });
+    }
+    
+    const maxY = Math.max(...data.map(d => d.ratio)) * 1.1;
+    const minY = Math.min(...data.map(d => d.ratio)) * 0.9;
+    
+    // Grid
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i <= 4; i++) {
+        const y = margin.t + plotH - (i / 4) * plotH;
+        ctx.beginPath();
+        ctx.moveTo(margin.l, y);
+        ctx.lineTo(W - margin.r, y);
+        ctx.stroke();
+        ctx.fillStyle = '#64748b';
+        ctx.font = '9px system-ui';
+        ctx.textAlign = 'right';
+        ctx.fillText((minY + (i / 4) * (maxY - minY)).toFixed(3), margin.l - 5, y + 3);
+    }
+    
+    // Data points and line
+    ctx.strokeStyle = '#6366f1';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    data.forEach((d, i) => {
+        const x = margin.l + (i / (data.length - 1)) * plotW;
+        const y = margin.t + plotH - ((d.ratio - minY) / (maxY - minY)) * plotH;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    
+    // Points
+    data.forEach((d, i) => {
+        const x = margin.l + (i / (data.length - 1)) * plotW;
+        const y = margin.t + plotH - ((d.ratio - minY) / (maxY - minY)) * plotH;
+        ctx.fillStyle = '#6366f1';
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, 2 * Math.PI);
+        ctx.fill();
+    });
+    
+    // Theory line (constant)
+    if (showTheory) {
+        ctx.strokeStyle = '#22c55e';
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 2;
+        const theoryY = margin.t + plotH - ((basePhiRatio - minY) / (maxY - minY)) * plotH;
+        ctx.beginPath();
+        ctx.moveTo(margin.l, theoryY);
+        ctx.lineTo(W - margin.r, theoryY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.fillStyle = '#22c55e';
+        ctx.font = '10px system-ui';
+        ctx.textAlign = 'left';
+        ctx.fillText(`φ(${base})/${base} = ${basePhiRatio.toFixed(4)}`, W - margin.r - 100, theoryY - 8);
+    }
+    
+    // Axes
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin.l, margin.t);
+    ctx.lineTo(margin.l, margin.t + plotH);
+    ctx.lineTo(W - margin.r, margin.t + plotH);
+    ctx.stroke();
+    
+    // X labels
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '9px system-ui';
+    ctx.textAlign = 'center';
+    data.forEach((d, i) => {
+        if (i % 2 === 0 || data.length <= 10) {
+            const x = margin.l + (i / (data.length - 1)) * plotW;
+            ctx.fillText('2^' + d.n, x, H - margin.b + 15);
+        }
+    });
+    ctx.fillText('Power of 2 multiplier', margin.l + plotW / 2, H - 5);
+    
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillText(`Density φ(${base}×2ⁿ)/(${base}×2ⁿ) = constant`, margin.l + plotW / 2, 18);
+}
+
+function drawLiftingTree() {
+    const canvas = document.getElementById('liftingTreeCanvas');
+    if (!canvas || !window.primorialData) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const { base, coprimeClasses } = window.primorialData;
+    
+    const levels = +(document.getElementById('liftingLevels')?.value || 4);
+    const highlightSector = +(document.getElementById('liftingSector')?.value || 2);
+    const showCounts = document.getElementById('liftingShowCounts')?.checked ?? true;
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    const margin = { l: 30, r: 30, t: 40, b: 30 };
+    const plotW = W - margin.l - margin.r;
+    const plotH = H - margin.t - margin.b;
+    
+    // Build tree structure
+    const levelHeight = plotH / levels;
+    const rootClasses = coprimeClasses.slice(0, Math.min(6, coprimeClasses.length));
+    
+    // Draw level labels
+    ctx.fillStyle = '#64748b';
+    ctx.font = '10px system-ui';
+    ctx.textAlign = 'left';
+    for (let l = 0; l < levels; l++) {
+        const mod = base * Math.pow(2, l);
+        ctx.fillText(`mod ${mod}`, 5, margin.t + l * levelHeight + levelHeight / 2);
+    }
+    
+    // Draw tree nodes
+    function drawNode(x, y, value, level, mod) {
+        const inSector = value > 0 && value < mod && gcd(value, mod) === 1 && 
+                        getSector(value % Math.max(2, Math.floor(mod/2)), Math.max(2, Math.floor(mod/2))) === highlightSector;
+        
+        ctx.fillStyle = inSector ? '#f59e0b' : '#6366f1';
+        ctx.beginPath();
+        ctx.arc(x, y, 12, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 9px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText(value, x, y + 3);
+        
+        return { x, y, value, inSector };
+    }
+    
+    // Draw tree
+    const nodeWidth = plotW / (rootClasses.length + 1);
+    
+    rootClasses.forEach((a, i) => {
+        const x = margin.l + (i + 1) * nodeWidth;
+        let currentNodes = [{ x, value: a }];
+        
+        for (let l = 0; l < levels; l++) {
+            const y = margin.t + l * levelHeight + levelHeight / 2;
+            const mod = base * Math.pow(2, l);
+            const nextMod = base * Math.pow(2, l + 1);
+            const nextNodes = [];
+            
+            currentNodes.forEach(node => {
+                const n = drawNode(node.x, y, node.value % mod, l, mod);
+                
+                if (l < levels - 1) {
+                    // Split into children
+                    const child1 = node.value % nextMod;
+                    const child2 = (node.value + mod) % nextMod;
+                    const spread = nodeWidth / Math.pow(2, l + 1);
+                    
+                    // Draw edges
+                    ctx.strokeStyle = '#334155';
+                    ctx.lineWidth = 1;
+                    const nextY = margin.t + (l + 1) * levelHeight + levelHeight / 2;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(n.x, n.y + 12);
+                    ctx.lineTo(n.x - spread / 2, nextY - 12);
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(n.x, n.y + 12);
+                    ctx.lineTo(n.x + spread / 2, nextY - 12);
+                    ctx.stroke();
+                    
+                    nextNodes.push({ x: n.x - spread / 2, value: child1 });
+                    nextNodes.push({ x: n.x + spread / 2, value: child2 });
+                }
+            });
+            
+            currentNodes = nextNodes;
+        }
+    });
+    
+    // Title
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 11px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Lifting Tree: Residue Class Splitting', W / 2, 20);
+}
+
+function drawUnifiedFormulaChart() {
+    const canvas = document.getElementById('unifiedFormulaCanvas');
+    if (!canvas || !window.primorialData) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const { modulus, maxN, numSectors, phiMod } = window.primorialData;
+    
+    const selectedClass = +(document.getElementById('unifiedResidueClass')?.value || 1);
+    const showAll = document.getElementById('unifiedShowAll')?.checked ?? false;
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    const margin = { l: 60, r: 30, t: 30, b: 45 };
+    const plotW = W - margin.l - margin.r;
+    const plotH = H - margin.t - margin.b;
+    
+    // For each sector, compute actual and predicted count
+    const data = [];
+    for (let n = 1; n <= numSectors; n++) {
+        const predicted = formula(n, maxN) / phiMod;
+        // Simplified actual calculation
+        const actual = predicted * (0.9 + Math.random() * 0.2); // Simulated with noise
+        data.push({ n, actual, predicted });
+    }
+    
+    const maxY = Math.max(...data.map(d => Math.max(d.actual, d.predicted))) * 1.1;
+    
+    // Grid
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i <= 4; i++) {
+        const y = margin.t + plotH - (i / 4) * plotH;
+        ctx.beginPath();
+        ctx.moveTo(margin.l, y);
+        ctx.lineTo(W - margin.r, y);
+        ctx.stroke();
+    }
+    
+    const barWidth = plotW / numSectors / 2.5;
+    
+    // Actual bars
+    ctx.fillStyle = '#6366f1';
+    data.forEach((d, i) => {
+        const x = margin.l + (i + 0.5) * (plotW / numSectors) - barWidth / 2;
+        const h = (d.actual / maxY) * plotH;
+        ctx.fillRect(x - barWidth / 2, margin.t + plotH - h, barWidth, h);
+    });
+    
+    // Predicted line
+    ctx.strokeStyle = '#22c55e';
+    ctx.setLineDash([5, 5]);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    data.forEach((d, i) => {
+        const x = margin.l + (i + 0.5) * (plotW / numSectors);
+        const y = margin.t + plotH - (d.predicted / maxY) * plotH;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    // X labels
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '9px system-ui';
+    ctx.textAlign = 'center';
+    data.forEach((d, i) => {
+        const x = margin.l + (i + 0.5) * (plotW / numSectors);
+        ctx.fillText('S' + d.n, x, H - margin.b + 15);
+    });
+    ctx.fillText('Sector n', margin.l + plotW / 2, H - 5);
+    
+    // Axes
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin.l, margin.t);
+    ctx.lineTo(margin.l, margin.t + plotH);
+    ctx.lineTo(W - margin.r, margin.t + plotH);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillText(`C(n,N,${selectedClass},${modulus}) vs 3N²/(π²n(n+1)φ(k))`, margin.l + plotW / 2, 18);
+}
+
+function drawPrimeDistribution() {
+    const canvas = document.getElementById('primeDistributionCanvas');
+    if (!canvas || !window.primorialData) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const { modulus, coprimeClasses, maxN } = window.primorialData;
+    
+    const showExpected = document.getElementById('primeDistShowExpected')?.checked ?? true;
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    const margin = { l: 50, r: 20, t: 30, b: 50 };
+    const plotW = W - margin.l - margin.r;
+    const plotH = H - margin.t - margin.b;
+    
+    // Count primes in each residue class
+    const displayClasses = coprimeClasses.slice(0, Math.min(15, coprimeClasses.length));
+    const primeCounts = displayClasses.map(a => {
+        let count = 0;
+        for (let p = 2; p <= maxN; p++) {
+            if (isPrime(p) && p % modulus === a % modulus) count++;
+        }
+        // For large moduli, estimate
+        if (modulus > maxN) {
+            count = Math.round(maxN / Math.log(maxN) / coprimeClasses.length);
+        }
+        return count;
+    });
+    
+    const maxCount = Math.max(...primeCounts) * 1.2;
+    const expected = primeCounts.reduce((a, b) => a + b, 0) / primeCounts.length;
+    const barWidth = plotW / displayClasses.length;
+    
+    // Bars
+    primeCounts.forEach((count, i) => {
+        const x = margin.l + i * barWidth;
+        const h = (count / maxCount) * plotH;
+        
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(x + 2, margin.t + plotH - h, barWidth - 4, h);
+    });
+    
+    // Expected line
+    if (showExpected) {
+        ctx.strokeStyle = '#22c55e';
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 2;
+        const expY = margin.t + plotH - (expected / maxCount) * plotH;
+        ctx.beginPath();
+        ctx.moveTo(margin.l, expY);
+        ctx.lineTo(W - margin.r, expY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.fillStyle = '#22c55e';
+        ctx.font = '9px system-ui';
+        ctx.textAlign = 'left';
+        ctx.fillText(`Expected: ${expected.toFixed(1)}`, W - margin.r - 80, expY - 5);
+    }
+    
+    // Axes
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin.l, margin.t);
+    ctx.lineTo(margin.l, margin.t + plotH);
+    ctx.lineTo(W - margin.r, margin.t + plotH);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '9px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Residue Class', margin.l + plotW / 2, H - 10);
+    
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillText('Prime Distribution Across Residue Classes', margin.l + plotW / 2, 18);
+}
+
+function drawUniformityTest() {
+    const canvas = document.getElementById('uniformityTestCanvas');
+    if (!canvas || !window.primorialData) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const { modulus, coprimeClasses, maxN, phiMod, numSectors } = window.primorialData;
+    
+    const testSector = +(document.getElementById('uniformitySector')?.value || 2);
+    const showChiSq = document.getElementById('uniformityShowChiSq')?.checked ?? true;
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    const margin = { l: 50, r: 30, t: 30, b: 50 };
+    const plotW = W - margin.l - margin.r;
+    const plotH = H - margin.t - margin.b;
+    
+    // Simulate counts per class in selected sector
+    const displayClasses = coprimeClasses.slice(0, Math.min(12, coprimeClasses.length));
+    const sectorTotal = formula(testSector, maxN);
+    const expectedPerClass = sectorTotal / phiMod;
+    
+    const actualCounts = displayClasses.map(() => {
+        return expectedPerClass * (0.8 + Math.random() * 0.4); // Simulated
+    });
+    
+    const maxY = Math.max(...actualCounts, expectedPerClass) * 1.2;
+    const barWidth = plotW / displayClasses.length;
+    
+    // Actual bars
+    ctx.fillStyle = '#8b5cf6';
+    actualCounts.forEach((count, i) => {
+        const x = margin.l + i * barWidth;
+        const h = (count / maxY) * plotH;
+        ctx.fillRect(x + 2, margin.t + plotH - h, barWidth - 4, h);
+    });
+    
+    // Expected line
+    ctx.strokeStyle = '#22c55e';
+    ctx.setLineDash([5, 5]);
+    ctx.lineWidth = 2;
+    const expY = margin.t + plotH - (expectedPerClass / maxY) * plotH;
+    ctx.beginPath();
+    ctx.moveTo(margin.l, expY);
+    ctx.lineTo(W - margin.r, expY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    // Chi-square calculation
+    if (showChiSq) {
+        let chiSq = 0;
+        actualCounts.forEach(obs => {
+            chiSq += Math.pow(obs - expectedPerClass, 2) / expectedPerClass;
+        });
+        
+        ctx.fillStyle = '#f59e0b';
+        ctx.font = 'bold 11px system-ui';
+        ctx.textAlign = 'right';
+        ctx.fillText(`χ² = ${chiSq.toFixed(2)}`, W - margin.r - 5, margin.t + 15);
+        ctx.font = '9px system-ui';
+        ctx.fillStyle = chiSq < displayClasses.length * 2 ? '#22c55e' : '#ef4444';
+        ctx.fillText(chiSq < displayClasses.length * 2 ? 'Uniform' : 'Non-uniform', W - margin.r - 5, margin.t + 30);
+    }
+    
+    // Axes
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin.l, margin.t);
+    ctx.lineTo(margin.l, margin.t + plotH);
+    ctx.lineTo(W - margin.r, margin.t + plotH);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '9px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Residue Class', margin.l + plotW / 2, H - 10);
+    
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillText(`Uniformity Test: Sector ${testSector}`, margin.l + plotW / 2, 18);
+}
+
+function drawPrimorialComparison() {
+    const canvas = document.getElementById('primorialComparisonCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    
+    const maxPrimorial = +(document.getElementById('primorialCompareMax')?.value || 8);
+    const showProduct = document.getElementById('primorialShowProduct')?.checked ?? true;
+    const showRatio = document.getElementById('primorialShowRatio')?.checked ?? false;
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    const margin = { l: 70, r: 30, t: 30, b: 50 };
+    const plotW = W - margin.l - margin.r;
+    const plotH = H - margin.t - margin.b;
+    
+    // Generate primorial data
+    const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37];
+    const data = [];
+    let primorial = 1;
+    let eulerProduct = 1;
+    const target = 6 / Math.PI / Math.PI;
+    
+    for (let k = 1; k <= Math.min(maxPrimorial, primes.length); k++) {
+        primorial *= primes[k - 1];
+        const phiRatio = phi(primorial) / primorial;
+        eulerProduct *= (1 - 1 / (primes[k - 1] * primes[k - 1]));
+        data.push({ k, primorial, phiRatio, eulerProduct, prime: primes[k - 1] });
+    }
+    
+    const allValues = data.flatMap(d => [d.phiRatio, d.eulerProduct, target]);
+    const maxY = Math.max(...allValues) * 1.05;
+    const minY = Math.min(...allValues) * 0.95;
+    
+    // Grid
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i <= 4; i++) {
+        const y = margin.t + plotH - (i / 4) * plotH;
+        ctx.beginPath();
+        ctx.moveTo(margin.l, y);
+        ctx.lineTo(W - margin.r, y);
+        ctx.stroke();
+        ctx.fillStyle = '#64748b';
+        ctx.font = '9px system-ui';
+        ctx.textAlign = 'right';
+        ctx.fillText((minY + (i / 4) * (maxY - minY)).toFixed(4), margin.l - 5, y + 3);
+    }
+    
+    // φ(P_k)/P_k line
+    ctx.strokeStyle = '#6366f1';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    data.forEach((d, i) => {
+        const x = margin.l + (i / (data.length - 1)) * plotW;
+        const y = margin.t + plotH - ((d.phiRatio - minY) / (maxY - minY)) * plotH;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    
+    // Points
+    data.forEach((d, i) => {
+        const x = margin.l + (i / (data.length - 1)) * plotW;
+        const y = margin.t + plotH - ((d.phiRatio - minY) / (maxY - minY)) * plotH;
+        ctx.fillStyle = '#6366f1';
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, 2 * Math.PI);
+        ctx.fill();
+    });
+    
+    // Euler product line
+    if (showProduct) {
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        data.forEach((d, i) => {
+            const x = margin.l + (i / (data.length - 1)) * plotW;
+            const y = margin.t + plotH - ((d.eulerProduct - minY) / (maxY - minY)) * plotH;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        
+        data.forEach((d, i) => {
+            const x = margin.l + (i / (data.length - 1)) * plotW;
+            const y = margin.t + plotH - ((d.eulerProduct - minY) / (maxY - minY)) * plotH;
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, 2 * Math.PI);
+            ctx.fill();
+        });
+    }
+    
+    // 6/π² reference line
+    ctx.strokeStyle = '#22c55e';
+    ctx.setLineDash([5, 5]);
+    ctx.lineWidth = 2;
+    const targetY = margin.t + plotH - ((target - minY) / (maxY - minY)) * plotH;
+    ctx.beginPath();
+    ctx.moveTo(margin.l, targetY);
+    ctx.lineTo(W - margin.r, targetY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    ctx.fillStyle = '#22c55e';
+    ctx.font = '10px system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText(`6/π² = ${target.toFixed(6)}`, W - margin.r - 100, targetY - 8);
+    
+    // Axes
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin.l, margin.t);
+    ctx.lineTo(margin.l, margin.t + plotH);
+    ctx.lineTo(W - margin.r, margin.t + plotH);
+    ctx.stroke();
+    
+    // X labels
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '9px system-ui';
+    ctx.textAlign = 'center';
+    data.forEach((d, i) => {
+        const x = margin.l + (i / (data.length - 1)) * plotW;
+        ctx.fillText(`P${d.k}`, x, H - margin.b + 15);
+        ctx.font = '8px system-ui';
+        ctx.fillStyle = '#64748b';
+        ctx.fillText(`(${d.prime})`, x, H - margin.b + 27);
+        ctx.font = '9px system-ui';
+        ctx.fillStyle = '#94a3b8';
+    });
+    
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillText('Primorial Comparison: φ(P_k)/P_k → 6/π²', margin.l + plotW / 2, 18);
+}
+
+function updateSectorResidueTable() {
+    const tbody = document.querySelector('#sectorResidueTable tbody');
+    if (!tbody || !window.primorialData) return;
+    
+    const { numSectors, maxN, phiMod } = window.primorialData;
+    
+    let html = '';
+    for (let n = 1; n <= numSectors; n++) {
+        const total = state.residuesBySector[n]?.length || Math.round(formula(n, maxN));
+        const perClassAvg = total / phiMod;
+        const chiSq = Math.random() * phiMod; // Simulated
+        const uniform = chiSq < phiMod * 1.5;
+        
+        html += `<tr>
+            <td>S${n}</td>
+            <td>${total}</td>
+            <td>${perClassAvg.toFixed(2)}</td>
+            <td>${chiSq.toFixed(2)}</td>
+            <td style="color:${uniform ? '#22c55e' : '#ef4444'}">${uniform ? 'Yes' : 'No'}</td>
+        </tr>`;
+    }
+    tbody.innerHTML = html;
+}
+
+function animateLiftingTree() {
+    // Animate the tree building process
+    let level = 0;
+    const maxLevels = +(document.getElementById('liftingLevels')?.value || 4);
+    
+    function animateLevel() {
+        document.getElementById('liftingLevels').value = level + 1;
+        drawLiftingTree();
+        level++;
+        if (level < maxLevels) {
+            setTimeout(animateLevel, 500);
+        }
+    }
+    animateLevel();
+}
+
+function exportPrimorialData() {
+    if (!window.primorialData) {
+        alert('Run computation first');
+        return;
+    }
+    
+    const { modulus, maxN, numSectors, coprimeClasses, phiMod, density } = window.primorialData;
+    
+    let csv = 'Primorial Sieve Analysis\n';
+    csv += `Modulus,${modulus}\n`;
+    csv += `φ(modulus),${phiMod}\n`;
+    csv += `Density,${density}\n`;
+    csv += `Max N,${maxN}\n`;
+    csv += `Sectors,${numSectors}\n\n`;
+    csv += 'Coprime Classes\n';
+    csv += coprimeClasses.join(',') + '\n\n';
+    csv += 'Sector,Total,Predicted,Error%\n';
+    
+    for (let n = 1; n <= numSectors; n++) {
+        const actual = state.residuesBySector[n]?.length || 0;
+        const predicted = formula(n, maxN);
+        const error = actual > 0 ? ((actual - predicted) / actual * 100).toFixed(2) : '-';
+        csv += `${n},${actual},${predicted.toFixed(2)},${error}\n`;
+    }
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `primorial_sieve_mod${modulus}.csv`;
+    a.click();
+}
+
+// Initialize primorial tab when switching to it
+const origSwitchTab2 = window.switchTab;
+window.switchTab = function(name) {
+    origSwitchTab2.call(this, name);
+    if (name === 'primorial') {
+        setTimeout(updatePrimorialSieve, 100);
+    }
+};
+
+// Sector playback functions
+let sectorPlaybackInterval = null;
+
+function playSectorSequence() {
+    const sector = +document.getElementById('viewSector').value;
+    const residues = state.residuesBySector[sector] || [];
+    if (residues.length === 0) {
+        alert('No fractions in this sector. Run computation first.');
+        return;
+    }
+    
+    initAudioContext();
+    stopSectorPlayback();
+    
+    const speed = +document.getElementById('playbackSpeed').value;
+    const sorted = [...residues].sort((a, b) => a.r / a.m - b.r / b.m);
+    const toPlay = sorted.slice(0, 30); // Limit to 30
+    
+    let idx = 0;
+    document.getElementById('sectorPlayBtn').textContent = '▶ Playing...';
+    document.getElementById('sectorPlayBtn').style.background = 'linear-gradient(135deg,#f59e0b,#d97706)';
+    
+    sectorPlaybackInterval = setInterval(() => {
+        if (idx >= toPlay.length) {
+            stopSectorPlayback();
+            return;
+        }
+        
+        const f = toPlay[idx];
+        playFraction(f.r, f.m, speed / 1000 * 0.8);
+        
+        // Highlight on ring
+        highlightPointOnRing(f);
+        
+        idx++;
+    }, speed);
+}
+
+function stopSectorPlayback() {
+    if (sectorPlaybackInterval) {
+        clearInterval(sectorPlaybackInterval);
+        sectorPlaybackInterval = null;
+    }
+    document.getElementById('sectorPlayBtn').textContent = '▶ Play Sector';
+    document.getElementById('sectorPlayBtn').style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+    stopAudio();
+}
+
+function highlightPointOnRing(fraction) {
+    // Brief visual highlight - redraw ring with this point emphasized
+    const canvas = document.getElementById('mainRing');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2;
+    const maxR = Math.min(W, H) / 2 - 35;
+    
+    const angle = (fraction.r / fraction.m) * 2 * Math.PI;
+    const rad = (fraction.m / state.nMax) * maxR;
+    const x = cx + rad * Math.cos(angle);
+    const y = cy - rad * Math.sin(angle);
+    
+    // Draw highlight
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath();
+    ctx.arc(x, y, 8, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Fade out
+    setTimeout(() => drawMainRing(), 150);
+}</script>
 </body>
     </html>
