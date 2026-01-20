@@ -1,4 +1,4 @@
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,6 +41,11 @@
         .harmonic-toolbar-toggle:hover { opacity: 0.9; }
         .harmonic-toolbar-toggle .icon { font-size: 14px; }
         .harmonic-toolbar-toggle.playing { background: linear-gradient(135deg, #22c55e, #16a34a); animation: pulse 0.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        @keyframes horizonPulse { 0%, 100% { transform: scale(1.15); box-shadow: 0 0 10px #8b5cf6; } 50% { transform: scale(1.2); box-shadow: 0 0 15px #8b5cf6; } }
+        .horizon-frac-playing { animation: horizonPulse 0.3s ease-in-out; transition: all 0.15s ease; }
+        .horizon-frac { transition: all 0.15s ease; }
+        .horizon-frac:hover { transform: scale(1.1); filter: brightness(1.2); }
         .harmonic-quick-display {
             display: flex;
             align-items: center;
@@ -351,8 +356,9 @@
                 <h5>Audio Engine <span class="badge">LIVE</span></h5>
                 <div class="harmonic-card-row">
                     <label>Base Hz:</label>
-                    <input type="range" id="baseFreq" min="55" max="880" value="220" oninput="updateBaseFreq()">
-                    <span class="val" id="baseFreqVal">220</span>
+                    <input type="number" id="baseFreq" min="20" max="2000" value="440" step="1" style="width:70px;" oninput="updateBaseFreq()">
+                    <input type="range" id="baseFreqSlider" min="55" max="880" value="440" oninput="document.getElementById('baseFreq').value=this.value; updateBaseFreq()">
+                    <span class="val" id="baseFreqVal">440 Hz</span>
                 </div>
                 <div class="harmonic-card-row">
                     <label>Volume:</label>
@@ -535,6 +541,7 @@
         <div class="tab" onclick="switchTab('primes')">Primes</div>
         <div class="tab" onclick="switchTab('harmonic')">Harmonic</div>
         <div class="tab" onclick="switchTab('primorial')">Primorial Sieve</div>
+        <div class="tab" onclick="switchTab('horizon')">Horizon</div>
         <div class="tab" onclick="switchTab('research')">Research</div>
     </div>
     
@@ -1449,6 +1456,127 @@
     </div>
     
     <!-- RESEARCH TAB -->
+    <!-- HORIZON TAB -->
+    <div id="tab-horizon" class="tab-content">
+        <div class="panel">
+            <h3 style="color:#00ff88;">Farey Horizon & Mediant Generation</h3>
+            
+            <div style="background:#1a1a2e;padding:20px;border-radius:8px;border-left:4px solid #00ff88;margin-bottom:20px;">
+                <h4 style="color:#00ff88;margin-top:0;">The Mediant Operation</h4>
+                <p>Given two Farey neighbors <span style="font-family:monospace;">a/b</span> and <span style="font-family:monospace;">c/d</span>, their <span style="color:#ff9f43;font-weight:bold;">mediant</span> is:</p>
+                <div style="background:#0f172a;padding:15px;border-radius:6px;text-align:center;font-size:1.3em;font-family:monospace;color:#00ff88;margin:15px 0;">med(a/b, c/d) = (a+c)/(b+d)</div>
+                <p style="color:#94a3b8;font-size:0.9em;">The mediant always lies strictly between its parents and is in lowest terms when the parents are Farey neighbors (|ad - bc| = 1).</p>
+            </div>
+            
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+                <div style="background:#1a1a2e;padding:20px;border-radius:8px;border-left:4px solid #5588ff;">
+                    <h4 style="color:#5588ff;margin-top:0;">Sector Boundaries</h4>
+                    <p>Sector S<sub>n</sub> = (1/(n+1), 1/n] is bounded by:</p>
+                    <ul style="color:#94a3b8;">
+                        <li><strong style="color:#e2e8f0;">Left boundary:</strong> 1/(n+1)</li>
+                        <li><strong style="color:#e2e8f0;">Right boundary:</strong> 1/n</li>
+                    </ul>
+                    <p>The <span style="color:#ff6b6b;font-weight:bold;">Gatekeeper</span> 2/(2n+1) is the mediant of these boundaries.</p>
+                </div>
+                <div style="background:#1a1a2e;padding:20px;border-radius:8px;border-left:4px solid #a855f7;">
+                    <h4 style="color:#a855f7;margin-top:0;">Tree Confinement</h4>
+                    <p><strong style="color:#e2e8f0;">Key insight:</strong> Mediants generated within a sector stay confined to that sector.</p>
+                    <p style="color:#94a3b8;font-size:0.9em;">If a/b ∈ S<sub>n</sub> and we take mediants with the sector boundaries, all descendants remain in S<sub>n</sub>.</p>
+                    <p style="color:#94a3b8;font-size:0.9em;">The Stern-Brocot subtree rooted at the Gatekeeper generates exactly the fractions in S<sub>n</sub> ∩ F<sub>N</sub>.</p>
+                </div>
+            </div>
+            
+            <div style="background:#1e2d3d;padding:20px;border-radius:8px;margin-bottom:20px;">
+                <h4 style="margin-top:0;">Explorer Controls</h4>
+                <div class="control-row">
+                    <label>Sector n:</label>
+                    <input type="number" id="horizonSectorN" value="5" min="1" max="500">
+                    <label>Max Denom N:</label>
+                    <input type="number" id="horizonMaxN" value="50" min="3" max="1000">
+                    <button onclick="generateHorizon()">Generate</button>
+                    <button style="background:linear-gradient(135deg,#22c55e,#16a34a);" onclick="playHorizonSequence()">▶ Play</button>
+                    <button style="background:linear-gradient(135deg,#6366f1,#8b5cf6);" onclick="playHorizonSequenceBackward()">◀ Backward</button>
+                    <button style="background:#ef4444;" onclick="stopAllPlayback()">■ Stop</button>
+                </div>
+            </div>
+            
+            <div id="horizonHarmonicInfo" style="background:linear-gradient(135deg,#1e1b4b,#312e81);padding:15px;border-radius:8px;margin-bottom:20px;display:none;">
+                <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+                    <div>
+                        <span style="color:#94a3b8;font-size:11px;">Selected:</span>
+                        <span id="horizonSelectedFrac" style="color:#8b5cf6;font-size:1.3em;font-weight:bold;margin-left:8px;">-</span>
+                    </div>
+                    <div>
+                        <span style="color:#94a3b8;font-size:11px;">Frequency:</span>
+                        <span id="horizonFreq" style="color:#22c55e;font-size:1.1em;margin-left:8px;">- Hz</span>
+                    </div>
+                    <div>
+                        <span style="color:#94a3b8;font-size:11px;">Note:</span>
+                        <span id="horizonNote" style="color:#f59e0b;font-size:1.1em;margin-left:8px;">-</span>
+                    </div>
+                    <div>
+                        <span style="color:#94a3b8;font-size:11px;">Mode:</span>
+                        <span id="horizonMode" style="margin-left:8px;">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background:#111;border-radius:10px;padding:15px;margin-bottom:20px;">
+                <canvas id="horizonCanvas" width="1100" height="200"></canvas>
+                <div style="display:flex;gap:20px;justify-content:center;margin-top:15px;flex-wrap:wrap;">
+                    <div style="display:flex;align-items:center;gap:5px;font-size:0.85em;"><div style="width:16px;height:16px;border-radius:3px;background:#5588ff;"></div> Boundary</div>
+                    <div style="display:flex;align-items:center;gap:5px;font-size:0.85em;"><div style="width:16px;height:16px;border-radius:3px;background:#ff6b6b;"></div> Gatekeeper</div>
+                    <div style="display:flex;align-items:center;gap:5px;font-size:0.85em;"><div style="width:16px;height:16px;border-radius:3px;background:#00ff88;"></div> Mediant Children</div>
+                </div>
+            </div>
+            
+            <div id="horizonStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:20px;"></div>
+            
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div style="background:#1a1a2e;padding:20px;border-radius:8px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                        <h4 style="color:#a78bfa;margin:0;">Mediant Generation Tree</h4>
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <select id="horizonTreeFormat" onchange="updateHorizonTree(horizonData, parseInt(document.getElementById('horizonSectorN').value))" style="padding:4px 8px;font-size:11px;background:#1e1b4b;border:1px solid #6366f1;border-radius:4px;color:#e2e8f0;">
+                                <option value="fraction">Fraction</option>
+                                <option value="decimal2">Decimal (2)</option>
+                                <option value="decimal4">Decimal (4)</option>
+                                <option value="decimal6">Decimal (6)</option>
+                                <option value="decimal8">Decimal (8)</option>
+                            </select>
+                            <button onclick="playHorizonByGeneration('forward')" style="padding:5px 10px;font-size:11px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;cursor:pointer;" title="Play generations forward">▶ Gen→</button>
+                            <button onclick="playHorizonByGeneration('backward')" style="padding:5px 10px;font-size:11px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:4px;color:white;cursor:pointer;" title="Play generations backward">←Gen ◀</button>
+                        </div>
+                    </div>
+                    <div id="horizonTreeDisplay" style="background:#0f172a;padding:15px;border-radius:6px;font-family:monospace;font-size:0.85em;max-height:300px;overflow-y:auto;">Select parameters and click Generate</div>
+                </div>
+                <div style="background:#1a1a2e;padding:20px;border-radius:8px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                        <h4 style="color:#a78bfa;margin:0;">Fractions in Sector (by value)</h4>
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <select id="horizonListFormat" onchange="updateHorizonFractionList(horizonData)" style="padding:4px 8px;font-size:11px;background:#1e1b4b;border:1px solid #6366f1;border-radius:4px;color:#e2e8f0;">
+                                <option value="fraction">Fraction</option>
+                                <option value="decimal2">Decimal (2)</option>
+                                <option value="decimal4">Decimal (4)</option>
+                                <option value="decimal6">Decimal (6)</option>
+                                <option value="decimal8">Decimal (8)</option>
+                            </select>
+                            <button onclick="playHorizonByValue('forward')" style="padding:5px 10px;font-size:11px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;cursor:pointer;" title="Play by value ascending">▶ 0→1</button>
+                            <button onclick="playHorizonByValue('backward')" style="padding:5px 10px;font-size:11px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:4px;color:white;cursor:pointer;" title="Play by value descending">1→0 ◀</button>
+                        </div>
+                    </div>
+                    <div id="horizonFractionList" style="background:#0f172a;padding:15px;border-radius:6px;font-family:monospace;font-size:0.85em;max-height:300px;overflow-y:auto;">-</div>
+                </div>
+            </div>
+            
+            <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+                <button onclick="screenshotFullTab('horizon')">Screenshot Full Horizon Tab</button>
+                <button onclick="exportHorizonCanvas()" class="secondary">Export Number Line (4K)</button>
+                <button onclick="exportHorizonData()" class="secondary">Export Data (CSV)</button>
+            </div>
+        </div>
+    </div>
+
     <div id="tab-research" class="tab-content">
         <div class="panel">
             <h3>Research Tools</h3>
@@ -1599,6 +1727,12 @@ function screenshotFullTab(tabName) {
     const tabElement = document.getElementById('tab-' + tabName);
     if (!tabElement) { alert('Tab not found'); return; }
     
+    // For horizon tab, use html2canvas for better capture of all elements
+    if (tabName === 'horizon') {
+        screenshotHorizonTab();
+        return;
+    }
+    
     const canvases = tabElement.querySelectorAll('canvas');
     const statGrids = tabElement.querySelectorAll('.stat-grid');
     const tables = tabElement.querySelectorAll('table');
@@ -1738,6 +1872,24 @@ function screenshotFullTab(tabName) {
             formula: 'φ(p) = p-1 for prime p',
             description: 'Prime denominator distribution and twin prime patterns',
             params: ['Prime vs composite ratio', 'k-tuple correlations', 'Gap patterns at primes']
+        },
+        'harmonic': {
+            title: 'Harmonic Analysis',
+            formula: 'freq = baseHz × (r/m)',
+            description: 'Musical interpretation of Farey fractions as harmonic ratios',
+            params: ['Just intonation ratios', 'Consonance by denominator', 'Interval relationships']
+        },
+        'primorial': {
+            title: 'Primorial Sieve',
+            formula: 'P# = Π p≤n',
+            description: 'Analysis using primorial moduli to study coprime structure',
+            params: ['Coprime residue classes', 'Sieve density φ(k)/k', 'Prime channel distribution']
+        },
+        'horizon': {
+            title: 'Farey Horizon & Mediant Generation',
+            formula: 'med(a/b, c/d) = (a+c)/(b+d)',
+            description: 'Mediant operation generates all Farey fractions within a sector from boundaries',
+            params: ['Gatekeeper: 2/(2n+1)', 'BFS tree generation', 'Sector confinement property']
         },
         'research': {
             title: 'Research Tools',
@@ -2022,6 +2174,93 @@ function screenshotFullTab(tabName) {
     currentScreenshotData = composite.toDataURL('image/png');
     document.getElementById('screenshotPreview').src = currentScreenshotData;
     document.getElementById('screenshotOverlay').classList.add('active');
+}
+
+// Special screenshot function for Horizon tab using html2canvas
+async function screenshotHorizonTab() {
+    const tabElement = document.getElementById('tab-horizon');
+    if (!tabElement) { alert('Tab not found'); return; }
+    
+    // Show loading
+    const loadingDiv = document.createElement('div');
+    loadingDiv.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e1b4b;padding:30px 50px;border-radius:10px;z-index:10000;color:#fff;font-size:16px;border:2px solid #8b5cf6;';
+    loadingDiv.textContent = 'Capturing screenshot...';
+    document.body.appendChild(loadingDiv);
+    
+    try {
+        // Use html2canvas to capture the entire tab
+        const canvas = await html2canvas(tabElement, {
+            backgroundColor: '#0a0f1a',
+            scale: 2,
+            logging: false,
+            useCORS: true,
+            allowTaint: true
+        });
+        
+        // Add header and footer
+        const finalCanvas = document.createElement('canvas');
+        const headerHeight = 80;
+        const footerHeight = 40;
+        finalCanvas.width = canvas.width;
+        finalCanvas.height = canvas.height + headerHeight + footerHeight;
+        const ctx = finalCanvas.getContext('2d');
+        
+        // Background
+        ctx.fillStyle = '#0a0f1a';
+        ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+        
+        // Header gradient
+        const gradient = ctx.createLinearGradient(0, 0, finalCanvas.width, headerHeight);
+        gradient.addColorStop(0, '#1e1b4b');
+        gradient.addColorStop(1, '#312e81');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, finalCanvas.width, headerHeight);
+        
+        // Header text
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = 'bold 32px system-ui';
+        ctx.textAlign = 'left';
+        ctx.fillText('Farey Horizon & Mediant Generation', 40, 45);
+        
+        const n = document.getElementById('horizonSectorN')?.value || 5;
+        const maxN = document.getElementById('horizonMaxN')?.value || 50;
+        ctx.font = '18px system-ui';
+        ctx.fillStyle = '#a5b4fc';
+        ctx.fillText('Sector ' + n + ' | N = ' + maxN + ' | Fractions: ' + (horizonData.fractions?.length || 0) + ' | ' + new Date().toLocaleString(), 40, 70);
+        
+        // Formula badge
+        ctx.fillStyle = 'rgba(99, 102, 241, 0.3)';
+        const formula = 'med(a/b, c/d) = (a+c)/(b+d)';
+        ctx.font = 'bold 20px serif';
+        const formulaWidth = ctx.measureText(formula).width + 40;
+        ctx.fillRect(finalCanvas.width - formulaWidth - 40, 20, formulaWidth, 40);
+        ctx.strokeStyle = '#6366f1';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(finalCanvas.width - formulaWidth - 40, 20, formulaWidth, 40);
+        ctx.fillStyle = '#e0e7ff';
+        ctx.textAlign = 'right';
+        ctx.fillText(formula, finalCanvas.width - 60, 48);
+        
+        // Main content
+        ctx.drawImage(canvas, 0, headerHeight);
+        
+        // Footer
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, finalCanvas.height - footerHeight, finalCanvas.width, footerHeight);
+        ctx.fillStyle = '#64748b';
+        ctx.font = '14px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('Farey Sector Research Platform | @7dview | wessengetachew.github.io', finalCanvas.width / 2, finalCanvas.height - 15);
+        
+        currentScreenshotData = finalCanvas.toDataURL('image/png');
+        document.getElementById('screenshotPreview').src = currentScreenshotData;
+        document.getElementById('screenshotOverlay').classList.add('active');
+        
+    } catch (e) {
+        alert('Screenshot failed: ' + e.message);
+    } finally {
+        document.body.removeChild(loadingDiv);
+    }
 }
 
 // Helper function to wrap text
@@ -4948,6 +5187,7 @@ function switchTab(name) {
     if(name==='primes') updatePrimeAnalysis();
     if(name==='harmonic') updateHarmonicTab();
     if(name==='theoryviz') drawTheoryViz();
+    if(name==='horizon') { setupHorizonCanvasClick(); if(horizonData.fractions.length===0) generateHorizon(); }
     
     setTimeout(addZoomControlsToCharts, 100);
 }
@@ -5133,6 +5373,732 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape') { closePointM
 document.getElementById('sectorModal').addEventListener('click', function(e) { if(e.target === this) closeSectorModal(); });
 
 // =============================================
+// =============================================
+// HORIZON TAB - FAREY MEDIANT GENERATION
+// =============================================
+
+let horizonData = { fractions: [], generations: [], gatekeeper: null, leftBound: null, rightBound: null, clickTargets: [] };
+
+function horizonMediant(f1, f2) {
+    return { p: f1.p + f2.p, q: f1.q + f2.q };
+}
+
+function horizonFracValue(f) { return f.p / f.q; }
+function horizonFracStr(f) { return f.p + '/' + f.q; }
+
+function generateMediantsInSector(n, maxDenom) {
+    const leftBound = { p: 1, q: n + 1 };
+    const rightBound = { p: 1, q: n };
+    const gatekeeper = horizonMediant(leftBound, rightBound);
+    
+    if (gatekeeper.q > maxDenom) {
+        return { fractions: [], generations: [], gatekeeper: null, leftBound, rightBound };
+    }
+    
+    const fractions = [gatekeeper];
+    const generations = [[gatekeeper]];
+    const seen = new Set([horizonFracStr(gatekeeper)]);
+    
+    // BFS mediant generation
+    let currentGen = [{ frac: gatekeeper, left: leftBound, right: rightBound }];
+    
+    for (let gen = 0; gen < 20 && currentGen.length > 0; gen++) {
+        const nextGen = [];
+        const newFracs = [];
+        
+        for (const item of currentGen) {
+            // Left child: mediant with left boundary
+            const leftChild = horizonMediant(item.left, item.frac);
+            if (leftChild.q <= maxDenom && !seen.has(horizonFracStr(leftChild))) {
+                seen.add(horizonFracStr(leftChild));
+                fractions.push(leftChild);
+                newFracs.push(leftChild);
+                nextGen.push({ frac: leftChild, left: item.left, right: item.frac });
+            }
+            
+            // Right child: mediant with right boundary
+            const rightChild = horizonMediant(item.frac, item.right);
+            if (rightChild.q <= maxDenom && !seen.has(horizonFracStr(rightChild))) {
+                seen.add(horizonFracStr(rightChild));
+                fractions.push(rightChild);
+                newFracs.push(rightChild);
+                nextGen.push({ frac: rightChild, left: item.frac, right: item.right });
+            }
+        }
+        
+        if (newFracs.length > 0) {
+            generations.push(newFracs);
+        }
+        currentGen = nextGen;
+    }
+    
+    return { fractions, generations, gatekeeper, leftBound, rightBound };
+}
+
+function drawHorizonNumberLine(data, n, maxDenom) {
+    const canvas = document.getElementById('horizonCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    ctx.clearRect(0, 0, width, height);
+    
+    // Reset click targets
+    horizonData.clickTargets = [];
+    
+    const leftVal = 1 / (n + 1);
+    const rightVal = 1 / n;
+    const padding = 50;
+    const lineY = height / 2;
+    
+    // Expand view slightly beyond sector
+    const margin = (rightVal - leftVal) * 0.15;
+    const viewLeft = leftVal - margin;
+    const viewRight = rightVal + margin;
+    
+    // Store for click detection
+    horizonData.viewLeft = viewLeft;
+    horizonData.viewRight = viewRight;
+    horizonData.padding = padding;
+    horizonData.canvasWidth = width;
+    
+    function xPos(val) {
+        return padding + (val - viewLeft) / (viewRight - viewLeft) * (width - 2 * padding);
+    }
+    
+    // Draw axis
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padding, lineY);
+    ctx.lineTo(width - padding, lineY);
+    ctx.stroke();
+    
+    // Draw sector region
+    ctx.fillStyle = 'rgba(0, 255, 136, 0.1)';
+    ctx.fillRect(xPos(leftVal), lineY - 60, xPos(rightVal) - xPos(leftVal), 120);
+    
+    // Draw boundary lines
+    ctx.strokeStyle = '#5588ff';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(xPos(leftVal), lineY - 70);
+    ctx.lineTo(xPos(leftVal), lineY + 70);
+    ctx.moveTo(xPos(rightVal), lineY - 70);
+    ctx.lineTo(xPos(rightVal), lineY + 70);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    // Label boundaries
+    ctx.fillStyle = '#5588ff';
+    ctx.font = '12px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('1/' + (n+1), xPos(leftVal), lineY + 85);
+    ctx.fillText('1/' + n, xPos(rightVal), lineY + 85);
+    
+    // Draw fractions
+    const allFracs = [];
+    
+    // Add boundaries (for reference)
+    allFracs.push({ frac: data.leftBound, type: 'boundary' });
+    allFracs.push({ frac: data.rightBound, type: 'boundary' });
+    
+    if (data.gatekeeper) {
+        allFracs.push({ frac: data.gatekeeper, type: 'gatekeeper' });
+        for (let i = 1; i < data.generations.length; i++) {
+            for (const f of data.generations[i]) {
+                allFracs.push({ frac: f, type: 'mediant' });
+            }
+        }
+    }
+    
+    // Sort by value for drawing
+    allFracs.sort((a, b) => horizonFracValue(a.frac) - horizonFracValue(b.frac));
+    
+    // Draw tick marks and labels
+    for (let i = 0; i < allFracs.length; i++) {
+        const item = allFracs[i];
+        const x = xPos(horizonFracValue(item.frac));
+        let color, tickHeight;
+        
+        switch (item.type) {
+            case 'boundary':
+                color = '#5588ff';
+                tickHeight = 25;
+                break;
+            case 'gatekeeper':
+                color = '#ff6b6b';
+                tickHeight = 35;
+                break;
+            case 'mediant':
+                color = '#00ff88';
+                tickHeight = 20;
+                break;
+        }
+        
+        // Check if this is the selected fraction
+        const isSelected = horizonData.selectedFrac && 
+            item.frac.p === horizonData.selectedFrac.p && 
+            item.frac.q === horizonData.selectedFrac.q;
+        
+        if (isSelected) {
+            // Draw highlight circle
+            ctx.fillStyle = 'rgba(139, 92, 246, 0.3)';
+            ctx.beginPath();
+            ctx.arc(x, lineY, 18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#8b5cf6';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        
+        ctx.strokeStyle = isSelected ? '#8b5cf6' : color;
+        ctx.lineWidth = item.type === 'gatekeeper' ? 3 : (isSelected ? 3 : 2);
+        ctx.beginPath();
+        ctx.moveTo(x, lineY - tickHeight);
+        ctx.lineTo(x, lineY + tickHeight);
+        ctx.stroke();
+        
+        // Store click target
+        horizonData.clickTargets.push({
+            x: x,
+            y: lineY,
+            r: 15,
+            frac: item.frac,
+            type: item.type
+        });
+        
+        // Label (stagger to avoid overlap)
+        ctx.fillStyle = isSelected ? '#8b5cf6' : color;
+        ctx.font = item.type === 'gatekeeper' || isSelected ? 'bold 11px monospace' : '10px monospace';
+        const labelY = item.type === 'gatekeeper' ? lineY - 45 : 
+                       (i % 2 === 0 ? lineY - 40 : lineY + 55);
+        ctx.fillText(horizonFracStr(item.frac), x, labelY);
+    }
+    
+    // Title
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Sector S_' + n + ' = (1/' + (n+1) + ', 1/' + n + ']', padding, 25);
+    
+    // Click hint
+    ctx.fillStyle = '#64748b';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('Click fractions to play', width - padding, 25);
+}
+
+function updateHorizonStats(data, n, maxDenom) {
+    const statsArea = document.getElementById('horizonStats');
+    if (!statsArea) return;
+    
+    const minDenom = 2 * n + 1;
+    const gatekeeperExists = maxDenom >= minDenom;
+    
+    // Asymptotic estimate
+    const estimate = (3 * maxDenom * maxDenom) / (Math.PI * Math.PI * n * (n + 1));
+    
+    // Horizon calculations
+    const gatekeeperHorizon = Math.floor((maxDenom - 1) / 2);
+    const statisticalHorizon = Math.floor(0.551328 * maxDenom);
+    
+    statsArea.innerHTML = `
+        <div style="background:#222;padding:15px;border-radius:8px;text-align:center;">
+            <div style="font-size:1.5em;color:#00ff88;font-weight:bold;">${data.fractions.length}</div>
+            <div style="font-size:0.85em;color:#888;">Actual Count</div>
+        </div>
+        <div style="background:#222;padding:15px;border-radius:8px;text-align:center;">
+            <div style="font-size:1.5em;color:#00ff88;font-weight:bold;">${estimate.toFixed(2)}</div>
+            <div style="font-size:0.85em;color:#888;">Asymptotic Estimate</div>
+        </div>
+        <div style="background:#222;padding:15px;border-radius:8px;text-align:center;">
+            <div style="font-size:1.5em;color:#ff6b6b;font-weight:bold;">${minDenom}</div>
+            <div style="font-size:0.85em;color:#888;">Min Denom (2n+1)</div>
+        </div>
+        <div style="background:#222;padding:15px;border-radius:8px;text-align:center;">
+            <div style="font-size:1.5em;color:#ff6b6b;font-weight:bold;">${gatekeeperExists ? horizonFracStr(data.gatekeeper) : 'None'}</div>
+            <div style="font-size:0.85em;color:#888;">Gatekeeper</div>
+        </div>
+        <div style="background:#222;padding:15px;border-radius:8px;text-align:center;">
+            <div style="font-size:1.5em;color:#a855f7;font-weight:bold;">${data.generations.length}</div>
+            <div style="font-size:0.85em;color:#888;">Generations</div>
+        </div>
+        <div style="background:#222;padding:15px;border-radius:8px;text-align:center;">
+            <div style="font-size:1.3em;color:#5588ff;font-weight:bold;">${gatekeeperHorizon} / ${statisticalHorizon}</div>
+            <div style="font-size:0.85em;color:#888;">Gatekeeper / Statistical Horizon</div>
+        </div>
+    `;
+}
+
+function updateHorizonTree(data, n) {
+    const treeDisplay = document.getElementById('horizonTreeDisplay');
+    if (!treeDisplay) return;
+    
+    const format = document.getElementById('horizonTreeFormat')?.value || 'fraction';
+    
+    function formatFrac(f) {
+        if (format === 'fraction') return f.p + '/' + f.q;
+        const precision = parseInt(format.replace('decimal', '')) || 4;
+        return (f.p / f.q).toFixed(precision);
+    }
+    
+    if (!data.gatekeeper) {
+        treeDisplay.innerHTML = '<span style="color:#ff6b6b">Sector ' + n + ' is empty: N < 2n+1 = ' + (2*n+1) + '</span>';
+        return;
+    }
+    
+    // Build full sequence including boundaries for playback reference
+    horizonData.treePlaySequence = [];
+    
+    let html = '<div><strong>Generation Process:</strong> <span style="color:#64748b;font-size:0.85em;">(click to play)</span></div>';
+    
+    // Boundaries
+    html += '<div style="margin:10px 0">Boundaries: ';
+    html += '<span id="horizon-tree-bound-left" class="horizon-frac" style="display:inline-block;padding:2px 6px;margin:2px;border-radius:3px;background:#5588ff33;border:1px solid #5588ff;cursor:pointer;" onclick="playHorizonFrac(1,' + (n+1) + ')">' + formatFrac({p:1, q:n+1}) + '</span>';
+    html += ' ← → ';
+    html += '<span id="horizon-tree-bound-right" class="horizon-frac" style="display:inline-block;padding:2px 6px;margin:2px;border-radius:3px;background:#5588ff33;border:1px solid #5588ff;cursor:pointer;" onclick="playHorizonFrac(1,' + n + ')">' + formatFrac({p:1, q:n}) + '</span>';
+    html += '</div>';
+    
+    // Add boundaries to sequence
+    horizonData.treePlaySequence.push({ p: 1, q: n + 1, id: 'horizon-tree-bound-left' });
+    horizonData.treePlaySequence.push({ p: 1, q: n, id: 'horizon-tree-bound-right' });
+    
+    // Gatekeeper line
+    html += '<div style="margin:10px 0">med(' + formatFrac({p:1,q:n+1}) + ', ' + formatFrac({p:1,q:n}) + ') = ';
+    html += '<span id="horizon-tree-gk" class="horizon-frac" style="display:inline-block;padding:2px 6px;margin:2px;border-radius:3px;background:#ff6b6b33;border:1px solid #ff6b6b;cursor:pointer;" onclick="playHorizonFrac(' + data.gatekeeper.p + ',' + data.gatekeeper.q + ')">' + formatFrac(data.gatekeeper) + '</span> (Gatekeeper)</div>';
+    html += '<hr style="border-color:#333; margin:15px 0">';
+    
+    // Add gatekeeper to sequence
+    horizonData.treePlaySequence.push({ p: data.gatekeeper.p, q: data.gatekeeper.q, id: 'horizon-tree-gk' });
+    
+    // Generations
+    for (let i = 0; i < data.generations.length; i++) {
+        const gen = data.generations[i];
+        html += '<div id="horizon-tree-gen-' + i + '"><strong>Gen ' + i + ':</strong> ';
+        for (let j = 0; j < gen.length; j++) {
+            const f = gen[j];
+            const cls = i === 0 ? 'background:#ff6b6b33;border:1px solid #ff6b6b;' : 'background:#00ff8833;border:1px solid #00ff88;';
+            const id = 'horizon-tree-' + i + '-' + j;
+            html += '<span id="' + id + '" class="horizon-frac" style="display:inline-block;padding:2px 6px;margin:2px;border-radius:3px;cursor:pointer;' + cls + '" onclick="playHorizonFrac(' + f.p + ',' + f.q + ')">' + formatFrac(f) + '</span> ';
+            
+            // Add to sequence (skip gen 0 gatekeeper as already added)
+            if (i > 0) {
+                horizonData.treePlaySequence.push({ p: f.p, q: f.q, id: id });
+            }
+        }
+        html += '</div>';
+    }
+    
+    treeDisplay.innerHTML = html;
+}
+
+function updateHorizonFractionList(data) {
+    const listDisplay = document.getElementById('horizonFractionList');
+    if (!listDisplay) return;
+    
+    const format = document.getElementById('horizonListFormat')?.value || 'fraction';
+    
+    function formatFrac(f) {
+        if (format === 'fraction') return f.p + '/' + f.q;
+        const precision = parseInt(format.replace('decimal', '')) || 4;
+        return (f.p / f.q).toFixed(precision);
+    }
+    
+    if (data.fractions.length === 0) {
+        listDisplay.innerHTML = 'No fractions in sector';
+        return;
+    }
+    
+    // Sort by value
+    const sorted = [...data.fractions].sort((a, b) => horizonFracValue(a) - horizonFracValue(b));
+    
+    // Store for playback with IDs
+    horizonData.valuePlaySequence = [];
+    
+    let html = '<strong>' + sorted.length + ' fractions:</strong> <span style="color:#64748b;font-size:0.85em;">(click to play)</span><br>';
+    
+    for (let i = 0; i < sorted.length; i++) {
+        const f = sorted[i];
+        const id = 'horizon-value-' + i;
+        html += '<span id="' + id + '" class="horizon-frac" style="display:inline-block;padding:2px 6px;margin:2px;border-radius:3px;background:#00ff8833;border:1px solid #00ff88;cursor:pointer;" onclick="playHorizonFrac(' + f.p + ',' + f.q + ')">' + formatFrac(f) + '</span> ';
+        
+        horizonData.valuePlaySequence.push({ p: f.p, q: f.q, id: id });
+    }
+    
+    listDisplay.innerHTML = html;
+}
+
+function generateHorizon() {
+    const n = parseInt(document.getElementById('horizonSectorN').value) || 5;
+    const maxDenom = parseInt(document.getElementById('horizonMaxN').value) || 50;
+    
+    horizonData = generateMediantsInSector(n, maxDenom);
+    
+    drawHorizonNumberLine(horizonData, n, maxDenom);
+    updateHorizonStats(horizonData, n, maxDenom);
+    updateHorizonTree(horizonData, n);
+    updateHorizonFractionList(horizonData);
+}
+
+function playHorizonSequence() {
+    if (horizonData.fractions.length === 0) {
+        showPlaybackStatus('Generate fractions first');
+        return;
+    }
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    // Sort by value
+    const sorted = [...horizonData.fractions].sort((a, b) => horizonFracValue(a) - horizonFracValue(b));
+    
+    // Convert to playback format
+    playbackState.queue = sorted.map(f => ({ r: f.p, m: f.q }));
+    playbackState.direction = 'forward';
+    playbackState.mode = 'horizon';
+    playbackState.currentIndex = 0;
+    playbackState.isPlaying = true;
+    
+    showPlaybackStatus('Playing Horizon mediants →');
+    startPlaybackLoop();
+}
+
+// Play a single horizon fraction and trigger global harmonic
+function playHorizonFrac(p, q) {
+    // Update selection for highlight
+    horizonData.selectedFrac = { p, q };
+    
+    // Redraw to show selection
+    const n = parseInt(document.getElementById('horizonSectorN').value) || 5;
+    const maxDenom = parseInt(document.getElementById('horizonMaxN').value) || 50;
+    drawHorizonNumberLine(horizonData, n, maxDenom);
+    
+    // Update harmonic info panel
+    updateHorizonHarmonicDisplay(p, q);
+    
+    // Trigger global harmonic system
+    triggerGlobalHarmonic(p, q);
+}
+
+// Play horizon sequence backward
+function playHorizonSequenceBackward() {
+    if (horizonData.fractions.length === 0) {
+        showPlaybackStatus('Generate fractions first');
+        return;
+    }
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    // Sort by value descending
+    const sorted = [...horizonData.fractions].sort((a, b) => horizonFracValue(b) - horizonFracValue(a));
+    
+    // Convert to playback format
+    playbackState.queue = sorted.map(f => ({ r: f.p, m: f.q }));
+    playbackState.direction = 'backward';
+    playbackState.mode = 'horizon';
+    playbackState.currentIndex = 0;
+    playbackState.isPlaying = true;
+    
+    showPlaybackStatus('Playing Horizon mediants ←');
+    startPlaybackLoop();
+}
+
+// Play fractions by generation order (BFS tree order) - includes boundaries
+function playHorizonByGeneration(direction) {
+    if (!horizonData.treePlaySequence || horizonData.treePlaySequence.length === 0) {
+        showPlaybackStatus('Generate fractions first');
+        return;
+    }
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    // Use the full tree sequence (boundaries + gatekeeper + all generations)
+    let sequence = [...horizonData.treePlaySequence];
+    
+    if (direction === 'backward') {
+        sequence.reverse();
+    }
+    
+    playbackState.queue = sequence.map(f => ({ r: f.p, m: f.q, highlightId: f.id }));
+    playbackState.direction = direction;
+    playbackState.mode = 'horizon-gen';
+    playbackState.currentIndex = 0;
+    playbackState.isPlaying = true;
+    
+    showPlaybackStatus('Playing by generation ' + (direction === 'forward' ? '→' : '←'));
+    startHorizonPlaybackLoop();
+}
+
+// Play fractions sorted by value with highlighting
+function playHorizonByValue(direction) {
+    if (!horizonData.valuePlaySequence || horizonData.valuePlaySequence.length === 0) {
+        showPlaybackStatus('Generate fractions first');
+        return;
+    }
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    // Use the value-sorted sequence
+    let sequence = [...horizonData.valuePlaySequence];
+    
+    if (direction === 'backward') {
+        sequence.reverse();
+    }
+    
+    playbackState.queue = sequence.map(f => ({ r: f.p, m: f.q, highlightId: f.id }));
+    playbackState.direction = direction;
+    playbackState.mode = 'horizon-value';
+    playbackState.currentIndex = 0;
+    playbackState.isPlaying = true;
+    
+    showPlaybackStatus('Playing by value ' + (direction === 'forward' ? '0→1' : '1→0'));
+    startHorizonPlaybackLoop();
+}
+
+// Special playback loop for horizon with highlighting
+function startHorizonPlaybackLoop() {
+    const speed = +(document.getElementById('playbackSpeed')?.value || 250);
+    
+    // Clear any previous highlights
+    document.querySelectorAll('.horizon-frac-playing').forEach(el => {
+        el.classList.remove('horizon-frac-playing');
+        el.style.background = '';
+        el.style.transform = '';
+        el.style.boxShadow = '';
+    });
+    
+    playbackState.intervalId = setInterval(() => {
+        if (!playbackState.isPlaying || playbackState.currentIndex >= playbackState.queue.length) {
+            stopAllPlayback();
+            // Clear highlights
+            document.querySelectorAll('.horizon-frac-playing').forEach(el => {
+                el.classList.remove('horizon-frac-playing');
+                el.style.background = '';
+                el.style.transform = '';
+                el.style.boxShadow = '';
+            });
+            showPlaybackStatus('Playback complete');
+            return;
+        }
+        
+        const f = playbackState.queue[playbackState.currentIndex];
+        
+        // Clear previous highlight
+        document.querySelectorAll('.horizon-frac-playing').forEach(el => {
+            el.classList.remove('horizon-frac-playing');
+            el.style.background = '';
+            el.style.transform = '';
+            el.style.boxShadow = '';
+        });
+        
+        // Highlight current fraction
+        if (f.highlightId) {
+            const el = document.getElementById(f.highlightId);
+            if (el) {
+                el.classList.add('horizon-frac-playing');
+                el.style.background = 'linear-gradient(135deg, #8b5cf6, #6366f1)';
+                el.style.transform = 'scale(1.15)';
+                el.style.boxShadow = '0 0 10px #8b5cf6';
+                el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+        
+        // Validate and play
+        if (f && f.r && f.m && f.m !== 0 && isFinite(f.r) && isFinite(f.m)) {
+            const duration = speed / 1000 * 0.8;
+            playFraction(f.r, f.m, duration);
+            highlightCurrentFraction({ r: f.r, m: f.m });
+            updatePlaybackDisplay({ r: f.r, m: f.m }, playbackState.currentIndex, playbackState.queue.length);
+            pulseToolbar();
+            
+            // Update horizon harmonic info
+            updateHorizonHarmonicDisplay(f.r, f.m);
+        }
+        
+        playbackState.currentIndex++;
+    }, speed);
+}
+
+// Update horizon harmonic info display
+function updateHorizonHarmonicDisplay(p, q) {
+    const infoPanel = document.getElementById('horizonHarmonicInfo');
+    if (infoPanel) {
+        infoPanel.style.display = 'block';
+        document.getElementById('horizonSelectedFrac').textContent = p + '/' + q;
+        
+        const freq = harmonicSettings.baseFreq * (p / q);
+        document.getElementById('horizonFreq').textContent = freq.toFixed(1) + ' Hz';
+        
+        if (typeof frequencyToNote === 'function') {
+            const note = frequencyToNote(freq);
+            document.getElementById('horizonNote').textContent = note.name;
+        }
+        
+        if (typeof getHarmonicMode === 'function') {
+            const mode = getHarmonicMode(q);
+            document.getElementById('horizonMode').innerHTML = '<span class="mode-badge ' + mode.class + '">' + mode.name + '</span>';
+        }
+    }
+}
+
+// Export horizon canvas as 4K image
+function exportHorizonCanvas() {
+    const canvas = document.getElementById('horizonCanvas');
+    if (!canvas) return;
+    
+    const n = parseInt(document.getElementById('horizonSectorN').value) || 5;
+    const maxN = parseInt(document.getElementById('horizonMaxN').value) || 50;
+    
+    // Create high-res canvas
+    const scale = 4;
+    const exportCanvas = document.createElement('canvas');
+    exportCanvas.width = canvas.width * scale;
+    exportCanvas.height = canvas.height * scale + 100;
+    const ctx = exportCanvas.getContext('2d');
+    
+    // Background
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+    
+    // Scale and draw original
+    ctx.save();
+    ctx.scale(scale, scale);
+    
+    // Redraw at scale
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.drawImage(canvas, 0, 0);
+    ctx.drawImage(tempCanvas, 0, 0);
+    ctx.restore();
+    
+    // Add title and metadata
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 48px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Farey Horizon - Sector S_' + n + ' | N=' + maxN, exportCanvas.width/2, exportCanvas.height - 60);
+    
+    ctx.font = '28px sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.fillText('Fractions: ' + horizonData.fractions.length + ' | Generations: ' + horizonData.generations.length + ' | Gatekeeper: ' + (horizonData.gatekeeper ? horizonFracStr(horizonData.gatekeeper) : 'None'), exportCanvas.width/2, exportCanvas.height - 20);
+    
+    // Download
+    const link = document.createElement('a');
+    link.download = 'horizon_sector_' + n + '_N' + maxN + '_4K.png';
+    link.href = exportCanvas.toDataURL('image/png');
+    link.click();
+}
+
+// Export horizon data as CSV
+function exportHorizonData() {
+    if (horizonData.fractions.length === 0) {
+        alert('Generate fractions first');
+        return;
+    }
+    
+    const n = parseInt(document.getElementById('horizonSectorN').value) || 5;
+    const maxN = parseInt(document.getElementById('horizonMaxN').value) || 50;
+    
+    let csv = 'Farey Horizon Export\n';
+    csv += 'Sector,' + n + '\n';
+    csv += 'Max Denominator,' + maxN + '\n';
+    csv += 'Total Fractions,' + horizonData.fractions.length + '\n';
+    csv += 'Generations,' + horizonData.generations.length + '\n';
+    csv += 'Gatekeeper,' + (horizonData.gatekeeper ? horizonFracStr(horizonData.gatekeeper) : 'None') + '\n';
+    csv += '\nFractions by Generation\n';
+    csv += 'Generation,Numerator,Denominator,Value,Frequency (Hz)\n';
+    
+    for (let g = 0; g < horizonData.generations.length; g++) {
+        for (const f of horizonData.generations[g]) {
+            const freq = harmonicSettings.baseFreq * (f.p / f.q);
+            csv += g + ',' + f.p + ',' + f.q + ',' + (f.p/f.q).toFixed(8) + ',' + freq.toFixed(2) + '\n';
+        }
+    }
+    
+    csv += '\nFractions by Value\n';
+    csv += 'Numerator,Denominator,Value,Frequency (Hz)\n';
+    
+    const sorted = [...horizonData.fractions].sort((a, b) => horizonFracValue(a) - horizonFracValue(b));
+    for (const f of sorted) {
+        const freq = harmonicSettings.baseFreq * (f.p / f.q);
+        csv += f.p + ',' + f.q + ',' + (f.p/f.q).toFixed(8) + ',' + freq.toFixed(2) + '\n';
+    }
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const link = document.createElement('a');
+    link.download = 'horizon_sector_' + n + '_N' + maxN + '.csv';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+}
+
+// Setup horizon canvas click handler
+function setupHorizonCanvasClick() {
+    const canvas = document.getElementById('horizonCanvas');
+    if (!canvas) return;
+    
+    canvas.style.cursor = 'pointer';
+    
+    canvas.addEventListener('click', function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Find closest click target
+        let closest = null;
+        let minDist = 20;
+        
+        for (const target of horizonData.clickTargets || []) {
+            const dist = Math.sqrt((target.x - x) ** 2 + (target.y - y) ** 2);
+            if (dist < minDist) {
+                minDist = dist;
+                closest = target;
+            }
+        }
+        
+        if (closest) {
+            playHorizonFrac(closest.frac.p, closest.frac.q);
+        }
+    });
+    
+    // Mousemove for hover effect
+    canvas.addEventListener('mousemove', function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        let hover = false;
+        for (const target of horizonData.clickTargets || []) {
+            const dist = Math.sqrt((target.x - x) ** 2 + (target.y - y) ** 2);
+            if (dist < 15) {
+                hover = true;
+                canvas.title = target.frac.p + '/' + target.frac.q + ' (' + target.type + ')';
+                break;
+            }
+        }
+        canvas.style.cursor = hover ? 'pointer' : 'default';
+        if (!hover) canvas.title = '';
+    });
+}
+
+// Initialize horizon canvas when tab is shown
+const origSwitchTab = typeof switchTab === 'function' ? switchTab : null;
+function initHorizonOnTabSwitch(tabId) {
+    if (tabId === 'horizon') {
+        setTimeout(() => {
+            setupHorizonCanvasClick();
+            if (horizonData.fractions.length === 0) {
+                generateHorizon();
+            }
+        }, 100);
+    }
+}
+
 // GLOBAL HARMONIC ANALYSIS SYSTEM
 // =============================================
 let audioCtx = null;
@@ -5140,7 +6106,7 @@ let currentOscillator = null;
 let currentGain = null;
 let selectedHarmonicFraction = { r: 1, m: 2 };
 let harmonicSettings = {
-    baseFreq: 220,
+    baseFreq: 440,
     volume: 1.0,
     waveform: 'sine',
     coupling: 0.5
@@ -5173,6 +6139,11 @@ function updateBaseFreq() {
     const freq = document.getElementById('baseFreq').value;
     harmonicSettings.baseFreq = +freq;
     document.getElementById('baseFreqVal').textContent = freq + ' Hz';
+    // Sync slider if within range
+    const slider = document.getElementById('baseFreqSlider');
+    if (slider && freq >= 55 && freq <= 880) {
+        slider.value = freq;
+    }
     updateHarmonicDisplays();
 }
 
@@ -5494,12 +6465,13 @@ function drawHarmonicSpectrum() {
 }
 
 function resetHarmonicDefaults() {
-    document.getElementById('baseFreq').value = 220;
+    document.getElementById('baseFreq').value = 440;
+    document.getElementById('baseFreqSlider').value = 440;
     document.getElementById('harmonicVolume').value = 30;
     document.getElementById('waveform').value = 'sine';
     document.getElementById('arnoldK').value = 50;
     
-    harmonicSettings = { baseFreq: 220, volume: 0.3, waveform: 'sine', coupling: 0.5 };
+    harmonicSettings = { baseFreq: 440, volume: 0.3, waveform: 'sine', coupling: 0.5 };
     selectedHarmonicFraction = { r: 1, m: 2 };
     
     updateBaseFreq();
@@ -7820,4 +8792,4 @@ function pulseToolbar() {
 
 </script>
 </body>
-                </html>
+            </html>
