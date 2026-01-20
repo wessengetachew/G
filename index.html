@@ -518,6 +518,29 @@
             <button class="secondary" onclick="exportAllData()">Export All</button>
             <button class="composite-export-btn" onclick="exportCompositeTab()" title="Export all visible charts to single 4K image">4K Composite Export</button>
         </div>
+        
+        <!-- Global Display Format Controls -->
+        <div class="control-row" style="background:linear-gradient(135deg,#1e1b4b,#312e81);padding:10px 15px;border-radius:6px;margin-top:10px;">
+            <label style="color:#a5b4fc;font-weight:600;">Global Display:</label>
+            <select id="globalDisplayFormat" onchange="updateGlobalDisplayFormat()" style="padding:5px 10px;background:#0f172a;border:1px solid #6366f1;border-radius:4px;color:#e2e8f0;">
+                <option value="fraction">Fraction (r/m)</option>
+                <option value="decimal">Decimal</option>
+                <option value="degree">Degrees (0-360°)</option>
+                <option value="radian">Radians (0-2π)</option>
+                <option value="pi">π-fraction (×π)</option>
+            </select>
+            <label style="color:#a5b4fc;margin-left:15px;">Precision:</label>
+            <select id="globalPrecision" onchange="updateGlobalDisplayFormat()" style="padding:5px 10px;background:#0f172a;border:1px solid #6366f1;border-radius:4px;color:#e2e8f0;">
+                <option value="2">2 decimals</option>
+                <option value="4" selected>4 decimals</option>
+                <option value="6">6 decimals</option>
+                <option value="8">8 decimals</option>
+                <option value="10">10 decimals</option>
+                <option value="12">12 decimals</option>
+            </select>
+            <span id="globalFormatPreview" style="color:#22c55e;margin-left:15px;font-family:monospace;">1/2 = 0.5000</span>
+        </div>
+        
         <div class="progress-bar" id="progressBar" style="display:none;"><div class="progress-fill" id="progressFill"></div></div>
         <div id="statusArea"></div>
     </div>
@@ -558,8 +581,41 @@
             <div class="chart-box chart-wrapper"><h4>Relative Error %</h4><canvas id="mainErrorChart"></canvas></div>
         </div>
         <div class="panel" style="margin-top:15px;">
-            <h4>Sector Data <span style="font-weight:normal; color:#64748b;">(click row to see primes)</span></h4>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+                <h4 style="margin:0;">Sector Data <span style="font-weight:normal; color:#64748b;">(click row to see details)</span></h4>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <label style="color:#94a3b8;">View Sector:</label>
+                    <select id="sectorDataSelect" onchange="showSectorDataDetail(this.value)" style="padding:5px 10px;background:#1e1b4b;border:1px solid #6366f1;border-radius:4px;color:#e2e8f0;">
+                        <option value="">-- Select Sector --</option>
+                    </select>
+                    <button onclick="exportSectorCSV(document.getElementById('sectorDataSelect').value)" class="secondary" style="font-size:11px;">Export Sector CSV</button>
+                    <button onclick="exportAllSectorsCSV()" class="secondary" style="font-size:11px;">Export All CSV</button>
+                </div>
+            </div>
             <div class="table-scroll"><table id="mainTable"><thead><tr><th>n</th><th>Interval</th><th>Exact</th><th>Pred</th><th>Err%</th><th>Primes</th><th>Composites</th></tr></thead><tbody></tbody></table></div>
+            
+            <!-- Sector Detail Panel -->
+            <div id="sectorDetailPanel" style="display:none;margin-top:15px;background:#0f172a;border-radius:8px;padding:15px;border:1px solid #334155;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <h5 style="margin:0;color:#a78bfa;" id="sectorDetailTitle">Sector Details</h5>
+                    <div style="display:flex;gap:8px;">
+                        <button onclick="playSectorDetailFractions('primes','forward')" style="padding:4px 10px;font-size:11px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:4px;color:white;cursor:pointer;">▶ Primes</button>
+                        <button onclick="playSectorDetailFractions('composites','forward')" style="padding:4px 10px;font-size:11px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:4px;color:white;cursor:pointer;">▶ Composites</button>
+                        <button onclick="playSectorDetailFractions('all','forward')" style="padding:4px 10px;font-size:11px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;cursor:pointer;">▶ All</button>
+                        <button onclick="closeSectorDetail()" style="padding:4px 10px;font-size:11px;background:#ef4444;border:none;border-radius:4px;color:white;cursor:pointer;">✕ Close</button>
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                    <div>
+                        <h6 style="color:#f59e0b;margin:0 0 8px 0;">Prime Denominators (<span id="sectorPrimeCount">0</span>)</h6>
+                        <div id="sectorPrimesList" style="background:#1e293b;padding:10px;border-radius:6px;max-height:200px;overflow-y:auto;font-family:monospace;font-size:0.85em;"></div>
+                    </div>
+                    <div>
+                        <h6 style="color:#6366f1;margin:0 0 8px 0;">Composite Denominators (<span id="sectorCompositeCount">0</span>)</h6>
+                        <div id="sectorCompositesList" style="background:#1e293b;padding:10px;border-radius:6px;max-height:200px;overflow-y:auto;font-family:monospace;font-size:0.85em;"></div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="panel chart-wrapper">
             <h4>Sector Ring <span style="font-weight:normal; color:#64748b;">(click points to see tree path)</span></h4>
@@ -1538,7 +1594,7 @@
                         <h4 style="color:#a78bfa;margin:0;">Mediant Generation Tree</h4>
                         <div style="display:flex;gap:6px;align-items:center;">
                             <select id="horizonTreeFormat" onchange="updateHorizonTree(horizonData, parseInt(document.getElementById('horizonSectorN').value))" style="padding:4px 8px;font-size:11px;background:#1e1b4b;border:1px solid #6366f1;border-radius:4px;color:#e2e8f0;">
-                                <option value="fraction">Fraction</option>
+                                <option value="fraction">Use Global</option>
                                 <option value="decimal2">Decimal (2)</option>
                                 <option value="decimal4">Decimal (4)</option>
                                 <option value="decimal6">Decimal (6)</option>
@@ -1555,7 +1611,7 @@
                         <h4 style="color:#a78bfa;margin:0;">Fractions in Sector (by value)</h4>
                         <div style="display:flex;gap:6px;align-items:center;">
                             <select id="horizonListFormat" onchange="updateHorizonFractionList(horizonData)" style="padding:4px 8px;font-size:11px;background:#1e1b4b;border:1px solid #6366f1;border-radius:4px;color:#e2e8f0;">
-                                <option value="fraction">Fraction</option>
+                                <option value="fraction">Use Global</option>
                                 <option value="decimal2">Decimal (2)</option>
                                 <option value="decimal4">Decimal (4)</option>
                                 <option value="decimal6">Decimal (6)</option>
@@ -3199,13 +3255,16 @@ function updateMainCharts() {
 
 function updateMainTable() {
     const tbody = document.querySelector('#mainTable tbody');
+    const sectorSelect = document.getElementById('sectorDataSelect');
     let html = '';
+    let optionsHtml = '<option value="">-- Select Sector --</option>';
+    
     state.sectors.forEach(s => {
         const res = state.residuesBySector[s.n] || [];
         const primeCount = res.filter(r => r.isPrime).length;
         const compositeCount = res.length - primeCount;
         const errColor = s.relError && Math.abs(s.relError) > 10 ? '#f87171' : '#4ade80';
-        html += '<tr onclick="openSectorModal(' + s.n + ')" style="cursor:pointer" title="Click to see sector ' + s.n + ' details">' +
+        html += '<tr onclick="showSectorDataDetail(' + s.n + ')" style="cursor:pointer" title="Click to see sector ' + s.n + ' details">' +
             '<td><strong>' + s.n + '</strong></td>' +
             '<td>(1/' + (s.n+1) + ', 1/' + s.n + ']</td>' +
             '<td>' + (s.exact !== null ? s.exact : '-') + '</td>' +
@@ -3214,8 +3273,11 @@ function updateMainTable() {
             '<td style="color:#f59e0b">' + (primeCount || '-') + '</td>' +
             '<td style="color:#6366f1">' + (compositeCount || '-') + '</td>' +
             '</tr>';
+        
+        optionsHtml += '<option value="' + s.n + '">Sector ' + s.n + ' (' + res.length + ' fractions)</option>';
     });
     tbody.innerHTML = html;
+    if (sectorSelect) sectorSelect.innerHTML = optionsHtml;
 }
 
 function openSectorModal(n) {
@@ -3279,6 +3341,228 @@ function viewSectorOnRing(n) {
     document.getElementById('viewSector').value = n;
     document.getElementById('showAllSectors').checked = false;
     drawMainRing();
+}
+
+// =============================================
+// GLOBAL DISPLAY FORMAT SYSTEM
+// =============================================
+
+const globalFormat = {
+    type: 'fraction',
+    precision: 4
+};
+
+function updateGlobalDisplayFormat() {
+    globalFormat.type = document.getElementById('globalDisplayFormat')?.value || 'fraction';
+    globalFormat.precision = parseInt(document.getElementById('globalPrecision')?.value) || 4;
+    
+    // Update preview
+    const preview = document.getElementById('globalFormatPreview');
+    if (preview) {
+        preview.textContent = '1/2 = ' + formatValueGlobal(1, 2);
+    }
+    
+    // Refresh displays that use global format
+    if (document.getElementById('sectorDetailPanel')?.style.display !== 'none') {
+        const sectorSelect = document.getElementById('sectorDataSelect');
+        if (sectorSelect?.value) showSectorDataDetail(sectorSelect.value);
+    }
+    if (typeof updateHorizonTree === 'function' && typeof horizonData !== 'undefined' && horizonData?.gatekeeper) {
+        const n = parseInt(document.getElementById('horizonSectorN')?.value) || 5;
+        updateHorizonTree(horizonData, n);
+        updateHorizonFractionList(horizonData);
+    }
+}
+
+function formatValueGlobal(r, m) {
+    const value = r / m;
+    const prec = globalFormat.precision;
+    
+    switch (globalFormat.type) {
+        case 'fraction':
+            return r + '/' + m;
+        case 'decimal':
+            return value.toFixed(prec);
+        case 'degree':
+            return (value * 360).toFixed(prec) + '°';
+        case 'radian':
+            return (value * 2 * Math.PI).toFixed(prec) + ' rad';
+        case 'pi':
+            return (value * 2).toFixed(prec) + 'π';
+        default:
+            return r + '/' + m;
+    }
+}
+
+function formatFractionGlobal(f) {
+    if (f.r !== undefined && f.m !== undefined) {
+        return formatValueGlobal(f.r, f.m);
+    } else if (f.p !== undefined && f.q !== undefined) {
+        return formatValueGlobal(f.p, f.q);
+    }
+    return '?/?';
+}
+
+// =============================================
+// SECTOR DATA DETAIL FUNCTIONS
+// =============================================
+
+function showSectorDataDetail(n) {
+    if (!n) {
+        document.getElementById('sectorDetailPanel').style.display = 'none';
+        return;
+    }
+    
+    n = parseInt(n);
+    const res = state.residuesBySector[n] || [];
+    const primes = res.filter(r => r.isPrime);
+    const composites = res.filter(r => !r.isPrime);
+    
+    // Update dropdown
+    document.getElementById('sectorDataSelect').value = n;
+    
+    // Update title
+    document.getElementById('sectorDetailTitle').textContent = 
+        'Sector ' + n + ': (1/' + (n+1) + ', 1/' + n + '] — ' + res.length + ' fractions';
+    
+    // Update counts
+    document.getElementById('sectorPrimeCount').textContent = primes.length;
+    document.getElementById('sectorCompositeCount').textContent = composites.length;
+    
+    // Format and display primes
+    const primesHtml = primes.length > 0 
+        ? primes.sort((a,b) => a.r/a.m - b.r/b.m).map(p => 
+            '<span class="sector-frac prime" onclick="triggerGlobalHarmonic(' + p.r + ',' + p.m + ')" style="display:inline-block;padding:2px 6px;margin:2px;border-radius:3px;background:#f59e0b33;border:1px solid #f59e0b;cursor:pointer;" title="' + (p.r/p.m).toFixed(8) + '">' + formatValueGlobal(p.r, p.m) + '</span>'
+          ).join('')
+        : '<span style="color:#64748b">No prime moduli in this sector</span>';
+    
+    // Format and display composites (limit to 200)
+    const compositesHtml = composites.length > 0 
+        ? composites.sort((a,b) => a.r/a.m - b.r/b.m).slice(0, 200).map(c => 
+            '<span class="sector-frac" onclick="triggerGlobalHarmonic(' + c.r + ',' + c.m + ')" style="display:inline-block;padding:2px 6px;margin:2px;border-radius:3px;background:#6366f133;border:1px solid #6366f1;cursor:pointer;" title="' + (c.r/c.m).toFixed(8) + '">' + formatValueGlobal(c.r, c.m) + '</span>'
+          ).join('') + (composites.length > 200 ? '<br><span style="color:#64748b;margin-top:8px;display:block;">... and ' + (composites.length - 200) + ' more</span>' : '')
+        : '<span style="color:#64748b">No composite moduli in this sector</span>';
+    
+    document.getElementById('sectorPrimesList').innerHTML = primesHtml;
+    document.getElementById('sectorCompositesList').innerHTML = compositesHtml;
+    
+    // Show panel
+    document.getElementById('sectorDetailPanel').style.display = 'block';
+}
+
+function closeSectorDetail() {
+    document.getElementById('sectorDetailPanel').style.display = 'none';
+    document.getElementById('sectorDataSelect').value = '';
+}
+
+function playSectorDetailFractions(type, direction) {
+    const n = parseInt(document.getElementById('sectorDataSelect').value);
+    if (!n) return;
+    
+    const res = state.residuesBySector[n] || [];
+    let fracs;
+    
+    if (type === 'primes') {
+        fracs = res.filter(r => r.isPrime);
+    } else if (type === 'composites') {
+        fracs = res.filter(r => !r.isPrime);
+    } else {
+        fracs = res;
+    }
+    
+    if (fracs.length === 0) {
+        showPlaybackStatus('No fractions to play');
+        return;
+    }
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    // Sort by value
+    fracs = fracs.sort((a, b) => direction === 'forward' ? a.r/a.m - b.r/b.m : b.r/b.m - a.r/a.m);
+    
+    playbackState.queue = fracs.map(f => ({ r: f.r, m: f.m }));
+    playbackState.direction = direction;
+    playbackState.mode = 'sector-detail';
+    playbackState.currentIndex = 0;
+    playbackState.isPlaying = true;
+    
+    const typeLabel = type === 'primes' ? 'primes' : type === 'composites' ? 'composites' : 'all';
+    showPlaybackStatus('Playing ' + typeLabel + ' from sector ' + n);
+    startPlaybackLoop();
+}
+
+function exportSectorCSV(n) {
+    if (!n) {
+        alert('Please select a sector first');
+        return;
+    }
+    n = parseInt(n);
+    const res = state.residuesBySector[n] || [];
+    if (res.length === 0) {
+        alert('No data for sector ' + n);
+        return;
+    }
+    
+    const prec = globalFormat.precision;
+    let csv = 'Sector ' + n + ' Data Export\n';
+    csv += 'Interval,(1/' + (n+1) + ', 1/' + n + ']\n';
+    csv += 'Total Fractions,' + res.length + '\n';
+    csv += 'Prime Denominators,' + res.filter(r => r.isPrime).length + '\n';
+    csv += 'Composite Denominators,' + res.filter(r => !r.isPrime).length + '\n\n';
+    csv += 'Numerator,Denominator,Value,Degrees,Radians,Pi-Fraction,Type,Frequency (Hz)\n';
+    
+    res.sort((a, b) => a.r/a.m - b.r/b.m).forEach(f => {
+        const val = f.r / f.m;
+        const freq = (harmonicSettings?.baseFreq || 440) * val;
+        csv += f.r + ',' + f.m + ',' + val.toFixed(prec) + ',' + 
+               (val * 360).toFixed(prec) + ',' + 
+               (val * 2 * Math.PI).toFixed(prec) + ',' + 
+               (val * 2).toFixed(prec) + 'π,' +
+               (f.isPrime ? 'Prime' : 'Composite') + ',' +
+               freq.toFixed(2) + '\n';
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sector_' + n + '_N' + state.nMax + '_data.csv';
+    a.click();
+}
+
+function exportAllSectorsCSV() {
+    if (state.sectors.length === 0) {
+        alert('No data to export. Run computation first.');
+        return;
+    }
+    
+    const prec = globalFormat.precision;
+    let csv = 'All Sectors Data Export\n';
+    csv += 'N Range,' + state.nMin + ' to ' + state.nMax + '\n';
+    csv += 'Sectors,' + state.sectorMin + ' to ' + state.sectorMax + '\n';
+    csv += 'Total Fractions,' + state.allResidues.length + '\n\n';
+    
+    csv += 'Sector,Numerator,Denominator,Value,Degrees,Radians,Pi-Fraction,Type,Frequency (Hz)\n';
+    
+    for (let s = state.sectorMin; s <= state.sectorMax; s++) {
+        const res = state.residuesBySector[s] || [];
+        res.sort((a, b) => a.r/a.m - b.r/b.m).forEach(f => {
+            const val = f.r / f.m;
+            const freq = (harmonicSettings?.baseFreq || 440) * val;
+            csv += s + ',' + f.r + ',' + f.m + ',' + val.toFixed(prec) + ',' + 
+                   (val * 360).toFixed(prec) + ',' + 
+                   (val * 2 * Math.PI).toFixed(prec) + ',' + 
+                   (val * 2).toFixed(prec) + 'π,' +
+                   (f.isPrime ? 'Prime' : 'Composite') + ',' +
+                   freq.toFixed(2) + '\n';
+        });
+    }
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'all_sectors_N' + state.nMax + '_data.csv';
+    a.click();
 }
 
 function drawMainRing() {
@@ -5636,12 +5920,19 @@ function updateHorizonTree(data, n) {
     const treeDisplay = document.getElementById('horizonTreeDisplay');
     if (!treeDisplay) return;
     
-    const format = document.getElementById('horizonTreeFormat')?.value || 'fraction';
+    const localFormat = document.getElementById('horizonTreeFormat')?.value || 'fraction';
     
     function formatFrac(f) {
-        if (format === 'fraction') return f.p + '/' + f.q;
-        const precision = parseInt(format.replace('decimal', '')) || 4;
-        return (f.p / f.q).toFixed(precision);
+        // Use local format if set, otherwise check global
+        if (localFormat !== 'fraction') {
+            const precision = parseInt(localFormat.replace('decimal', '')) || 4;
+            return (f.p / f.q).toFixed(precision);
+        }
+        // Use global format
+        if (typeof formatValueGlobal === 'function') {
+            return formatValueGlobal(f.p, f.q);
+        }
+        return f.p + '/' + f.q;
     }
     
     if (!data.gatekeeper) {
@@ -5698,12 +5989,19 @@ function updateHorizonFractionList(data) {
     const listDisplay = document.getElementById('horizonFractionList');
     if (!listDisplay) return;
     
-    const format = document.getElementById('horizonListFormat')?.value || 'fraction';
+    const localFormat = document.getElementById('horizonListFormat')?.value || 'fraction';
     
     function formatFrac(f) {
-        if (format === 'fraction') return f.p + '/' + f.q;
-        const precision = parseInt(format.replace('decimal', '')) || 4;
-        return (f.p / f.q).toFixed(precision);
+        // Use local format if set, otherwise check global
+        if (localFormat !== 'fraction') {
+            const precision = parseInt(localFormat.replace('decimal', '')) || 4;
+            return (f.p / f.q).toFixed(precision);
+        }
+        // Use global format
+        if (typeof formatValueGlobal === 'function') {
+            return formatValueGlobal(f.p, f.q);
+        }
+        return f.p + '/' + f.q;
     }
     
     if (data.fractions.length === 0) {
@@ -8792,4 +9090,4 @@ function pulseToolbar() {
 
 </script>
 </body>
-            </html>
+    </html>
