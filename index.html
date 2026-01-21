@@ -533,18 +533,38 @@
         <div class="control-row">
             <div class="control-group highlight">
                 <label>N:</label>
-                <input type="number" id="nMin" value="100" min="2"> to
-                <input type="number" id="nMax" value="100" min="2">
+                <input type="number" id="nMin" value="1" min="1"> to
+                <input type="number" id="nMax" value="500" min="2">
             </div>
             <div class="control-group highlight">
                 <label>Sectors:</label>
-                <input type="number" id="sectorMin" value="1" min="1"> to
-                <input type="number" id="sectorMax" value="15" min="1">
+                <input type="number" id="sectorMin" value="0" min="0"> to
+                <input type="number" id="sectorMax" value="275" min="1">
             </div>
             <button onclick="computeAll()">Compute</button>
             <button class="secondary" onclick="cancelComputation()">Cancel</button>
             <button class="secondary" onclick="exportAllData()">Export All</button>
             <button class="composite-export-btn" onclick="exportCompositeTab()" title="Export all visible charts to single 4K image">4K Composite Export</button>
+        </div>
+        
+        <!-- Sector Bound Controls -->
+        <div class="control-row" style="background:#0f172a;padding:8px 12px;border-radius:6px;margin-top:8px;border:1px solid #334155;">
+            <label style="color:#94a3b8;font-size:11px;margin-right:8px;">Sector Bound:</label>
+            <label style="font-size:11px;"><input type="checkbox" id="useSectorBound" checked onchange="updateSectorBound()"> Auto-bound</label>
+            <label style="margin-left:12px;font-size:11px;">Constant:</label>
+            <select id="sectorBoundPreset" onchange="applySectorBoundPreset()" style="font-size:11px;padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;">
+                <option value="sqrt3pi" selected>√3/π ≈ 0.5513</option>
+                <option value="sqrt6pi">√6/π ≈ 0.7797</option>
+                <option value="1pi">1/π ≈ 0.3183</option>
+                <option value="2pi">2/π ≈ 0.6366</option>
+                <option value="sqrt2pi">√2/π ≈ 0.4502</option>
+                <option value="1">1.0000</option>
+                <option value="custom">Custom...</option>
+            </select>
+            <label style="margin-left:8px;font-size:11px;">or enter:</label>
+            <input type="text" id="customSectorBound" value="sqrt(3)/pi" placeholder="e.g. sqrt(6)/pi" style="width:100px;font-size:11px;padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-family:monospace;" onchange="applyCustomSectorBound()">
+            <span id="sectorBoundValue" style="color:#22c55e;font-size:11px;font-family:monospace;margin-left:8px;">= 0.5513</span>
+            <span id="sectorBoundResult" style="color:#f59e0b;font-size:11px;margin-left:8px;">→ Max sector: 275</span>
         </div>
         
         <!-- Global Display Format Controls -->
@@ -681,7 +701,7 @@
             </div>
             
             <div class="control-row" style="margin-bottom:10px;">
-                <label>Sector: <input type="number" id="viewSector" value="1" min="1" onchange="drawMainRing()"></label>
+                <label>Sector: <input type="number" id="viewSector" value="1" min="0" onchange="drawMainRing()"></label>
                 <label>Color: <select id="colorMode" onchange="drawMainRing()"><option value="sector">Sector</option><option value="prime">Prime</option><option value="denominator">Denom</option><option value="gap">Gap</option></select></label>
                 <label><input type="checkbox" id="showAllSectors" onchange="drawMainRing()"> All</label>
                 <button class="secondary" onclick="openSectorModal(+document.getElementById('viewSector').value)">View Sector Details</button>
@@ -1787,13 +1807,14 @@
 
 <script>
 const state = {
-    mode: 'exact', nMin: 100, nMax: 100, sectorMin: 1, sectorMax: 15,
+    mode: 'exact', nMin: 1, nMax: 500, sectorMin: 0, sectorMax: 275,
     sectors: [], residuesBySector: {}, allResidues: [], gaps: [], farey: [],
-    computing: false, charts: {}, ringPoints: [], animationId: null
+    computing: false, charts: {}, ringPoints: [], animationId: null,
+    sectorBoundConstant: Math.sqrt(3) / Math.PI // Default √3/π
 };
 
 const sectorColors = ['#6366f1','#8b5cf6','#a855f7','#d946ef','#ec4899','#f43f5e','#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e','#10b981','#14b8a6','#06b6d4','#0ea5e9','#3b82f6'];
-function getSectorColor(n) { return sectorColors[(n-1) % sectorColors.length]; }
+function getSectorColor(n) { return sectorColors[(n) % sectorColors.length]; }
 
 // Canvas state
 let currentScreenshotData = null;
@@ -2487,6 +2508,115 @@ function setMode(mode) {
     document.getElementById('mode-'+mode).classList.add('active');
     document.getElementById('modeDescription').textContent = {exact:'Exact enumeration',hybrid:'Hybrid mode',formula:'Formula only'}[mode];
 }
+
+// =============================================
+// SECTOR BOUND FUNCTIONS
+// =============================================
+
+function parseMathExpression(expr) {
+    // Parse mathematical expressions like sqrt(3)/pi, sqrt(6)/pi, etc.
+    try {
+        let parsed = expr.toLowerCase()
+            .replace(/sqrt\s*\(\s*(\d+)\s*\)/g, 'Math.sqrt($1)')
+            .replace(/pi/g, 'Math.PI')
+            .replace(/e(?![a-z])/g, 'Math.E')
+            .replace(/ln\s*\(\s*([^)]+)\s*\)/g, 'Math.log($1)')
+            .replace(/log\s*\(\s*([^)]+)\s*\)/g, 'Math.log10($1)');
+        return eval(parsed);
+    } catch (e) {
+        console.warn('Failed to parse:', expr, e);
+        return null;
+    }
+}
+
+function updateSectorBound() {
+    const useBound = document.getElementById('useSectorBound').checked;
+    if (useBound) {
+        const N = +document.getElementById('nMax').value || 500;
+        const maxSector = Math.floor(N * state.sectorBoundConstant);
+        document.getElementById('sectorMax').value = maxSector;
+        document.getElementById('sectorBoundResult').textContent = `→ Max sector: ${maxSector}`;
+    }
+}
+
+function applySectorBoundPreset() {
+    const preset = document.getElementById('sectorBoundPreset').value;
+    let constant, displayExpr;
+    
+    switch(preset) {
+        case 'sqrt3pi':
+            constant = Math.sqrt(3) / Math.PI;
+            displayExpr = 'sqrt(3)/pi';
+            break;
+        case 'sqrt6pi':
+            constant = Math.sqrt(6) / Math.PI;
+            displayExpr = 'sqrt(6)/pi';
+            break;
+        case '1pi':
+            constant = 1 / Math.PI;
+            displayExpr = '1/pi';
+            break;
+        case '2pi':
+            constant = 2 / Math.PI;
+            displayExpr = '2/pi';
+            break;
+        case 'sqrt2pi':
+            constant = Math.sqrt(2) / Math.PI;
+            displayExpr = 'sqrt(2)/pi';
+            break;
+        case '1':
+            constant = 1;
+            displayExpr = '1';
+            break;
+        case 'custom':
+            // Don't change anything, let user enter custom
+            return;
+        default:
+            constant = Math.sqrt(3) / Math.PI;
+            displayExpr = 'sqrt(3)/pi';
+    }
+    
+    state.sectorBoundConstant = constant;
+    document.getElementById('customSectorBound').value = displayExpr;
+    document.getElementById('sectorBoundValue').textContent = `= ${constant.toFixed(4)}`;
+    updateSectorBound();
+}
+
+function applyCustomSectorBound() {
+    const expr = document.getElementById('customSectorBound').value;
+    const constant = parseMathExpression(expr);
+    
+    if (constant !== null && isFinite(constant) && constant > 0) {
+        state.sectorBoundConstant = constant;
+        document.getElementById('sectorBoundValue').textContent = `= ${constant.toFixed(4)}`;
+        document.getElementById('sectorBoundPreset').value = 'custom';
+        updateSectorBound();
+    } else {
+        document.getElementById('sectorBoundValue').textContent = '= invalid';
+    }
+}
+
+// Update sector bound when N changes
+document.addEventListener('DOMContentLoaded', function() {
+    const nMaxInput = document.getElementById('nMax');
+    if (nMaxInput) {
+        nMaxInput.addEventListener('change', function() {
+            if (document.getElementById('useSectorBound')?.checked) {
+                updateSectorBound();
+            }
+        });
+        nMaxInput.addEventListener('input', function() {
+            if (document.getElementById('useSectorBound')?.checked) {
+                updateSectorBound();
+            }
+        });
+    }
+    
+    // Initialize sector bound display
+    setTimeout(() => {
+        applySectorBoundPreset();
+    }, 100);
+});
 
 async function computeAll() {
     if(state.computing) return;
@@ -9377,12 +9507,12 @@ function pulseToolbar() {
 // =============================================
 
 const presets = {
-    quick: { N: 50, sectorMin: 1, sectorMax: 10, colorMode: 'sector', showAll: true },
-    standard: { N: 200, sectorMin: 1, sectorMax: 15, colorMode: 'sector', showAll: true },
-    detailed: { N: 500, sectorMin: 1, sectorMax: 20, colorMode: 'prime', showAll: true },
-    deep: { N: 1000, sectorMin: 1, sectorMax: 25, colorMode: 'prime', showAll: false },
-    primes: { N: 300, sectorMin: 1, sectorMax: 15, colorMode: 'prime', showAll: true },
-    musical: { N: 12, sectorMin: 1, sectorMax: 12, colorMode: 'sector', showAll: true, baseFreq: 440 }
+    quick: { N: 50, sectorMin: 0, useBound: true, colorMode: 'sector', showAll: true },
+    standard: { N: 200, sectorMin: 0, useBound: true, colorMode: 'sector', showAll: true },
+    detailed: { N: 500, sectorMin: 0, useBound: true, colorMode: 'prime', showAll: true },
+    deep: { N: 1000, sectorMin: 0, useBound: true, colorMode: 'prime', showAll: false },
+    primes: { N: 300, sectorMin: 0, useBound: true, colorMode: 'prime', showAll: true },
+    musical: { N: 12, sectorMin: 0, sectorMax: 12, colorMode: 'sector', showAll: true, baseFreq: 440 }
 };
 
 function applyPreset(name) {
@@ -9390,8 +9520,17 @@ function applyPreset(name) {
     if (!preset) return;
     
     document.getElementById('nMax').value = preset.N;
+    document.getElementById('nMin').value = 1;
     document.getElementById('sectorMin').value = preset.sectorMin;
-    document.getElementById('sectorMax').value = preset.sectorMax;
+    
+    if (preset.useBound) {
+        document.getElementById('useSectorBound').checked = true;
+        updateSectorBound();
+    } else if (preset.sectorMax) {
+        document.getElementById('useSectorBound').checked = false;
+        document.getElementById('sectorMax').value = preset.sectorMax;
+    }
+    
     document.getElementById('colorMode').value = preset.colorMode;
     document.getElementById('showAllSectors').checked = preset.showAll;
     
@@ -9752,4 +9891,4 @@ function playNextRandomInterval() {
 
 </script>
 </body>
-                                                                                                               </html>
+    </html>
