@@ -335,6 +335,10 @@
                 <span class="value" id="quickFreq">110 Hz</span>
             </div>
             <div class="harmonic-quick-item">
+                <label>λ:</label>
+                <span class="value" id="quickWave" style="color:#f59e0b;">3.12 m</span>
+            </div>
+            <div class="harmonic-quick-item">
                 <label>Note:</label>
                 <span class="note" id="quickNote">A2</span>
             </div>
@@ -6622,16 +6626,21 @@ function selectFractionForHarmonic(r, m) {
     const qf = document.getElementById('quickFraction');
     const qfreq = document.getElementById('quickFreq');
     const qn = document.getElementById('quickNote');
+    const qw = document.getElementById('quickWave');
+    
+    const wavelength = 343 / freq; // Speed of sound / frequency
+    const waveStr = wavelength >= 1 ? wavelength.toFixed(2) + ' m' : (wavelength * 100).toFixed(1) + ' cm';
     
     if (qf) qf.textContent = r + '/' + m;
     if (qfreq) qfreq.textContent = freq.toFixed(1) + ' Hz';
+    if (qw) qw.textContent = waveStr;
     if (qn) qn.textContent = note.name;
     
     const info = document.getElementById('selectedFractionInfo');
     if (info) {
         info.innerHTML = `
             <div style="font-size:16px; color:#8b5cf6; font-weight:bold;">${r}/${m}</div>
-            <div>Frequency: <strong>${freq.toFixed(2)} Hz</strong></div>
+            <div>Frequency: <strong>${freq.toFixed(2)} Hz</strong> | λ: <strong style="color:#f59e0b;">${waveStr}</strong></div>
             <div>Note: <strong>${note.name}</strong> (${note.cents >= 0 ? '+' : ''}${note.cents}¢)</div>
             <div>Interval: <strong>${getIntervalName(r, m)}</strong></div>
             <div>Mode: <span class="mode-badge ${mode.class}">${mode.name}</span></div>
@@ -6655,8 +6664,14 @@ function updateHarmonicDisplays() {
     const quickFrac = document.getElementById('quickFraction');
     const quickFreq = document.getElementById('quickFreq');
     const quickNote = document.getElementById('quickNote');
+    const quickWave = document.getElementById('quickWave');
+    
+    const wavelength = 343 / freq;
+    const waveStr = wavelength >= 1 ? wavelength.toFixed(2) + ' m' : (wavelength * 100).toFixed(1) + ' cm';
+    
     if (quickFrac) quickFrac.textContent = r + '/' + m;
     if (quickFreq) quickFreq.textContent = freq.toFixed(1) + ' Hz';
+    if (quickWave) quickWave.textContent = waveStr;
     if (quickNote) quickNote.textContent = note.name;
     
     // Update mode indicator
@@ -8595,13 +8610,16 @@ function playSectorAudio(sectorNum, direction = 'forward') {
     let sorted = [...residues].sort((a, b) => a.r/a.m - b.r/b.m);
     if (direction === 'backward') sorted.reverse();
     
-    playbackState.queue = sorted.slice(0, 40); // Limit
+    // Increased limit from 40 to 100
+    playbackState.queue = sorted.slice(0, 100);
     playbackState.direction = direction;
     playbackState.mode = 'sector';
     playbackState.currentIndex = 0;
     playbackState.isPlaying = true;
     
-    showPlaybackStatus(`Playing Sector ${sectorNum} ${direction === 'forward' ? '→' : '←'}`);
+    const totalInSector = residues.length;
+    const playing = playbackState.queue.length;
+    showPlaybackStatus(`Playing Sector ${sectorNum} ${direction === 'forward' ? '→' : '←'} (${playing}${playing < totalInSector ? '/' + totalInSector : ''} fractions)`);
     startPlaybackLoop();
 }
 
@@ -8710,19 +8728,29 @@ function playGapsAsIntervals(direction = 'forward') {
 
 // Main playback loop
 function startPlaybackLoop() {
-    const speed = +(document.getElementById('playbackSpeed')?.value || 250);
+    const speed = Math.max(100, +(document.getElementById('playbackSpeed')?.value || 250));
+    
+    // Clear any existing interval first
+    if (playbackState.intervalId) {
+        clearInterval(playbackState.intervalId);
+    }
     
     playbackState.intervalId = setInterval(() => {
-        if (!playbackState.isPlaying || playbackState.currentIndex >= playbackState.queue.length) {
+        if (!playbackState.isPlaying) {
             stopAllPlayback();
-            showPlaybackStatus('Playback complete');
+            return;
+        }
+        
+        if (playbackState.currentIndex >= playbackState.queue.length) {
+            stopAllPlayback();
+            showPlaybackStatus(`Playback complete (${playbackState.queue.length} items)`);
             return;
         }
         
         const f = playbackState.queue[playbackState.currentIndex];
         
         // Validate fraction before playing
-        if (f && f.r && f.m && f.m !== 0 && isFinite(f.r) && isFinite(f.m)) {
+        if (f && typeof f.r === 'number' && typeof f.m === 'number' && f.m !== 0 && isFinite(f.r) && isFinite(f.m)) {
             const duration = speed / 1000 * 0.8;
             playFraction(f.r, f.m, duration);
             highlightCurrentFraction(f);
@@ -8761,6 +8789,11 @@ function highlightCurrentFraction(f) {
     if (isFinite(freq) && freq > 0) {
         document.getElementById('quickFreq').textContent = freq.toFixed(1) + ' Hz';
         document.getElementById('quickNote').textContent = frequencyToNote(freq).name;
+        
+        const wavelength = 343 / freq;
+        const waveStr = wavelength >= 1 ? wavelength.toFixed(2) + ' m' : (wavelength * 100).toFixed(1) + ' cm';
+        const qw = document.getElementById('quickWave');
+        if (qw) qw.textContent = waveStr;
     }
     
     // Highlight on ring if visible
