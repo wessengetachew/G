@@ -625,8 +625,19 @@
         </div>
         <div class="stat-grid" id="mainStats"></div>
         <div class="grid-2" style="margin-top:15px;">
-            <div class="chart-box chart-wrapper"><h4>Exact vs Predicted</h4><canvas id="mainCountChart"></canvas></div>
-            <div class="chart-box chart-wrapper"><h4>Relative Error %</h4><canvas id="mainErrorChart"></canvas></div>
+            <div class="chart-box chart-wrapper">
+                <h4>Exact vs Predicted 
+                    <button class="secondary" onclick="playErrorBySector('count')" style="font-size:10px;padding:3px 8px;margin-left:10px;">▶ Play</button>
+                </h4>
+                <canvas id="mainCountChart"></canvas>
+            </div>
+            <div class="chart-box chart-wrapper">
+                <h4>Relative Error % 
+                    <button class="secondary" onclick="playErrorBySector('error')" style="font-size:10px;padding:3px 8px;margin-left:10px;">▶ Play</button>
+                    <button class="secondary" onclick="stopAllPlayback()" style="font-size:10px;padding:3px 8px;">■</button>
+                </h4>
+                <canvas id="mainErrorChart"></canvas>
+            </div>
         </div>
         <div class="panel" style="margin-top:15px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
@@ -9693,6 +9704,68 @@ function playSectorPrimes(sectorNum) {
 }
 
 // =============================================
+// PLAY ERROR/COUNT BY SECTOR
+// =============================================
+
+function playErrorBySector(mode = 'error') {
+    if (state.sectors.length === 0) {
+        showPlaybackStatus('No sector data - run computation first');
+        return;
+    }
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    // Map sector data to frequencies based on error or count
+    const data = state.sectors.map(s => {
+        if (mode === 'error') {
+            // Map error to frequency: larger error = higher pitch
+            const err = Math.abs(s.relError || 0);
+            // Scale error (0-100%) to frequency range (200-800 Hz)
+            const freq = 200 + (err / 100) * 600;
+            return { n: s.n, value: err, freq: Math.min(1200, Math.max(100, freq)) };
+        } else {
+            // Map count to frequency: more fractions = higher pitch  
+            const count = s.exact || s.predicted || 0;
+            const maxCount = Math.max(...state.sectors.map(x => x.exact || x.predicted || 1));
+            const freq = 150 + (count / maxCount) * 700;
+            return { n: s.n, value: count, freq: Math.min(1200, Math.max(100, freq)) };
+        }
+    });
+    
+    playbackState.isPlaying = true;
+    let idx = 0;
+    const speed = +(document.getElementById('playbackSpeed')?.value || 250);
+    
+    function playNext() {
+        if (!playbackState.isPlaying || idx >= data.length) {
+            stopAllPlayback();
+            showPlaybackStatus(`${mode === 'error' ? 'Error' : 'Count'} sonification complete`);
+            return;
+        }
+        
+        const d = data[idx];
+        const vol = (harmonicSettings.volume || 0.5) * 0.5;
+        
+        playTone(d.freq, speed / 1000 * 0.8, vol);
+        
+        // Update display
+        const label = mode === 'error' ? `Err: ${d.value.toFixed(1)}%` : `Count: ${Math.round(d.value)}`;
+        showPlaybackStatus(`Sector ${d.n}: ${label} → ${d.freq.toFixed(0)} Hz`);
+        
+        // Highlight sector on ring if visible
+        document.getElementById('viewSector').value = d.n;
+        drawMainRing();
+        
+        idx++;
+        playbackState.intervalId = setTimeout(playNext, speed);
+    }
+    
+    showPlaybackStatus(`Playing ${mode === 'error' ? 'relative error' : 'counts'} across ${data.length} sectors`);
+    playNext();
+}
+
+// =============================================
 // SECTOR SWEEP ANIMATION
 // =============================================
 
@@ -9891,4 +9964,4 @@ function playNextRandomInterval() {
 
 </script>
 </body>
-    </html>
+                               </html>
