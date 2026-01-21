@@ -633,8 +633,11 @@
             </div>
             <div class="chart-box chart-wrapper">
                 <h4>Relative Error % 
-                    <button class="secondary" onclick="playErrorBySector('error')" style="font-size:10px;padding:3px 8px;margin-left:10px;">▶ Play</button>
+                    <button class="secondary" onclick="playErrorBySector('error')" style="font-size:10px;padding:3px 8px;margin-left:10px;">▶ Play All</button>
+                    <button id="playSelectedRangeBtn" class="secondary" onclick="playSelectedErrorRange()" style="font-size:10px;padding:3px 8px;display:none;">▶ Play Selection</button>
+                    <button class="secondary" onclick="clearErrorSelection()" style="font-size:10px;padding:3px 8px;">Clear</button>
                     <button class="secondary" onclick="stopAllPlayback()" style="font-size:10px;padding:3px 8px;">■</button>
+                    <span id="errorSelectionInfo" style="font-size:10px;color:#64748b;margin-left:10px;"></span>
                 </h4>
                 <canvas id="mainErrorChart"></canvas>
             </div>
@@ -642,7 +645,9 @@
         <div class="panel" style="margin-top:15px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
                 <h4 style="margin:0;">Sector Data <span style="font-weight:normal; color:#64748b;">(click row to see details)</span></h4>
-                <div style="display:flex;gap:8px;align-items:center;">
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                    <button id="playAllSectorsBtn" onclick="playAllSectorsSequentially()" style="padding:5px 12px;font-size:11px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;cursor:pointer;">▶ Play All Sectors</button>
+                    <button onclick="stopAllPlayback()" style="padding:5px 8px;font-size:11px;background:#ef4444;border:none;border-radius:4px;color:white;cursor:pointer;">■ Stop</button>
                     <label style="color:#94a3b8;">View Sector:</label>
                     <select id="sectorDataSelect" onchange="showSectorDataDetail(this.value)" style="padding:5px 10px;background:#1e1b4b;border:1px solid #6366f1;border-radius:4px;color:#e2e8f0;">
                         <option value="">-- Select Sector --</option>
@@ -679,9 +684,13 @@
         <div class="panel chart-wrapper">
             <h4>Sector Ring <span style="font-weight:normal; color:#64748b;">(click points to see tree path)</span></h4>
             
-            <!-- PRESETS ROW -->
-            <div class="control-row" style="margin-bottom:8px;background:#1e1b4b;padding:8px 12px;border-radius:6px;border:1px solid #6366f1;">
-                <span style="color:#a5b4fc;font-size:11px;margin-right:10px;">Presets:</span>
+            <!-- MAIN CONTROLS + PRESETS ROW (Combined) -->
+            <div class="control-row" style="margin-bottom:8px;background:#1e1b4b;padding:10px 12px;border-radius:6px;border:1px solid #6366f1;">
+                <label>Sector: <input type="number" id="viewSector" value="1" min="0" onchange="drawMainRing()" style="width:60px;"></label>
+                <label>Color: <select id="colorMode" onchange="drawMainRing()"><option value="sector">Sector</option><option value="prime">Prime</option><option value="denominator">Denom</option><option value="gap">Gap</option></select></label>
+                <label><input type="checkbox" id="showAllSectors" onchange="drawMainRing()"> All</label>
+                <span style="color:#475569;margin:0 8px;">|</span>
+                <span style="color:#a5b4fc;font-size:11px;">Presets:</span>
                 <button class="secondary" onclick="applyPreset('quick')" style="font-size:10px;padding:4px 8px;">Quick (N=50)</button>
                 <button class="secondary" onclick="applyPreset('standard')" style="font-size:10px;padding:4px 8px;">Standard (N=200)</button>
                 <button class="secondary" onclick="applyPreset('detailed')" style="font-size:10px;padding:4px 8px;">Detailed (N=500)</button>
@@ -711,10 +720,8 @@
                 <span id="ringAnimStatus" style="margin-left:auto;color:#64748b;font-size:11px;"></span>
             </div>
             
+            <!-- PLAYBACK ROW -->
             <div class="control-row" style="margin-bottom:10px;">
-                <label>Sector: <input type="number" id="viewSector" value="1" min="0" onchange="drawMainRing()"></label>
-                <label>Color: <select id="colorMode" onchange="drawMainRing()"><option value="sector">Sector</option><option value="prime">Prime</option><option value="denominator">Denom</option><option value="gap">Gap</option></select></label>
-                <label><input type="checkbox" id="showAllSectors" onchange="drawMainRing()"> All</label>
                 <button class="secondary" onclick="openSectorModal(+document.getElementById('viewSector').value)">View Sector Details</button>
                 <button style="background:linear-gradient(135deg,#22c55e,#16a34a);" onclick="playSectorSequence('forward')" id="sectorPlayBtn" title="Play sector ascending">▶ Forward</button>
                 <button style="background:linear-gradient(135deg,#6366f1,#8b5cf6);" onclick="playSectorSequence('backward')" title="Play sector descending">◀ Backward</button>
@@ -728,6 +735,33 @@
         
         <div class="panel chart-wrapper">
             <h4>Sector Tree Path <span style="font-weight:normal; color:#64748b;">(Stern-Brocot navigation - click nodes to play)</span></h4>
+            <div class="control-row" style="margin-bottom:8px;background:#1e1b4b;padding:8px 12px;border-radius:6px;border:1px solid #6366f1;">
+                <label>View Sector: 
+                    <select id="treeSectorFilter" onchange="drawSectorTree()" style="width:120px;">
+                        <option value="all">All Sectors</option>
+                        <option value="1">Sector 1 (1/2, 1]</option>
+                        <option value="2">Sector 2 (1/3, 1/2]</option>
+                        <option value="3">Sector 3 (1/4, 1/3]</option>
+                        <option value="4">Sector 4 (1/5, 1/4]</option>
+                        <option value="5">Sector 5 (1/6, 1/5]</option>
+                        <option value="6">Sector 6 (1/7, 1/6]</option>
+                        <option value="7">Sector 7 (1/8, 1/7]</option>
+                        <option value="8">Sector 8 (1/9, 1/8]</option>
+                        <option value="9">Sector 9 (1/10, 1/9]</option>
+                        <option value="10">Sector 10 (1/11, 1/10]</option>
+                    </select>
+                </label>
+                <label>Color by: 
+                    <select id="treeColorMode" onchange="drawSectorTree()">
+                        <option value="default">Default</option>
+                        <option value="sector">Sector</option>
+                        <option value="prime">Prime/Composite</option>
+                        <option value="arnold">Arnold Tongue</option>
+                    </select>
+                </label>
+                <label><input type="checkbox" id="treeHighlightOnly" onchange="drawSectorTree()"> Highlight Only</label>
+                <button class="secondary" onclick="playTreeSectorFractions()" style="font-size:11px;">▶ Play Sector</button>
+            </div>
             <div class="control-row" style="margin-bottom:10px;">
                 <label>Tree Depth: <input type="number" id="treeDepth" value="8" min="3" max="15" onchange="drawSectorTree()"></label>
                 <label><input type="checkbox" id="showTreeLabels" checked onchange="drawSectorTree()"> Labels</label>
@@ -751,10 +785,12 @@
                 <div class="color-legend-item"><div class="color-swatch" style="background:#22c55e"></div>Target fraction</div>
                 <div class="color-legend-item"><div class="color-swatch" style="background:#ef4444"></div>L (left)</div>
                 <div class="color-legend-item"><div class="color-swatch" style="background:#3b82f6"></div>R (right)</div>
-                <div class="color-legend-item" style="border-left:1px solid #475569; padding-left:10px;"><strong style="color:#8b5cf6;">Arnold:</strong></div>
-                <div class="color-legend-item"><div class="color-swatch" style="background:#22c55e"></div>Unison</div>
-                <div class="color-legend-item"><div class="color-swatch" style="background:#3b82f6"></div>Consonant</div>
-                <div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Complex</div>
+                <div class="color-legend-item" style="border-left:1px solid #475569; padding-left:10px;"><strong style="color:#a5b4fc;">Sector Colors:</strong></div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:hsl(0,70%,50%)"></div>S1</div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:hsl(36,70%,50%)"></div>S2</div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:hsl(72,70%,50%)"></div>S3</div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:hsl(108,70%,50%)"></div>S4</div>
+                <div class="color-legend-item"><div class="color-swatch" style="background:hsl(144,70%,50%)"></div>S5</div>
             </div>
         </div>
         
@@ -3501,7 +3537,46 @@ function updateMainCharts() {
     
     if(state.charts.mainError) state.charts.mainError.destroy();
     if(hasExact) {
-        state.charts.mainError = new Chart(document.getElementById('mainErrorChart'),{type:'bar',data:{labels,datasets:[{label:'Rel Err%',data:state.sectors.map(s=>s.relError),backgroundColor:'rgba(245,158,11,0.7)'}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+        state.charts.mainError = new Chart(document.getElementById('mainErrorChart'),{
+            type:'bar',
+            data:{
+                labels,
+                datasets:[{
+                    label:'Rel Err%',
+                    data:state.sectors.map(s=>s.relError),
+                    backgroundColor: state.sectors.map((s, i) => 
+                        errorChartSelection.start !== null && i >= errorChartSelection.start && i <= errorChartSelection.end 
+                            ? 'rgba(34,197,94,0.9)' 
+                            : 'rgba(245,158,11,0.7)'
+                    )
+                }]
+            },
+            options:{
+                responsive:true,
+                plugins:{legend:{display:false}},
+                scales:{
+                    x:{
+                        ticks:{
+                            color:'#94a3b8',
+                            maxRotation: 45,
+                            autoSkip: true,
+                            maxTicksLimit: 30
+                        },
+                        title: {display: true, text: 'Sector n', color: '#64748b'}
+                    },
+                    y:{ticks:{color:'#94a3b8'}}
+                },
+                onClick: (evt, elements) => {
+                    if (elements.length > 0) {
+                        const idx = elements[0].index;
+                        playErrorChartBar(idx);
+                    }
+                }
+            }
+        });
+        
+        // Add drag selection for region
+        setupErrorChartSelection();
     }
 }
 
@@ -3942,7 +4017,9 @@ function drawSectorTree() {
     const depth = +document.getElementById('treeDepth').value;
     const showLabels = document.getElementById('showTreeLabels').checked;
     const showGrid = document.getElementById('showTreeGrid').checked;
-    const showArnold = document.getElementById('showArnoldOnTree')?.checked ?? false;
+    const sectorFilter = document.getElementById('treeSectorFilter')?.value || 'all';
+    const colorMode = document.getElementById('treeColorMode')?.value || 'default';
+    const highlightOnly = document.getElementById('treeHighlightOnly')?.checked || false;
     
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, W, H);
@@ -3960,14 +4037,65 @@ function drawSectorTree() {
         }
     }
     
+    // Draw sector boundary lines if filtering
+    if (sectorFilter !== 'all') {
+        const sectorNum = parseInt(sectorFilter);
+        const leftBound = 1 / (sectorNum + 1);
+        const rightBound = 1 / sectorNum;
+        
+        // Convert to x positions (fractions map to horizontal position)
+        const leftX = leftBound * W;
+        const rightX = rightBound * W;
+        
+        // Draw sector region highlight
+        ctx.fillStyle = 'rgba(99, 102, 241, 0.1)';
+        ctx.fillRect(leftX, 0, rightX - leftX, H);
+        
+        // Draw boundary lines
+        ctx.strokeStyle = '#6366f1';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(leftX, 0);
+        ctx.lineTo(leftX, H);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(rightX, 0);
+        ctx.lineTo(rightX, H);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // Label boundaries
+        ctx.fillStyle = '#a5b4fc';
+        ctx.font = '10px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText(`1/${sectorNum + 1}`, leftX, H - 5);
+        ctx.fillText(`1/${sectorNum}`, rightX, H - 5);
+    }
+    
     // Build and draw Stern-Brocot tree
     const treeNodes = buildSternBrocotTree(depth);
     
+    // Calculate sector for each node
+    treeNodes.forEach(node => {
+        node.sector = getSector(node.r, node.m);
+        node.isPrime = isPrime(node.m);
+    });
+    
     // Draw edges first
-    ctx.strokeStyle = '#334155';
-    ctx.lineWidth = 1;
     treeNodes.forEach(node => {
         if (node.parent) {
+            const inSector = sectorFilter === 'all' || node.sector === parseInt(sectorFilter);
+            const parentInSector = sectorFilter === 'all' || node.parent.sector === parseInt(sectorFilter);
+            
+            if (highlightOnly && sectorFilter !== 'all' && !inSector && !parentInSector) {
+                ctx.strokeStyle = '#1e293b';
+            } else if (inSector && sectorFilter !== 'all') {
+                ctx.strokeStyle = getSectorColor(node.sector);
+            } else {
+                ctx.strokeStyle = '#334155';
+            }
+            ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(node.parent.x, node.parent.y);
             ctx.lineTo(node.x, node.y);
@@ -3979,25 +4107,55 @@ function drawSectorTree() {
     treeNodes.forEach(node => {
         const isOnPath = selectedTreePoint && isNodeOnPath(node, selectedTreePoint);
         const isTarget = selectedTreePoint && node.r === selectedTreePoint.r && node.m === selectedTreePoint.m;
+        const inSector = sectorFilter === 'all' || node.sector === parseInt(sectorFilter);
+        
+        // Skip dim nodes if highlight only
+        if (highlightOnly && sectorFilter !== 'all' && !inSector && !isOnPath && !isTarget) {
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, 2, 0, 2 * Math.PI);
+            ctx.fill();
+            return;
+        }
         
         ctx.beginPath();
-        ctx.arc(node.x, node.y, isTarget ? 10 : (isOnPath ? 7 : 5), 0, 2 * Math.PI);
+        ctx.arc(node.x, node.y, isTarget ? 10 : (isOnPath ? 7 : (inSector && sectorFilter !== 'all' ? 6 : 5)), 0, 2 * Math.PI);
         
         if (isTarget) {
             ctx.fillStyle = '#22c55e';
         } else if (isOnPath) {
             ctx.fillStyle = '#f59e0b';
-        } else if (showArnold && typeof getHarmonicMode === 'function') {
-            // Color by harmonic mode (Arnold tongue)
-            const mode = getHarmonicMode(node.m);
-            ctx.fillStyle = mode.color;
         } else {
-            ctx.fillStyle = '#6366f1';
+            // Apply color mode
+            switch (colorMode) {
+                case 'sector':
+                    ctx.fillStyle = getSectorColor(node.sector);
+                    break;
+                case 'prime':
+                    ctx.fillStyle = node.isPrime ? '#f59e0b' : '#6366f1';
+                    break;
+                case 'arnold':
+                    if (typeof getHarmonicMode === 'function') {
+                        const mode = getHarmonicMode(node.m);
+                        ctx.fillStyle = mode.color;
+                    } else {
+                        ctx.fillStyle = '#6366f1';
+                    }
+                    break;
+                default:
+                    if (sectorFilter !== 'all' && inSector) {
+                        ctx.fillStyle = getSectorColor(node.sector);
+                    } else {
+                        ctx.fillStyle = '#6366f1';
+                    }
+            }
         }
         ctx.fill();
         
-        if (showLabels && node.depth <= 5) {
-            ctx.fillStyle = '#e2e8f0';
+        // Labels
+        const showThisLabel = showLabels && (node.depth <= 5 || (inSector && sectorFilter !== 'all'));
+        if (showThisLabel) {
+            ctx.fillStyle = inSector && sectorFilter !== 'all' ? '#fff' : '#e2e8f0';
             ctx.font = node.depth <= 3 ? 'bold 11px system-ui' : '9px system-ui';
             ctx.textAlign = 'center';
             ctx.fillText(`${node.r}/${node.m}`, node.x, node.y - 10);
@@ -4019,6 +4177,16 @@ function drawSectorTree() {
     ctx.textAlign = 'center';
     ctx.fillText('1/2 (root)', W/2, 25);
     
+    // Sector info
+    if (sectorFilter !== 'all') {
+        const sectorNum = parseInt(sectorFilter);
+        const nodesInSector = treeNodes.filter(n => n.sector === sectorNum);
+        ctx.fillStyle = '#a5b4fc';
+        ctx.font = 'bold 11px system-ui';
+        ctx.textAlign = 'right';
+        ctx.fillText(`Sector ${sectorNum}: ${nodesInSector.length} nodes in tree`, W - 10, 15);
+    }
+    
     // Depth markers
     ctx.textAlign = 'left';
     ctx.fillStyle = '#475569';
@@ -4026,6 +4194,41 @@ function drawSectorTree() {
         const y = 40 + (d / depth) * (H - 80);
         ctx.fillText(`d=${d}`, 5, y + 4);
     }
+}
+
+function playTreeSectorFractions() {
+    const sectorFilter = document.getElementById('treeSectorFilter')?.value || 'all';
+    if (sectorFilter === 'all') {
+        showPlaybackStatus('Select a specific sector to play');
+        return;
+    }
+    
+    const sectorNum = parseInt(sectorFilter);
+    const depth = +document.getElementById('treeDepth').value;
+    const treeNodes = buildSternBrocotTree(depth);
+    
+    // Get nodes in this sector
+    const nodesInSector = treeNodes.filter(n => getSector(n.r, n.m) === sectorNum);
+    
+    if (nodesInSector.length === 0) {
+        showPlaybackStatus(`No nodes in sector ${sectorNum} at depth ${depth}`);
+        return;
+    }
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    // Sort by value (ascending)
+    nodesInSector.sort((a, b) => a.r/a.m - b.r/b.m);
+    
+    playbackState.queue = nodesInSector.map(n => ({ r: n.r, m: n.m }));
+    playbackState.direction = 'forward';
+    playbackState.mode = 'tree-sector';
+    playbackState.currentIndex = 0;
+    playbackState.isPlaying = true;
+    
+    showPlaybackStatus(`Playing ${nodesInSector.length} fractions from sector ${sectorNum}`);
+    startPlaybackLoop();
 }
 
 function buildSternBrocotTree(maxDepth) {
@@ -9162,8 +9365,13 @@ function stopAllPlayback() {
     // Reset UI
     const sectorBtn = document.getElementById('sectorPlayBtn');
     if (sectorBtn) {
-        sectorBtn.textContent = '▶ Play Sector';
+        sectorBtn.textContent = '▶ Forward';
         sectorBtn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+    }
+    
+    // Reset all sectors button
+    if (typeof resetAllSectorsBtn === 'function') {
+        resetAllSectorsBtn();
     }
 }
 
@@ -9763,6 +9971,257 @@ function playErrorBySector(mode = 'error') {
     
     showPlaybackStatus(`Playing ${mode === 'error' ? 'relative error' : 'counts'} across ${data.length} sectors`);
     playNext();
+}
+
+// =============================================
+// ERROR CHART SELECTION AND CLICK-TO-PLAY
+// =============================================
+
+let errorChartSelection = { start: null, end: null, isDragging: false };
+
+function setupErrorChartSelection() {
+    const canvas = document.getElementById('mainErrorChart');
+    if (!canvas || !state.charts.mainError) return;
+    
+    canvas.addEventListener('mousedown', (e) => {
+        const chart = state.charts.mainError;
+        const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: false }, false);
+        if (elements.length > 0) {
+            errorChartSelection.start = elements[0].index;
+            errorChartSelection.end = elements[0].index;
+            errorChartSelection.isDragging = true;
+            updateErrorChartHighlight();
+        }
+    });
+    
+    canvas.addEventListener('mousemove', (e) => {
+        if (!errorChartSelection.isDragging) return;
+        const chart = state.charts.mainError;
+        const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: false }, false);
+        if (elements.length > 0) {
+            errorChartSelection.end = elements[0].index;
+            updateErrorChartHighlight();
+        }
+    });
+    
+    canvas.addEventListener('mouseup', () => {
+        if (errorChartSelection.isDragging) {
+            errorChartSelection.isDragging = false;
+            // Ensure start <= end
+            if (errorChartSelection.start > errorChartSelection.end) {
+                [errorChartSelection.start, errorChartSelection.end] = [errorChartSelection.end, errorChartSelection.start];
+            }
+            updateErrorChartHighlight();
+        }
+    });
+    
+    canvas.addEventListener('mouseleave', () => {
+        errorChartSelection.isDragging = false;
+    });
+}
+
+function updateErrorChartHighlight() {
+    if (!state.charts.mainError) return;
+    
+    const { start, end } = errorChartSelection;
+    const hasSelection = start !== null && end !== null;
+    
+    // Update bar colors
+    state.charts.mainError.data.datasets[0].backgroundColor = state.sectors.map((s, i) => {
+        const inRange = hasSelection && i >= Math.min(start, end) && i <= Math.max(start, end);
+        return inRange ? 'rgba(34,197,94,0.9)' : 'rgba(245,158,11,0.7)';
+    });
+    state.charts.mainError.update('none');
+    
+    // Show/hide play selection button and info
+    const btn = document.getElementById('playSelectedRangeBtn');
+    const info = document.getElementById('errorSelectionInfo');
+    if (hasSelection && Math.abs(end - start) >= 0) {
+        const minIdx = Math.min(start, end);
+        const maxIdx = Math.max(start, end);
+        const startSector = state.sectors[minIdx]?.n;
+        const endSector = state.sectors[maxIdx]?.n;
+        btn.style.display = 'inline-block';
+        info.textContent = `Selected: Sectors ${startSector}-${endSector} (${maxIdx - minIdx + 1} bars)`;
+    } else {
+        btn.style.display = 'none';
+        info.textContent = '';
+    }
+}
+
+function clearErrorSelection() {
+    errorChartSelection = { start: null, end: null, isDragging: false };
+    updateErrorChartHighlight();
+    const info = document.getElementById('errorSelectionInfo');
+    if (info) info.textContent = '';
+}
+
+function playErrorChartBar(idx) {
+    if (!state.sectors[idx]) return;
+    
+    initAudioContext();
+    
+    const s = state.sectors[idx];
+    const err = Math.abs(s.relError || 0);
+    const freq = 200 + (err / 100) * 600;
+    const clampedFreq = Math.min(1200, Math.max(100, freq));
+    
+    playTone(clampedFreq, 0.3, (harmonicSettings.volume || 0.5) * 0.6);
+    showPlaybackStatus(`Sector ${s.n}: Error ${err.toFixed(1)}% → ${clampedFreq.toFixed(0)} Hz`);
+    
+    // Highlight on ring
+    document.getElementById('viewSector').value = s.n;
+    drawMainRing();
+}
+
+function playSelectedErrorRange() {
+    const { start, end } = errorChartSelection;
+    if (start === null || end === null) {
+        showPlaybackStatus('No selection - drag across bars to select range');
+        return;
+    }
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    const minIdx = Math.min(start, end);
+    const maxIdx = Math.max(start, end);
+    
+    const data = [];
+    for (let i = minIdx; i <= maxIdx; i++) {
+        const s = state.sectors[i];
+        if (s) {
+            const err = Math.abs(s.relError || 0);
+            const freq = 200 + (err / 100) * 600;
+            data.push({ n: s.n, value: err, freq: Math.min(1200, Math.max(100, freq)), idx: i });
+        }
+    }
+    
+    playbackState.isPlaying = true;
+    let idx = 0;
+    const speed = +(document.getElementById('playbackSpeed')?.value || 250);
+    
+    function playNext() {
+        if (!playbackState.isPlaying || idx >= data.length) {
+            stopAllPlayback();
+            showPlaybackStatus('Selection playback complete');
+            return;
+        }
+        
+        const d = data[idx];
+        playTone(d.freq, speed / 1000 * 0.8, (harmonicSettings.volume || 0.5) * 0.5);
+        showPlaybackStatus(`Sector ${d.n}: Error ${d.value.toFixed(1)}% → ${d.freq.toFixed(0)} Hz (${idx + 1}/${data.length})`);
+        
+        document.getElementById('viewSector').value = d.n;
+        drawMainRing();
+        
+        idx++;
+        playbackState.intervalId = setTimeout(playNext, speed);
+    }
+    
+    showPlaybackStatus(`Playing selected range: Sectors ${state.sectors[minIdx]?.n}-${state.sectors[maxIdx]?.n}`);
+    playNext();
+}
+
+// =============================================
+// PLAY ALL SECTORS SEQUENTIALLY
+// =============================================
+
+function playAllSectorsSequentially() {
+    if (state.sectors.length === 0) {
+        showPlaybackStatus('No sector data - run computation first');
+        return;
+    }
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    // Collect ALL fractions from all sectors in order (by sector, then by value within sector)
+    const allFractions = [];
+    
+    // Sort sectors by n (ascending)
+    const sortedSectors = [...state.sectors].sort((a, b) => a.n - b.n);
+    
+    sortedSectors.forEach(s => {
+        const residues = state.residuesBySector[s.n] || [];
+        // Sort fractions within sector by value (ascending)
+        const sorted = [...residues].sort((a, b) => a.r/a.m - b.r/b.m);
+        sorted.forEach(f => {
+            allFractions.push({ r: f.r, m: f.m, sector: s.n, isPrime: f.isPrime });
+        });
+    });
+    
+    if (allFractions.length === 0) {
+        showPlaybackStatus('No fractions to play');
+        return;
+    }
+    
+    playbackState.queue = allFractions;
+    playbackState.direction = 'forward';
+    playbackState.mode = 'all-sectors';
+    playbackState.currentIndex = 0;
+    playbackState.isPlaying = true;
+    
+    const btn = document.getElementById('playAllSectorsBtn');
+    if (btn) {
+        btn.textContent = '■ Stop';
+        btn.style.background = '#ef4444';
+        btn.onclick = stopAllPlayback;
+    }
+    
+    showPlaybackStatus(`Playing all ${allFractions.length} fractions across ${sortedSectors.length} sectors`);
+    startAllSectorsPlaybackLoop();
+}
+
+function startAllSectorsPlaybackLoop() {
+    const speed = Math.max(50, +(document.getElementById('playbackSpeed')?.value || 250) / 2); // Faster for continuous play
+    
+    if (playbackState.intervalId) {
+        clearInterval(playbackState.intervalId);
+    }
+    
+    let lastSector = null;
+    
+    playbackState.intervalId = setInterval(() => {
+        if (!playbackState.isPlaying) {
+            resetAllSectorsBtn();
+            return;
+        }
+        
+        if (playbackState.currentIndex >= playbackState.queue.length) {
+            stopAllPlayback();
+            showPlaybackStatus(`All sectors playback complete (${playbackState.queue.length} fractions)`);
+            resetAllSectorsBtn();
+            return;
+        }
+        
+        const f = playbackState.queue[playbackState.currentIndex];
+        
+        if (f && typeof f.r === 'number' && typeof f.m === 'number' && f.m !== 0) {
+            const duration = speed / 1000 * 0.8;
+            playFraction(f.r, f.m, duration);
+            
+            // Update sector view when sector changes
+            if (f.sector !== lastSector) {
+                document.getElementById('viewSector').value = f.sector;
+                drawMainRing();
+                lastSector = f.sector;
+            }
+            
+            showPlaybackStatus(`S${f.sector}: ${f.r}/${f.m} ${f.isPrime ? '(P)' : ''} — ${playbackState.currentIndex + 1}/${playbackState.queue.length}`);
+        }
+        
+        playbackState.currentIndex++;
+    }, speed);
+}
+
+function resetAllSectorsBtn() {
+    const btn = document.getElementById('playAllSectorsBtn');
+    if (btn) {
+        btn.textContent = '▶ Play All Sectors';
+        btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+        btn.onclick = playAllSectorsSequentially;
+    }
 }
 
 // =============================================
