@@ -384,6 +384,29 @@
                 </div>
             </div>
             
+            <!-- WAVELENGTH DISPLAY -->
+            <div class="harmonic-card">
+                <h5>Wave Properties <span class="badge" style="background:#f59e0b;">λ</span></h5>
+                <div class="freq-box" style="background:linear-gradient(135deg,#1e1b4b,#0f172a);">
+                    <div class="big" id="wavelengthDisplay" style="color:#f59e0b;">78.0 cm</div>
+                    <div class="small">Wavelength (v=343 m/s)</div>
+                </div>
+                <div style="margin-top:8px;font-size:10px;color:#64748b;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                        <span>Period:</span>
+                        <span id="periodDisplay" style="color:#a5b4fc;">2.27 ms</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                        <span>Angular ω:</span>
+                        <span id="angularFreqDisplay" style="color:#a5b4fc;">2764 rad/s</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span>Wavenumber k:</span>
+                        <span id="wavenumberDisplay" style="color:#a5b4fc;">8.06 /m</span>
+                    </div>
+                </div>
+            </div>
+            
             <!-- MUSICAL INTERVALS -->
             <div class="harmonic-card">
                 <h5>Musical Intervals</h5>
@@ -405,11 +428,12 @@
                     <button class="interval-btn-sm" onclick="setHarmonicInterval(3,1)" title="12th">3:1</button>
                     <button class="interval-btn-sm" onclick="setHarmonicInterval(4,1)" title="2Oct">4:1</button>
                 </div>
-                <div style="margin-top:8px;display:flex;gap:4px;justify-content:center;">
+                <div style="margin-top:8px;display:flex;gap:4px;justify-content:center;flex-wrap:wrap;">
                     <button class="harmonic-quick-btn play" onclick="playSelectedFraction()">▶ Play</button>
                     <button class="harmonic-quick-btn" onclick="playArpeggio()">Arpeggio</button>
                     <button class="harmonic-quick-btn" onclick="playChord()">Chord</button>
-                    <button class="harmonic-quick-btn stop" onclick="stopAudio()">■ Stop</button>
+                    <button class="harmonic-quick-btn" id="randomIntervalBtn" onclick="toggleRandomIntervals()" style="background:linear-gradient(135deg,#f59e0b,#d97706);border-color:#f59e0b;">🎲 Random</button>
+                    <button class="harmonic-quick-btn stop" onclick="stopAudio(); stopRandomIntervals();">■ Stop</button>
                 </div>
             </div>
             
@@ -623,6 +647,39 @@
         </div>
         <div class="panel chart-wrapper">
             <h4>Sector Ring <span style="font-weight:normal; color:#64748b;">(click points to see tree path)</span></h4>
+            
+            <!-- PRESETS ROW -->
+            <div class="control-row" style="margin-bottom:8px;background:#1e1b4b;padding:8px 12px;border-radius:6px;border:1px solid #6366f1;">
+                <span style="color:#a5b4fc;font-size:11px;margin-right:10px;">Presets:</span>
+                <button class="secondary" onclick="applyPreset('quick')" style="font-size:10px;padding:4px 8px;">Quick (N=50)</button>
+                <button class="secondary" onclick="applyPreset('standard')" style="font-size:10px;padding:4px 8px;">Standard (N=200)</button>
+                <button class="secondary" onclick="applyPreset('detailed')" style="font-size:10px;padding:4px 8px;">Detailed (N=500)</button>
+                <button class="secondary" onclick="applyPreset('deep')" style="font-size:10px;padding:4px 8px;">Deep (N=1000)</button>
+                <button class="secondary" onclick="applyPreset('primes')" style="font-size:10px;padding:4px 8px;border-color:#f59e0b;color:#f59e0b;">Prime Focus</button>
+                <button class="secondary" onclick="applyPreset('musical')" style="font-size:10px;padding:4px 8px;border-color:#22c55e;color:#22c55e;">Musical (N=12)</button>
+            </div>
+            
+            <!-- ANIMATION ROW -->
+            <div class="control-row" style="margin-bottom:8px;background:#0f172a;padding:8px 12px;border-radius:6px;border:1px solid #334155;">
+                <span style="color:#94a3b8;font-size:11px;margin-right:10px;">Animation:</span>
+                <button id="ringAnimateBtn" onclick="toggleRingAnimation()" style="background:linear-gradient(135deg,#22c55e,#16a34a);font-size:11px;padding:5px 12px;">▶ Animate N</button>
+                <button id="sectorSweepBtn" onclick="toggleSectorSweep()" style="background:linear-gradient(135deg,#8b5cf6,#6366f1);font-size:11px;padding:5px 12px;">▶ Sweep Sectors</button>
+                <button onclick="stepRingAnimation(1)" class="secondary" style="font-size:11px;padding:5px 8px;">N+1</button>
+                <button onclick="stepRingAnimation(-1)" class="secondary" style="font-size:11px;padding:5px 8px;">N-1</button>
+                <button onclick="stepSectorAnimation(1)" class="secondary" style="font-size:11px;padding:5px 8px;">S+1</button>
+                <button onclick="stepSectorAnimation(-1)" class="secondary" style="font-size:11px;padding:5px 8px;">S-1</button>
+                <label style="margin-left:10px;font-size:11px;">Speed:
+                    <select id="ringAnimSpeed" style="font-size:10px;padding:3px;">
+                        <option value="50">Fast</option>
+                        <option value="150" selected>Normal</option>
+                        <option value="300">Slow</option>
+                        <option value="500">Very Slow</option>
+                    </select>
+                </label>
+                <label style="margin-left:10px;font-size:11px;"><input type="checkbox" id="animWithSound" checked> Sound</label>
+                <span id="ringAnimStatus" style="margin-left:auto;color:#64748b;font-size:11px;"></span>
+            </div>
+            
             <div class="control-row" style="margin-bottom:10px;">
                 <label>Sector: <input type="number" id="viewSector" value="1" min="1" onchange="drawMainRing()"></label>
                 <label>Color: <select id="colorMode" onchange="drawMainRing()"><option value="sector">Sector</option><option value="prime">Prime</option><option value="denominator">Denom</option><option value="gap">Gap</option></select></label>
@@ -1236,21 +1293,67 @@
     
     <!-- PRIMES TAB -->
     <div id="tab-primes" class="tab-content">
+        <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#1e1b4b);border-left:4px solid #f59e0b;margin-bottom:20px;">
+            <h3 style="color:#fcd34d;margin-top:0;">Prime Analysis</h3>
+            <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;"><strong>Overview:</strong> This tab explores how prime numbers manifest within the Farey sequence structure. Primes play a special role: for prime p, we have φ(p) = p-1 coprime residues, giving primes maximal density. The distribution of prime denominators across sectors reveals deep connections to the Prime Number Theorem and twin prime conjectures.</p>
+            <div style="display:flex;gap:15px;flex-wrap:wrap;margin-top:12px;">
+                <div style="background:rgba(245,158,11,0.2);padding:10px 15px;border-radius:6px;border:1px solid #f59e0b;">
+                    <div style="color:#fcd34d;font-size:0.75em;">Prime Density</div>
+                    <div style="color:#f1f5f9;font-size:1.1em;font-family:monospace;">π(x) ~ x/ln(x)</div>
+                </div>
+                <div style="background:rgba(34,197,94,0.2);padding:10px 15px;border-radius:6px;border:1px solid #22c55e;">
+                    <div style="color:#86efac;font-size:0.75em;">Twin Prime Gap</div>
+                    <div style="color:#f1f5f9;font-size:0.9em;">p, p+2 both prime</div>
+                </div>
+                <div style="background:rgba(99,102,241,0.2);padding:10px 15px;border-radius:6px;border:1px solid #6366f1;">
+                    <div style="color:#a5b4fc;font-size:0.75em;">Euler's φ for prime p</div>
+                    <div style="color:#f1f5f9;font-size:1.1em;font-family:monospace;">φ(p) = p - 1</div>
+                </div>
+            </div>
+        </div>
+        
         <div class="panel">
-            <h3>Prime Analysis</h3>
             <div class="stat-grid" id="primeStats"></div>
+            
             <div class="grid-2" style="margin-top:15px;">
-                <div class="chart-box"><h4>Twin Prime Gap Markers</h4><canvas id="twinPrimeChart"></canvas></div>
-                <div class="chart-box"><h4>Prime vs Composite Moduli</h4><canvas id="primeVsCompositeChart"></canvas></div>
+                <div class="chart-box chart-wrapper">
+                    <h4>Twin Prime Gap Markers</h4>
+                    <p style="color:#64748b;font-size:0.8em;margin-bottom:10px;">Scatter plot showing Farey gaps where both neighboring denominators are twin primes (p, p+2). The x-axis shows the position in [0,1], y-axis shows gap size. Clusters indicate regions rich in twin prime structure.</p>
+                    <canvas id="twinPrimeChart"></canvas>
+                </div>
+                <div class="chart-box chart-wrapper">
+                    <h4>Prime vs Composite Moduli</h4>
+                    <p style="color:#64748b;font-size:0.8em;margin-bottom:10px;">Compares count of fractions with prime denominators (orange) vs composite denominators (purple) in each sector. Prime moduli contribute more fractions per unit since φ(p)/p = 1-1/p is larger for primes.</p>
+                    <canvas id="primeVsCompositeChart"></canvas>
+                </div>
             </div>
+            
             <div class="grid-2" style="margin-top:15px;">
-                <div class="chart-box"><h4>Prime k-tuple Correlations</h4><canvas id="ktupleChart"></canvas></div>
-                <div class="chart-box"><h4>Prime Denominator Density</h4><canvas id="primeDenomDensityChart"></canvas></div>
+                <div class="chart-box chart-wrapper">
+                    <h4>Prime k-tuple Correlations</h4>
+                    <p style="color:#64748b;font-size:0.8em;margin-bottom:10px;">Counts prime constellations appearing in Farey denominators: <strong>Twin</strong> (p, p+2), <strong>Cousin</strong> (p, p+4), <strong>Sexy</strong> (p, p+6), and prime triplets. These patterns connect to the Hardy-Littlewood conjectures on prime gaps.</p>
+                    <canvas id="ktupleChart"></canvas>
+                </div>
+                <div class="chart-box chart-wrapper">
+                    <h4>Prime Denominator Density</h4>
+                    <p style="color:#64748b;font-size:0.8em;margin-bottom:10px;">Shows φ(p) = p-1 for each prime denominator p. This linear growth demonstrates why primes contribute heavily to Farey sequences. The PNT reference line shows expected prime density π(x) ~ x/ln(x).</p>
+                    <canvas id="primeDenomDensityChart"></canvas>
+                </div>
             </div>
+            
             <div class="panel" style="margin-top:15px; background:#0f172a;">
-                <h4>Twin Prime Gaps in Farey Sequence</h4>
+                <h4>Twin Prime Gaps in Farey Sequence 
+                    <button class="secondary" onclick="playTwinPrimeGaps()" style="font-size:10px;padding:4px 8px;margin-left:10px;">▶ Play All</button>
+                    <button class="secondary" onclick="stopAllPlayback()" style="font-size:10px;padding:4px 8px;">■ Stop</button>
+                </h4>
+                <p style="color:#64748b;font-size:0.8em;margin-bottom:10px;">Lists Farey neighbors where both denominators form a twin prime pair. Click any pair to hear the interval between them as frequencies. Twin primes create distinctive harmonic relationships due to their close denominators.</p>
                 <div id="twinPrimeList" class="residue-list"></div>
             </div>
+            
+            <div class="derivation-box" style="margin-top:15px;">
+                <strong>Mathematical Background:</strong> The distribution of primes among Farey denominators reflects the Prime Number Theorem: π(N) ~ N/ln(N). Twin primes (p, p+2) are conjectured to be infinite (unproven), with density governed by the twin prime constant C₂ ≈ 0.66. The Hardy-Littlewood conjecture predicts ~2C₂N/(ln N)² twin primes up to N. In harmonic terms, prime denominators produce "pure" frequency ratios with fewer overtone conflicts.
+            </div>
+            
             <div style="margin-top:15px;"><button onclick="screenshotFullTab('primes')">Screenshot Full Primes Tab</button></div>
         </div>
     </div>
@@ -1749,8 +1852,12 @@ function openSectorModal(n) {
         '<div class="residue-list" style="max-height:200px; background:#0f172a; padding:10px; border-radius:5px; border:1px solid rgba(245,158,11,0.3);">' + primesHtml + '</div>' +
         '<h4 style="color:#6366f1; margin:15px 0 8px 0;">Composite Moduli Fractions (' + composites.length + ') <span style="font-weight:normal; color:#64748b;">- showing first 100</span></h4>' +
         '<div class="residue-list" style="max-height:200px; background:#0f172a; padding:10px; border-radius:5px; border:1px solid rgba(99,102,241,0.3);">' + compositesHtml + '</div>' +
-        '<div style="margin-top:15px; display:flex; gap:10px;">' +
-        '<button onclick="exportSectorData(' + n + ')">Export Sector CSV</button>' +
+        '<div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">' +
+        '<button onclick="playSectorAudio(' + n + ',\'forward\')" style="background:linear-gradient(135deg,#22c55e,#16a34a);padding:8px 16px;border:none;border-radius:5px;color:white;cursor:pointer;">▶ Play All Forward</button>' +
+        '<button onclick="playSectorAudio(' + n + ',\'backward\')" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:8px 16px;border:none;border-radius:5px;color:white;cursor:pointer;">◀ Play Backward</button>' +
+        '<button onclick="playSectorPrimes(' + n + ')" style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:8px 16px;border:none;border-radius:5px;color:white;cursor:pointer;">▶ Primes Only</button>' +
+        '<button onclick="stopAllPlayback()" style="background:#ef4444;padding:8px 16px;border:none;border-radius:5px;color:white;cursor:pointer;">■ Stop</button>' +
+        '<button onclick="exportSectorData(' + n + ')">Export CSV</button>' +
         '<button class="secondary" onclick="viewSectorOnRing(' + n + ')">View on Ring</button>' +
         '</div>';
     
@@ -3312,7 +3419,11 @@ function openSectorModal(n) {
             ${composites.length > 100 ? `<span style="color:#64748b; display:block; margin-top:8px;">... and ${composites.length - 100} more</span>` : ''}
         </div>
         
-        <div style="margin-top:15px; display:flex; gap:10px;">
+        <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button onclick="playSectorAudio(${n}, 'forward')" style="background:linear-gradient(135deg,#22c55e,#16a34a);">▶ Play All Forward</button>
+            <button onclick="playSectorAudio(${n}, 'backward')" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">◀ Play All Backward</button>
+            <button onclick="playSectorPrimes(${n})" style="background:linear-gradient(135deg,#f59e0b,#d97706);">▶ Play Primes</button>
+            <button onclick="stopAllPlayback()" style="background:#ef4444;">■ Stop</button>
             <button onclick="exportSectorData(${n})">Export Sector CSV</button>
             <button class="secondary" onclick="viewSectorOnRing(${n})">View on Ring</button>
         </div>
@@ -3461,7 +3572,10 @@ function closeSectorDetail() {
 
 function playSectorDetailFractions(type, direction) {
     const n = parseInt(document.getElementById('sectorDataSelect').value);
-    if (!n) return;
+    if (!n) {
+        showPlaybackStatus('Select a sector first');
+        return;
+    }
     
     const res = state.residuesBySector[n] || [];
     let fracs;
@@ -3475,7 +3589,7 @@ function playSectorDetailFractions(type, direction) {
     }
     
     if (fracs.length === 0) {
-        showPlaybackStatus('No fractions to play');
+        showPlaybackStatus('No ' + type + ' fractions in sector ' + n);
         return;
     }
     
@@ -3483,16 +3597,20 @@ function playSectorDetailFractions(type, direction) {
     stopAllPlayback();
     
     // Sort by value
-    fracs = fracs.sort((a, b) => direction === 'forward' ? a.r/a.m - b.r/b.m : b.r/b.m - a.r/a.m);
+    fracs = [...fracs].sort((a, b) => direction === 'forward' ? a.r/a.m - b.r/b.m : b.r/b.m - a.r/a.m);
     
-    playbackState.queue = fracs.map(f => ({ r: f.r, m: f.m }));
+    // Limit to 150 for performance
+    const limited = fracs.slice(0, 150);
+    
+    playbackState.queue = limited.map(f => ({ r: f.r, m: f.m }));
     playbackState.direction = direction;
     playbackState.mode = 'sector-detail';
     playbackState.currentIndex = 0;
     playbackState.isPlaying = true;
     
     const typeLabel = type === 'primes' ? 'primes' : type === 'composites' ? 'composites' : 'all';
-    showPlaybackStatus('Playing ' + typeLabel + ' from sector ' + n);
+    const countInfo = limited.length < fracs.length ? limited.length + '/' + fracs.length : limited.length;
+    showPlaybackStatus(`Playing ${typeLabel} from sector ${n} (${countInfo} fractions)`);
     startPlaybackLoop();
 }
 
@@ -5313,8 +5431,11 @@ function updatePrimeAnalysis() {
         return diff === 2 && isPrime(g.left.m) && isPrime(g.right.m);
     });
     
+    // Store for playback
+    window.twinPrimeGapsCache = twinPrimeGaps;
+    
     document.getElementById('twinPrimeList').innerHTML = twinPrimeGaps.length > 0 
-        ? twinPrimeGaps.slice(0,30).map(g=>`<span class="residue-item twin">${g.left.r}/${g.left.m} - ${g.right.r}/${g.right.m}</span>`).join('')
+        ? twinPrimeGaps.slice(0,30).map(g=>`<span class="residue-item twin" onclick="playTwinPrimePair(${g.left.r},${g.left.m},${g.right.r},${g.right.m})" style="cursor:pointer;">${g.left.r}/${g.left.m} - ${g.right.r}/${g.right.m}</span>`).join('')
         : '<span style="color:#64748b">No twin prime patterns found</span>';
     
     // Prime vs composite by sector
@@ -5343,6 +5464,88 @@ function updatePrimeAnalysis() {
     
     if(state.charts.twinPrime) state.charts.twinPrime.destroy();
     state.charts.twinPrime = new Chart(document.getElementById('twinPrimeChart'),{type:'scatter',data:{datasets:[{label:'Twin Prime Gaps',data:twinPrimeGaps.slice(0,100).map(g=>({x:g.left.value,y:g.gap})),backgroundColor:'rgba(34,197,94,0.7)'}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+}
+
+// Play a single twin prime pair as interval
+function playTwinPrimePair(r1, m1, r2, m2) {
+    initAudioContext();
+    const freq1 = harmonicSettings.baseFreq * r1 / m1;
+    const freq2 = harmonicSettings.baseFreq * r2 / m2;
+    const vol = (harmonicSettings.volume || 0.5) * 0.4;
+    
+    playTone(freq1, 0.4, vol);
+    setTimeout(() => playTone(freq2, 0.4, vol), 200);
+    
+    showPlaybackStatus(`Twin prime pair: ${r1}/${m1} → ${r2}/${m2}`);
+}
+
+// Play twin prime sequence
+function playTwinPrimeSequence() {
+    const gaps = window.twinPrimeGapsCache || [];
+    if (gaps.length === 0) {
+        showPlaybackStatus('No twin prime gaps found');
+        return;
+    }
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    // Convert to flat list of fractions
+    const fracs = [];
+    gaps.slice(0, 30).forEach(g => {
+        fracs.push({ r: g.left.r, m: g.left.m });
+        fracs.push({ r: g.right.r, m: g.right.m });
+    });
+    
+    playbackState.queue = fracs;
+    playbackState.direction = 'forward';
+    playbackState.mode = 'twin-primes';
+    playbackState.currentIndex = 0;
+    playbackState.isPlaying = true;
+    
+    showPlaybackStatus(`Playing ${gaps.length} twin prime pairs`);
+    startPlaybackLoop();
+}
+
+// Play all twin prime gaps
+function playTwinPrimeGaps() {
+    const gaps = window.twinPrimeGapsCache || [];
+    if (gaps.length === 0) {
+        showPlaybackStatus('No twin prime gaps found');
+        return;
+    }
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    // Play as intervals (both notes of each pair together)
+    let idx = 0;
+    const speed = +(document.getElementById('playbackSpeed')?.value || 250);
+    
+    playbackState.isPlaying = true;
+    
+    function playNextPair() {
+        if (!playbackState.isPlaying || idx >= gaps.length) {
+            stopAllPlayback();
+            showPlaybackStatus('Twin prime playback complete');
+            return;
+        }
+        
+        const g = gaps[idx];
+        const freq1 = harmonicSettings.baseFreq * g.left.r / g.left.m;
+        const freq2 = harmonicSettings.baseFreq * g.right.r / g.right.m;
+        const vol = (harmonicSettings.volume || 0.5) * 0.3;
+        
+        playTone(freq1, speed / 1000, vol);
+        playTone(freq2, speed / 1000, vol);
+        
+        showPlaybackStatus(`Twin ${idx + 1}/${gaps.length}: ${g.left.r}/${g.left.m} + ${g.right.r}/${g.right.m}`);
+        
+        idx++;
+        playbackState.intervalId = setTimeout(playNextPair, speed + 50);
+    }
+    
+    playNextPair();
 }
 
 // RESEARCH
@@ -6636,6 +6839,9 @@ function selectFractionForHarmonic(r, m) {
     if (qw) qw.textContent = waveStr;
     if (qn) qn.textContent = note.name;
     
+    // Update wave properties panel
+    updateWaveProperties(freq);
+    
     const info = document.getElementById('selectedFractionInfo');
     if (info) {
         info.innerHTML = `
@@ -6674,6 +6880,9 @@ function updateHarmonicDisplays() {
     if (quickWave) quickWave.textContent = waveStr;
     if (quickNote) quickNote.textContent = note.name;
     
+    // Update wave properties panel
+    updateWaveProperties(freq);
+    
     // Update mode indicator
     const indicator = document.getElementById('harmonicModeIndicator');
     if (indicator) {
@@ -6686,6 +6895,35 @@ function updateHarmonicDisplays() {
     
     drawArnoldMini();
     drawHarmonicSeriesViz();
+}
+
+// Update wave properties panel with frequency info
+function updateWaveProperties(freq) {
+    if (!freq || freq <= 0 || !isFinite(freq)) return;
+    
+    const speedOfSound = 343; // m/s at 20°C
+    const wavelength = speedOfSound / freq;
+    const period = 1000 / freq; // in ms
+    const angularFreq = 2 * Math.PI * freq;
+    const wavenumber = (2 * Math.PI) / wavelength;
+    
+    const waveDisp = document.getElementById('wavelengthDisplay');
+    const periodDisp = document.getElementById('periodDisplay');
+    const angularDisp = document.getElementById('angularFreqDisplay');
+    const wavenumDisp = document.getElementById('wavenumberDisplay');
+    
+    if (waveDisp) {
+        waveDisp.textContent = wavelength >= 1 ? wavelength.toFixed(2) + ' m' : (wavelength * 100).toFixed(1) + ' cm';
+    }
+    if (periodDisp) {
+        periodDisp.textContent = period >= 1 ? period.toFixed(2) + ' ms' : (period * 1000).toFixed(1) + ' μs';
+    }
+    if (angularDisp) {
+        angularDisp.textContent = angularFreq.toFixed(0) + ' rad/s';
+    }
+    if (wavenumDisp) {
+        wavenumDisp.textContent = wavenumber.toFixed(2) + ' /m';
+    }
 }
 
 function updateArnoldTongue() {
@@ -8770,6 +9008,16 @@ function stopAllPlayback() {
     }
     stopAudio();
     
+    // Stop random intervals if playing
+    if (typeof stopRandomIntervals === 'function') {
+        stopRandomIntervals();
+    }
+    
+    // Stop sector sweep if active
+    if (typeof stopSectorSweep === 'function' && sectorSweeping) {
+        stopSectorSweep();
+    }
+    
     // Reset UI
     const sectorBtn = document.getElementById('sectorPlayBtn');
     if (sectorBtn) {
@@ -8794,6 +9042,9 @@ function highlightCurrentFraction(f) {
         const waveStr = wavelength >= 1 ? wavelength.toFixed(2) + ' m' : (wavelength * 100).toFixed(1) + ' cm';
         const qw = document.getElementById('quickWave');
         if (qw) qw.textContent = waveStr;
+        
+        // Update wave properties panel
+        updateWaveProperties(freq);
     }
     
     // Highlight on ring if visible
@@ -9121,6 +9372,384 @@ function pulseToolbar() {
     }
 }
 
+// =============================================
+// PRESETS SYSTEM
+// =============================================
+
+const presets = {
+    quick: { N: 50, sectorMin: 1, sectorMax: 10, colorMode: 'sector', showAll: true },
+    standard: { N: 200, sectorMin: 1, sectorMax: 15, colorMode: 'sector', showAll: true },
+    detailed: { N: 500, sectorMin: 1, sectorMax: 20, colorMode: 'prime', showAll: true },
+    deep: { N: 1000, sectorMin: 1, sectorMax: 25, colorMode: 'prime', showAll: false },
+    primes: { N: 300, sectorMin: 1, sectorMax: 15, colorMode: 'prime', showAll: true },
+    musical: { N: 12, sectorMin: 1, sectorMax: 12, colorMode: 'sector', showAll: true, baseFreq: 440 }
+};
+
+function applyPreset(name) {
+    const preset = presets[name];
+    if (!preset) return;
+    
+    document.getElementById('nMax').value = preset.N;
+    document.getElementById('sectorMin').value = preset.sectorMin;
+    document.getElementById('sectorMax').value = preset.sectorMax;
+    document.getElementById('colorMode').value = preset.colorMode;
+    document.getElementById('showAllSectors').checked = preset.showAll;
+    
+    if (preset.baseFreq) {
+        document.getElementById('baseFreq').value = preset.baseFreq;
+        document.getElementById('baseFreqSlider').value = preset.baseFreq;
+        updateBaseFreq();
+    }
+    
+    showPlaybackStatus(`Applied preset: ${name}`);
+    runComputation();
+}
+
+// =============================================
+// RING ANIMATION SYSTEM
+// =============================================
+
+let ringAnimating = false;
+let ringAnimId = null;
+let ringAnimN = 2;
+
+function toggleRingAnimation() {
+    if (ringAnimating) {
+        stopRingAnimation();
+    } else {
+        startRingAnimation();
+    }
+}
+
+function startRingAnimation() {
+    ringAnimating = true;
+    ringAnimN = 2;
+    
+    const btn = document.getElementById('ringAnimateBtn');
+    if (btn) {
+        btn.textContent = '■ Stop Animation';
+        btn.style.background = '#ef4444';
+    }
+    
+    // Reset state for animation
+    state.sectors = [];
+    state.residuesBySector = {};
+    state.allResidues = [];
+    
+    animateRingStep();
+}
+
+function stopRingAnimation() {
+    ringAnimating = false;
+    if (ringAnimId) {
+        clearTimeout(ringAnimId);
+        ringAnimId = null;
+    }
+    
+    const btn = document.getElementById('ringAnimateBtn');
+    if (btn) {
+        btn.textContent = '▶ Animate N Growth';
+        btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+    }
+}
+
+function animateRingStep() {
+    if (!ringAnimating) return;
+    
+    const maxN = +document.getElementById('nMax').value || 200;
+    const speed = +document.getElementById('ringAnimSpeed').value || 150;
+    const withSound = document.getElementById('animWithSound')?.checked;
+    
+    if (ringAnimN > maxN) {
+        stopRingAnimation();
+        showPlaybackStatus('Animation complete');
+        return;
+    }
+    
+    // Add fractions for current N
+    const m = ringAnimN;
+    for (let r = 1; r < m; r++) {
+        if (gcd(r, m) === 1) {
+            const s = getSector(r, m);
+            const res = { r, m, sector: s, isPrime: isPrime(m), value: r/m };
+            state.allResidues.push(res);
+            
+            const sMin = +document.getElementById('sectorMin').value || 1;
+            const sMax = +document.getElementById('sectorMax').value || 10;
+            if (s && s >= sMin && s <= sMax) {
+                if (!state.residuesBySector[s]) state.residuesBySector[s] = [];
+                state.residuesBySector[s].push(res);
+            }
+        }
+    }
+    
+    // Update sectors
+    const sMin = +document.getElementById('sectorMin').value || 1;
+    const sMax = +document.getElementById('sectorMax').value || 10;
+    state.sectors = [];
+    for (let n = sMin; n <= sMax; n++) {
+        const res = state.residuesBySector[n] || [];
+        const pred = formula(n, ringAnimN);
+        state.sectors.push({
+            n, exact: res.length, predicted: pred,
+            error: res.length - pred,
+            relError: res.length > 0 ? ((res.length - pred) / res.length) * 100 : 0,
+            primeCount: res.filter(x => x.isPrime).length
+        });
+    }
+    
+    // Redraw
+    drawMainRing();
+    
+    // Update status
+    const status = document.getElementById('ringAnimStatus');
+    if (status) status.textContent = `N=${ringAnimN} | ${state.allResidues.length} fractions`;
+    
+    // Play sound for new fractions
+    if (withSound && state.allResidues.length > 0) {
+        const lastFrac = state.allResidues[state.allResidues.length - 1];
+        if (lastFrac && ringAnimN % 3 === 0) { // Play every 3rd N to not overwhelm
+            initAudioContext();
+            playFraction(lastFrac.r, lastFrac.m, 0.1);
+        }
+    }
+    
+    ringAnimN++;
+    ringAnimId = setTimeout(animateRingStep, speed);
+}
+
+function stepRingAnimation(delta) {
+    const currentN = +document.getElementById('nMax').value || 200;
+    const newN = Math.max(2, Math.min(2000, currentN + delta));
+    document.getElementById('nMax').value = newN;
+    runComputation();
+}
+
+// =============================================
+// PLAY SECTOR PRIMES
+// =============================================
+
+function playSectorPrimes(sectorNum) {
+    const residues = state.residuesBySector[sectorNum] || [];
+    const primes = residues.filter(r => r.isPrime);
+    
+    if (primes.length === 0) {
+        showPlaybackStatus('No prime denominators in sector ' + sectorNum);
+        return;
+    }
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    const sorted = [...primes].sort((a, b) => a.r/a.m - b.r/b.m);
+    
+    playbackState.queue = sorted;
+    playbackState.direction = 'forward';
+    playbackState.mode = 'sector-primes';
+    playbackState.currentIndex = 0;
+    playbackState.isPlaying = true;
+    
+    showPlaybackStatus(`Playing Sector ${sectorNum} primes (${primes.length} fractions)`);
+    startPlaybackLoop();
+}
+
+// =============================================
+// SECTOR SWEEP ANIMATION
+// =============================================
+
+let sectorSweeping = false;
+let sectorSweepId = null;
+let currentSweepSector = 1;
+
+function toggleSectorSweep() {
+    if (sectorSweeping) {
+        stopSectorSweep();
+    } else {
+        startSectorSweep();
+    }
+}
+
+function startSectorSweep() {
+    sectorSweeping = true;
+    currentSweepSector = +document.getElementById('sectorMin').value || 1;
+    
+    const btn = document.getElementById('sectorSweepBtn');
+    if (btn) {
+        btn.textContent = '■ Stop Sweep';
+        btn.style.background = '#ef4444';
+    }
+    
+    sweepSectorStep();
+}
+
+function stopSectorSweep() {
+    sectorSweeping = false;
+    if (sectorSweepId) {
+        clearTimeout(sectorSweepId);
+        sectorSweepId = null;
+    }
+    stopAllPlayback();
+    
+    const btn = document.getElementById('sectorSweepBtn');
+    if (btn) {
+        btn.textContent = '▶ Sweep Sectors';
+        btn.style.background = 'linear-gradient(135deg,#8b5cf6,#6366f1)';
+    }
+}
+
+function sweepSectorStep() {
+    if (!sectorSweeping) return;
+    
+    const maxSector = +document.getElementById('sectorMax').value || 10;
+    const speed = +document.getElementById('ringAnimSpeed').value || 150;
+    const withSound = document.getElementById('animWithSound')?.checked;
+    
+    if (currentSweepSector > maxSector) {
+        stopSectorSweep();
+        showPlaybackStatus('Sector sweep complete');
+        return;
+    }
+    
+    // Update view to current sector
+    document.getElementById('viewSector').value = currentSweepSector;
+    document.getElementById('showAllSectors').checked = false;
+    drawMainRing();
+    
+    // Update status
+    const status = document.getElementById('ringAnimStatus');
+    const residues = state.residuesBySector[currentSweepSector] || [];
+    if (status) status.textContent = `Sector ${currentSweepSector} | ${residues.length} fractions`;
+    
+    // Play a representative fraction from this sector
+    if (withSound && residues.length > 0) {
+        initAudioContext();
+        // Play the mediant (middle) fraction of the sector
+        const midIdx = Math.floor(residues.length / 2);
+        const midFrac = residues.sort((a,b) => a.r/a.m - b.r/b.m)[midIdx];
+        if (midFrac) {
+            playFraction(midFrac.r, midFrac.m, 0.3);
+        }
+    }
+    
+    currentSweepSector++;
+    sectorSweepId = setTimeout(sweepSectorStep, speed * 3);
+}
+
+function stepSectorAnimation(delta) {
+    const currentSector = +document.getElementById('viewSector').value || 1;
+    const minSector = +document.getElementById('sectorMin').value || 1;
+    const maxSector = +document.getElementById('sectorMax').value || 10;
+    const newSector = Math.max(minSector, Math.min(maxSector, currentSector + delta));
+    
+    document.getElementById('viewSector').value = newSector;
+    document.getElementById('showAllSectors').checked = false;
+    drawMainRing();
+    
+    // Play a sound for feedback
+    const withSound = document.getElementById('animWithSound')?.checked;
+    const residues = state.residuesBySector[newSector] || [];
+    if (withSound && residues.length > 0) {
+        initAudioContext();
+        const midIdx = Math.floor(residues.length / 2);
+        const midFrac = residues.sort((a,b) => a.r/a.m - b.r/b.m)[midIdx];
+        if (midFrac) {
+            playFraction(midFrac.r, midFrac.m, 0.2);
+        }
+    }
+    
+    const status = document.getElementById('ringAnimStatus');
+    if (status) status.textContent = `Sector ${newSector} | ${residues.length} fractions`;
+}
+
+// =============================================
+// RANDOM INTERVAL PLAYBACK
+// =============================================
+
+const musicalIntervals = [
+    { r: 1, m: 1, name: 'Unison' },
+    { r: 16, m: 15, name: 'm2' },
+    { r: 9, m: 8, name: 'M2' },
+    { r: 6, m: 5, name: 'm3' },
+    { r: 5, m: 4, name: 'M3' },
+    { r: 4, m: 3, name: 'P4' },
+    { r: 45, m: 32, name: 'TT' },
+    { r: 3, m: 2, name: 'P5' },
+    { r: 8, m: 5, name: 'm6' },
+    { r: 5, m: 3, name: 'M6' },
+    { r: 9, m: 5, name: 'm7' },
+    { r: 15, m: 8, name: 'M7' },
+    { r: 2, m: 1, name: 'Oct' },
+    { r: 5, m: 2, name: '10th' },
+    { r: 3, m: 1, name: '12th' },
+    { r: 4, m: 1, name: '2Oct' }
+];
+
+let randomIntervalPlaying = false;
+let randomIntervalId = null;
+
+function toggleRandomIntervals() {
+    if (randomIntervalPlaying) {
+        stopRandomIntervals();
+    } else {
+        startRandomIntervals();
+    }
+}
+
+function startRandomIntervals() {
+    randomIntervalPlaying = true;
+    initAudioContext();
+    
+    const btn = document.getElementById('randomIntervalBtn');
+    if (btn) {
+        btn.textContent = '■ Stop';
+        btn.style.background = '#ef4444';
+    }
+    
+    playNextRandomInterval();
+}
+
+function stopRandomIntervals() {
+    randomIntervalPlaying = false;
+    if (randomIntervalId) {
+        clearTimeout(randomIntervalId);
+        randomIntervalId = null;
+    }
+    stopAudio();
+    
+    const btn = document.getElementById('randomIntervalBtn');
+    if (btn) {
+        btn.textContent = '🎲 Random';
+        btn.style.background = 'linear-gradient(135deg,#f59e0b,#d97706)';
+    }
+}
+
+function playNextRandomInterval() {
+    if (!randomIntervalPlaying) return;
+    
+    // Shuffle all intervals and play them one by one
+    if (!window.randomIntervalQueue || window.randomIntervalQueue.length === 0) {
+        // Reshuffle when queue is empty
+        window.randomIntervalQueue = [...musicalIntervals].sort(() => Math.random() - 0.5);
+    }
+    
+    // Get next interval from queue
+    const interval = window.randomIntervalQueue.shift();
+    
+    // Random duration between 200-500ms
+    const duration = 200 + Math.random() * 300;
+    
+    // Play the interval
+    setHarmonicInterval(interval.r, interval.m);
+    playFraction(interval.r, interval.m, duration / 1000);
+    
+    // Show which interval is playing and how many left in cycle
+    const remaining = window.randomIntervalQueue.length;
+    showPlaybackStatus(`🎲 ${interval.name} (${interval.r}:${interval.m}) — ${remaining} left in cycle`);
+    
+    // Schedule next
+    randomIntervalId = setTimeout(playNextRandomInterval, duration + 50);
+}
+
 </script>
 </body>
-    </html>
+                                                                                                               </html>
