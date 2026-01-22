@@ -516,7 +516,8 @@
     <p class="subtitle">Comprehensive analysis with RH connections, modular arithmetic, and advanced visualizations</p>
     
     <div class="formula-box">
-        <div class="formula-main">C(n, N) = 3N² / (π² n(n+1))</div>
+        <div class="formula-main" id="formulaDisplay">C(n, N) = 3N² / (π² n(n+1))</div>
+        <div id="formulaComputed" style="text-align:center; font-size:0.9em; color:#22c55e; margin-top:8px; display:none;"></div>
         <p style="text-align:center; font-size:0.85em; opacity:0.9;">Asymptotic count of coprime pairs (r, m) with r/m in sector S_n = (1/(n+1), 1/n]</p>
     </div>
     
@@ -538,7 +539,7 @@
             </div>
             <div class="control-group highlight">
                 <label>Sectors:</label>
-                <input type="number" id="sectorMin" value="0" min="0"> to
+                <input type="number" id="sectorMin" value="1" min="1"> to
                 <input type="number" id="sectorMax" value="275" min="1">
             </div>
             <button onclick="computeAll()">Compute</button>
@@ -565,6 +566,16 @@
             <input type="text" id="customSectorBound" value="sqrt(3)/pi" placeholder="e.g. sqrt(6)/pi" style="width:100px;font-size:11px;padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-family:monospace;" onchange="applyCustomSectorBound()">
             <span id="sectorBoundValue" style="color:#22c55e;font-size:11px;font-family:monospace;margin-left:8px;">= 0.5513</span>
             <span id="sectorBoundResult" style="color:#f59e0b;font-size:11px;margin-left:8px;">→ Max sector: 275</span>
+        </div>
+        
+        <!-- Bounded P/C Analysis for Large N -->
+        <div class="control-row" style="background:#1e1b4b;padding:8px 12px;border-radius:6px;margin-top:8px;border:1px solid #6366f1;">
+            <label style="color:#a5b4fc;font-size:11px;font-weight:bold;margin-right:8px;">Large N P/C Analysis:</label>
+            <label style="font-size:11px;"><input type="checkbox" id="computeBoundedPC" checked> Compute bounded window for P/C ratios</label>
+            <label style="margin-left:12px;font-size:11px;">Window N:</label>
+            <input type="number" id="boundedWindowN" value="1500" min="100" max="3000" style="width:70px;font-size:11px;padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;">
+            <span style="color:#64748b;font-size:10px;margin-left:8px;">(exact data computed up to this N for P/C ratios)</span>
+            <button onclick="showConvergenceAnalysis()" class="secondary" style="margin-left:12px;font-size:10px;padding:4px 8px;">Convergence Analysis</button>
         </div>
         
         <!-- Global Display Format Controls -->
@@ -655,6 +666,7 @@
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
                 <h4 style="margin:0;">Sector Data <span style="font-weight:normal; color:#64748b;">(click row to see details)</span></h4>
                 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                    <label style="font-size:11px;color:#94a3b8;"><input type="checkbox" id="showCategoryColumns" onchange="updateMainTable()"> Show Categories</label>
                     <button id="playAllSectorsBtn" onclick="playAllSectorsSequentially()" style="padding:5px 12px;font-size:11px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;cursor:pointer;">▶ Play All Sectors</button>
                     <button onclick="stopAllPlayback()" style="padding:5px 8px;font-size:11px;background:#ef4444;border:none;border-radius:4px;color:white;cursor:pointer;">■ Stop</button>
                     <label style="color:#94a3b8;">View Sector:</label>
@@ -665,19 +677,55 @@
                     <button onclick="exportAllSectorsCSV()" class="secondary" style="font-size:11px;">Export All CSV</button>
                 </div>
             </div>
-            <div class="table-scroll"><table id="mainTable"><thead><tr><th>n</th><th>Interval</th><th>Exact</th><th>Pred</th><th>Err%</th><th>Primes</th><th>Composites</th></tr></thead><tbody></tbody></table></div>
+            <!-- Category legend -->
+            <div id="categoryLegend" style="display:none;margin-bottom:10px;padding:8px 12px;background:#1e1b4b;border-radius:6px;font-size:11px;border:1px solid #334155;">
+                <div style="margin-bottom:6px;">
+                    <span style="color:#94a3b8;margin-right:8px;"><strong>Columns:</strong></span>
+                    <span style="color:#f59e0b;margin-right:12px;">P(m) = Prime denominator count</span>
+                    <span style="color:#6366f1;margin-right:12px;">C(m) = Composite denominator count</span>
+                    <span style="color:#22c55e;margin-right:12px;">P/C = P(m)/C(m) ratio</span>
+                    <span style="color:#a5b4fc;margin-right:12px;">P(r) = Prime numerator count</span>
+                </div>
+                <div>
+                    <span style="color:#94a3b8;margin-right:8px;"><strong>Categories:</strong></span>
+                    <span style="color:#22c55e;margin-right:12px;">PP = Both prime (r prime, m prime)</span>
+                    <span style="color:#f59e0b;margin-right:12px;">PC = Prime num, Composite denom</span>
+                    <span style="color:#6366f1;margin-right:12px;">CP = Composite num, Prime denom</span>
+                    <span style="color:#94a3b8;">CC = Both composite</span>
+                </div>
+            </div>
+            <div class="table-scroll"><table id="mainTable"><thead><tr id="mainTableHeader"><th>n</th><th>Interval</th><th>Exact</th><th>Pred</th><th>Err%</th><th title="P(m) = Prime denominator count (m is prime: 2,3,5,7,...)">P(m)</th><th title="C(m) = Composite denominator count (m is composite: 4,6,8,9,...)">C(m)</th><th title="P/C = P(m)/C(m) ratio">P/C</th></tr></thead><tbody></tbody></table></div>
             
             <!-- Sector Detail Panel -->
             <div id="sectorDetailPanel" style="display:none;margin-top:15px;background:#0f172a;border-radius:8px;padding:15px;border:1px solid #334155;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                    <h5 style="margin:0;color:#a78bfa;" id="sectorDetailTitle">Sector Details</h5>
-                    <div style="display:flex;gap:8px;">
-                        <button onclick="playSectorDetailFractions('primes','forward')" style="padding:4px 10px;font-size:11px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:4px;color:white;cursor:pointer;">▶ Primes</button>
-                        <button onclick="playSectorDetailFractions('composites','forward')" style="padding:4px 10px;font-size:11px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:4px;color:white;cursor:pointer;">▶ Composites</button>
-                        <button onclick="playSectorDetailFractions('all','forward')" style="padding:4px 10px;font-size:11px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;cursor:pointer;">▶ All</button>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                    <div>
+                        <h5 style="margin:0;color:#a78bfa;" id="sectorDetailTitle">Sector Details</h5>
+                        <div style="margin-top:6px;font-size:12px;">
+                            <span style="color:#94a3b8;">P/C Ratio (denom): </span>
+                            <span id="sectorPCRatio" style="color:#22c55e;font-family:monospace;font-weight:bold;">-</span>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button onclick="playSectorDetailFractions('primes','forward')" style="padding:4px 10px;font-size:11px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:4px;color:white;cursor:pointer;">▶ P(m)</button>
+                        <button onclick="playSectorDetailFractions('composites','forward')" style="padding:4px 10px;font-size:11px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:4px;color:white;cursor:pointer;">▶ C(m)</button>
+                        <button onclick="playSectorDetailFractions('PP','forward')" style="padding:4px 10px;font-size:11px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;cursor:pointer;">▶ PP</button>
+                        <button onclick="playSectorDetailFractions('all','forward')" style="padding:4px 10px;font-size:11px;background:linear-gradient(135deg,#8b5cf6,#7c3aed);border:none;border-radius:4px;color:white;cursor:pointer;">▶ All</button>
                         <button onclick="closeSectorDetail()" style="padding:4px 10px;font-size:11px;background:#ef4444;border:none;border-radius:4px;color:white;cursor:pointer;">✕ Close</button>
                     </div>
                 </div>
+                
+                <!-- Category breakdown stats -->
+                <div id="sectorCategoryStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:12px;padding:10px;background:#1e293b;border-radius:6px;">
+                    <div style="text-align:center;"><div style="color:#f59e0b;font-size:16px;font-weight:bold;" id="statPrimeM">0</div><div style="font-size:10px;color:#94a3b8;">P(m) Prime denom</div></div>
+                    <div style="text-align:center;"><div style="color:#6366f1;font-size:16px;font-weight:bold;" id="statCompM">0</div><div style="font-size:10px;color:#94a3b8;">C(m) Comp denom</div></div>
+                    <div style="text-align:center;"><div style="color:#a5b4fc;font-size:16px;font-weight:bold;" id="statPrimeR">0</div><div style="font-size:10px;color:#94a3b8;">P(r) Prime num</div></div>
+                    <div style="text-align:center;"><div style="color:#22c55e;font-size:16px;font-weight:bold;" id="statPP">0</div><div style="font-size:10px;color:#94a3b8;">PP Both prime</div></div>
+                    <div style="text-align:center;"><div style="color:#f59e0b;font-size:16px;font-weight:bold;" id="statPC">0</div><div style="font-size:10px;color:#94a3b8;">PC P-num C-denom</div></div>
+                    <div style="text-align:center;"><div style="color:#6366f1;font-size:16px;font-weight:bold;" id="statCP">0</div><div style="font-size:10px;color:#94a3b8;">CP C-num P-denom</div></div>
+                    <div style="text-align:center;"><div style="color:#94a3b8;font-size:16px;font-weight:bold;" id="statCC">0</div><div style="font-size:10px;color:#94a3b8;">CC Both comp</div></div>
+                </div>
+                
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
                     <div>
                         <h6 style="color:#f59e0b;margin:0 0 8px 0;">Prime Denominators (<span id="sectorPrimeCount">0</span>)</h6>
@@ -695,7 +743,7 @@
             
             <!-- MAIN CONTROLS + PRESETS ROW (Combined) -->
             <div class="control-row" style="margin-bottom:8px;background:#1e1b4b;padding:10px 12px;border-radius:6px;border:1px solid #6366f1;">
-                <label>Sector: <input type="number" id="viewSector" value="1" min="0" onchange="drawMainRing()" style="width:60px;"></label>
+                <label>Sector: <input type="number" id="viewSector" value="1" min="1" onchange="drawMainRing(); updateFormulaDisplay();" style="width:60px;"></label>
                 <label>Color: <select id="colorMode" onchange="drawMainRing()"><option value="sector">Sector</option><option value="prime">Prime</option><option value="denominator">Denom</option><option value="gap">Gap</option></select></label>
                 <label><input type="checkbox" id="showAllSectors" onchange="drawMainRing()"> All</label>
                 <span style="color:#475569;margin:0 8px;">|</span>
@@ -1980,10 +2028,14 @@
 
 <script>
 const state = {
-    mode: 'exact', nMin: 1, nMax: 500, sectorMin: 0, sectorMax: 275,
+    mode: 'exact', nMin: 1, nMax: 500, sectorMin: 1, sectorMax: 275,
     sectors: [], residuesBySector: {}, allResidues: [], gaps: [], farey: [],
     computing: false, charts: {}, ringPoints: [], animationId: null,
-    sectorBoundConstant: Math.sqrt(3) / Math.PI // Default √3/π
+    sectorBoundConstant: Math.sqrt(3) / Math.PI, // Default √3/π
+    // Bounded window data for P/C analysis in large N mode
+    boundedResiduesBySector: {},
+    boundedN: 1500,
+    useBoundedPC: true
 };
 
 const sectorColors = ['#6366f1','#8b5cf6','#a855f7','#d946ef','#ec4899','#f43f5e','#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e','#10b981','#14b8a6','#06b6d4','#0ea5e9','#3b82f6'];
@@ -2142,7 +2194,15 @@ function screenshotFullTab(tabName) {
             title: 'Main Sector Analysis',
             formula: 'C(n, N) = 3N² / (π² n(n+1))',
             description: 'Asymptotic count of coprime pairs (r, m) with r/m in sector Sₙ = (1/(n+1), 1/n]',
-            params: ['Coprime density: 6/π² ≈ 0.6079', 'Sector width: 1/(n(n+1))', 'Error term: O(N log N)']
+            params: (function() {
+                const baseParams = ['Coprime density: 6/π² ≈ 0.6079', 'P(m)=Prime denom, C(m)=Comp denom', 'P/C = P(m)/C(m) ratio'];
+                const showCats = document.getElementById('showCategoryColumns')?.checked;
+                if (showCats) {
+                    baseParams.push('PP=Both prime, PC=Prime r Comp m');
+                    baseParams.push('CP=Comp r Prime m, CC=Both comp');
+                }
+                return baseParams;
+            })()
         },
         'theory': {
             title: 'Farey Sector Density Theory',
@@ -2394,24 +2454,33 @@ function screenshotFullTab(tabName) {
         ctx.font = 'bold 16px "Cambria Math", serif';
         ctx.fillText(info.formula, x + canvasWidth/2, y + 82);
         
+        // Computed example
+        const viewSector = parseInt(document.getElementById('viewSector')?.value || 1);
+        const N = state.nMax;
+        const pi2 = Math.PI * Math.PI;
+        const computedResult = (3 * N * N) / (pi2 * viewSector * (viewSector + 1));
+        ctx.fillStyle = '#22c55e';
+        ctx.font = '12px system-ui';
+        ctx.fillText(`Example: C(${viewSector}, ${N.toLocaleString()}) = ${computedResult.toFixed(4)}`, x + canvasWidth/2, y + 115);
+        
         // Description
         ctx.fillStyle = '#94a3b8';
         ctx.font = '11px system-ui';
         const descLines = wrapText(ctx, info.description, canvasWidth - 40);
         descLines.forEach((line, i) => {
-            ctx.fillText(line, x + canvasWidth/2, y + 125 + i * 16);
+            ctx.fillText(line, x + canvasWidth/2, y + 140 + i * 16);
         });
         
         // Parameters
         ctx.fillStyle = '#cbd5e1';
         ctx.font = 'bold 12px system-ui';
         ctx.textAlign = 'left';
-        ctx.fillText('Parameters:', x + 25, y + 180);
+        ctx.fillText('Definitions:', x + 25, y + 185);
         
         ctx.font = '11px system-ui';
         ctx.fillStyle = '#a5b4fc';
         info.params.forEach((param, i) => {
-            ctx.fillText('• ' + param, x + 30, y + 200 + i * 20);
+            ctx.fillText('• ' + param, x + 30, y + 203 + i * 18);
         });
         
         // Current values
@@ -2493,38 +2562,48 @@ function screenshotFullTab(tabName) {
     ctx.textAlign = 'center';
     ctx.fillText(info.formula, padding + 20 + ((totalWidth - padding * 2) / 2 - 40) / 2, currentY + 65);
     
+    // Computed example
+    const bottomViewSector = parseInt(document.getElementById('viewSector')?.value || 1);
+    const bottomN = state.nMax;
+    const bottomPi2 = Math.PI * Math.PI;
+    const bottomResult = (3 * bottomN * bottomN) / (bottomPi2 * bottomViewSector * (bottomViewSector + 1));
+    ctx.fillStyle = '#22c55e';
+    ctx.font = '11px system-ui';
+    ctx.fillText(`C(${bottomViewSector}, ${bottomN.toLocaleString()}) = ${bottomResult.toFixed(4)}`, padding + 20 + ((totalWidth - padding * 2) / 2 - 40) / 2, currentY + 90);
+    
     ctx.fillStyle = '#94a3b8';
     ctx.font = '10px system-ui';
     ctx.textAlign = 'left';
     const descLines2 = wrapText(ctx, info.description, (totalWidth - padding * 2) / 2 - 50);
     descLines2.forEach((line, i) => {
-        ctx.fillText(line, padding + 25, currentY + 100 + i * 14);
+        ctx.fillText(line, padding + 25, currentY + 110 + i * 14);
     });
     
     // Right side - Parameters and constants
     const rightX = padding + (totalWidth - padding * 2) / 2 + 20;
     ctx.fillStyle = '#c7d2fe';
     ctx.font = 'bold 13px system-ui';
-    ctx.fillText('Key Parameters', rightX, currentY + 25);
+    ctx.fillText('Definitions', rightX, currentY + 25);
     
     ctx.fillStyle = '#a5b4fc';
-    ctx.font = '11px system-ui';
+    ctx.font = '10px system-ui';
     info.params.forEach((param, i) => {
-        ctx.fillText('• ' + param, rightX + 5, currentY + 50 + i * 18);
+        ctx.fillText('• ' + param, rightX + 5, currentY + 45 + i * 16);
     });
     
     // Constants box
+    const constY = currentY + 45 + info.params.length * 16 + 10;
     ctx.fillStyle = '#0f172a';
-    ctx.fillRect(rightX, currentY + 120, 200, 55);
+    ctx.fillRect(rightX, constY, 200, 55);
     ctx.strokeStyle = '#334155';
-    ctx.strokeRect(rightX, currentY + 120, 200, 55);
+    ctx.strokeRect(rightX, constY, 200, 55);
     ctx.fillStyle = '#64748b';
     ctx.font = '10px system-ui';
-    ctx.fillText('Universal Constants:', rightX + 10, currentY + 138);
+    ctx.fillText('Universal Constants:', rightX + 10, constY + 18);
     ctx.fillStyle = '#6366f1';
     ctx.font = '11px monospace';
-    ctx.fillText('6/π² = ' + (6/Math.PI/Math.PI).toFixed(8), rightX + 10, currentY + 155);
-    ctx.fillText('π²/6 = ' + (Math.PI*Math.PI/6).toFixed(8), rightX + 10, currentY + 170);
+    ctx.fillText('6/π² = ' + (6/Math.PI/Math.PI).toFixed(8), rightX + 10, constY + 35);
+    ctx.fillText('π²/6 = ' + (Math.PI*Math.PI/6).toFixed(8), rightX + 10, constY + 50);
     
     // Footer
     ctx.fillStyle = '#475569';
@@ -2804,19 +2883,29 @@ async function computeAll() {
     state.sectorMin = +document.getElementById('sectorMin').value;
     state.sectorMax = +document.getElementById('sectorMax').value;
     
+    // Get bounded P/C settings
+    state.useBoundedPC = document.getElementById('computeBoundedPC')?.checked ?? true;
+    state.boundedN = +(document.getElementById('boundedWindowN')?.value || 1500);
+    
     document.getElementById('progressBar').style.display = 'block';
     document.getElementById('statusArea').innerHTML = '<span class="info-badge">Computing...</span>';
     
     state.sectors = []; state.residuesBySector = {}; state.allResidues = []; state.gaps = []; state.farey = [];
+    state.boundedResiduesBySector = {};
     
     const N = state.nMax;
     
     // Formula mode: fast path - no enumeration needed
     if(state.mode === 'formula') {
+        // First compute bounded window for P/C ratios if enabled
+        if (state.useBoundedPC) {
+            document.getElementById('statusArea').innerHTML = '<span class="info-badge">Computing bounded P/C window...</span>';
+            await computeBoundedWindow();
+        }
         computeFormulaOnly();
         updateFormulaOnlyDisplays();
         document.getElementById('progressBar').style.display = 'none';
-        document.getElementById('statusArea').innerHTML = '<span class="info-badge success">Done (Formula)</span>';
+        document.getElementById('statusArea').innerHTML = '<span class="info-badge success">Done (Formula' + (state.useBoundedPC ? ' + Bounded P/C' : '') + ')</span>';
         state.computing = false;
         return;
     }
@@ -2825,9 +2914,14 @@ async function computeAll() {
     if(N <= 1500) {
         await computeExact(N);
     } else {
-        // Large N in non-formula mode: compute formula + warning
+        // Large N in non-formula mode: compute bounded window first for P/C
+        if (state.useBoundedPC) {
+            document.getElementById('statusArea').innerHTML = '<span class="info-badge">Computing bounded P/C window...</span>';
+            await computeBoundedWindow();
+        }
+        // Then compute formula
         computeFormulaOnly();
-        document.getElementById('statusArea').innerHTML = '<span class="info-badge" style="background:#f59e0b;">N too large for exact - using formula</span>';
+        document.getElementById('statusArea').innerHTML = '<span class="info-badge" style="background:#f59e0b;">N > 1500 - using formula' + (state.useBoundedPC ? ' + bounded P/C' : '') + '</span>';
     }
     
     computeGaps();
@@ -2846,7 +2940,17 @@ async function computeExact(N) {
         for(let r=1; r<m; r++) {
             if(gcd(r,m)===1) {
                 const s = getSector(r,m);
-                const res = {r, m, sector:s, isPrime:isPrime(m), value:r/m};
+                const isPrimeM = isPrime(m);
+                const isPrimeR = isPrime(r);
+                const res = {
+                    r, m, sector:s, 
+                    isPrime: isPrimeM,      // Denominator is prime
+                    isPrimeNum: isPrimeR,   // Numerator is prime
+                    category: isPrimeR && isPrimeM ? 'PP' :
+                              isPrimeR && !isPrimeM ? 'PC' :
+                              !isPrimeR && isPrimeM ? 'CP' : 'CC',
+                    value: r/m
+                };
                 state.allResidues.push(res);
                 if(s && s>=state.sectorMin && s<=state.sectorMax) {
                     if(!state.residuesBySector[s]) state.residuesBySector[s] = [];
@@ -2864,15 +2968,206 @@ async function computeExact(N) {
     for(let n=state.sectorMin; n<=state.sectorMax; n++) {
         const res = state.residuesBySector[n] || [];
         const exact = res.length, pred = formula(n,N);
-        const primeCount = res.filter(x=>x.isPrime).length;
-        state.sectors.push({n, exact, predicted:pred, error:exact-pred, relError:exact>0?((exact-pred)/exact)*100:0, width:1/(n*(n+1)), primeCount});
+        const primeCount = res.filter(x=>x.isPrime).length;  // Prime denominator
+        const primeNumCount = res.filter(x=>x.isPrimeNum).length;  // Prime numerator
+        // Category counts
+        const ppCount = res.filter(x=>x.category==='PP').length;  // Both prime
+        const pcCount = res.filter(x=>x.category==='PC').length;  // Prime num, Composite denom
+        const cpCount = res.filter(x=>x.category==='CP').length;  // Composite num, Prime denom
+        const ccCount = res.filter(x=>x.category==='CC').length;  // Both composite
+        
+        state.sectors.push({
+            n, exact, predicted:pred, error:exact-pred, 
+            relError:exact>0?((exact-pred)/exact)*100:0, 
+            width:1/(n*(n+1)), 
+            primeCount,      // Prime denominators
+            primeNumCount,   // Prime numerators
+            ppCount, pcCount, cpCount, ccCount
+        });
     }
 }
 
 function computeFormulaOnly() {
     for(let n=state.sectorMin; n<=state.sectorMax; n++) {
-        state.sectors.push({n, exact:null, predicted:formula(n,state.nMax), error:null, relError:null, width:1/(n*(n+1)), primeCount:null});
+        // Get bounded P/C data if available
+        const boundedRes = state.boundedResiduesBySector[n] || [];
+        const boundedPrimeCount = boundedRes.filter(x => x.isPrime).length;  // Prime denom
+        const boundedPrimeNumCount = boundedRes.filter(x => x.isPrimeNum).length;  // Prime num
+        const boundedCompositeCount = boundedRes.length - boundedPrimeCount;
+        const boundedPCRatio = boundedCompositeCount > 0 ? boundedPrimeCount / boundedCompositeCount : null;
+        
+        // Category counts from bounded data
+        const boundedPP = boundedRes.filter(x => x.category === 'PP').length;
+        const boundedPC = boundedRes.filter(x => x.category === 'PC').length;
+        const boundedCP = boundedRes.filter(x => x.category === 'CP').length;
+        const boundedCC = boundedRes.filter(x => x.category === 'CC').length;
+        
+        state.sectors.push({
+            n, 
+            exact: null, 
+            predicted: formula(n, state.nMax), 
+            error: null, 
+            relError: null, 
+            width: 1/(n*(n+1)), 
+            primeCount: null,
+            primeNumCount: null,
+            ppCount: null, pcCount: null, cpCount: null, ccCount: null,
+            // Bounded window data
+            boundedPrimeCount: boundedRes.length > 0 ? boundedPrimeCount : null,
+            boundedPrimeNumCount: boundedRes.length > 0 ? boundedPrimeNumCount : null,
+            boundedCompositeCount: boundedRes.length > 0 ? boundedCompositeCount : null,
+            boundedPCRatio: boundedPCRatio,
+            boundedTotal: boundedRes.length > 0 ? boundedRes.length : null,
+            boundedExact: boundedRes.length > 0 ? boundedRes.length : null,
+            boundedPredicted: formula(n, state.boundedN),
+            boundedError: boundedRes.length > 0 ? boundedRes.length - formula(n, state.boundedN) : null,
+            boundedRelError: boundedRes.length > 0 ? ((boundedRes.length - formula(n, state.boundedN)) / boundedRes.length) * 100 : null,
+            // Bounded category counts
+            boundedPP: boundedRes.length > 0 ? boundedPP : null,
+            boundedPC: boundedRes.length > 0 ? boundedPC : null,
+            boundedCP: boundedRes.length > 0 ? boundedCP : null,
+            boundedCC: boundedRes.length > 0 ? boundedCC : null
+        });
     }
+}
+
+// Compute bounded window for P/C ratios (async to not block UI)
+async function computeBoundedWindow() {
+    const boundedN = state.boundedN;
+    state.boundedResiduesBySector = {};
+    
+    let ops = 0;
+    for(let m = 2; m <= boundedN; m++) {
+        for(let r = 1; r < m; r++) {
+            if(gcd(r, m) === 1) {
+                const s = getSector(r, m);
+                if(s !== null && s >= state.sectorMin && s <= state.sectorMax) {
+                    if(!state.boundedResiduesBySector[s]) state.boundedResiduesBySector[s] = [];
+                    const isPrimeM = isPrime(m);
+                    const isPrimeR = isPrime(r);
+                    state.boundedResiduesBySector[s].push({
+                        r, m, 
+                        sector: s, 
+                        isPrime: isPrimeM,      // Denominator is prime
+                        isPrimeNum: isPrimeR,   // Numerator is prime
+                        // Classification
+                        category: isPrimeR && isPrimeM ? 'PP' :    // Both prime
+                                  isPrimeR && !isPrimeM ? 'PC' :   // Prime num, Composite denom
+                                  !isPrimeR && isPrimeM ? 'CP' :   // Composite num, Prime denom
+                                  'CC',                             // Both composite
+                        value: r/m
+                    });
+                }
+            }
+        }
+        ops += m;
+        if(m % 100 === 0) {
+            document.getElementById('progressFill').style.width = (m / boundedN * 100) + '%';
+            await new Promise(r => setTimeout(r, 0));
+        }
+        if(!state.computing) return;
+    }
+}
+
+// Convergence analysis - show how error and P/C converge as N increases
+function showConvergenceAnalysis() {
+    // Compute data at multiple N values
+    const nValues = [100, 200, 500, 1000, 1500, 2000, 5000, 10000, 50000, 100000, 1000000, 10000000];
+    const sectorN = +(document.getElementById('viewSector')?.value || 2);
+    
+    let html = '<div style="max-height:500px;overflow-y:auto;">';
+    html += '<h4 style="color:#a5b4fc;margin-bottom:12px;">Convergence Analysis for Sector ' + sectorN + '</h4>';
+    html += '<p style="color:#94a3b8;font-size:12px;margin-bottom:12px;">Shows how error and P/C ratio converge as N → ∞</p>';
+    
+    html += '<table style="width:100%;font-size:11px;border-collapse:collapse;">';
+    html += '<thead><tr style="background:#1e293b;">';
+    html += '<th style="padding:8px;text-align:left;border-bottom:1px solid #475569;">N</th>';
+    html += '<th style="padding:8px;text-align:right;border-bottom:1px solid #475569;">Formula Pred</th>';
+    html += '<th style="padding:8px;text-align:right;border-bottom:1px solid #475569;">Bounded Exact</th>';
+    html += '<th style="padding:8px;text-align:right;border-bottom:1px solid #475569;">Rel Error %</th>';
+    html += '<th style="padding:8px;text-align:right;border-bottom:1px solid #475569;">Primes</th>';
+    html += '<th style="padding:8px;text-align:right;border-bottom:1px solid #475569;">Composites</th>';
+    html += '<th style="padding:8px;text-align:right;border-bottom:1px solid #475569;">P/C Ratio</th>';
+    html += '</tr></thead><tbody>';
+    
+    // Use cached bounded data for actual counts
+    const boundedRes = state.boundedResiduesBySector[sectorN] || [];
+    const actualPrimes = boundedRes.filter(x => x.isPrime).length;
+    const actualComposites = boundedRes.length - actualPrimes;
+    const actualPCRatio = actualComposites > 0 ? actualPrimes / actualComposites : null;
+    
+    nValues.forEach(N => {
+        const pred = formula(sectorN, N);
+        
+        // For bounded N, we can compute exact
+        let exact = null, primes = null, composites = null, pcRatio = null, relError = null;
+        
+        if (N <= state.boundedN && boundedRes.length > 0) {
+            // Filter bounded data to N
+            const filtered = boundedRes.filter(f => f.m <= N);
+            exact = filtered.length;
+            primes = filtered.filter(f => f.isPrime).length;
+            composites = exact - primes;
+            pcRatio = composites > 0 ? primes / composites : null;
+            relError = exact > 0 ? ((exact - pred) / exact) * 100 : 0;
+        } else {
+            // Extrapolate P/C ratio based on bounded data
+            // P/C ratio should scale roughly as 1/ln(N) based on prime density
+            if (actualPCRatio !== null) {
+                const scaleFactor = Math.log(state.boundedN) / Math.log(N);
+                pcRatio = actualPCRatio * scaleFactor;
+            }
+        }
+        
+        const errColor = relError !== null ? (Math.abs(relError) < 1 ? '#22c55e' : Math.abs(relError) < 5 ? '#f59e0b' : '#ef4444') : '#64748b';
+        const pcColor = pcRatio !== null ? (pcRatio > 1 ? '#f59e0b' : '#6366f1') : '#64748b';
+        
+        html += '<tr style="border-bottom:1px solid #334155;">';
+        html += '<td style="padding:6px 8px;font-family:monospace;">' + N.toLocaleString() + '</td>';
+        html += '<td style="padding:6px 8px;text-align:right;font-family:monospace;">' + pred.toFixed(2) + '</td>';
+        html += '<td style="padding:6px 8px;text-align:right;font-family:monospace;">' + (exact !== null ? exact : '-') + '</td>';
+        html += '<td style="padding:6px 8px;text-align:right;font-family:monospace;color:' + errColor + '">' + (relError !== null ? relError.toFixed(4) + '%' : '-') + '</td>';
+        html += '<td style="padding:6px 8px;text-align:right;color:#f59e0b;">' + (primes !== null ? primes : '-') + '</td>';
+        html += '<td style="padding:6px 8px;text-align:right;color:#6366f1;">' + (composites !== null ? composites : '-') + '</td>';
+        html += '<td style="padding:6px 8px;text-align:right;font-family:monospace;color:' + pcColor + '">' + (pcRatio !== null ? pcRatio.toFixed(6) : '-') + '</td>';
+        html += '</tr>';
+    });
+    
+    html += '</tbody></table>';
+    
+    // Add theoretical notes
+    html += '<div style="margin-top:15px;padding:12px;background:#1e293b;border-radius:6px;font-size:11px;">';
+    html += '<h5 style="color:#a5b4fc;margin:0 0 8px 0;">Theoretical Notes</h5>';
+    html += '<p style="color:#94a3b8;margin:4px 0;"><strong>Error Convergence:</strong> Relative error → 0 as N → ∞ (formula becomes exact asymptotically)</p>';
+    html += '<p style="color:#94a3b8;margin:4px 0;"><strong>P/C Ratio Convergence:</strong> P/C → 0 as N → ∞ (primes become sparse, density ~ 1/ln(N))</p>';
+    html += '<p style="color:#94a3b8;margin:4px 0;"><strong>Rate:</strong> Error ∝ O(N^ε) for small ε; P/C ∝ O(1/ln(N))</p>';
+    html += '</div>';
+    html += '</div>';
+    
+    // Show in modal
+    showModal('Convergence Analysis', html);
+}
+
+function showModal(title, content) {
+    let modal = document.getElementById('convergenceModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'convergenceModal';
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:10000;';
+        modal.innerHTML = `
+            <div style="background:#0f172a;border:1px solid #6366f1;border-radius:12px;padding:20px;max-width:900px;width:90%;max-height:90vh;overflow:auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                    <h3 id="modalTitle" style="margin:0;color:#e2e8f0;"></h3>
+                    <button onclick="document.getElementById('convergenceModal').style.display='none'" style="background:#ef4444;border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;">Close</button>
+                </div>
+                <div id="modalContent"></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalContent').innerHTML = content;
+    modal.style.display = 'flex';
 }
 
 function computeGaps() {
@@ -2902,25 +3197,49 @@ function updateFormulaOnlyDisplays() {
 
 function updateMainChartsFormulaOnly() {
     const labels = state.sectors.map(s=>s.n);
+    const hasBoundedData = state.sectors.some(s => s.boundedExact !== null);
     
     if(state.charts.mainCount) state.charts.mainCount.destroy();
+    
+    const datasets = [{
+        label:'Predicted (Formula N=' + state.nMax + ')',
+        data:state.sectors.map(s=>s.predicted),
+        borderColor:'#22c55e',
+        backgroundColor:'rgba(34,197,94,0.1)',
+        fill:true
+    }];
+    
+    // Add bounded data if available
+    if (hasBoundedData) {
+        datasets.unshift({
+            label: 'Bounded Exact (N≤' + state.boundedN + ')',
+            data: state.sectors.map(s => s.boundedExact),
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99,102,241,0.1)',
+            fill: false,
+            borderDash: [5, 5]
+        });
+        datasets.push({
+            label: 'Bounded Predicted (N=' + state.boundedN + ')',
+            data: state.sectors.map(s => s.boundedPredicted),
+            borderColor: '#f59e0b',
+            backgroundColor: 'transparent',
+            fill: false,
+            borderDash: [2, 2]
+        });
+    }
+    
     state.charts.mainCount = new Chart(document.getElementById('mainCountChart'),{
         type:'line',
         data:{
             labels,
-            datasets:[{
-                label:'Predicted (Formula)',
-                data:state.sectors.map(s=>s.predicted),
-                borderColor:'#22c55e',
-                backgroundColor:'rgba(34,197,94,0.1)',
-                fill:true
-            }]
+            datasets
         },
         options:{
             responsive:true,
             plugins:{
                 legend:{labels:{color:'#94a3b8'}},
-                title:{display:true, text:'Formula Predictions Only (No Exact Data)', color:'#f59e0b'}
+                title:{display:true, text: hasBoundedData ? 'Formula + Bounded Window Data' : 'Formula Predictions Only (No Exact Data)', color: hasBoundedData ? '#22c55e' : '#f59e0b'}
             },
             scales:{
                 x:{ticks:{color:'#94a3b8'}},
@@ -2929,16 +3248,62 @@ function updateMainChartsFormulaOnly() {
         }
     });
     
-    // No error chart in formula mode (no exact data to compare)
+    // Show bounded error chart if available
     if(state.charts.mainError) state.charts.mainError.destroy();
-    const ctx = document.getElementById('mainErrorChart').getContext('2d');
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.fillStyle = '#64748b';
-    ctx.font = '14px system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText('No error data in Formula mode', ctx.canvas.width/2, ctx.canvas.height/2 - 10);
-    ctx.fillText('(Switch to Exact or Hybrid mode)', ctx.canvas.width/2, ctx.canvas.height/2 + 15);
+    
+    if (hasBoundedData) {
+        state.charts.mainError = new Chart(document.getElementById('mainErrorChart'),{
+            type:'bar',
+            data:{
+                labels,
+                datasets:[{
+                    label:'Bounded Rel Err% (N≤' + state.boundedN + ')',
+                    data:state.sectors.map(s=>s.boundedRelError),
+                    backgroundColor: state.sectors.map((s, i) => 
+                        errorChartSelection.start !== null && i >= errorChartSelection.start && i <= errorChartSelection.end 
+                            ? 'rgba(34,197,94,0.9)' 
+                            : 'rgba(245,158,11,0.7)'
+                    )
+                }]
+            },
+            options:{
+                responsive:true,
+                plugins:{
+                    legend:{display:false},
+                    title:{display:true, text:'Bounded Window Error (N≤' + state.boundedN + ')', color:'#a5b4fc'}
+                },
+                scales:{
+                    x:{
+                        ticks:{
+                            color:'#94a3b8',
+                            maxRotation: 45,
+                            autoSkip: true,
+                            maxTicksLimit: 30
+                        },
+                        title: {display: true, text: 'Sector n', color: '#64748b'}
+                    },
+                    y:{ticks:{color:'#94a3b8'}}
+                },
+                onClick: (evt, elements) => {
+                    if (elements && elements.length > 0) {
+                        playErrorChartBar(elements[0].index);
+                    }
+                }
+            }
+        });
+        
+        // Setup selection handlers
+        setupErrorChartSelection();
+    } else {
+        const ctx = document.getElementById('mainErrorChart').getContext('2d');
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.fillStyle = '#64748b';
+        ctx.font = '14px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('No error data in Formula mode', ctx.canvas.width/2, ctx.canvas.height/2 - 10);
+        ctx.fillText('(Enable "Compute bounded window" for P/C data)', ctx.canvas.width/2, ctx.canvas.height/2 + 15);
+    }
 }
 
 function updateAllDisplays() {
@@ -3715,17 +4080,46 @@ function animateTheoryViz() {
 
 function updateMainStats() {
     const hasExact = state.sectors.some(s=>s.exact!==null);
+    const hasBounded = state.sectors.some(s=>s.boundedExact!==null);
     const total = hasExact ? state.sectors.reduce((s,x)=>s+(x.exact||0),0) : null;
+    const totalBounded = hasBounded ? state.sectors.reduce((s,x)=>s+(x.boundedExact||0),0) : null;
     const totalPred = state.sectors.reduce((s,x)=>s+x.predicted,0);
     const modeLabel = state.mode === 'formula' ? '<div class="stat-card" style="border-color:#f59e0b;"><div class="stat-value" style="color:#f59e0b;">Formula</div><div class="stat-label">Mode (instant)</div></div>' : '';
+    const boundedLabel = hasBounded && !hasExact ? `<div class="stat-card" style="border-color:#a5b4fc;"><div class="stat-value" style="color:#a5b4fc;">${fmt(totalBounded)}</div><div class="stat-label">Bounded (N≤${state.boundedN})</div></div>` : '';
     document.getElementById('mainStats').innerHTML = `
         <div class="stat-card"><div class="stat-value">${fmt(state.nMax)}</div><div class="stat-label">N</div></div>
         <div class="stat-card"><div class="stat-value">${state.sectorMax}</div><div class="stat-label">Sectors</div></div>
         ${hasExact?`<div class="stat-card"><div class="stat-value">${fmt(total)}</div><div class="stat-label">Exact</div></div>`:''}
+        ${boundedLabel}
         <div class="stat-card"><div class="stat-value">${fmt(totalPred)}</div><div class="stat-label">Predicted</div></div>
         <div class="stat-card"><div class="stat-value">${(6/Math.PI/Math.PI).toFixed(4)}</div><div class="stat-label">6/π²</div></div>
         ${modeLabel}
     `;
+    
+    // Update formula display with computed values
+    updateFormulaDisplay();
+}
+
+function updateFormulaDisplay() {
+    const formulaComputed = document.getElementById('formulaComputed');
+    if (!formulaComputed) return;
+    
+    const N = state.nMax;
+    const n = document.getElementById('viewSector')?.value || 1;
+    let nVal = parseInt(n) || 1;
+    if (nVal < 1) nVal = 1; // Prevent division by zero
+    
+    // Calculate the formula result for current sector
+    const N2 = N * N;
+    const pi2 = Math.PI * Math.PI;
+    const denominator = nVal * (nVal + 1);
+    const result = (3 * N2) / (pi2 * denominator);
+    
+    // Show computed values
+    formulaComputed.innerHTML = `<span style="color:#94a3b8;">For n=${nVal}, N=${N.toLocaleString()}:</span> ` +
+        `C(${nVal}, ${N.toLocaleString()}) = 3×${N.toLocaleString()}² / (π²×${nVal}×${nVal+1}) = ` +
+        `<span style="color:#22c55e;font-weight:bold;">${result.toFixed(4)}</span>`;
+    formulaComputed.style.display = 'block';
 }
 
 function updateMainCharts() {
@@ -3784,27 +4178,149 @@ function updateMainCharts() {
 
 function updateMainTable() {
     const tbody = document.querySelector('#mainTable tbody');
+    const theadRow = document.getElementById('mainTableHeader');
     const sectorSelect = document.getElementById('sectorDataSelect');
+    const showCategories = document.getElementById('showCategoryColumns')?.checked || false;
+    const categoryLegend = document.getElementById('categoryLegend');
+    
+    // Show/hide legend
+    if (categoryLegend) categoryLegend.style.display = showCategories ? 'block' : 'none';
+    
+    // Update header based on category toggle
+    if (theadRow) {
+        if (showCategories) {
+            theadRow.innerHTML = '<th>n</th><th>Interval</th><th>Exact</th><th>Pred</th><th>Err%</th>' +
+                '<th title="P(m) = Prime denominator count (m is prime: 2,3,5,7,...)" style="color:#f59e0b;">P(m)</th>' +
+                '<th title="C(m) = Composite denominator count (m is composite: 4,6,8,9,...)" style="color:#6366f1;">C(m)</th>' +
+                '<th title="P/C = P(m)/C(m) ratio">P/C</th>' +
+                '<th title="P(r) = Prime numerator count (r is prime)" style="color:#a5b4fc;">P(r)</th>' +
+                '<th title="PP = Both prime (r prime AND m prime)" style="color:#22c55e;">PP</th>' +
+                '<th title="PC = Prime numerator, Composite denominator" style="color:#f59e0b;">PC</th>' +
+                '<th title="CP = Composite numerator, Prime denominator" style="color:#6366f1;">CP</th>' +
+                '<th title="CC = Both composite (r composite AND m composite)" style="color:#94a3b8;">CC</th>';
+        } else {
+            theadRow.innerHTML = '<th>n</th><th>Interval</th><th>Exact</th><th>Pred</th><th>Err%</th>' +
+                '<th title="P(m) = Prime denominator count (m is prime: 2,3,5,7,...)">P(m)</th>' +
+                '<th title="C(m) = Composite denominator count (m is composite: 4,6,8,9,...)">C(m)</th>' +
+                '<th title="P/C = P(m)/C(m) ratio">P/C</th>';
+        }
+    }
+    
     let html = '';
     let optionsHtml = '<option value="">-- Select Sector --</option>';
     
-    state.sectors.forEach(s => {
-        const res = state.residuesBySector[s.n] || [];
-        const primeCount = res.filter(r => r.isPrime).length;
-        const compositeCount = res.length - primeCount;
-        const errColor = s.relError && Math.abs(s.relError) > 10 ? '#f87171' : '#4ade80';
-        html += '<tr onclick="showSectorDataDetail(' + s.n + ')" style="cursor:pointer" title="Click to see sector ' + s.n + ' details">' +
+    // Check if we're in formula/large N mode and have bounded data
+    const usesBoundedData = state.nMax > 1500 || state.mode === 'formula';
+    const hasBoundedData = Object.keys(state.boundedResiduesBySector).length > 0;
+    
+    state.sectors.forEach((s, idx) => {
+        // Use actual residues if available, otherwise use bounded data
+        let res = state.residuesBySector[s.n] || [];
+        let primeCount, compositeCount, primeNumCount, ppCount, pcCount, cpCount, ccCount;
+        let dataSource = '';
+        
+        if (res.length > 0) {
+            // We have exact data for this sector
+            primeCount = res.filter(r => r.isPrime).length;
+            compositeCount = res.length - primeCount;
+            primeNumCount = s.primeNumCount || res.filter(r => r.isPrimeNum).length;
+            ppCount = s.ppCount || res.filter(r => r.category === 'PP').length;
+            pcCount = s.pcCount || res.filter(r => r.category === 'PC').length;
+            cpCount = s.cpCount || res.filter(r => r.category === 'CP').length;
+            ccCount = s.ccCount || res.filter(r => r.category === 'CC').length;
+        } else if (hasBoundedData && state.boundedResiduesBySector[s.n]) {
+            // Use bounded window data
+            res = state.boundedResiduesBySector[s.n];
+            primeCount = s.boundedPrimeCount || res.filter(r => r.isPrime).length;
+            compositeCount = s.boundedCompositeCount || (res.length - primeCount);
+            primeNumCount = s.boundedPrimeNumCount || res.filter(r => r.isPrimeNum).length;
+            ppCount = s.boundedPP || res.filter(r => r.category === 'PP').length;
+            pcCount = s.boundedPC || res.filter(r => r.category === 'PC').length;
+            cpCount = s.boundedCP || res.filter(r => r.category === 'CP').length;
+            ccCount = s.boundedCC || res.filter(r => r.category === 'CC').length;
+            dataSource = '*';
+        } else {
+            primeCount = 0;
+            compositeCount = 0;
+            primeNumCount = 0;
+            ppCount = 0; pcCount = 0; cpCount = 0; ccCount = 0;
+        }
+        
+        const errColor = s.relError !== null && Math.abs(s.relError) > 10 ? '#f87171' : '#4ade80';
+        
+        // Calculate P/C ratio (use bounded if available)
+        let pcRatio = '-';
+        let pcColor = '#94a3b8';
+        if (s.boundedPCRatio !== undefined && s.boundedPCRatio !== null) {
+            pcRatio = s.boundedPCRatio.toFixed(6);
+            pcColor = s.boundedPCRatio > 1 ? '#f59e0b' : s.boundedPCRatio < 1 ? '#6366f1' : '#22c55e';
+        } else if (compositeCount > 0) {
+            const ratio = primeCount / compositeCount;
+            pcRatio = ratio.toFixed(6);
+            pcColor = ratio > 1 ? '#f59e0b' : ratio < 1 ? '#6366f1' : '#22c55e';
+        } else if (primeCount > 0) {
+            pcRatio = '∞';
+            pcColor = '#f59e0b';
+        }
+        
+        // Format predicted with more precision
+        const predStr = s.predicted !== null ? s.predicted.toFixed(10) : '-';
+        
+        // Show bounded error if available, otherwise regular error
+        let errStr = '-';
+        let errValue = null;
+        if (s.relError !== null) {
+            errStr = s.relError.toFixed(6) + '%';
+            errValue = s.relError;
+        } else if (s.boundedRelError !== null) {
+            errStr = s.boundedRelError.toFixed(6) + '%*';
+            errValue = s.boundedRelError;
+        }
+        const displayErrColor = errValue !== null && Math.abs(errValue) > 10 ? '#f87171' : '#4ade80';
+        
+        // Show exact count or bounded exact
+        let exactDisplay = '-';
+        if (s.exact !== null) {
+            exactDisplay = s.exact;
+        } else if (s.boundedExact !== null) {
+            exactDisplay = s.boundedExact + '*';
+        }
+        
+        // Prime/composite display
+        const primeDisplay = primeCount > 0 ? primeCount + dataSource : '-';
+        const compositeDisplay = compositeCount > 0 ? compositeCount + dataSource : '-';
+        const primeNumDisplay = primeNumCount > 0 ? primeNumCount + dataSource : '-';
+        
+        html += '<tr data-sector="' + s.n + '" data-idx="' + idx + '" onclick="showSectorDataDetail(' + s.n + ')" style="cursor:pointer" title="Click to see sector ' + s.n + ' details">' +
             '<td><strong>' + s.n + '</strong></td>' +
             '<td>(1/' + (s.n+1) + ', 1/' + s.n + ']</td>' +
-            '<td>' + (s.exact !== null ? s.exact : '-') + '</td>' +
-            '<td>' + fmt(s.predicted) + '</td>' +
-            '<td style="color:' + errColor + '">' + (s.relError ? s.relError.toFixed(1) + '%' : '-') + '</td>' +
-            '<td style="color:#f59e0b">' + (primeCount || '-') + '</td>' +
-            '<td style="color:#6366f1">' + (compositeCount || '-') + '</td>' +
-            '</tr>';
+            '<td>' + exactDisplay + '</td>' +
+            '<td style="font-family:monospace;font-size:11px;">' + predStr + '</td>' +
+            '<td style="color:' + displayErrColor + ';font-family:monospace;font-size:11px;">' + errStr + '</td>' +
+            '<td style="color:#f59e0b;font-size:11px;">' + primeDisplay + '</td>' +
+            '<td style="color:#6366f1;font-size:11px;">' + compositeDisplay + '</td>' +
+            '<td style="color:' + pcColor + ';font-family:monospace;">' + pcRatio + '</td>';
         
-        optionsHtml += '<option value="' + s.n + '">Sector ' + s.n + ' (' + res.length + ' fractions)</option>';
+        // Add category columns if enabled
+        if (showCategories) {
+            html += '<td style="color:#a5b4fc;font-size:11px;">' + primeNumDisplay + '</td>' +
+                    '<td style="color:#22c55e;font-size:11px;">' + (ppCount > 0 ? ppCount + dataSource : '-') + '</td>' +
+                    '<td style="color:#f59e0b;font-size:11px;">' + (pcCount > 0 ? pcCount + dataSource : '-') + '</td>' +
+                    '<td style="color:#6366f1;font-size:11px;">' + (cpCount > 0 ? cpCount + dataSource : '-') + '</td>' +
+                    '<td style="color:#94a3b8;font-size:11px;">' + (ccCount > 0 ? ccCount + dataSource : '-') + '</td>';
+        }
+        
+        html += '</tr>';
+        
+        optionsHtml += '<option value="' + s.n + '">Sector ' + s.n + ' (' + (res.length || 'formula') + ' fractions)</option>';
     });
+    
+    // Add footnote if using bounded data
+    const colSpan = showCategories ? 13 : 8;
+    if (usesBoundedData && hasBoundedData) {
+        html += '<tr style="background:#1e1b4b;"><td colspan="' + colSpan + '" style="font-size:10px;color:#a5b4fc;padding:8px;text-align:center;">* Data from bounded window N ≤ ' + state.boundedN + ' | P(m)=Prime denom, C(m)=Composite denom, P(r)=Prime num | PP=Both prime, PC=P num C denom, CP=C num P denom, CC=Both composite</td></tr>';
+    }
+    
     tbody.innerHTML = html;
     if (sectorSelect) sectorSelect.innerHTML = optionsHtml;
 }
@@ -3947,34 +4463,79 @@ function showSectorDataDetail(n) {
     }
     
     n = parseInt(n);
-    const res = state.residuesBySector[n] || [];
-    const primes = res.filter(r => r.isPrime);
-    const composites = res.filter(r => !r.isPrime);
+    
+    // Use actual residues if available, otherwise use bounded data
+    let res = state.residuesBySector[n] || [];
+    let dataSource = '';
+    
+    if (res.length === 0 && state.boundedResiduesBySector[n]) {
+        res = state.boundedResiduesBySector[n];
+        dataSource = ' (from bounded N≤' + state.boundedN + ')';
+    }
+    
+    const primes = res.filter(r => r.isPrime);        // Prime denominator
+    const composites = res.filter(r => !r.isPrime);   // Composite denominator
+    const primeNums = res.filter(r => r.isPrimeNum);  // Prime numerator
+    
+    // Category counts
+    const ppFracs = res.filter(r => r.category === 'PP');  // Both prime
+    const pcFracs = res.filter(r => r.category === 'PC');  // Prime num, Comp denom
+    const cpFracs = res.filter(r => r.category === 'CP');  // Comp num, Prime denom
+    const ccFracs = res.filter(r => r.category === 'CC');  // Both composite
     
     // Update dropdown
     document.getElementById('sectorDataSelect').value = n;
     
     // Update title
     document.getElementById('sectorDetailTitle').textContent = 
-        'Sector ' + n + ': (1/' + (n+1) + ', 1/' + n + '] — ' + res.length + ' fractions';
+        'Sector ' + n + ': (1/' + (n+1) + ', 1/' + n + '] — ' + res.length + ' fractions' + dataSource;
     
     // Update counts
     document.getElementById('sectorPrimeCount').textContent = primes.length;
     document.getElementById('sectorCompositeCount').textContent = composites.length;
     
-    // Format and display primes
+    // Update category stats
+    document.getElementById('statPrimeM').textContent = primes.length;
+    document.getElementById('statCompM').textContent = composites.length;
+    document.getElementById('statPrimeR').textContent = primeNums.length;
+    document.getElementById('statPP').textContent = ppFracs.length;
+    document.getElementById('statPC').textContent = pcFracs.length;
+    document.getElementById('statCP').textContent = cpFracs.length;
+    document.getElementById('statCC').textContent = ccFracs.length;
+    
+    // Calculate and display P/C ratio
+    const pcRatioEl = document.getElementById('sectorPCRatio');
+    if (composites.length > 0) {
+        const ratio = primes.length / composites.length;
+        pcRatioEl.textContent = ratio.toFixed(10) + dataSource;
+        pcRatioEl.style.color = ratio > 1 ? '#f59e0b' : ratio < 1 ? '#6366f1' : '#22c55e';
+    } else if (primes.length > 0) {
+        pcRatioEl.textContent = '∞ (no composites)' + dataSource;
+        pcRatioEl.style.color = '#f59e0b';
+    } else {
+        pcRatioEl.textContent = '0/0 (empty)';
+        pcRatioEl.style.color = '#64748b';
+    }
+    
+    // Helper to format fraction with category color
+    function formatFracWithCategory(f) {
+        const catColors = { 'PP': '#22c55e', 'PC': '#f59e0b', 'CP': '#6366f1', 'CC': '#94a3b8' };
+        const bgColors = { 'PP': '#22c55e33', 'PC': '#f59e0b33', 'CP': '#6366f133', 'CC': '#94a3b833' };
+        const color = catColors[f.category] || '#94a3b8';
+        const bg = bgColors[f.category] || '#94a3b833';
+        return '<span onclick="triggerGlobalHarmonic(' + f.r + ',' + f.m + ')" style="display:inline-block;padding:2px 6px;margin:2px;border-radius:3px;background:' + bg + ';border:1px solid ' + color + ';cursor:pointer;color:' + color + ';" title="' + (f.r/f.m).toFixed(10) + ' [' + f.category + ']">' + formatValueGlobal(f.r, f.m) + '</span>';
+    }
+    
+    // Format and display primes (sorted by value, showing category)
     const primesHtml = primes.length > 0 
-        ? primes.sort((a,b) => a.r/a.m - b.r/b.m).map(p => 
-            '<span class="sector-frac prime" onclick="triggerGlobalHarmonic(' + p.r + ',' + p.m + ')" style="display:inline-block;padding:2px 6px;margin:2px;border-radius:3px;background:#f59e0b33;border:1px solid #f59e0b;cursor:pointer;" title="' + (p.r/p.m).toFixed(8) + '">' + formatValueGlobal(p.r, p.m) + '</span>'
-          ).join('')
-        : '<span style="color:#64748b">No prime moduli in this sector</span>';
+        ? primes.sort((a,b) => a.r/a.m - b.r/b.m).map(formatFracWithCategory).join('')
+        : '<span style="color:#64748b">No prime denominators in this sector</span>';
     
     // Format and display composites (limit to 200)
     const compositesHtml = composites.length > 0 
-        ? composites.sort((a,b) => a.r/a.m - b.r/b.m).slice(0, 200).map(c => 
-            '<span class="sector-frac" onclick="triggerGlobalHarmonic(' + c.r + ',' + c.m + ')" style="display:inline-block;padding:2px 6px;margin:2px;border-radius:3px;background:#6366f133;border:1px solid #6366f1;cursor:pointer;" title="' + (c.r/c.m).toFixed(8) + '">' + formatValueGlobal(c.r, c.m) + '</span>'
-          ).join('') + (composites.length > 200 ? '<br><span style="color:#64748b;margin-top:8px;display:block;">... and ' + (composites.length - 200) + ' more</span>' : '')
-        : '<span style="color:#64748b">No composite moduli in this sector</span>';
+        ? composites.sort((a,b) => a.r/a.m - b.r/b.m).slice(0, 200).map(formatFracWithCategory).join('') + 
+          (composites.length > 200 ? '<br><span style="color:#64748b;margin-top:8px;display:block;">... and ' + (composites.length - 200) + ' more</span>' : '')
+        : '<span style="color:#64748b">No composite denominators in this sector</span>';
     
     document.getElementById('sectorPrimesList').innerHTML = primesHtml;
     document.getElementById('sectorCompositesList').innerHTML = compositesHtml;
@@ -3995,19 +4556,52 @@ function playSectorDetailFractions(type, direction) {
         return;
     }
     
-    const res = state.residuesBySector[n] || [];
-    let fracs;
+    // Use actual residues if available, otherwise use bounded data
+    let res = state.residuesBySector[n] || [];
+    if (res.length === 0 && state.boundedResiduesBySector[n]) {
+        res = state.boundedResiduesBySector[n];
+    }
     
-    if (type === 'primes') {
-        fracs = res.filter(r => r.isPrime);
-    } else if (type === 'composites') {
-        fracs = res.filter(r => !r.isPrime);
-    } else {
-        fracs = res;
+    let fracs;
+    let typeLabel = type;
+    
+    // Filter by type
+    switch(type) {
+        case 'primes':
+            fracs = res.filter(r => r.isPrime);
+            typeLabel = 'prime denominators';
+            break;
+        case 'composites':
+            fracs = res.filter(r => !r.isPrime);
+            typeLabel = 'composite denominators';
+            break;
+        case 'primeNums':
+            fracs = res.filter(r => r.isPrimeNum);
+            typeLabel = 'prime numerators';
+            break;
+        case 'PP':
+            fracs = res.filter(r => r.category === 'PP');
+            typeLabel = 'PP (both prime)';
+            break;
+        case 'PC':
+            fracs = res.filter(r => r.category === 'PC');
+            typeLabel = 'PC (prime num, comp denom)';
+            break;
+        case 'CP':
+            fracs = res.filter(r => r.category === 'CP');
+            typeLabel = 'CP (comp num, prime denom)';
+            break;
+        case 'CC':
+            fracs = res.filter(r => r.category === 'CC');
+            typeLabel = 'CC (both composite)';
+            break;
+        default:
+            fracs = res;
+            typeLabel = 'all';
     }
     
     if (fracs.length === 0) {
-        showPlaybackStatus('No ' + type + ' fractions in sector ' + n);
+        showPlaybackStatus('No ' + typeLabel + ' fractions in sector ' + n);
         return;
     }
     
@@ -4026,7 +4620,6 @@ function playSectorDetailFractions(type, direction) {
     playbackState.currentIndex = 0;
     playbackState.isPlaying = true;
     
-    const typeLabel = type === 'primes' ? 'primes' : type === 'composites' ? 'composites' : 'all';
     const countInfo = limited.length < fracs.length ? limited.length + '/' + fracs.length : limited.length;
     showPlaybackStatus(`Playing ${typeLabel} from sector ${n} (${countInfo} fractions)`);
     startPlaybackLoop();
@@ -4038,19 +4631,42 @@ function exportSectorCSV(n) {
         return;
     }
     n = parseInt(n);
-    const res = state.residuesBySector[n] || [];
+    
+    // Use actual residues if available, otherwise use bounded data
+    let res = state.residuesBySector[n] || [];
+    let dataSource = '';
+    if (res.length === 0 && state.boundedResiduesBySector[n]) {
+        res = state.boundedResiduesBySector[n];
+        dataSource = ' (from bounded N≤' + state.boundedN + ')';
+    }
+    
     if (res.length === 0) {
         alert('No data for sector ' + n);
         return;
     }
     
-    const prec = globalFormat.precision;
-    let csv = 'Sector ' + n + ' Data Export\n';
+    const primeCount = res.filter(r => r.isPrime).length;
+    const compositeCount = res.filter(r => !r.isPrime).length;
+    const primeNumCount = res.filter(r => r.isPrimeNum).length;
+    const ppCount = res.filter(r => r.category === 'PP').length;
+    const pcCount = res.filter(r => r.category === 'PC').length;
+    const cpCount = res.filter(r => r.category === 'CP').length;
+    const ccCount = res.filter(r => r.category === 'CC').length;
+    const pcRatio = compositeCount > 0 ? (primeCount / compositeCount).toFixed(10) : (primeCount > 0 ? 'Infinity' : 'N/A');
+    
+    const prec = 10; // Use 10 decimal places
+    let csv = 'Sector ' + n + ' Data Export' + dataSource + '\n';
     csv += 'Interval,(1/' + (n+1) + ', 1/' + n + ']\n';
     csv += 'Total Fractions,' + res.length + '\n';
-    csv += 'Prime Denominators,' + res.filter(r => r.isPrime).length + '\n';
-    csv += 'Composite Denominators,' + res.filter(r => !r.isPrime).length + '\n\n';
-    csv += 'Numerator,Denominator,Value,Degrees,Radians,Pi-Fraction,Type,Frequency (Hz)\n';
+    csv += 'Prime Denominators P(m),' + primeCount + '\n';
+    csv += 'Composite Denominators C(m),' + compositeCount + '\n';
+    csv += 'Prime Numerators P(r),' + primeNumCount + '\n';
+    csv += 'P/C Ratio (denom),' + pcRatio + '\n';
+    csv += 'PP (both prime),' + ppCount + '\n';
+    csv += 'PC (prime num comp denom),' + pcCount + '\n';
+    csv += 'CP (comp num prime denom),' + cpCount + '\n';
+    csv += 'CC (both composite),' + ccCount + '\n\n';
+    csv += 'Numerator,Denominator,Value,Degrees,Radians,Pi-Fraction,Denom Type,Num Type,Category,Frequency (Hz)\n';
     
     res.sort((a, b) => a.r/a.m - b.r/b.m).forEach(f => {
         const val = f.r / f.m;
@@ -4060,6 +4676,8 @@ function exportSectorCSV(n) {
                (val * 2 * Math.PI).toFixed(prec) + ',' + 
                (val * 2).toFixed(prec) + 'π,' +
                (f.isPrime ? 'Prime' : 'Composite') + ',' +
+               (f.isPrimeNum ? 'Prime' : 'Composite') + ',' +
+               (f.category || '-') + ',' +
                freq.toFixed(2) + '\n';
     });
     
@@ -4076,16 +4694,62 @@ function exportAllSectorsCSV() {
         return;
     }
     
-    const prec = globalFormat.precision;
+    const prec = 10; // Use 10 decimal places
+    const hasBoundedData = Object.keys(state.boundedResiduesBySector).length > 0;
+    
     let csv = 'All Sectors Data Export\n';
     csv += 'N Range,' + state.nMin + ' to ' + state.nMax + '\n';
     csv += 'Sectors,' + state.sectorMin + ' to ' + state.sectorMax + '\n';
-    csv += 'Total Fractions,' + state.allResidues.length + '\n\n';
+    csv += 'Total Fractions,' + state.allResidues.length + '\n';
+    if (hasBoundedData) {
+        csv += 'Bounded Window N,' + state.boundedN + '\n';
+    }
+    csv += '\n';
     
-    csv += 'Sector,Numerator,Denominator,Value,Degrees,Radians,Pi-Fraction,Type,Frequency (Hz)\n';
+    // Add sector summary with P/C ratios and categories
+    csv += 'SECTOR SUMMARY\n';
+    csv += 'Sector,Interval,Exact,Predicted,Error%,P(m),C(m),P/C Ratio,P(r),PP,PC,CP,CC\n';
+    state.sectors.forEach(s => {
+        // Use actual residues if available, otherwise use bounded data
+        let res = state.residuesBySector[s.n] || [];
+        if (res.length === 0 && state.boundedResiduesBySector[s.n]) {
+            res = state.boundedResiduesBySector[s.n];
+        }
+        
+        const primeCount = res.filter(r => r.isPrime).length;
+        const compositeCount = res.length - primeCount;
+        const primeNumCount = res.filter(r => r.isPrimeNum).length;
+        const ppCount = res.filter(r => r.category === 'PP').length;
+        const pcCount = res.filter(r => r.category === 'PC').length;
+        const cpCount = res.filter(r => r.category === 'CP').length;
+        const ccCount = res.filter(r => r.category === 'CC').length;
+        const pcRatio = compositeCount > 0 ? (primeCount / compositeCount).toFixed(10) : (primeCount > 0 ? 'Infinity' : 'N/A');
+        
+        csv += s.n + ',' +
+               '(1/' + (s.n+1) + ' - 1/' + s.n + '],' +
+               (s.exact !== null ? s.exact : (s.boundedExact || '')) + ',' +
+               (s.predicted !== null ? s.predicted.toFixed(10) : '') + ',' +
+               (s.relError !== null ? s.relError.toFixed(6) : (s.boundedRelError ? s.boundedRelError.toFixed(6) : '')) + ',' +
+               primeCount + ',' +
+               compositeCount + ',' +
+               pcRatio + ',' +
+               primeNumCount + ',' +
+               ppCount + ',' +
+               pcCount + ',' +
+               cpCount + ',' +
+               ccCount + '\n';
+    });
+    
+    csv += '\nFRACTION DETAILS\n';
+    csv += 'Sector,Numerator,Denominator,Value,Degrees,Radians,Pi-Fraction,Denom Type,Num Type,Category,Frequency (Hz)\n';
     
     for (let s = state.sectorMin; s <= state.sectorMax; s++) {
-        const res = state.residuesBySector[s] || [];
+        // Use actual residues if available, otherwise use bounded data
+        let res = state.residuesBySector[s] || [];
+        if (res.length === 0 && state.boundedResiduesBySector[s]) {
+            res = state.boundedResiduesBySector[s];
+        }
+        
         res.sort((a, b) => a.r/a.m - b.r/b.m).forEach(f => {
             const val = f.r / f.m;
             const freq = (harmonicSettings?.baseFreq || 440) * val;
@@ -4094,6 +4758,8 @@ function exportAllSectorsCSV() {
                    (val * 2 * Math.PI).toFixed(prec) + ',' + 
                    (val * 2).toFixed(prec) + 'π,' +
                    (f.isPrime ? 'Prime' : 'Composite') + ',' +
+                   (f.isPrimeNum ? 'Prime' : 'Composite') + ',' +
+                   (f.category || '-') + ',' +
                    freq.toFixed(2) + '\n';
         });
     }
@@ -6324,28 +6990,66 @@ async function exportCompositeTab() {
         });
     }
     
-    yPos = baseHeight - 400;
+    yPos = baseHeight - 600;
     ctx.fillStyle = '#334155';
-    ctx.fillRect(50, yPos - 50, baseWidth - 100, 350);
+    ctx.fillRect(50, yPos - 50, baseWidth - 100, 550);
     
     ctx.fillStyle = '#f1f5f9';
     ctx.font = 'bold 50px Arial';
     ctx.textAlign = 'left';
-    ctx.fillText('Legend & Parameters', 100, yPos + 20);
+    ctx.fillText('Parameters & Legend', 100, yPos + 20);
     
     ctx.font = '40px Arial';
     ctx.fillStyle = '#cbd5e1';
-    let legendY = yPos + 100;
+    let legendY = yPos + 90;
+    
+    // Formula with computed values
+    const N = state.nMax;
+    const viewSector = parseInt(document.getElementById('viewSector')?.value || 1);
+    const pi2 = Math.PI * Math.PI;
+    const formulaResult = (3 * N * N) / (pi2 * viewSector * (viewSector + 1));
+    
     const legendItems = [
-        'Resolution: 4K (7680×4320)',
-        'Color Scale: Indigo (#6366f1) to Purple (#8b5cf6)',
-        'Time Generated: ' + new Date().toISOString(),
-        'Tab: ' + tabName
+        `N = ${N.toLocaleString()}, Sectors: ${state.sectorMin} to ${state.sectorMax}, Mode: ${state.mode}`,
+        `Formula: C(n, N) = 3N² / (π² n(n+1))`,
+        `Example: C(${viewSector}, ${N.toLocaleString()}) = 3×${N.toLocaleString()}² / (π²×${viewSector}×${viewSector+1}) = ${formulaResult.toFixed(4)}`,
+        '',
+        'Column Definitions:',
+        '  P(m) = Prime denominator count (m ∈ {2,3,5,7,11,...})',
+        '  C(m) = Composite denominator count (m ∈ {4,6,8,9,10,...})',
+        '  P/C = P(m)/C(m) ratio',
+        '  P(r) = Prime numerator count'
     ];
     
+    // Add category definitions if categories are shown
+    const showCategories = document.getElementById('showCategoryColumns')?.checked;
+    if (showCategories) {
+        legendItems.push('');
+        legendItems.push('Category Definitions:');
+        legendItems.push('  PP = Both prime (r prime AND m prime)');
+        legendItems.push('  PC = Prime numerator, Composite denominator');
+        legendItems.push('  CP = Composite numerator, Prime denominator');
+        legendItems.push('  CC = Both composite (r composite AND m composite)');
+    }
+    
     legendItems.forEach((item, idx) => {
-        ctx.fillText(item, 120, legendY + (idx * 60));
+        if (item.startsWith('Column') || item.startsWith('Category')) {
+            ctx.fillStyle = '#a5b4fc';
+            ctx.font = 'bold 38px Arial';
+        } else if (item.startsWith('  ')) {
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '36px Arial';
+        } else {
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = '40px Arial';
+        }
+        ctx.fillText(item, 120, legendY + (idx * 50));
     });
+    
+    // Add timestamp
+    ctx.fillStyle = '#64748b';
+    ctx.font = '32px Arial';
+    ctx.fillText('Generated: ' + new Date().toISOString(), baseWidth - 800, baseHeight - 80);
     
     compositeCanvas.toBlob(blob => {
         const url = URL.createObjectURL(blob);
@@ -9554,6 +10258,11 @@ function stopAllPlayback() {
     }
     stopAudio();
     
+    // Clear playback highlights
+    if (typeof clearAllPlaybackHighlights === 'function') {
+        clearAllPlaybackHighlights();
+    }
+    
     // Stop random intervals if playing
     if (typeof stopRandomIntervals === 'function') {
         stopRandomIntervals();
@@ -10238,6 +10947,15 @@ function setupErrorChartSelection() {
                 [errorChartSelection.start, errorChartSelection.end] = [errorChartSelection.end, errorChartSelection.start];
             }
             updateErrorChartHighlight();
+            
+            // If single bar clicked (not dragged), highlight table row
+            if (errorChartSelection.start === errorChartSelection.end) {
+                const idx = errorChartSelection.start;
+                const s = state.sectors[idx];
+                if (s) {
+                    highlightTableRow(s.n);
+                }
+            }
         }
     });
     
@@ -10282,6 +11000,110 @@ function clearErrorSelection() {
     if (info) info.textContent = '';
 }
 
+// =============================================
+// HIGHLIGHT FUNCTIONS FOR PLAYBACK VISUALIZATION
+// =============================================
+
+let currentHighlightedRow = null;
+let currentHighlightedBarIdx = null;
+let blinkInterval = null;
+
+function highlightTableRow(sectorN) {
+    // Clear previous highlight
+    if (currentHighlightedRow) {
+        currentHighlightedRow.style.background = '';
+        currentHighlightedRow.style.outline = '';
+    }
+    
+    const row = document.querySelector(`#mainTable tbody tr[data-sector="${sectorN}"]`);
+    if (row) {
+        row.style.background = 'rgba(99, 102, 241, 0.3)';
+        row.style.outline = '2px solid #6366f1';
+        currentHighlightedRow = row;
+        
+        // Scroll row into view
+        row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+function clearTableRowHighlight() {
+    if (currentHighlightedRow) {
+        currentHighlightedRow.style.background = '';
+        currentHighlightedRow.style.outline = '';
+        currentHighlightedRow = null;
+    }
+}
+
+function highlightChartBar(idx, blink = false) {
+    if (!state.charts.mainError) return;
+    
+    // Stop any existing blink
+    if (blinkInterval) {
+        clearInterval(blinkInterval);
+        blinkInterval = null;
+    }
+    
+    currentHighlightedBarIdx = idx;
+    
+    // Reset all bars to default
+    const colors = state.sectors.map((s, i) => {
+        if (i === idx) {
+            return 'rgba(34, 197, 94, 0.9)'; // Highlighted green
+        }
+        return 'rgba(245, 158, 11, 0.7)'; // Default orange
+    });
+    
+    state.charts.mainError.data.datasets[0].backgroundColor = colors;
+    state.charts.mainError.data.datasets[0].borderColor = state.sectors.map((s, i) => 
+        i === idx ? '#22c55e' : '#f59e0b'
+    );
+    state.charts.mainError.data.datasets[0].borderWidth = state.sectors.map((s, i) => 
+        i === idx ? 3 : 1
+    );
+    state.charts.mainError.update('none');
+    
+    if (blink) {
+        let isOn = true;
+        blinkInterval = setInterval(() => {
+            isOn = !isOn;
+            state.charts.mainError.data.datasets[0].backgroundColor[idx] = 
+                isOn ? 'rgba(34, 197, 94, 0.9)' : 'rgba(34, 197, 94, 0.3)';
+            state.charts.mainError.update('none');
+        }, 200);
+    }
+}
+
+function clearChartBarHighlight() {
+    if (blinkInterval) {
+        clearInterval(blinkInterval);
+        blinkInterval = null;
+    }
+    
+    if (!state.charts.mainError) return;
+    
+    currentHighlightedBarIdx = null;
+    
+    // Reset all bars to default
+    state.charts.mainError.data.datasets[0].backgroundColor = state.sectors.map(() => 'rgba(245, 158, 11, 0.7)');
+    state.charts.mainError.data.datasets[0].borderColor = state.sectors.map(() => '#f59e0b');
+    state.charts.mainError.data.datasets[0].borderWidth = state.sectors.map(() => 1);
+    state.charts.mainError.update('none');
+}
+
+function highlightSectorDuringPlayback(sectorN, sectorIdx, blink = false) {
+    highlightTableRow(sectorN);
+    highlightChartBar(sectorIdx, blink);
+    
+    // Also update ring view
+    document.getElementById('viewSector').value = sectorN;
+    drawMainRing();
+}
+
+function clearAllPlaybackHighlights() {
+    clearTableRowHighlight();
+    clearChartBarHighlight();
+}
+
 function playErrorChartBar(idx) {
     if (!state.sectors[idx]) return;
     
@@ -10295,9 +11117,8 @@ function playErrorChartBar(idx) {
     playTone(clampedFreq, 0.3, (harmonicSettings.volume || 0.5) * 0.6);
     showPlaybackStatus(`Sector ${s.n}: Error ${err.toFixed(1)}% → ${clampedFreq.toFixed(0)} Hz`);
     
-    // Highlight on ring
-    document.getElementById('viewSector').value = s.n;
-    drawMainRing();
+    // Highlight table row and chart bar
+    highlightSectorDuringPlayback(s.n, idx, false);
 }
 
 function playSelectedErrorRange() {
@@ -10345,6 +11166,7 @@ function playErrorMagnitudeMode(minIdx, maxIdx) {
     function playNext() {
         if (!playbackState.isPlaying || idx >= data.length) {
             stopAllPlayback();
+            clearAllPlaybackHighlights();
             showPlaybackStatus('Selection playback complete');
             return;
         }
@@ -10353,8 +11175,8 @@ function playErrorMagnitudeMode(minIdx, maxIdx) {
         playTone(d.freq, speed / 1000 * 0.8, (harmonicSettings.volume || 0.5) * 0.5);
         showPlaybackStatus(`Sector ${d.n}: Error ${d.value.toFixed(1)}% → ${d.freq.toFixed(0)} Hz (${idx + 1}/${data.length})`);
         
-        document.getElementById('viewSector').value = d.n;
-        drawMainRing();
+        // Highlight current sector (bar + table row)
+        highlightSectorDuringPlayback(d.n, d.idx, false);
         
         idx++;
         playbackState.intervalId = setTimeout(playNext, speed);
@@ -10393,25 +11215,32 @@ function playAllFractionsMode(minIdx, maxIdx) {
     
     playbackState.isPlaying = true;
     let idx = 0;
+    let currentSectorIdx = null;
     const speed = +(document.getElementById('playbackSpeed')?.value || 250);
     const baseFreq = 220;
     
     function playNext() {
         if (!playbackState.isPlaying || idx >= allFractions.length) {
             stopAllPlayback();
+            clearAllPlaybackHighlights();
             showPlaybackStatus('Selection playback complete');
             return;
         }
         
         const f = allFractions[idx];
+        
+        // Check if we moved to a new sector - update blinking highlight
+        if (currentSectorIdx !== f.sectorIdx) {
+            currentSectorIdx = f.sectorIdx;
+            // Start blinking for this sector
+            highlightSectorDuringPlayback(f.sector, f.sectorIdx, true);
+        }
+        
         const freq = baseFreq * (f.m / f.r); // Harmonic frequency
         const clampedFreq = Math.min(2000, Math.max(80, freq));
         
         playTone(clampedFreq, speed / 1000 * 0.8, (harmonicSettings.volume || 0.5) * 0.5);
         showPlaybackStatus(`S${f.sector}: ${f.r}/${f.m} → ${clampedFreq.toFixed(0)} Hz (${idx + 1}/${allFractions.length})`);
-        
-        document.getElementById('viewSector').value = f.sector;
-        drawMainRing();
         
         idx++;
         playbackState.intervalId = setTimeout(playNext, speed);
@@ -10460,6 +11289,7 @@ function playRepresentativeMode(minIdx, maxIdx) {
     function playNext() {
         if (!playbackState.isPlaying || idx >= data.length) {
             stopAllPlayback();
+            clearAllPlaybackHighlights();
             showPlaybackStatus('Selection playback complete');
             return;
         }
@@ -10471,8 +11301,8 @@ function playRepresentativeMode(minIdx, maxIdx) {
         playTone(clampedFreq, speed / 1000 * 0.8, (harmonicSettings.volume || 0.5) * 0.5);
         showPlaybackStatus(`S${f.sector}: mediant ${f.r}/${f.m} (of ${f.total}) → ${clampedFreq.toFixed(0)} Hz (${idx + 1}/${data.length})`);
         
-        document.getElementById('viewSector').value = f.sector;
-        drawMainRing();
+        // Highlight current sector (bar + table row)
+        highlightSectorDuringPlayback(f.sector, f.sectorIdx, false);
         
         idx++;
         playbackState.intervalId = setTimeout(playNext, speed);
