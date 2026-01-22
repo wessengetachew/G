@@ -1009,7 +1009,7 @@
             </div>
             <div style="text-align:center;position:relative;"><canvas id="mainRing" class="ring-canvas" width="600" height="600"></canvas><div class="point-tooltip" id="pointTooltip"></div></div>
             <div class="color-legend" id="colorLegend"></div>
-            <div style="margin-top:10px;"><button onclick="screenshotFullTab('main')">Screenshot Full Main Tab</button></div>
+            <div style="margin-top:10px;"><button onclick="exportRingHiRes()">Screenshot Ring</button></div>
         </div>
         
         <div class="panel chart-wrapper">
@@ -1212,10 +1212,9 @@
                 <div class="color-legend" id="sectorPartitionLegend"></div>
             </div>
             <div class="chart-box chart-wrapper">
-                <h4>Density Cone: C(n,N) ~ N²/n(n+1)</h4>
+                <h4>Density Cone: C(n,N) ~ (3/π²)N²/n(n+1)</h4>
                 <div class="control-row" style="margin-bottom:8px;">
                     <label>Sectors to show: <input type="number" id="tvConeSectors" value="4" min="1" max="10" onchange="drawDensityCone()"></label>
-                    <label><input type="checkbox" id="tvShowConeRef" checked onchange="drawDensityCone()"> 6/π² ref</label>
                     <label><input type="checkbox" id="tvLogScale" onchange="drawDensityCone()"> Log Y</label>
                 </div>
                 <canvas id="densityConeCanvas" width="550" height="350"></canvas>
@@ -1300,6 +1299,10 @@
             <div class="chart-box chart-wrapper"><h4>Gap Distribution (Color = Size)</h4><canvas id="gapDistChart"></canvas></div>
             <div class="chart-box chart-wrapper"><h4>Gap vs Denominator Product</h4><canvas id="gapVsDenomChart"></canvas></div>
         </div>
+        <div class="grid-2" style="margin-top:15px;">
+            <div class="chart-box chart-wrapper"><h4>Gap Position in [0,1]</h4><canvas id="gapPositionChart"></canvas></div>
+            <div class="chart-box chart-wrapper"><h4>Gap Size vs Position</h4><canvas id="gapSizePositionChart"></canvas></div>
+        </div>
         <div class="panel" style="margin-top:15px; background:#0f172a;">
             <h4>Largest Gaps <span style="font-weight:normal;color:#64748b;">(sorted by gap size)</span></h4>
             <div class="table-scroll">
@@ -1311,6 +1314,9 @@
         </div>
         <div class="connection-box" style="margin-top:15px;">
             <strong>Key Insight:</strong> Every gap exactly equals 1/(bd) where b and d are the denominators of consecutive Farey fractions. This is a consequence of the mediant property: for neighbors a/b and c/d, we have |ad - bc| = 1.
+        </div>
+        <div class="derivation-box" style="margin-top:15px;">
+            <strong>Ford Circles Connection:</strong> Each Farey fraction a/b corresponds to a Ford circle of radius 1/(2b²) tangent to the real line at x = a/b. Two Ford circles are tangent if and only if their fractions are Farey neighbors. The gap formula 1/(bd) emerges from the geometry of tangent Ford circles, connecting number theory to hyperbolic geometry.
         </div>
         <div style="margin-top:15px; padding:12px; background:#1e293b; border-radius:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
             <span style="color:#94a3b8; font-size:12px;">Hear the gaps as intervals:</span>
@@ -1329,12 +1335,24 @@
             <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">Define δ_k = F_k - k/|F_N| as the k-th Farey fraction deviation. The growth rate of Σ|δ_k| is directly equivalent to the Riemann Hypothesis. If RH is true, the sum grows slower than N^(1/2+ε) for any ε > 0. This provides a concrete computational test for RH properties through Farey sequence analysis. <strong style="color:#f87171;">Note: These computations illustrate known equivalences but do not constitute a proof or disproof of RH.</strong></p>
         </div>
         <div class="stat-grid" id="franelStats" style="margin-top:12px;"></div>
+        <div class="control-panel" style="margin-top:15px;">
+            <div class="control-row">
+                <label>Test Alpha: <input type="range" id="franelAlphaSlider" min="0.3" max="0.7" step="0.01" value="0.5" onchange="updateFranelAlpha()"><span id="franelAlphaValue" style="margin-left:8px;color:#06b6d4;">0.50</span></label>
+                <span id="franelAlphaResult" style="margin-left:15px;padding:4px 10px;border-radius:4px;font-size:12px;"></span>
+            </div>
+        </div>
             <div class="grid-2" style="margin-top:15px;">
                 <div class="chart-box"><h4>Deviation δ_k vs k</h4><canvas id="franelDeviationChart"></canvas></div>
                 <div class="chart-box"><h4>Cumulative |δ| / N^α</h4><canvas id="franelCumulativeChart"></canvas></div>
             </div>
-            <div class="chart-box" style="margin-top:15px;"><h4>Σ|δ| / N^α for various α</h4><canvas id="franelAlphaChart"></canvas></div>
-            <div class="derivation-box" style="margin-top:15px;"><strong>Interpretation:</strong> If RH is true, the normalized sum should stay bounded. Divergence for alpha <= 1/2 would contradict RH.</div>
+            <div class="grid-2" style="margin-top:15px;">
+                <div class="chart-box"><h4>Σ|δ| / N^α for various α</h4><canvas id="franelAlphaChart"></canvas></div>
+                <div class="chart-box"><h4>Log-Log: log(Σ|δ|) vs log(N)</h4><canvas id="franelLogLogChart"></canvas></div>
+            </div>
+            <div class="derivation-box" style="margin-top:15px;"><strong>Interpretation:</strong> If RH is true, the normalized sum Σ|δ|/N^α should stay bounded for α > 1/2. Divergence for α ≤ 1/2 would contradict RH. The log-log plot slope indicates the actual growth exponent.</div>
+            <div class="connection-box" style="margin-top:15px;">
+                <strong>Mertens Function Connection:</strong> The Mertens function M(n) = Σμ(k) for k≤n satisfies M(n) = O(n^(1/2+ε)) ⟺ RH. The Franel-Landau sum and Mertens function encode equivalent information about zero distribution of ζ(s). Both provide computational windows into the Riemann Hypothesis.
+            </div>
             <div style="margin-top:15px; padding:12px; background:#1e293b; border-radius:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                 <span style="color:#94a3b8; font-size:12px;">Hear the Farey sequence:</span>
                 <button onclick="playFareySequence('forward')" style="padding:8px 14px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:5px;color:white;cursor:pointer;">▶ Forward (0→1)</button>
@@ -1353,14 +1371,21 @@
         </div>
         <div class="panel">
             <h3>Dedekind Sums</h3>
-            <div class="theorem-box"><strong>Definition:</strong> s(h,k) = Σ_{j=1}^{k-1} ((j/k))((hj/k)) where ((x)) = x - ⌊x⌋ - 1/2 if x∉ℤ, else 0</div>
+            <div class="theorem-box"><strong>Definition:</strong> s(h,k) = Σ_{j=1}^{k-1} ((j/k))((hj/k)) where ((x)) = x - floor(x) - 1/2 if x is not an integer, else 0</div>
             <div class="control-row" style="margin:12px 0;"><label>Max k: <input type="number" id="dedekindMaxK" value="20" min="2" onchange="computeDedekind()"></label></div>
-            <div class="grid-2">
+            <div class="stat-grid" id="dedekindStats" style="margin-top:12px;"></div>
+            <div class="grid-2" style="margin-top:15px;">
                 <div class="chart-box"><h4>s(h,k) Heatmap</h4><canvas id="dedekindHeatmap" width="400" height="400"></canvas></div>
                 <div class="chart-box"><h4>s(1,k) vs k</h4><canvas id="dedekindChart"></canvas></div>
             </div>
-            <div class="panel" style="margin-top:15px; background:#0f172a;"><h4>Dedekind Sum Table</h4><div class="table-scroll"><table id="dedekindTable"><thead><tr><th>h</th><th>k</th><th>s(h,k)</th><th>12k·s(h,k)</th><th>gcd</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="grid-2" style="margin-top:15px;">
+                <div class="chart-box"><h4>Distribution of s(h,k) Values</h4><canvas id="dedekindDistChart"></canvas></div>
+                <div class="chart-box"><h4>12k*s(h,k) Distribution</h4><canvas id="dedekind12kChart"></canvas></div>
+            </div>
+            <div class="panel" style="margin-top:15px; background:#0f172a;"><h4>Dedekind Sum Table</h4><div class="table-scroll"><table id="dedekindTable"><thead><tr><th>h</th><th>k</th><th>s(h,k)</th><th>12k*s(h,k)</th><th>gcd</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="panel" style="margin-top:15px; background:#0f172a;"><h4>Reciprocity Verification <span style="font-weight:normal;color:#64748b;">(s(h,k) + s(k,h) = -1/4 + (1/12)(h/k + k/h + 1/(hk)))</span></h4><div class="table-scroll"><table id="dedekindReciprocityTable"><thead><tr><th>h</th><th>k</th><th>s(h,k)</th><th>s(k,h)</th><th>Sum</th><th>RHS</th><th>Match</th></tr></thead><tbody></tbody></table></div></div>
             <div class="connection-box" style="margin-top:12px;"><strong>Reciprocity:</strong> s(h,k) + s(k,h) = -1/4 + (1/12)(h/k + k/h + 1/(hk))</div>
+            <div class="derivation-box" style="margin-top:12px;"><strong>Modular Forms Connection:</strong> Dedekind sums arise in the transformation formula for the Dedekind eta function η(τ) = e^(πiτ/12) Π(1-e^(2πinτ)). Under modular transformations, the eta function picks up factors involving Dedekind sums, making them essential in the theory of modular forms.</div>
             <div style="margin-top:15px;"><button onclick="screenshotFullTab('dedekind')">Screenshot Full Dedekind Tab</button></div>
         </div>
     </div>
@@ -3567,7 +3592,6 @@ function drawDensityCone() {
     const W = canvas.width, H = canvas.height;
     const maxN = +(document.getElementById('tvMaxN')?.value || 150);
     const numSectors = +(document.getElementById('tvConeSectors')?.value || 4);
-    const showRef = document.getElementById('tvShowConeRef')?.checked ?? true;
     const logScale = document.getElementById('tvLogScale')?.checked ?? false;
     
     ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
@@ -3608,22 +3632,6 @@ function drawDensityCone() {
         ctx.fillText(`n=${n}`, W - margin.r - 30, Math.max(margin.t + 15, labelY + 4));
         
         legendHtml += `<div class="color-legend-item"><div class="color-swatch" style="background:${color}"></div>n=${n}</div>`;
-    }
-    
-    if (showRef) {
-        ctx.strokeStyle = '#22c55e';
-        ctx.setLineDash([5,5]);
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        const refY = margin.t + plotH * 0.4;
-        ctx.moveTo(margin.l, refY);
-        ctx.lineTo(W - margin.r, refY);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.fillStyle = '#22c55e';
-        ctx.font = '9px system-ui';
-        ctx.fillText('6/π² ref', W - margin.r - 35, refY - 5);
-        legendHtml += `<div class="color-legend-item"><div class="color-swatch" style="background:#22c55e;border-style:dashed"></div>6/π²</div>`;
     }
     
     ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
@@ -6253,18 +6261,64 @@ function handleTreeCanvasClick(e) {
 function updateGapAnalysis() {
     if(state.gaps.length===0) { document.getElementById('gapStats').innerHTML='<div class="stat-card"><div class="stat-label">No data</div></div>'; return; }
     const gaps = state.gaps.map(g=>g.gap);
-    const mean = gaps.reduce((a,b)=>a+b,0)/gaps.length;
+    const n = gaps.length;
+    const sum = gaps.reduce((a,b)=>a+b,0);
+    const mean = sum / n;
     const sorted = [...gaps].sort((a,b)=>a-b);
-    const median = sorted[Math.floor(sorted.length/2)];
-    const maxGap = sorted[sorted.length-1];
+    const median = sorted[Math.floor(n/2)];
+    const maxGap = sorted[n-1];
     const minGap = sorted[0];
+    const variance = gaps.reduce((s,g) => s + (g-mean)**2, 0) / n;
+    const stdDev = Math.sqrt(variance);
+    const skewness = gaps.reduce((s,g) => s + Math.pow((g-mean)/stdDev, 3), 0) / n;
+    const kurtosis = gaps.reduce((s,g) => s + Math.pow((g-mean)/stdDev, 4), 0) / n - 3;
+    
+    // Expected average gap: 1/|F_N| where |F_N| ~ 3N²/π²
+    const expectedAvgGap = (Math.PI * Math.PI) / (3 * state.nMax * state.nMax);
+    const expectedFN = 3 * state.nMax * state.nMax / (Math.PI * Math.PI);
+    
+    // Gap ratio (max/min)
+    const gapRatio = maxGap / minGap;
+    
+    // Count gaps by sector
+    const gapsBySector = {};
+    state.gaps.forEach(g => {
+        const s = g.sector || 1;
+        gapsBySector[s] = (gapsBySector[s] || 0) + 1;
+    });
+    
+    // Largest denominator product
+    const maxDenomProd = Math.max(...state.gaps.map(g => g.denomProduct));
+    const minDenomProd = Math.min(...state.gaps.map(g => g.denomProduct));
+    
+    // Verification: sum of all gaps should equal 1 (for full Farey sequence)
+    const sumCheck = sum.toFixed(6);
+    
+    // Q1, Q3 for IQR
+    const q1 = sorted[Math.floor(n/4)];
+    const q3 = sorted[Math.floor(3*n/4)];
+    const iqr = q3 - q1;
     
     document.getElementById('gapStats').innerHTML = 
-        '<div class="stat-card"><div class="stat-value">' + state.gaps.length + '</div><div class="stat-label">Total Gaps</div></div>' +
-        '<div class="stat-card"><div class="stat-value">' + mean.toExponential(2) + '</div><div class="stat-label">Mean Gap</div></div>' +
-        '<div class="stat-card"><div class="stat-value">' + median.toExponential(2) + '</div><div class="stat-label">Median</div></div>' +
-        '<div class="stat-card"><div class="stat-value" style="color:#ef4444">' + maxGap.toExponential(2) + '</div><div class="stat-label">Max Gap</div></div>' +
-        '<div class="stat-card"><div class="stat-value" style="color:#22c55e">' + minGap.toExponential(2) + '</div><div class="stat-label">Min Gap</div></div>';
+        '<div class="stat-card"><div class="stat-value">' + n + '</div><div class="stat-label">Total Gaps</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + Math.round(expectedFN) + '</div><div class="stat-label">Expected |F_N|</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + sumCheck + '</div><div class="stat-label">Sum (should≈1)</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + mean.toExponential(3) + '</div><div class="stat-label">Mean Gap</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + expectedAvgGap.toExponential(3) + '</div><div class="stat-label">Expected 1/|F_N|</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + ((mean/expectedAvgGap)*100).toFixed(1) + '%</div><div class="stat-label">Mean/Expected</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + median.toExponential(3) + '</div><div class="stat-label">Median</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + stdDev.toExponential(3) + '</div><div class="stat-label">Std Dev</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + (stdDev/mean*100).toFixed(1) + '%</div><div class="stat-label">CV (σ/μ)</div></div>' +
+        '<div class="stat-card"><div class="stat-value" style="color:#ef4444">' + maxGap.toExponential(3) + '</div><div class="stat-label">Max Gap</div></div>' +
+        '<div class="stat-card"><div class="stat-value" style="color:#22c55e">' + minGap.toExponential(3) + '</div><div class="stat-label">Min Gap</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + gapRatio.toFixed(1) + '</div><div class="stat-label">Max/Min Ratio</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + q1.toExponential(2) + '</div><div class="stat-label">Q1 (25%)</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + q3.toExponential(2) + '</div><div class="stat-label">Q3 (75%)</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + iqr.toExponential(2) + '</div><div class="stat-label">IQR</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + skewness.toFixed(3) + '</div><div class="stat-label">Skewness</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + kurtosis.toFixed(3) + '</div><div class="stat-label">Excess Kurtosis</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + minDenomProd + '</div><div class="stat-label">Min bd Product</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + maxDenomProd + '</div><div class="stat-label">Max bd Product</div></div>';
     
     // Gap Distribution - Gradient colored histogram
     const bins = 20;
@@ -6376,6 +6430,89 @@ function updateGapAnalysis() {
         }
     });
     
+    // Gap Position Chart - where gaps occur in [0,1]
+    const positionData = state.gaps.slice(0, 300).map(g => ({
+        x: g.left.value,
+        y: g.gap
+    }));
+    
+    if(state.charts.gapPosition) state.charts.gapPosition.destroy();
+    state.charts.gapPosition = new Chart(document.getElementById('gapPositionChart'), {
+        type: 'bar',
+        data: {
+            labels: positionData.map(d => d.x.toFixed(3)),
+            datasets: [{
+                label: 'Gap at Position',
+                data: positionData.map(d => d.y),
+                backgroundColor: positionData.map(d => `hsla(${d.x * 360}, 70%, 55%, 0.7)`),
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: 'Gap Sizes Along [0,1]', color: '#94a3b8', font: { size: 11 } }
+            },
+            scales: {
+                x: { 
+                    title: { display: true, text: 'Position in [0,1]', color: '#94a3b8' },
+                    ticks: { display: false },
+                    grid: { color: '#334155' }
+                },
+                y: { 
+                    title: { display: true, text: 'Gap Size', color: '#94a3b8' },
+                    ticks: { color: '#94a3b8' },
+                    grid: { color: '#334155' }
+                }
+            }
+        }
+    });
+    
+    // Gap Size vs Position Scatter
+    const scatterPosData = state.gaps.slice(0, 500).map(g => ({
+        x: (g.left.value + g.right.value) / 2,
+        y: g.gap
+    }));
+    
+    if(state.charts.gapSizePosition) state.charts.gapSizePosition.destroy();
+    state.charts.gapSizePosition = new Chart(document.getElementById('gapSizePositionChart'), {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Gap Size',
+                data: scatterPosData,
+                backgroundColor: scatterPosData.map(d => {
+                    const h = d.x * 360;
+                    const l = 40 + Math.min(d.y * 5000, 30);
+                    return `hsla(${h}, 70%, ${l}%, 0.6)`;
+                }),
+                pointRadius: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: 'Gap Distribution Across Unit Interval', color: '#94a3b8', font: { size: 11 } }
+            },
+            scales: {
+                x: { 
+                    min: 0, max: 1,
+                    title: { display: true, text: 'Position in [0,1]', color: '#94a3b8' },
+                    ticks: { color: '#94a3b8' },
+                    grid: { color: '#334155' }
+                },
+                y: { 
+                    type: 'logarithmic',
+                    title: { display: true, text: 'Gap Size (log)', color: '#94a3b8' },
+                    ticks: { color: '#94a3b8' },
+                    grid: { color: '#334155' }
+                }
+            }
+        }
+    });
+    
     // Update gap table with more info
     document.querySelector('#gapTable tbody').innerHTML = state.gaps.slice(0, 30).map((g, i) => {
         const match = Math.abs(g.gap - g.theoretical) < 1e-15;
@@ -6398,12 +6535,58 @@ function computeFranel() {
     const sumAbsDelta = deviations.reduce((s,d)=>s+Math.abs(d.delta),0);
     const N = state.nMax;
     
+    // Store for alpha slider
+    state.franelSumAbsDelta = sumAbsDelta;
+    state.franelN = N;
+    
+    // Additional statistics
+    const deltas = deviations.map(d => d.delta);
+    const absDeltas = deltas.map(d => Math.abs(d));
+    const sumDelta = deltas.reduce((a,b) => a+b, 0);  // Signed sum
+    const sumDeltaSq = deltas.reduce((a,d) => a + d*d, 0);
+    const meanAbsDelta = sumAbsDelta / n;
+    const maxAbsDelta = Math.max(...absDeltas);
+    const minAbsDelta = Math.min(...absDeltas);
+    const maxDelta = Math.max(...deltas);
+    const minDelta = Math.min(...deltas);
+    
+    // Variance and std dev of deviations
+    const varianceDelta = sumDeltaSq / n;
+    const stdDevDelta = Math.sqrt(varianceDelta);
+    
+    // Expected |F_N| from asymptotic formula
+    const expectedFN = 3 * N * N / (Math.PI * Math.PI);
+    const fnError = ((n - expectedFN) / expectedFN * 100).toFixed(2);
+    
+    // Effective exponent estimate
+    const effectiveExponent = Math.log(sumAbsDelta) / Math.log(N);
+    
+    // RH consistency check
+    const rhBound = Math.pow(N, 0.5 + 0.01);
+    const rhConsistent = sumAbsDelta < rhBound * 10;  // Some slack for finite N
+    
     document.getElementById('franelStats').innerHTML = `
-        <div class="stat-card"><div class="stat-value">${n}</div><div class="stat-label">|F_N|</div></div>
+        <div class="stat-card"><div class="stat-value">${n}</div><div class="stat-label">|F_N| (actual)</div></div>
+        <div class="stat-card"><div class="stat-value">${Math.round(expectedFN)}</div><div class="stat-label">|F_N| (expected)</div></div>
+        <div class="stat-card"><div class="stat-value">${fnError}%</div><div class="stat-label">|F_N| Error</div></div>
         <div class="stat-card"><div class="stat-value">${sumAbsDelta.toFixed(4)}</div><div class="stat-label">Σ|δ|</div></div>
+        <div class="stat-card"><div class="stat-value">${sumDelta.toExponential(2)}</div><div class="stat-label">Σδ (signed)</div></div>
+        <div class="stat-card"><div class="stat-value">${sumDeltaSq.toExponential(3)}</div><div class="stat-label">Σδ²</div></div>
+        <div class="stat-card"><div class="stat-value">${meanAbsDelta.toExponential(3)}</div><div class="stat-label">Mean |δ|</div></div>
+        <div class="stat-card"><div class="stat-value">${stdDevDelta.toExponential(3)}</div><div class="stat-label">Std Dev δ</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#ef4444">${maxAbsDelta.toExponential(3)}</div><div class="stat-label">Max |δ|</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#22c55e">${minAbsDelta.toExponential(3)}</div><div class="stat-label">Min |δ|</div></div>
+        <div class="stat-card"><div class="stat-value">${maxDelta.toExponential(3)}</div><div class="stat-label">Max δ (signed)</div></div>
+        <div class="stat-card"><div class="stat-value">${minDelta.toExponential(3)}</div><div class="stat-label">Min δ (signed)</div></div>
         <div class="stat-card"><div class="stat-value">${(sumAbsDelta/Math.sqrt(N)).toFixed(4)}</div><div class="stat-label">Σ|δ|/√N</div></div>
         <div class="stat-card"><div class="stat-value">${(sumAbsDelta/Math.pow(N,0.5+0.01)).toFixed(4)}</div><div class="stat-label">Σ|δ|/N^0.51</div></div>
+        <div class="stat-card"><div class="stat-value">${(sumAbsDelta/N).toFixed(6)}</div><div class="stat-label">Σ|δ|/N</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#06b6d4">${effectiveExponent.toFixed(4)}</div><div class="stat-label">Eff. Exponent</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:${rhConsistent ? '#22c55e' : '#ef4444'}">${rhConsistent ? 'Yes' : 'No'}</div><div class="stat-label">RH Consistent</div></div>
     `;
+    
+    // Update alpha slider display
+    updateFranelAlpha();
     
     const sampleRate = Math.max(1, Math.floor(n/200));
     const sampled = deviations.filter((_,i)=>i%sampleRate===0);
@@ -6416,10 +6599,59 @@ function computeFranel() {
     if(state.charts.franelCumulative) state.charts.franelCumulative.destroy();
     state.charts.franelCumulative = new Chart(document.getElementById('franelCumulativeChart'),{type:'line',data:{labels:sampled.map(d=>d.k),datasets:[{label:'Cum|δ|/√k',data:cumData,borderColor:'#8b5cf6',fill:false,pointRadius:0}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
     
-    const alphas = [0.4, 0.45, 0.5, 0.55, 0.6];
+    const alphas = [0.35, 0.4, 0.45, 0.5, 0.52, 0.55, 0.6, 0.65];
     const alphaData = alphas.map(a => sumAbsDelta / Math.pow(N, a));
     if(state.charts.franelAlpha) state.charts.franelAlpha.destroy();
-    state.charts.franelAlpha = new Chart(document.getElementById('franelAlphaChart'),{type:'bar',data:{labels:alphas.map(a=>`α=${a}`),datasets:[{label:'Σ|δ|/N^α',data:alphaData,backgroundColor:alphas.map(a=>a<=0.5?'rgba(239,68,68,0.7)':'rgba(34,197,94,0.7)')}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    state.charts.franelAlpha = new Chart(document.getElementById('franelAlphaChart'),{type:'bar',data:{labels:alphas.map(a=>`α=${a}`),datasets:[{label:'Σ|δ|/N^α',data:alphaData,backgroundColor:alphas.map(a=>a<=0.5?'rgba(239,68,68,0.7)':'rgba(34,197,94,0.7)')}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    
+    // Log-Log chart - shows growth exponent
+    const logLogData = [];
+    let runningSum = 0;
+    for (let i = 0; i < deviations.length; i++) {
+        runningSum += Math.abs(deviations[i].delta);
+        if (i > 0 && i % Math.max(1, Math.floor(n/50)) === 0) {
+            const effN = Math.ceil((i+1) * N / n);
+            logLogData.push({ x: Math.log10(effN), y: Math.log10(runningSum) });
+        }
+    }
+    
+    // Theoretical lines for comparison
+    const xMin = logLogData[0]?.x || 1;
+    const xMax = logLogData[logLogData.length-1]?.x || 2;
+    const yIntercept = logLogData[0]?.y || 0;
+    const theoreticalHalf = logLogData.map(d => ({ x: d.x, y: yIntercept + 0.5 * (d.x - xMin) }));
+    const theoreticalOne = logLogData.map(d => ({ x: d.x, y: yIntercept + 1.0 * (d.x - xMin) }));
+    
+    if(state.charts.franelLogLog) state.charts.franelLogLog.destroy();
+    state.charts.franelLogLog = new Chart(document.getElementById('franelLogLogChart'),{
+        type:'scatter',
+        data:{
+            datasets:[
+                {label:'Actual log(Σ|δ|)',data:logLogData,borderColor:'#06b6d4',backgroundColor:'#06b6d4',pointRadius:3,showLine:true,fill:false},
+                {label:'Slope 0.5 (RH bound)',data:theoreticalHalf,borderColor:'#22c55e',borderDash:[5,5],pointRadius:0,showLine:true,fill:false},
+                {label:'Slope 1.0',data:theoreticalOne,borderColor:'#ef4444',borderDash:[3,3],pointRadius:0,showLine:true,fill:false}
+            ]
+        },
+        options:{responsive:true,plugins:{legend:{labels:{color:'#94a3b8'}}},scales:{x:{title:{display:true,text:'log₁₀(N)',color:'#94a3b8'},ticks:{color:'#94a3b8'}},y:{title:{display:true,text:'log₁₀(Σ|δ|)',color:'#94a3b8'},ticks:{color:'#94a3b8'}}}}
+    });
+}
+
+function updateFranelAlpha() {
+    const slider = document.getElementById('franelAlphaSlider');
+    const valueSpan = document.getElementById('franelAlphaValue');
+    const resultSpan = document.getElementById('franelAlphaResult');
+    if (!slider || !valueSpan || !resultSpan) return;
+    
+    const alpha = parseFloat(slider.value);
+    valueSpan.textContent = alpha.toFixed(2);
+    
+    if (state.franelSumAbsDelta && state.franelN) {
+        const normalized = state.franelSumAbsDelta / Math.pow(state.franelN, alpha);
+        const bounded = alpha > 0.5;
+        resultSpan.textContent = `Σ|δ|/N^${alpha.toFixed(2)} = ${normalized.toFixed(4)}`;
+        resultSpan.style.background = bounded ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)';
+        resultSpan.style.color = bounded ? '#22c55e' : '#ef4444';
+    }
 }
 
 // DEDEKIND
@@ -6435,19 +6667,123 @@ function computeDedekind() {
         }
     }
     
+    // Statistics
+    const sValues = data.map(d => d.s);
+    const n = sValues.length;
+    const sumS = sValues.reduce((a,b) => a+b, 0);
+    const meanS = sumS / n;
+    const minS = Math.min(...sValues);
+    const maxS = Math.max(...sValues);
+    
+    // Variance and std dev
+    const varianceS = sValues.reduce((a,s) => a + (s-meanS)**2, 0) / n;
+    const stdDevS = Math.sqrt(varianceS);
+    
+    // Count positive, negative, zero
+    const positiveCount = sValues.filter(s => s > 1e-10).length;
+    const negativeCount = sValues.filter(s => s < -1e-10).length;
+    const zeroCount = sValues.filter(s => Math.abs(s) < 1e-10).length;
+    
+    // 12k*s(h,k) values - should all be integers
+    const s12kValues = data.map(d => d.s12k);
+    const s12kIntegers = s12kValues.filter(v => Math.abs(v - Math.round(v)) < 1e-6).length;
+    const s12kIntegerPct = (s12kIntegers / n * 100).toFixed(1);
+    
+    // Min and max of 12k*s
+    const min12kS = Math.min(...s12kValues);
+    const max12kS = Math.max(...s12kValues);
+    
+    // Sum of absolute values
+    const sumAbsS = sValues.reduce((a,s) => a + Math.abs(s), 0);
+    
+    // Median
+    const sorted = [...sValues].sort((a,b) => a-b);
+    const medianS = sorted[Math.floor(n/2)];
+    
+    // Expected total coprime pairs up to maxK: Σφ(k) for k=2 to maxK
+    let expectedPairs = 0;
+    for(let k=2; k<=maxK; k++) expectedPairs += phi(k);
+    
+    document.getElementById('dedekindStats').innerHTML = `
+        <div class="stat-card"><div class="stat-value">${n}</div><div class="stat-label">Total Pairs</div></div>
+        <div class="stat-card"><div class="stat-value">${expectedPairs}</div><div class="stat-label">Expected Σφ(k)</div></div>
+        <div class="stat-card"><div class="stat-value">${sumS.toFixed(4)}</div><div class="stat-label">Σs(h,k)</div></div>
+        <div class="stat-card"><div class="stat-value">${sumAbsS.toFixed(4)}</div><div class="stat-label">Σ|s(h,k)|</div></div>
+        <div class="stat-card"><div class="stat-value">${meanS.toFixed(6)}</div><div class="stat-label">Mean s(h,k)</div></div>
+        <div class="stat-card"><div class="stat-value">${medianS.toFixed(6)}</div><div class="stat-label">Median s(h,k)</div></div>
+        <div class="stat-card"><div class="stat-value">${stdDevS.toFixed(4)}</div><div class="stat-label">Std Dev</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#22c55e">${minS.toFixed(4)}</div><div class="stat-label">Min s(h,k)</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#ef4444">${maxS.toFixed(4)}</div><div class="stat-label">Max s(h,k)</div></div>
+        <div class="stat-card"><div class="stat-value">${(maxS-minS).toFixed(4)}</div><div class="stat-label">Range</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#22c55e">${positiveCount}</div><div class="stat-label">Positive Count</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#ef4444">${negativeCount}</div><div class="stat-label">Negative Count</div></div>
+        <div class="stat-card"><div class="stat-value">${zeroCount}</div><div class="stat-label">Zero Count</div></div>
+        <div class="stat-card"><div class="stat-value">${s12kIntegerPct}%</div><div class="stat-label">12ks Integer%</div></div>
+        <div class="stat-card"><div class="stat-value">${Math.round(min12kS)}</div><div class="stat-label">Min 12ks</div></div>
+        <div class="stat-card"><div class="stat-value">${Math.round(max12kS)}</div><div class="stat-label">Max 12ks</div></div>
+    `;
+    
     document.querySelector('#dedekindTable tbody').innerHTML = data.slice(0,50).map(d=>`<tr><td>${d.h}</td><td>${d.k}</td><td>${d.s.toFixed(4)}</td><td>${d.s12k.toFixed(2)}</td><td>${gcd(d.h,d.k)}</td></tr>`).join('');
+    
+    // Reciprocity verification table
+    const reciprocityData = [];
+    for(let k=3; k<=Math.min(maxK, 15); k++) {
+        for(let h=2; h<k; h++) {
+            if(gcd(h,k)===1) {
+                const shk = sawtoothSum(h,k);
+                const skh = sawtoothSum(k,h);
+                const sum = shk + skh;
+                const rhs = -0.25 + (1/12)*(h/k + k/h + 1/(h*k));
+                reciprocityData.push({h, k, shk, skh, sum, rhs, match: Math.abs(sum - rhs) < 1e-10});
+            }
+        }
+    }
+    
+    document.querySelector('#dedekindReciprocityTable tbody').innerHTML = reciprocityData.slice(0,30).map(d => 
+        `<tr><td>${d.h}</td><td>${d.k}</td><td>${d.shk.toFixed(6)}</td><td>${d.skh.toFixed(6)}</td><td style="color:#06b6d4">${d.sum.toFixed(6)}</td><td style="color:#f59e0b">${d.rhs.toFixed(6)}</td><td style="color:${d.match ? '#22c55e' : '#ef4444'}">${d.match ? 'Yes' : 'No'}</td></tr>`
+    ).join('');
     
     const s1k = [];
     for(let k=2; k<=maxK; k++) { s1k.push({k, s:sawtoothSum(1,k)}); }
     if(state.charts.dedekind) state.charts.dedekind.destroy();
     state.charts.dedekind = new Chart(document.getElementById('dedekindChart'),{type:'line',data:{labels:s1k.map(d=>d.k),datasets:[{label:'s(1,k)',data:s1k.map(d=>d.s),borderColor:'#6366f1',fill:false}]},options:{responsive:true,scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
     
+    // Distribution of s(h,k) values
+    const bins = 20;
+    const bw = (maxS - minS) / bins;
+    const hist = new Array(bins).fill(0);
+    sValues.forEach(s => { const b = Math.min(bins-1, Math.floor((s-minS)/bw)); hist[b]++; });
+    
+    if(state.charts.dedekindDist) state.charts.dedekindDist.destroy();
+    state.charts.dedekindDist = new Chart(document.getElementById('dedekindDistChart'),{
+        type:'bar',
+        data:{
+            labels:hist.map((_,i)=>(minS+i*bw).toFixed(3)),
+            datasets:[{label:'Count',data:hist,backgroundColor:'rgba(245,158,11,0.6)',borderColor:'#f59e0b',borderWidth:1}]
+        },
+        options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8',maxRotation:45,font:{size:9}}},y:{ticks:{color:'#94a3b8'}}}}
+    });
+    
+    // 12k*s(h,k) distribution - should be integers!
+    const s12kRounded = data.map(d => Math.round(d.s12k));
+    const s12kCounts = {};
+    s12kRounded.forEach(v => { s12kCounts[v] = (s12kCounts[v] || 0) + 1; });
+    const s12kLabels = Object.keys(s12kCounts).map(Number).sort((a,b) => a-b);
+    
+    if(state.charts.dedekind12k) state.charts.dedekind12k.destroy();
+    state.charts.dedekind12k = new Chart(document.getElementById('dedekind12kChart'),{
+        type:'bar',
+        data:{
+            labels:s12kLabels,
+            datasets:[{label:'Count',data:s12kLabels.map(l=>s12kCounts[l]),backgroundColor:'rgba(139,92,246,0.6)',borderColor:'#8b5cf6',borderWidth:1}]
+        },
+        options:{responsive:true,plugins:{legend:{display:false},title:{display:true,text:'12k*s(h,k) always integer!',color:'#94a3b8',font:{size:11}}},scales:{x:{title:{display:true,text:'12k*s(h,k)',color:'#94a3b8'},ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}
+    });
+    
     // Heatmap
     const canvas = document.getElementById('dedekindHeatmap'), ctx = canvas.getContext('2d');
     const W=canvas.width, H=canvas.height, cellW=W/maxK, cellH=H/maxK;
     ctx.fillStyle='#0f172a'; ctx.fillRect(0,0,W,H);
-    let minS=Infinity, maxS=-Infinity;
-    data.forEach(d => { if(d.s<minS)minS=d.s; if(d.s>maxS)maxS=d.s; });
     data.forEach(d => {
         const norm = (d.s-minS)/(maxS-minS);
         ctx.fillStyle = `hsl(${260-norm*200},70%,50%)`;
