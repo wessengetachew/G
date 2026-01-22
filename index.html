@@ -774,7 +774,67 @@
                 </select></label>
                 <label><input type="checkbox" id="showAllSectors" onchange="drawMainRing()"> All</label>
                 <label><input type="checkbox" id="invertRingOrder" onchange="drawMainRing()"> Invert</label>
-                <label style="font-size:10px;">Pt: <input type="range" id="ringPointSize" min="1" max="8" value="2" style="width:50px;" onchange="drawMainRing()"></label>
+                <label style="font-size:10px;">Pt: <input type="range" id="ringPointSize" min="0.3" max="8" value="2" step="0.1" style="width:50px;" onchange="drawMainRing()"></label>
+            </div>
+            
+            <!-- LABELING ROW -->
+            <div class="control-row" style="margin-bottom:8px;background:#0f172a;padding:8px 12px;border-radius:6px;border:1px solid #334155;">
+                <span style="color:#94a3b8;font-size:11px;margin-right:8px;">Labels:</span>
+                <label style="font-size:10px;">Format:
+                    <select id="ringLabelFormat" onchange="drawMainRing()" style="font-size:10px;padding:2px;">
+                        <option value="none">None</option>
+                        <option value="fraction">r/m</option>
+                        <option value="decimal">Decimal</option>
+                        <option value="angle">Angle</option>
+                        <option value="residue">Residue r</option>
+                        <option value="sector">Sector</option>
+                        <option value="gcd">GCD</option>
+                        <option value="order">Mult Order</option>
+                        <option value="totient">Totient</option>
+                        <option value="cfPath">CF Path</option>
+                        <option value="cents">Cents</option>
+                    </select>
+                </label>
+                <label style="font-size:10px;">Show:
+                    <select id="ringLabelWhich" onchange="drawMainRing()" style="font-size:10px;padding:2px;">
+                        <option value="none">None</option>
+                        <option value="all">All</option>
+                        <option value="outer">Outer Ring</option>
+                        <option value="primes">Prime m</option>
+                        <option value="sector">Cur Sector</option>
+                        <option value="simple">m≤12</option>
+                    </select>
+                </label>
+                <label style="font-size:10px;">Size: <input type="range" id="ringLabelSize" min="6" max="16" value="9" style="width:40px;" onchange="drawMainRing()"></label>
+                <label style="font-size:10px;"><input type="checkbox" id="ringLabelBg" onchange="drawMainRing()"> BG</label>
+            </div>
+            
+            <!-- RESIDUE TRACKER ROW -->
+            <div class="control-row" style="margin-bottom:8px;background:#1e1b4b;padding:8px 12px;border-radius:6px;border:1px solid #8b5cf6;">
+                <span style="color:#c7d2fe;font-size:11px;margin-right:8px;">Tracker:</span>
+                <label style="font-size:10px;"><input type="checkbox" id="enableResidueTracker" onchange="drawMainRing()"> On</label>
+                <label style="font-size:10px;">Track: <input type="text" id="trackResidues" placeholder="1,5,7 or 1-10" style="width:70px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
+                <label style="font-size:10px;">Color: <input type="color" id="trackerColor" value="#ff00ff" style="width:25px;height:18px;" onchange="drawMainRing()"></label>
+                <label style="font-size:10px;">Size: <input type="range" id="trackerSize" min="3" max="15" value="6" style="width:40px;" onchange="drawMainRing()"></label>
+                <label style="font-size:10px;"><input type="checkbox" id="trackerGlow" checked onchange="drawMainRing()"> Glow</label>
+                <label style="font-size:10px;"><input type="checkbox" id="trackerConnect" onchange="drawMainRing()"> Line</label>
+                <button class="secondary" onclick="setTrackerPreset('phi12')" style="font-size:9px;padding:2px 5px;">phi(12)</button>
+                <button class="secondary" onclick="setTrackerPreset('phi30')" style="font-size:9px;padding:2px 5px;">phi(30)</button>
+                <button class="secondary" onclick="setTrackerPreset('primes')" style="font-size:9px;padding:2px 5px;">Primes</button>
+            </div>
+            
+            <!-- ROTATION & SECTOR ANALYSIS ROW -->
+            <div class="control-row" style="margin-bottom:8px;background:#0f172a;padding:8px 12px;border-radius:6px;border:1px solid #334155;">
+                <span style="color:#94a3b8;font-size:11px;margin-right:8px;">Rotation:</span>
+                <label style="font-size:10px;"><input type="checkbox" id="enableRingRotation" onchange="drawMainRing()"> Enable</label>
+                <label style="font-size:10px;">Per-Ring: <input type="range" id="ringRotationAmount" min="0" max="360" value="0" step="1" style="width:60px;" onchange="drawMainRing()"></label>
+                <label style="font-size:10px;"><input type="checkbox" id="rotationCumulative" onchange="drawMainRing()"> Cumulative</label>
+                <span style="color:#475569;margin:0 8px;">|</span>
+                <span style="color:#94a3b8;font-size:11px;">Analysis:</span>
+                <label style="font-size:10px;"><input type="checkbox" id="showSectorBounds" onchange="drawMainRing()"> Bounds</label>
+                <label style="font-size:10px;"><input type="checkbox" id="showMedianLine" onchange="drawMainRing()"> Median</label>
+                <label style="font-size:10px;"><input type="checkbox" id="dimOutsideSector" onchange="drawMainRing()"> Dim Outside</label>
+                <button class="secondary" onclick="showSectorStats()" style="font-size:9px;padding:2px 6px;">Stats</button>
             </div>
             
             <!-- PRESETS ROW -->
@@ -807,6 +867,7 @@
                 <span style="color:#94a3b8;font-size:11px;margin-right:10px;">Animation:</span>
                 <button id="ringAnimateBtn" onclick="toggleRingAnimation()" style="background:linear-gradient(135deg,#22c55e,#16a34a);font-size:11px;padding:5px 12px;">▶ Animate N</button>
                 <button id="sectorSweepBtn" onclick="toggleSectorSweep()" style="background:linear-gradient(135deg,#8b5cf6,#6366f1);font-size:11px;padding:5px 12px;">▶ Sweep Sectors</button>
+                <button onclick="resetRingAnimation()" class="secondary" style="font-size:11px;padding:5px 8px;border-color:#ef4444;color:#ef4444;">Reset</button>
                 <button onclick="stepRingAnimation(1)" class="secondary" style="font-size:11px;padding:5px 8px;">N+1</button>
                 <button onclick="stepRingAnimation(-1)" class="secondary" style="font-size:11px;padding:5px 8px;">N-1</button>
                 <button onclick="stepSectorAnimation(1)" class="secondary" style="font-size:11px;padding:5px 8px;">S+1</button>
@@ -900,6 +961,7 @@
             <button onclick="screenshotFullTab('main')" style="padding:12px 24px; font-size:14px;">Screenshot Full Main Tab</button>
             <button class="secondary" onclick="exportMainTabData()" style="margin-left:10px; padding:12px 24px; font-size:14px;">Export Main Tab Data</button>
         </div>
+    </div>
     </div>
     
     <!-- THEORY TAB -->
@@ -4708,7 +4770,49 @@ function drawMainRing() {
     const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
     const pointSize = +(document.getElementById('ringPointSize')?.value || 2);
     
+    // Label settings
+    const labelFormat = document.getElementById('ringLabelFormat')?.value || 'none';
+    const labelWhich = document.getElementById('ringLabelWhich')?.value || 'none';
+    const labelSize = +(document.getElementById('ringLabelSize')?.value || 9);
+    const labelBg = document.getElementById('ringLabelBg')?.checked || false;
+    
+    // Tracker settings
+    const trackerOn = document.getElementById('enableResidueTracker')?.checked || false;
+    const trackStr = document.getElementById('trackResidues')?.value || '';
+    const trackerColor = document.getElementById('trackerColor')?.value || '#ff00ff';
+    const trackerSize = +(document.getElementById('trackerSize')?.value || 6);
+    const trackerGlow = document.getElementById('trackerGlow')?.checked || false;
+    const trackerConnect = document.getElementById('trackerConnect')?.checked || false;
+    const trackedResidues = parseTrackerResidues(trackStr);
+    
+    // Rotation settings
+    const rotationOn = document.getElementById('enableRingRotation')?.checked || false;
+    const rotationAmt = +(document.getElementById('ringRotationAmount')?.value || 0) * Math.PI / 180;
+    const rotationCumulative = document.getElementById('rotationCumulative')?.checked || false;
+    
+    // Sector analysis
+    const showBounds = document.getElementById('showSectorBounds')?.checked || false;
+    const showMedian = document.getElementById('showMedianLine')?.checked || false;
+    const dimOutside = document.getElementById('dimOutsideSector')?.checked || false;
+    
     ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
+    
+    // Draw sector bounds
+    if (showBounds && !showAll) {
+        const a1 = (1/(sector+1))*2*Math.PI, a2 = (1/sector)*2*Math.PI;
+        ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2; ctx.setLineDash([5,5]);
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(a1)*maxR, cy-Math.sin(a1)*maxR); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(a2)*maxR, cy-Math.sin(a2)*maxR); ctx.stroke();
+        ctx.setLineDash([]);
+    }
+    
+    // Draw median line
+    if (showMedian && !showAll) {
+        const medAngle = ((1/(sector+1) + 1/sector)/2)*2*Math.PI;
+        ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(medAngle)*maxR, cy-Math.sin(medAngle)*maxR); ctx.stroke();
+        ctx.setLineDash([]);
+    }
     
     ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
     for(let n=1; n<=Math.min(15,state.sectorMax); n++) {
@@ -4729,22 +4833,163 @@ function drawMainRing() {
     let maxGap=0, minGap=Infinity;
     residues.forEach(r => { const g=r.gapRight||0; if(g>maxGap)maxGap=g; if(g>0&&g<minGap)minGap=g; });
     
+    const maxM = Math.max(...residues.map(r => r.m), 1);
+    const trackerPoints = [];
+    
+    // Draw points
     residues.forEach(res => {
         const {r,m,sector:s,isPrime:ip} = res;
-        const angle = (r/m)*2*Math.PI;
-        // Invert: outer ring = small m, inner = large m
+        let angle = (r/m)*2*Math.PI;
+        
+        // Apply rotation
+        if (rotationOn) {
+            const ringIdx = m;
+            angle += rotationCumulative ? rotationAmt * ringIdx : rotationAmt;
+        }
+        
         const radNorm = invertOrder ? (1 - m/state.nMax) : (m/state.nMax);
         const rad = Math.max(radNorm, 0.05) * maxR;
         const x = cx+rad*Math.cos(angle), y = cy-rad*Math.sin(angle);
+        
         let color = getRingPointColor(colorMode, res, s, ip, m, r, maxGap, minGap);
         let size = pointSize;
-        if (colorMode === 'prime' && ip) size = pointSize + 1;
+        if (colorMode === 'prime' && ip) size = pointSize + 0.5;
+        
+        // Dim outside sector
+        let alpha = 1;
+        if (dimOutside && !showAll && s !== sector) alpha = 0.2;
+        
+        ctx.globalAlpha = alpha;
         ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x,y,size,0,2*Math.PI); ctx.fill();
-        state.ringPoints.push({x,y,r,m,sector:s,isPrime:ip,gap:res.gapRight,color});
+        ctx.globalAlpha = 1;
+        
+        state.ringPoints.push({x,y,r,m,sector:s,isPrime:ip,gap:res.gapRight,color,angle,rad});
+        
+        // Track residue
+        if (trackerOn && trackedResidues.includes(r)) {
+            trackerPoints.push({x,y,r,m,angle,rad});
+        }
     });
+    
+    // Draw tracker connections
+    if (trackerOn && trackerConnect && trackerPoints.length > 1) {
+        ctx.strokeStyle = trackerColor; ctx.lineWidth = 1; ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        trackerPoints.forEach((p,i) => i === 0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
+        ctx.stroke(); ctx.globalAlpha = 1;
+    }
+    
+    // Draw tracker highlights
+    if (trackerOn && trackerPoints.length > 0) {
+        trackerPoints.forEach(p => {
+            if (trackerGlow) { ctx.shadowColor = trackerColor; ctx.shadowBlur = 12; }
+            ctx.fillStyle = trackerColor;
+            ctx.beginPath(); ctx.arc(p.x,p.y,trackerSize,0,2*Math.PI); ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#fff'; ctx.font = '9px system-ui'; ctx.textAlign = 'center';
+            ctx.fillText(`${p.r}/${p.m}`, p.x, p.y - trackerSize - 2);
+        });
+    }
+    
+    // Draw labels
+    if (labelFormat !== 'none' && labelWhich !== 'none') {
+        ctx.font = `${labelSize}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        state.ringPoints.forEach((p, idx) => {
+            const res = residues[idx];
+            if (!shouldLabelPoint(res, labelWhich, sector, maxM)) return;
+            const txt = getRingLabelText(res, labelFormat);
+            if (!txt) return;
+            if (labelBg) {
+                const w = ctx.measureText(txt).width;
+                ctx.fillStyle = 'rgba(15,23,42,0.85)';
+                ctx.fillRect(p.x - w/2 - 2, p.y - pointSize - labelSize - 2, w + 4, labelSize + 2);
+            }
+            ctx.fillStyle = '#e2e8f0';
+            ctx.fillText(txt, p.x, p.y - pointSize - 2);
+        });
+    }
     
     ctx.fillStyle='#e2e8f0'; ctx.beginPath(); ctx.arc(cx,cy,4,0,2*Math.PI); ctx.fill();
     updateColorLegend(colorMode, showAll, sector);
+}
+
+function parseTrackerResidues(str) {
+    if (!str.trim()) return [];
+    const res = [];
+    str.split(',').forEach(p => {
+        p = p.trim();
+        if (p.includes('-')) {
+            const [a,b] = p.split('-').map(Number);
+            for (let i = a; i <= b; i++) res.push(i);
+        } else if (p) res.push(parseInt(p));
+    });
+    return res.filter(r => !isNaN(r));
+}
+
+function shouldLabelPoint(res, which, curSector, maxM) {
+    switch(which) {
+        case 'all': return true;
+        case 'outer': return res.m === maxM;
+        case 'primes': return res.isPrime;
+        case 'sector': return res.sector === curSector;
+        case 'simple': return res.m <= 12;
+        default: return false;
+    }
+}
+
+function getRingLabelText(res, fmt) {
+    const {r,m,sector,isPrime} = res;
+    switch(fmt) {
+        case 'fraction': return `${r}/${m}`;
+        case 'decimal': return (r/m).toFixed(3);
+        case 'angle': return ((r/m)*360).toFixed(1) + '°';
+        case 'residue': return String(r);
+        case 'sector': return `S${sector}`;
+        case 'gcd': return `g${gcd(r,m)}`;
+        case 'order': return `o${getMultOrder(r,m)}`;
+        case 'totient': return `φ${eulerPhi(m)}`;
+        case 'cfPath': const cf = toCF(r,m); return cf.length <= 3 ? `[${cf.join(',')}]` : `[${cf.slice(0,2).join(',')}...]`;
+        case 'cents': return Math.round(1200*Math.log2(r/m)) + '¢';
+        default: return '';
+    }
+}
+
+function getMultOrder(a, n) {
+    if (gcd(a, n) !== 1) return 0;
+    let order = 1, cur = a % n;
+    while (cur !== 1 && order <= n) { cur = (cur * a) % n; order++; }
+    return order;
+}
+
+function setTrackerPreset(preset) {
+    const input = document.getElementById('trackResidues');
+    switch(preset) {
+        case 'phi12': input.value = '1,5,7,11'; break;
+        case 'phi30': input.value = '1,7,11,13,17,19,23,29'; break;
+        case 'primes': input.value = '2,3,5,7,11,13'; break;
+    }
+    document.getElementById('enableResidueTracker').checked = true;
+    drawMainRing();
+}
+
+function showSectorStats() {
+    const sector = +document.getElementById('viewSector').value;
+    const res = state.residuesBySector[sector] || [];
+    const primeCount = res.filter(r => r.isPrime).length;
+    const N = state.nMax;
+    const pred = (3*N*N)/(Math.PI*Math.PI*sector*(sector+1));
+    alert(`Sector ${sector} Stats:\nRange: (1/${sector+1}, 1/${sector}]\nTotal: ${res.length}\nPrime m: ${primeCount} (${(primeCount/res.length*100).toFixed(1)}%)\nPredicted: ${pred.toFixed(1)}\nError: ${((res.length-pred)/pred*100).toFixed(1)}%`);
+}
+
+function resetRingAnimation() {
+    stopRingAnimation();
+    stopSectorSweep();
+    document.getElementById('nMax').value = 50;
+    document.getElementById('sectorMin').value = 1;
+    document.getElementById('sectorMax').value = 10;
+    document.getElementById('viewSector').value = 2;
+    document.getElementById('ringAnimStatus').textContent = 'Reset to defaults';
+    computeFareySectors();
 }
 
 function getRingPointColor(colorMode, res, s, ip, m, r, maxGap, minGap) {
@@ -11710,3 +11955,5 @@ function playNextRandomInterval() {
 </script>
 </body>
 </html>
+
+    
