@@ -777,64 +777,179 @@
                 <label style="font-size:10px;">Pt: <input type="range" id="ringPointSize" min="0.3" max="8" value="2" step="0.1" style="width:50px;" onchange="drawMainRing()"></label>
             </div>
             
-            <!-- LABELING ROW -->
-            <div class="control-row" style="margin-bottom:8px;background:#0f172a;padding:8px 12px;border-radius:6px;border:1px solid #334155;">
-                <span style="color:#94a3b8;font-size:11px;margin-right:8px;">Labels:</span>
-                <label style="font-size:10px;">Format:
-                    <select id="ringLabelFormat" onchange="drawMainRing()" style="font-size:10px;padding:2px;">
-                        <option value="none">None</option>
-                        <option value="fraction">r/m</option>
-                        <option value="decimal">Decimal</option>
-                        <option value="angle">Angle</option>
-                        <option value="residue">Residue r</option>
-                        <option value="sector">Sector</option>
-                        <option value="gcd">GCD</option>
-                        <option value="order">Mult Order</option>
-                        <option value="totient">Totient</option>
-                        <option value="cfPath">CF Path</option>
-                        <option value="cents">Cents</option>
-                    </select>
-                </label>
-                <label style="font-size:10px;">Show:
-                    <select id="ringLabelWhich" onchange="drawMainRing()" style="font-size:10px;padding:2px;">
-                        <option value="none">None</option>
-                        <option value="all">All</option>
-                        <option value="outer">Outer Ring</option>
-                        <option value="primes">Prime m</option>
-                        <option value="sector">Cur Sector</option>
-                        <option value="simple">m≤12</option>
-                    </select>
-                </label>
-                <label style="font-size:10px;">Size: <input type="range" id="ringLabelSize" min="6" max="16" value="9" style="width:40px;" onchange="drawMainRing()"></label>
-                <label style="font-size:10px;"><input type="checkbox" id="ringLabelBg" onchange="drawMainRing()"> BG</label>
+            <!-- COLLAPSIBLE: Per-Ring Rotation -->
+            <div class="control-row" style="margin-bottom:4px;background:rgba(255,215,0,0.1);padding:6px 12px;border-radius:6px;border:1px solid #ffd700;">
+                <div style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;width:100%;" onclick="toggleRingSection('secRotation')">
+                    <strong style="color:#ffd700;font-size:12px;">Per-Ring Rotation</strong>
+                    <span id="secRotationIcon" style="color:#ffd700;">+</span>
+                </div>
+            </div>
+            <div id="secRotation" style="display:none;margin-bottom:8px;background:#0f172a;padding:10px 12px;border-radius:6px;border:1px solid #334155;">
+                <div class="control-row" style="margin-bottom:6px;">
+                    <label style="font-size:10px;"><input type="checkbox" id="enableRingRotation" onchange="drawMainRing()"> Enable</label>
+                    <label style="font-size:10px;">Ring Inc Δθ: <input type="range" id="ringRotationAmount" min="0" max="180" value="0" step="0.5" style="width:80px;" onchange="updateRotationDisplay();drawMainRing()"><span id="rotationAmountV" style="color:#ffd700;margin-left:4px;">0°</span></label>
+                    <label style="font-size:10px;"><input type="checkbox" id="rotationCumulative" checked onchange="drawMainRing()"> Cumulative</label>
+                    <label style="font-size:10px;"><input type="checkbox" id="showRingLabels" onchange="drawMainRing()"> Ring Labels</label>
+                </div>
+                <div class="control-row" style="margin-bottom:6px;">
+                    <label style="font-size:10px;">Fraction a/m: <input type="text" id="ringRotationFrac" placeholder="1/12, 1/6..." style="width:60px;font-size:10px;padding:2px;" onchange="applyRotationFraction()"></label>
+                    <label style="font-size:10px;">Global Phase: <input type="range" id="ringGlobalPhase" min="0" max="360" value="0" step="1" style="width:60px;" onchange="updatePhaseDisplay();drawMainRing()"><span id="globalPhaseV" style="color:#94a3b8;margin-left:4px;">0°</span></label>
+                </div>
+                <div class="control-row">
+                    <span style="font-size:10px;color:#94a3b8;">Presets:</span>
+                    <button class="secondary" onclick="setRotationPreset(0)" style="font-size:9px;padding:2px 5px;">0°</button>
+                    <button class="secondary" onclick="setRotationPreset(30)" style="font-size:9px;padding:2px 5px;">1/12</button>
+                    <button class="secondary" onclick="setRotationPreset(60)" style="font-size:9px;padding:2px 5px;">1/6</button>
+                    <button class="secondary" onclick="setRotationPreset(90)" style="font-size:9px;padding:2px 5px;border-color:#00d9ff;color:#00d9ff;">1/4</button>
+                    <button class="secondary" onclick="setRotationPreset(120)" style="font-size:9px;padding:2px 5px;">1/3</button>
+                    <button class="secondary" onclick="setRotationPreset(180)" style="font-size:9px;padding:2px 5px;border-color:#ff6496;color:#ff6496;">1/2</button>
+                    <button class="secondary" onclick="setRotationPreset(137.5)" style="font-size:9px;padding:2px 5px;border-color:#ffd700;color:#ffd700;font-weight:bold;" title="Golden Angle">φ 137.5°</button>
+                </div>
             </div>
             
-            <!-- RESIDUE TRACKER ROW -->
-            <div class="control-row" style="margin-bottom:8px;background:#1e1b4b;padding:8px 12px;border-radius:6px;border:1px solid #8b5cf6;">
-                <span style="color:#c7d2fe;font-size:11px;margin-right:8px;">Tracker:</span>
-                <label style="font-size:10px;"><input type="checkbox" id="enableResidueTracker" onchange="drawMainRing()"> On</label>
-                <label style="font-size:10px;">Track: <input type="text" id="trackResidues" placeholder="1,5,7 or 1-10" style="width:70px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
-                <label style="font-size:10px;">Color: <input type="color" id="trackerColor" value="#ff00ff" style="width:25px;height:18px;" onchange="drawMainRing()"></label>
-                <label style="font-size:10px;">Size: <input type="range" id="trackerSize" min="3" max="15" value="6" style="width:40px;" onchange="drawMainRing()"></label>
-                <label style="font-size:10px;"><input type="checkbox" id="trackerGlow" checked onchange="drawMainRing()"> Glow</label>
-                <label style="font-size:10px;"><input type="checkbox" id="trackerConnect" onchange="drawMainRing()"> Line</label>
-                <button class="secondary" onclick="setTrackerPreset('phi12')" style="font-size:9px;padding:2px 5px;">phi(12)</button>
-                <button class="secondary" onclick="setTrackerPreset('phi30')" style="font-size:9px;padding:2px 5px;">phi(30)</button>
-                <button class="secondary" onclick="setTrackerPreset('primes')" style="font-size:9px;padding:2px 5px;">Primes</button>
+            <!-- COLLAPSIBLE: Farey Sector Analysis -->
+            <div class="control-row" style="margin-bottom:4px;background:rgba(150,100,255,0.1);padding:6px 12px;border-radius:6px;border:1px solid #9664ff;">
+                <div style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;width:100%;" onclick="toggleRingSection('secFarey')">
+                    <strong style="color:#9664ff;font-size:12px;">Farey Sector Analysis</strong>
+                    <span id="secFareyIcon" style="color:#9664ff;">+</span>
+                </div>
+            </div>
+            <div id="secFarey" style="display:none;margin-bottom:8px;background:#0f172a;padding:10px 12px;border-radius:6px;border:1px solid #334155;">
+                <div style="background:rgba(150,100,255,0.15);padding:6px;border-radius:4px;margin-bottom:8px;font-size:9px;border-left:3px solid #9664ff;">
+                    <strong style="color:#9664ff;">Getachew Sector Formula:</strong> C(n,N) ≈ 3N²/(π²·n(n+1)) for coprime count in sector Sₙ=(1/(n+1),1/n]
+                </div>
+                <div class="control-row" style="margin-bottom:6px;">
+                    <label style="font-size:10px;"><input type="checkbox" id="showSectorBounds" onchange="drawMainRing()"> Show Bounds</label>
+                    <label style="font-size:10px;"><input type="checkbox" id="showMedianLine" onchange="drawMainRing()"> Median Line</label>
+                    <label style="font-size:10px;"><input type="checkbox" id="showAllSectorLines" onchange="drawMainRing()"> All 1/n Lines</label>
+                    <label style="font-size:10px;"><input type="checkbox" id="dimOutsideSector" onchange="drawMainRing()"> Dim Outside</label>
+                </div>
+                <div class="control-row" style="margin-bottom:6px;">
+                    <label style="font-size:10px;">Sector Color:
+                        <select id="sectorColorMode" onchange="drawMainRing()" style="font-size:10px;padding:2px;">
+                            <option value="preserve">Preserve</option>
+                            <option value="dim">Dim Outside</option>
+                            <option value="gold">Gold Inside</option>
+                            <option value="enhance">Enhance Inside</option>
+                            <option value="inout">In/Out Only</option>
+                        </select>
+                    </label>
+                    <label style="font-size:10px;">Analysis:
+                        <select id="sectorAnalysisMode" onchange="updateSectorAnalysis()" style="font-size:10px;padding:2px;">
+                            <option value="count">Count Primitives</option>
+                            <option value="density">Density vs 1/ζ(2)</option>
+                            <option value="compare">Compare Sectors</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="control-row" style="margin-bottom:6px;">
+                    <span style="font-size:10px;color:#94a3b8;">Quick:</span>
+                    <button class="secondary" onclick="setQuickSector(1)" style="font-size:9px;padding:2px 5px;border-color:#ff6496;color:#ff6496;">S₁</button>
+                    <button class="secondary" onclick="setQuickSector(2)" style="font-size:9px;padding:2px 5px;border-color:#ffd700;color:#ffd700;">S₂</button>
+                    <button class="secondary" onclick="setQuickSector(3)" style="font-size:9px;padding:2px 5px;border-color:#00ff88;color:#00ff88;">S₃</button>
+                    <button class="secondary" onclick="setQuickSector(4)" style="font-size:9px;padding:2px 5px;border-color:#00d9ff;color:#00d9ff;">S₄</button>
+                    <button class="secondary" onclick="setQuickSector(5)" style="font-size:9px;padding:2px 5px;">S₅</button>
+                    <button class="secondary" onclick="showSectorStats()" style="font-size:9px;padding:2px 6px;border-color:#9664ff;color:#9664ff;">Full Stats</button>
+                    <button class="secondary" onclick="compareSectors()" style="font-size:9px;padding:2px 6px;">Compare All</button>
+                </div>
+                <div id="sectorStatsPanel" style="margin-top:6px;padding:8px;background:rgba(150,100,255,0.1);border-radius:4px;font-size:10px;">
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">
+                        <span>Coprime: <strong id="statCoprime" style="color:#ffd700;">—</strong></span>
+                        <span>Predicted: <strong id="statPredicted" style="color:#00d9ff;">—</strong></span>
+                        <span>Error: <strong id="statError" style="color:#00ff88;">—</strong></span>
+                    </div>
+                </div>
             </div>
             
-            <!-- ROTATION & SECTOR ANALYSIS ROW -->
-            <div class="control-row" style="margin-bottom:8px;background:#0f172a;padding:8px 12px;border-radius:6px;border:1px solid #334155;">
-                <span style="color:#94a3b8;font-size:11px;margin-right:8px;">Rotation:</span>
-                <label style="font-size:10px;"><input type="checkbox" id="enableRingRotation" onchange="drawMainRing()"> Enable</label>
-                <label style="font-size:10px;">Per-Ring: <input type="range" id="ringRotationAmount" min="0" max="360" value="0" step="1" style="width:60px;" onchange="drawMainRing()"></label>
-                <label style="font-size:10px;"><input type="checkbox" id="rotationCumulative" onchange="drawMainRing()"> Cumulative</label>
-                <span style="color:#475569;margin:0 8px;">|</span>
-                <span style="color:#94a3b8;font-size:11px;">Analysis:</span>
-                <label style="font-size:10px;"><input type="checkbox" id="showSectorBounds" onchange="drawMainRing()"> Bounds</label>
-                <label style="font-size:10px;"><input type="checkbox" id="showMedianLine" onchange="drawMainRing()"> Median</label>
-                <label style="font-size:10px;"><input type="checkbox" id="dimOutsideSector" onchange="drawMainRing()"> Dim Outside</label>
-                <button class="secondary" onclick="showSectorStats()" style="font-size:9px;padding:2px 6px;">Stats</button>
+            <!-- COLLAPSIBLE: Residue Tracker -->
+            <div class="control-row" style="margin-bottom:4px;background:rgba(0,255,136,0.1);padding:6px 12px;border-radius:6px;border:1px solid #00ff88;">
+                <div style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;width:100%;" onclick="toggleRingSection('secTracker')">
+                    <strong style="color:#00ff88;font-size:12px;">Residue Tracker</strong>
+                    <span id="secTrackerIcon" style="color:#00ff88;">+</span>
+                </div>
+            </div>
+            <div id="secTracker" style="display:none;margin-bottom:8px;background:#0f172a;padding:10px 12px;border-radius:6px;border:1px solid #334155;">
+                <div class="control-row" style="margin-bottom:6px;">
+                    <label style="font-size:10px;"><input type="checkbox" id="enableResidueTracker" onchange="drawMainRing()"> Enable</label>
+                    <label style="font-size:10px;">Mode:
+                        <select id="trackerMode" onchange="updateTrackerMode()" style="font-size:10px;padding:2px;">
+                            <option value="manual">Manual Input</option>
+                            <option value="slider">Slider (Single r)</option>
+                        </select>
+                    </label>
+                </div>
+                <div id="trackerManualControls">
+                    <div class="control-row" style="margin-bottom:6px;">
+                        <label style="font-size:10px;">Track: <input type="text" id="trackResidues" placeholder="1,5,7 or 1-10" style="width:100px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
+                        <label style="font-size:10px;">Mod Filter: <input type="text" id="trackerModFilter" placeholder="blank=all" style="width:60px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
+                    </div>
+                </div>
+                <div id="trackerSliderControls" style="display:none;">
+                    <div class="control-row" style="margin-bottom:6px;">
+                        <label style="font-size:10px;">Track r: <input type="range" id="trackerSliderR" min="0" max="100" value="1" style="width:100px;" onchange="updateTrackerSlider();drawMainRing()"><span id="trackerSliderV" style="color:#00ff88;margin-left:4px;">1</span></label>
+                    </div>
+                </div>
+                <div class="control-row" style="margin-bottom:6px;">
+                    <label style="font-size:10px;">Color: <input type="color" id="trackerColor" value="#00ffff" style="width:25px;height:18px;" onchange="drawMainRing()"></label>
+                    <label style="font-size:10px;">Size: <input type="range" id="trackerSize" min="2" max="20" value="8" style="width:50px;" onchange="updateTrackerSizeDisplay();drawMainRing()"><span id="trackerSizeV" style="color:#94a3b8;margin-left:2px;">8</span></label>
+                </div>
+                <div class="control-row" style="margin-bottom:6px;">
+                    <label style="font-size:10px;"><input type="checkbox" id="trackerGlow" checked onchange="drawMainRing()"> Glow</label>
+                    <label style="font-size:10px;"><input type="checkbox" id="trackerConnect" onchange="drawMainRing()"> Connect Lines</label>
+                </div>
+                <div class="control-row">
+                    <span style="font-size:10px;color:#94a3b8;">Quick:</span>
+                    <button class="secondary" onclick="setTrackerPreset('phi12')" style="font-size:9px;padding:2px 5px;">φ(12)</button>
+                    <button class="secondary" onclick="setTrackerPreset('phi30')" style="font-size:9px;padding:2px 5px;border-color:#00ff88;color:#00ff88;">φ(30)</button>
+                    <button class="secondary" onclick="setTrackerPreset('phi60')" style="font-size:9px;padding:2px 5px;">φ(60)</button>
+                    <button class="secondary" onclick="setTrackerPreset('primes')" style="font-size:9px;padding:2px 5px;border-color:#ff6496;color:#ff6496;">Primes≤10</button>
+                    <button class="secondary" onclick="setTrackerPreset('twins')" style="font-size:9px;padding:2px 5px;border-color:#ffd700;color:#ffd700;">Twin-Adm(30)</button>
+                </div>
+                <div id="trackerInfoPanel" style="display:none;margin-top:6px;padding:6px;background:rgba(0,255,136,0.1);border-radius:4px;font-size:9px;max-height:100px;overflow-y:auto;">
+                    <div style="color:#00ff88;font-weight:bold;margin-bottom:4px;">Tracked Residues</div>
+                    <div id="trackerInfoData"></div>
+                </div>
+            </div>
+            
+            <!-- COLLAPSIBLE: Labels -->
+            <div class="control-row" style="margin-bottom:4px;background:rgba(0,217,255,0.1);padding:6px 12px;border-radius:6px;border:1px solid #00d9ff;">
+                <div style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;width:100%;" onclick="toggleRingSection('secLabels')">
+                    <strong style="color:#00d9ff;font-size:12px;">Point Labels</strong>
+                    <span id="secLabelsIcon" style="color:#00d9ff;">+</span>
+                </div>
+            </div>
+            <div id="secLabels" style="display:none;margin-bottom:8px;background:#0f172a;padding:10px 12px;border-radius:6px;border:1px solid #334155;">
+                <div class="control-row" style="margin-bottom:6px;">
+                    <label style="font-size:10px;">Format:
+                        <select id="ringLabelFormat" onchange="drawMainRing()" style="font-size:10px;padding:2px;">
+                            <option value="none">None</option>
+                            <option value="fraction">r/m</option>
+                            <option value="decimal">Decimal</option>
+                            <option value="angle">Angle θ°</option>
+                            <option value="residue">Residue r</option>
+                            <option value="sector">Sector</option>
+                            <option value="gcd">GCD</option>
+                            <option value="order">Mult Order</option>
+                            <option value="totient">φ(m)</option>
+                            <option value="cfPath">CF Path</option>
+                            <option value="cents">Cents</option>
+                        </select>
+                    </label>
+                    <label style="font-size:10px;">Show:
+                        <select id="ringLabelWhich" onchange="drawMainRing()" style="font-size:10px;padding:2px;">
+                            <option value="none">None</option>
+                            <option value="all">All Points</option>
+                            <option value="outer">Outer Ring</option>
+                            <option value="primes">Prime m</option>
+                            <option value="sector">Current Sector</option>
+                            <option value="simple">m≤12</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="control-row">
+                    <label style="font-size:10px;">Size: <input type="range" id="ringLabelSize" min="6" max="16" value="9" style="width:60px;" onchange="document.getElementById('labelSizeV').textContent=this.value;drawMainRing()"><span id="labelSizeV" style="color:#94a3b8;margin-left:2px;">9</span></label>
+                    <label style="font-size:10px;"><input type="checkbox" id="ringLabelBg" onchange="drawMainRing()"> Background</label>
+                </div>
             </div>
             
             <!-- PRESETS ROW -->
@@ -4778,24 +4893,40 @@ function drawMainRing() {
     
     // Tracker settings
     const trackerOn = document.getElementById('enableResidueTracker')?.checked || false;
-    const trackStr = document.getElementById('trackResidues')?.value || '';
-    const trackerColor = document.getElementById('trackerColor')?.value || '#ff00ff';
-    const trackerSize = +(document.getElementById('trackerSize')?.value || 6);
+    const trackerMode = document.getElementById('trackerMode')?.value || 'manual';
+    const trackStr = trackerMode === 'manual' ? (document.getElementById('trackResidues')?.value || '') : String(document.getElementById('trackerSliderR')?.value || 1);
+    const trackerColor = document.getElementById('trackerColor')?.value || '#00ffff';
+    const trackerSize = +(document.getElementById('trackerSize')?.value || 8);
     const trackerGlow = document.getElementById('trackerGlow')?.checked || false;
     const trackerConnect = document.getElementById('trackerConnect')?.checked || false;
+    const trackerModFilterStr = document.getElementById('trackerModFilter')?.value || '';
+    const trackerModFilter = trackerModFilterStr.trim() ? trackerModFilterStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n)) : null;
     const trackedResidues = parseTrackerResidues(trackStr);
     
     // Rotation settings
     const rotationOn = document.getElementById('enableRingRotation')?.checked || false;
     const rotationAmt = +(document.getElementById('ringRotationAmount')?.value || 0) * Math.PI / 180;
-    const rotationCumulative = document.getElementById('rotationCumulative')?.checked || false;
+    const rotationCumulative = document.getElementById('rotationCumulative')?.checked || true;
+    const globalPhase = +(document.getElementById('ringGlobalPhase')?.value || 0) * Math.PI / 180;
+    const showRingLabels = document.getElementById('showRingLabels')?.checked || false;
     
     // Sector analysis
     const showBounds = document.getElementById('showSectorBounds')?.checked || false;
     const showMedian = document.getElementById('showMedianLine')?.checked || false;
+    const showAllLines = document.getElementById('showAllSectorLines')?.checked || false;
     const dimOutside = document.getElementById('dimOutsideSector')?.checked || false;
+    const sectorColorMode = document.getElementById('sectorColorMode')?.value || 'preserve';
     
     ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
+    
+    // Draw all 1/n sector lines if enabled
+    if (showAllLines) {
+        ctx.strokeStyle = 'rgba(150,100,255,0.3)'; ctx.lineWidth = 1;
+        for(let n=1; n<=Math.min(20,state.sectorMax); n++) {
+            const angle = (1/n)*2*Math.PI;
+            ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(angle)*maxR, cy-Math.sin(angle)*maxR); ctx.stroke();
+        }
+    }
     
     // Draw sector bounds
     if (showBounds && !showAll) {
@@ -4812,6 +4943,10 @@ function drawMainRing() {
         ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
         ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(medAngle)*maxR, cy-Math.sin(medAngle)*maxR); ctx.stroke();
         ctx.setLineDash([]);
+        // Draw mediant fraction label
+        const medP = 1 + 1, medQ = (sector+1) + sector;
+        ctx.fillStyle = '#22c55e'; ctx.font = '10px system-ui';
+        ctx.fillText(`${medP}/${medQ}`, cx+Math.cos(medAngle)*(maxR+18)-8, cy-Math.sin(medAngle)*(maxR+18));
     }
     
     ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
@@ -4841,10 +4976,11 @@ function drawMainRing() {
         const {r,m,sector:s,isPrime:ip} = res;
         let angle = (r/m)*2*Math.PI;
         
-        // Apply rotation
+        // Apply rotation (cumulative per ring + global phase)
         if (rotationOn) {
             const ringIdx = m;
-            angle += rotationCumulative ? rotationAmt * ringIdx : rotationAmt;
+            const ringRotation = rotationCumulative ? rotationAmt * ringIdx : rotationAmt;
+            angle += ringRotation + globalPhase;
         }
         
         const radNorm = invertOrder ? (1 - m/state.nMax) : (m/state.nMax);
@@ -4855,9 +4991,21 @@ function drawMainRing() {
         let size = pointSize;
         if (colorMode === 'prime' && ip) size = pointSize + 0.5;
         
+        // Apply sector color mode
+        const inSector = s === sector;
+        if (!showAll && sectorColorMode !== 'preserve') {
+            if (sectorColorMode === 'gold' && inSector) color = '#ffd700';
+            else if (sectorColorMode === 'inout') color = inSector ? '#ffd700' : '#4b5563';
+            else if (sectorColorMode === 'enhance' && inSector) {
+                // Brighten color
+                const rgb = color.match(/\d+/g);
+                if (rgb) color = `rgb(${Math.min(255,+rgb[0]*1.3)},${Math.min(255,+rgb[1]*1.3)},${Math.min(255,+rgb[2]*1.3)})`;
+            }
+        }
+        
         // Dim outside sector
         let alpha = 1;
-        if (dimOutside && !showAll && s !== sector) alpha = 0.2;
+        if ((dimOutside || sectorColorMode === 'dim') && !showAll && !inSector) alpha = 0.2;
         
         ctx.globalAlpha = alpha;
         ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x,y,size,0,2*Math.PI); ctx.fill();
@@ -4865,9 +5013,11 @@ function drawMainRing() {
         
         state.ringPoints.push({x,y,r,m,sector:s,isPrime:ip,gap:res.gapRight,color,angle,rad});
         
-        // Track residue
+        // Track residue (with mod filter support)
         if (trackerOn && trackedResidues.includes(r)) {
-            trackerPoints.push({x,y,r,m,angle,rad});
+            if (!trackerModFilter || trackerModFilter.includes(m)) {
+                trackerPoints.push({x,y,r,m,angle,rad});
+            }
         }
     });
     
@@ -4886,10 +5036,11 @@ function drawMainRing() {
             ctx.fillStyle = trackerColor;
             ctx.beginPath(); ctx.arc(p.x,p.y,trackerSize,0,2*Math.PI); ctx.fill();
             ctx.shadowBlur = 0;
-            ctx.fillStyle = '#fff'; ctx.font = '9px system-ui'; ctx.textAlign = 'center';
-            ctx.fillText(`${p.r}/${p.m}`, p.x, p.y - trackerSize - 2);
         });
     }
+    
+    // Update tracker info panel
+    updateTrackerInfo(trackerPoints, trackerOn);
     
     // Draw labels
     if (labelFormat !== 'none' && labelWhich !== 'none') {
@@ -4909,8 +5060,58 @@ function drawMainRing() {
         });
     }
     
+    // Draw ring labels (modulus values at ring positions)
+    if (showRingLabels && rotationOn) {
+        ctx.fillStyle = '#ffd700';
+        ctx.font = '10px system-ui';
+        ctx.textAlign = 'left';
+        const labeledRings = new Set();
+        residues.forEach(res => {
+            if (labeledRings.has(res.m)) return;
+            labeledRings.add(res.m);
+            const radNorm = invertOrder ? (1 - res.m/state.nMax) : (res.m/state.nMax);
+            const rad = Math.max(radNorm, 0.05) * maxR;
+            const ringRotation = rotationCumulative ? rotationAmt * res.m : rotationAmt;
+            const labelAngle = -Math.PI/2 + ringRotation + globalPhase;
+            const lx = cx + rad * Math.cos(labelAngle);
+            const ly = cy + rad * Math.sin(labelAngle);
+            ctx.fillText(`m=${res.m}`, lx + 3, ly + 3);
+        });
+    }
+    
     ctx.fillStyle='#e2e8f0'; ctx.beginPath(); ctx.arc(cx,cy,4,0,2*Math.PI); ctx.fill();
     updateColorLegend(colorMode, showAll, sector);
+    updateSectorStats(sector, residues);
+}
+
+function updateTrackerInfo(trackerPoints, enabled) {
+    const panel = document.getElementById('trackerInfoPanel');
+    const data = document.getElementById('trackerInfoData');
+    if (!panel || !data) return;
+    panel.style.display = enabled && trackerPoints.length > 0 ? 'block' : 'none';
+    if (trackerPoints.length === 0) return;
+    
+    let html = `<div style="color:#94a3b8;">Tracking ${trackerPoints.length} points:</div>`;
+    trackerPoints.slice(0, 10).forEach(p => {
+        html += `<span style="color:#00ffff;margin-right:6px;">${p.r}/${p.m}</span>`;
+    });
+    if (trackerPoints.length > 10) html += `<span style="color:#64748b;">... +${trackerPoints.length - 10} more</span>`;
+    data.innerHTML = html;
+}
+
+function updateSectorStats(sector, residues) {
+    const sectorRes = residues.filter(r => r.sector === sector);
+    const coprime = sectorRes.length;
+    const N = state.nMax;
+    const predicted = (3 * N * N) / (Math.PI * Math.PI * sector * (sector + 1));
+    const error = coprime > 0 ? ((coprime - predicted) / predicted * 100).toFixed(1) : '—';
+    
+    const statC = document.getElementById('statCoprime');
+    const statP = document.getElementById('statPredicted');
+    const statE = document.getElementById('statError');
+    if (statC) statC.textContent = coprime;
+    if (statP) statP.textContent = predicted.toFixed(1);
+    if (statE) statE.textContent = error + '%';
 }
 
 function parseTrackerResidues(str) {
@@ -4966,9 +5167,12 @@ function setTrackerPreset(preset) {
     switch(preset) {
         case 'phi12': input.value = '1,5,7,11'; break;
         case 'phi30': input.value = '1,7,11,13,17,19,23,29'; break;
+        case 'phi60': input.value = '1,7,11,13,17,19,23,29,31,37,41,43,47,49,53,59'; break;
         case 'primes': input.value = '2,3,5,7,11,13'; break;
+        case 'twins': input.value = '1,11,13,17,19,29'; break;
     }
     document.getElementById('enableResidueTracker').checked = true;
+    toggleRingSection('secTracker', true);
     drawMainRing();
 }
 
@@ -4978,7 +5182,50 @@ function showSectorStats() {
     const primeCount = res.filter(r => r.isPrime).length;
     const N = state.nMax;
     const pred = (3*N*N)/(Math.PI*Math.PI*sector*(sector+1));
-    alert(`Sector ${sector} Stats:\nRange: (1/${sector+1}, 1/${sector}]\nTotal: ${res.length}\nPrime m: ${primeCount} (${(primeCount/res.length*100).toFixed(1)}%)\nPredicted: ${pred.toFixed(1)}\nError: ${((res.length-pred)/pred*100).toFixed(1)}%`);
+    const err = ((res.length-pred)/pred*100).toFixed(2);
+    const density = (res.length / (N*N) * 100).toFixed(4);
+    const zetaDensity = (6/(Math.PI*Math.PI)*100).toFixed(4);
+    
+    // Update stats panel
+    document.getElementById('statCoprime').textContent = res.length;
+    document.getElementById('statPredicted').textContent = pred.toFixed(1);
+    document.getElementById('statError').textContent = err + '%';
+    document.getElementById('statError').style.color = Math.abs(parseFloat(err)) < 5 ? '#00ff88' : '#ff6496';
+    
+    alert(`Sector ${sector} Full Statistics
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Range: (1/${sector+1}, 1/${sector}]
+Angular: ${(360/(sector+1)).toFixed(1)}° – ${(360/sector).toFixed(1)}°
+
+Counts:
+  Total Coprimes: ${res.length}
+  Prime m: ${primeCount} (${(primeCount/res.length*100).toFixed(1)}%)
+  Composite m: ${res.length - primeCount}
+
+Formula Analysis:
+  Predicted: ${pred.toFixed(2)}
+  Absolute Error: ${(res.length - pred).toFixed(2)}
+  Relative Error: ${err}%
+  
+Density:
+  Observed: ${density}%
+  1/ζ(2): ${zetaDensity}%`);
+}
+
+function compareSectors() {
+    const maxSector = Math.min(10, state.sectorMax);
+    let report = `Sector Comparison (N=${state.nMax})\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    report += 'Sect │ Count │ Pred  │ Error%\n';
+    report += '─────┼───────┼───────┼───────\n';
+    
+    for (let s = 1; s <= maxSector; s++) {
+        const res = state.residuesBySector[s] || [];
+        const count = res.length;
+        const pred = (3 * state.nMax * state.nMax) / (Math.PI * Math.PI * s * (s + 1));
+        const errPct = ((count - pred) / pred * 100).toFixed(1);
+        report += `  ${s}  │ ${count.toString().padStart(5)} │ ${pred.toFixed(0).padStart(5)} │ ${errPct.padStart(5)}%\n`;
+    }
+    alert(report);
 }
 
 function resetRingAnimation() {
@@ -4990,6 +5237,107 @@ function resetRingAnimation() {
     document.getElementById('viewSector').value = 2;
     document.getElementById('ringAnimStatus').textContent = 'Reset to defaults';
     computeFareySectors();
+}
+
+// Collapsible section toggle
+function toggleRingSection(sectionId, forceOpen) {
+    const section = document.getElementById(sectionId);
+    const icon = document.getElementById(sectionId + 'Icon');
+    if (!section) return;
+    
+    const isHidden = section.style.display === 'none';
+    const shouldOpen = forceOpen !== undefined ? forceOpen : isHidden;
+    
+    section.style.display = shouldOpen ? 'block' : 'none';
+    if (icon) icon.textContent = shouldOpen ? '−' : '+';
+}
+
+function expandAllRingSections() {
+    ['secRotation', 'secFarey', 'secTracker', 'secLabels'].forEach(id => toggleRingSection(id, true));
+}
+
+function collapseAllRingSections() {
+    ['secRotation', 'secFarey', 'secTracker', 'secLabels'].forEach(id => toggleRingSection(id, false));
+}
+
+// Rotation controls
+function updateRotationDisplay() {
+    const val = document.getElementById('ringRotationAmount').value;
+    document.getElementById('rotationAmountV').textContent = val + '°';
+}
+
+function updatePhaseDisplay() {
+    const val = document.getElementById('ringGlobalPhase').value;
+    document.getElementById('globalPhaseV').textContent = val + '°';
+}
+
+function setRotationPreset(degrees) {
+    document.getElementById('ringRotationAmount').value = degrees;
+    document.getElementById('rotationAmountV').textContent = degrees + '°';
+    document.getElementById('enableRingRotation').checked = true;
+    toggleRingSection('secRotation', true);
+    drawMainRing();
+}
+
+function applyRotationFraction() {
+    const frac = document.getElementById('ringRotationFrac').value.trim();
+    if (!frac) return;
+    
+    let degrees = 0;
+    if (frac.includes('/')) {
+        const [num, den] = frac.split('/').map(Number);
+        if (den && !isNaN(num) && !isNaN(den)) {
+            degrees = (num / den) * 360;
+        }
+    } else {
+        degrees = parseFloat(frac);
+    }
+    
+    if (!isNaN(degrees)) {
+        document.getElementById('ringRotationAmount').value = degrees % 360;
+        updateRotationDisplay();
+        document.getElementById('enableRingRotation').checked = true;
+        drawMainRing();
+    }
+}
+
+// Sector quick select
+function setQuickSector(s) {
+    document.getElementById('viewSector').value = s;
+    drawMainRing();
+    updateFormulaDisplay();
+    updateSectorAnalysis();
+}
+
+function updateSectorAnalysis() {
+    const sector = +document.getElementById('viewSector').value;
+    const res = state.residuesBySector[sector] || [];
+    const N = state.nMax;
+    const pred = (3*N*N)/(Math.PI*Math.PI*sector*(sector+1));
+    const err = res.length > 0 ? ((res.length-pred)/pred*100).toFixed(1) : '—';
+    
+    document.getElementById('statCoprime').textContent = res.length;
+    document.getElementById('statPredicted').textContent = pred.toFixed(1);
+    document.getElementById('statError').textContent = err + '%';
+}
+
+// Tracker mode
+function updateTrackerMode() {
+    const mode = document.getElementById('trackerMode').value;
+    document.getElementById('trackerManualControls').style.display = mode === 'manual' ? 'block' : 'none';
+    document.getElementById('trackerSliderControls').style.display = mode === 'slider' ? 'block' : 'none';
+    drawMainRing();
+}
+
+function updateTrackerSlider() {
+    const val = document.getElementById('trackerSliderR').value;
+    document.getElementById('trackerSliderV').textContent = val;
+}
+
+function updateTrackerSizeDisplay() {
+    const val = document.getElementById('trackerSize').value;
+    const disp = document.getElementById('trackerSizeV');
+    if (disp) disp.textContent = val;
 }
 
 function getRingPointColor(colorMode, res, s, ip, m, r, maxGap, minGap) {
