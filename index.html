@@ -744,9 +744,41 @@
             <!-- MAIN CONTROLS + PRESETS ROW (Combined) -->
             <div class="control-row" style="margin-bottom:8px;background:#1e1b4b;padding:10px 12px;border-radius:6px;border:1px solid #6366f1;">
                 <label>Sector: <input type="number" id="viewSector" value="1" min="1" onchange="drawMainRing(); updateFormulaDisplay();" style="width:60px;"></label>
-                <label>Color: <select id="colorMode" onchange="drawMainRing()"><option value="sector">Sector</option><option value="prime">Prime</option><option value="denominator">Denom</option><option value="gap">Gap</option></select></label>
+                <label>Color: <select id="colorMode" onchange="drawMainRing()">
+                    <optgroup label="Basic">
+                        <option value="sector">Sector</option>
+                        <option value="prime">Prime/Composite</option>
+                        <option value="denominator">Denominator</option>
+                        <option value="numerator">Numerator</option>
+                        <option value="gap">Gap Size</option>
+                    </optgroup>
+                    <optgroup label="Harmonic">
+                        <option value="harmonic">Harmonic (by q)</option>
+                        <option value="primeLimit">Prime Limit</option>
+                        <option value="tenney">Tenney Height</option>
+                        <option value="consonance">Consonance</option>
+                    </optgroup>
+                    <optgroup label="Number Theory">
+                        <option value="gcd">GCD Spectrum</option>
+                        <option value="quadRes">Quadratic Residue</option>
+                        <option value="sbDepth">S-B Tree Depth</option>
+                        <option value="totient">By φ(m)</option>
+                    </optgroup>
+                    <optgroup label="Gradients">
+                        <option value="rainbow">Rainbow</option>
+                        <option value="fire">Fire</option>
+                        <option value="plasma">Plasma</option>
+                        <option value="viridis">Viridis</option>
+                        <option value="ocean">Ocean</option>
+                    </optgroup>
+                </select></label>
                 <label><input type="checkbox" id="showAllSectors" onchange="drawMainRing()"> All</label>
-                <span style="color:#475569;margin:0 8px;">|</span>
+                <label><input type="checkbox" id="invertRingOrder" onchange="drawMainRing()"> Invert</label>
+                <label style="font-size:10px;">Pt: <input type="range" id="ringPointSize" min="1" max="8" value="2" style="width:50px;" onchange="drawMainRing()"></label>
+            </div>
+            
+            <!-- PRESETS ROW -->
+            <div class="control-row" style="margin-bottom:8px;background:#0f172a;padding:8px 12px;border-radius:6px;border:1px solid #334155;">
                 <span style="color:#a5b4fc;font-size:11px;">Presets:</span>
                 <button class="secondary" onclick="applyPreset('quick')" style="font-size:10px;padding:4px 8px;">Quick (N=50)</button>
                 <button class="secondary" onclick="applyPreset('standard')" style="font-size:10px;padding:4px 8px;">Standard (N=200)</button>
@@ -754,6 +786,20 @@
                 <button class="secondary" onclick="applyPreset('deep')" style="font-size:10px;padding:4px 8px;">Deep (N=1000)</button>
                 <button class="secondary" onclick="applyPreset('primes')" style="font-size:10px;padding:4px 8px;border-color:#f59e0b;color:#f59e0b;">Prime Focus</button>
                 <button class="secondary" onclick="applyPreset('musical')" style="font-size:10px;padding:4px 8px;border-color:#22c55e;color:#22c55e;">Musical (N=12)</button>
+                <span style="color:#475569;margin:0 8px;">|</span>
+                <label style="font-size:10px;">Canvas:
+                    <select id="ringCanvasSize" onchange="resizeRingCanvas()" style="font-size:10px;padding:2px;">
+                        <option value="600">600×600</option>
+                        <option value="800">800×800</option>
+                        <option value="1000">1000×1000</option>
+                        <option value="1200">1200×1200 HD</option>
+                        <option value="1600">1600×1600 XL</option>
+                        <option value="2000">2000×2000 2K</option>
+                        <option value="3200">3200×3200 4K</option>
+                        <option value="4000">4000×4000 4K+</option>
+                    </select>
+                </label>
+                <button class="secondary" onclick="exportRingHiRes()" style="font-size:10px;padding:4px 8px;border-color:#22c55e;color:#22c55e;" title="Export at selected resolution">Export PNG</button>
             </div>
             
             <!-- ANIMATION ROW -->
@@ -848,124 +894,6 @@
                 <div class="color-legend-item"><div class="color-swatch" style="background:hsl(72,70%,50%)"></div>S3</div>
                 <div class="color-legend-item"><div class="color-swatch" style="background:hsl(108,70%,50%)"></div>S4</div>
                 <div class="color-legend-item"><div class="color-swatch" style="background:hsl(144,70%,50%)"></div>S5</div>
-            </div>
-        </div>
-        
-        <!-- MATHEMATICAL MUSIC GENERATOR -->
-        <div class="panel chart-wrapper" style="background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e1b4b 100%);border:2px solid #8b5cf6;">
-            <h4 style="color:#e0e7ff;">🎵 Mathematical Music Generator <span style="font-weight:normal;color:#a5b4fc;">(Procedural compositions from Farey mathematics)</span></h4>
-            
-            <!-- Style Presets -->
-            <div class="control-row" style="margin-bottom:10px;background:#0f172a;padding:10px 12px;border-radius:6px;">
-                <span style="color:#a5b4fc;font-size:11px;margin-right:10px;">Style:</span>
-                <button id="musicStyle-epic" onclick="setMusicStyle('epic')" class="music-style-btn active" style="background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;padding:6px 12px;border-radius:4px;color:white;cursor:pointer;font-size:11px;font-weight:600;">🔥 Epic</button>
-                <button id="musicStyle-battle" onclick="setMusicStyle('battle')" class="music-style-btn" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);border:none;padding:6px 12px;border-radius:4px;color:white;cursor:pointer;font-size:11px;font-weight:600;">⚔️ Battle</button>
-                <button id="musicStyle-powerSurge" onclick="setMusicStyle('powerSurge')" class="music-style-btn" style="background:linear-gradient(135deg,#ea580c,#c2410c);border:none;padding:6px 12px;border-radius:4px;color:white;cursor:pointer;font-size:11px;font-weight:600;">⚡ Power Surge</button>
-                <button id="musicStyle-awakening" onclick="setMusicStyle('awakening')" class="music-style-btn" style="background:linear-gradient(135deg,#4f46e5,#3730a3);border:none;padding:6px 12px;border-radius:4px;color:white;cursor:pointer;font-size:11px;font-weight:600;">💠 Awakening</button>
-                <button id="musicStyle-soulReaper" onclick="setMusicStyle('soulReaper')" class="music-style-btn" style="background:linear-gradient(135deg,#0f172a,#1e293b);border:1px solid #6366f1;padding:6px 12px;border-radius:4px;color:white;cursor:pointer;font-size:11px;font-weight:600;">🗡️ Soul Edge</button>
-                <button id="musicStyle-hollow" onclick="setMusicStyle('hollow')" class="music-style-btn" style="background:linear-gradient(135deg,#18181b,#27272a);border:1px solid #ef4444;padding:6px 12px;border-radius:4px;color:white;cursor:pointer;font-size:11px;font-weight:600;">🌑 Hollow</button>
-            </div>
-            <div class="control-row" style="margin-bottom:10px;background:#0f172a;padding:8px 12px;border-radius:6px;">
-                <span style="color:#64748b;font-size:10px;margin-right:10px;">More:</span>
-                <button id="musicStyle-finalForm" onclick="setMusicStyle('finalForm')" class="music-style-btn" style="background:linear-gradient(135deg,#fbbf24,#d97706);border:none;padding:5px 10px;border-radius:4px;color:black;cursor:pointer;font-size:10px;font-weight:600;">👑 Final Form</button>
-                <button id="musicStyle-triumph" onclick="setMusicStyle('triumph')" class="music-style-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);border:none;padding:5px 10px;border-radius:4px;color:white;cursor:pointer;font-size:10px;font-weight:600;">🏆 Triumph</button>
-                <button id="musicStyle-resolve" onclick="setMusicStyle('resolve')" class="music-style-btn" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none;padding:5px 10px;border-radius:4px;color:white;cursor:pointer;font-size:10px;font-weight:600;">💪 Resolve</button>
-                <button id="musicStyle-dark" onclick="setMusicStyle('dark')" class="music-style-btn" style="background:linear-gradient(135deg,#1f2937,#111827);border:none;padding:5px 10px;border-radius:4px;color:white;cursor:pointer;font-size:10px;font-weight:600;">🌑 Dark</button>
-                <button id="musicStyle-mystical" onclick="setMusicStyle('mystical')" class="music-style-btn" style="background:linear-gradient(135deg,#0891b2,#0e7490);border:none;padding:5px 10px;border-radius:4px;color:white;cursor:pointer;font-size:10px;font-weight:600;">✨ Mystical</button>
-                <button id="musicStyle-calm" onclick="setMusicStyle('calm')" class="music-style-btn" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;padding:5px 10px;border-radius:4px;color:white;cursor:pointer;font-size:10px;font-weight:600;">🌊 Calm</button>
-            </div>
-            
-            <!-- Controls Row -->
-            <div class="control-row" style="margin-bottom:10px;">
-                <label>BPM: <input type="number" id="musicBPM" value="120" min="40" max="240" style="width:60px;" onchange="updateMusicTempo()"></label>
-                <label>Scale: 
-                    <select id="musicScale" onchange="updateMusicScale()">
-                        <option value="minor">Natural Minor</option>
-                        <option value="harmonicMinor">Harmonic Minor</option>
-                        <option value="major">Major</option>
-                        <option value="pentatonic">Pentatonic</option>
-                        <option value="phrygian">Phrygian (dark)</option>
-                        <option value="dorian">Dorian</option>
-                        <option value="chromatic">Chromatic</option>
-                    </select>
-                </label>
-                <label>Base: 
-                    <select id="musicBaseNote">
-                        <option value="130.81">C3</option>
-                        <option value="146.83">D3</option>
-                        <option value="164.81">E3</option>
-                        <option value="174.61">F3</option>
-                        <option value="196.00" selected>G3</option>
-                        <option value="220.00">A3</option>
-                        <option value="246.94">B3</option>
-                    </select>
-                </label>
-                <label>Octaves: <input type="number" id="musicOctaves" value="3" min="1" max="5" style="width:50px;"></label>
-                <label>Duration: 
-                    <select id="musicDuration">
-                        <option value="8">8 bars</option>
-                        <option value="16" selected>16 bars</option>
-                        <option value="32">32 bars</option>
-                        <option value="64">64 bars (long)</option>
-                        <option value="0">∞ Loop</option>
-                    </select>
-                </label>
-            </div>
-            
-            <!-- Pattern & Source Row -->
-            <div class="control-row" style="margin-bottom:10px;">
-                <label>Pattern: 
-                    <select id="musicPattern">
-                        <option value="arpeggio">Arpeggio Sweep</option>
-                        <option value="melody" selected>Melodic Line</option>
-                        <option value="chords">Chord Progression</option>
-                        <option value="bassline">Bassline + Lead</option>
-                        <option value="counterpoint">Counterpoint</option>
-                    </select>
-                </label>
-                <label>Data Source: 
-                    <select id="musicSource">
-                        <option value="sectors" selected>Sector Fractions</option>
-                        <option value="primes">Prime Denoms Only</option>
-                        <option value="farey">Full Farey Sequence</option>
-                        <option value="gaps">Gap Sizes</option>
-                        <option value="errors">Prediction Errors</option>
-                    </select>
-                </label>
-                <label>Sector Range: <input type="number" id="musicSectorStart" value="1" min="1" style="width:45px;"> - <input type="number" id="musicSectorEnd" value="10" min="1" style="width:45px;"></label>
-                <label><input type="checkbox" id="musicAddBass" checked> Bass</label>
-                <label><input type="checkbox" id="musicAddDrums"> Drums</label>
-            </div>
-            
-            <!-- Playback Controls -->
-            <div style="display:flex;align-items:center;gap:15px;margin-bottom:15px;padding:12px;background:#0f172a;border-radius:8px;">
-                <button id="musicPlayBtn" onclick="toggleMathMusic()" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;padding:12px 30px;border-radius:6px;color:white;cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;">
-                    <span style="font-size:18px;">▶</span> Generate & Play
-                </button>
-                <button onclick="stopMathMusic()" style="background:#ef4444;border:none;padding:12px 20px;border-radius:6px;color:white;cursor:pointer;font-size:14px;">■ Stop</button>
-                <button onclick="exportMathMusicMIDI()" class="secondary" style="padding:10px 15px;font-size:12px;">Export Sequence</button>
-                <div style="flex:1;text-align:center;">
-                    <div id="musicStatusDisplay" style="color:#a5b4fc;font-size:12px;">Ready to generate mathematical music</div>
-                    <div id="musicProgressBar" style="height:4px;background:#334155;border-radius:2px;margin-top:6px;overflow:hidden;display:none;">
-                        <div id="musicProgressFill" style="height:100%;background:linear-gradient(90deg,#8b5cf6,#22c55e);width:0%;transition:width 0.1s;"></div>
-                    </div>
-                </div>
-                <div style="text-align:right;">
-                    <div style="color:#64748b;font-size:10px;">Current Note</div>
-                    <div id="musicCurrentNote" style="color:#22c55e;font-size:18px;font-weight:bold;font-family:monospace;">—</div>
-                </div>
-            </div>
-            
-            <!-- Visualization Canvas -->
-            <div style="position:relative;">
-                <canvas id="musicVisualizerCanvas" width="880" height="120" style="width:100%;background:#0f172a;border-radius:6px;border:1px solid #334155;"></canvas>
-                <div id="musicNoteOverlay" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:48px;color:#8b5cf6;opacity:0;transition:opacity 0.15s;pointer-events:none;text-shadow:0 0 20px #8b5cf6;"></div>
-            </div>
-            
-            <!-- Info -->
-            <div style="margin-top:10px;padding:10px;background:#0f172a;border-radius:5px;font-size:11px;color:#64748b;">
-                <strong style="color:#a5b4fc;">How it works:</strong> Farey fractions are mapped to musical notes using the selected scale. Sector boundaries create phrase structures, prime denominators trigger accent notes, and gap sizes influence rhythm/dynamics. Each style applies different transformations to create unique mathematical compositions.
-            </div>
         </div>
         
         <div style="margin-top:15px; padding:15px; background:#1e293b; border-radius:8px; border:1px solid #334155; text-align:center;">
@@ -4777,6 +4705,8 @@ function drawMainRing() {
     const sector = +document.getElementById('viewSector').value;
     const colorMode = document.getElementById('colorMode').value;
     const showAll = document.getElementById('showAllSectors').checked;
+    const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
+    const pointSize = +(document.getElementById('ringPointSize')?.value || 2);
     
     ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
     
@@ -4801,17 +4731,15 @@ function drawMainRing() {
     
     residues.forEach(res => {
         const {r,m,sector:s,isPrime:ip} = res;
-        const angle = (r/m)*2*Math.PI, rad = (m/state.nMax)*maxR;
+        const angle = (r/m)*2*Math.PI;
+        // Invert: outer ring = small m, inner = large m
+        const radNorm = invertOrder ? (1 - m/state.nMax) : (m/state.nMax);
+        const rad = Math.max(radNorm, 0.05) * maxR;
         const x = cx+rad*Math.cos(angle), y = cy-rad*Math.sin(angle);
-        let color;
-        switch(colorMode) {
-            case 'sector': color = getSectorColor(s); break;
-            case 'prime': color = ip?'#f59e0b':'#6366f1'; break;
-            case 'denominator': color = `hsl(${260-(m/state.nMax)*200},70%,60%)`; break;
-            case 'gap': const g=res.gapRight||minGap; const gn=maxGap>minGap?(g-minGap)/(maxGap-minGap):0.5; color=`hsl(${120-gn*120},80%,50%)`; break;
-            default: color='#6366f1';
-        }
-        ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x,y,colorMode==='prime'&&ip?3:2,0,2*Math.PI); ctx.fill();
+        let color = getRingPointColor(colorMode, res, s, ip, m, r, maxGap, minGap);
+        let size = pointSize;
+        if (colorMode === 'prime' && ip) size = pointSize + 1;
+        ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x,y,size,0,2*Math.PI); ctx.fill();
         state.ringPoints.push({x,y,r,m,sector:s,isPrime:ip,gap:res.gapRight,color});
     });
     
@@ -4819,14 +4747,183 @@ function drawMainRing() {
     updateColorLegend(colorMode, showAll, sector);
 }
 
+function getRingPointColor(colorMode, res, s, ip, m, r, maxGap, minGap) {
+    const cf = toCF(r, m);
+    const sbDepth = cf.length;
+    const phi = eulerPhi(m);
+    
+    switch(colorMode) {
+        case 'sector': return getSectorColor(s);
+        case 'prime': return ip ? '#f59e0b' : '#6366f1';
+        case 'denominator': return `hsl(${260-(m/state.nMax)*200},70%,60%)`;
+        case 'numerator': return `hsl(${(r/m)*360},70%,55%)`;
+        case 'gap': 
+            const g = res.gapRight || minGap;
+            const gn = maxGap > minGap ? (g-minGap)/(maxGap-minGap) : 0.5;
+            return `hsl(${120-gn*120},80%,50%)`;
+        
+        // Harmonic color modes
+        case 'harmonic':
+            if (m === 1) return '#22c55e'; // Unison
+            if (m <= 4) return '#3b82f6';  // Consonant
+            if (m <= 8) return '#f59e0b';  // Complex
+            if (m <= 16) return '#ef4444'; // Dissonant
+            return '#94a3b8';
+        case 'primeLimit':
+            const primes = [2,3,5,7,11,13];
+            let limit = 1;
+            let temp = m;
+            for (const p of primes) { while(temp % p === 0) { limit = Math.max(limit, p); temp /= p; } }
+            if (temp > 1) limit = temp;
+            if (limit <= 2) return '#22c55e';
+            if (limit <= 3) return '#3b82f6';
+            if (limit <= 5) return '#8b5cf6';
+            if (limit <= 7) return '#f59e0b';
+            if (limit <= 11) return '#ef4444';
+            return '#64748b';
+        case 'tenney':
+            const tenney = Math.log2(r) + Math.log2(m);
+            const tenneyNorm = Math.min(tenney / 12, 1);
+            return `hsl(${120 - tenneyNorm * 120}, 70%, 55%)`;
+        case 'consonance':
+            const cons = 1 / (r * m);
+            if (cons >= 0.1) return '#22c55e';
+            if (cons >= 0.02) return '#3b82f6';
+            if (cons >= 0.005) return '#f59e0b';
+            return '#ef4444';
+        
+        // Number theory modes
+        case 'gcd':
+            const gcdVal = gcd(r, m);
+            return gcdVal === 1 ? '#ffd700' : `hsl(${(gcdVal % 10) * 36}, 60%, 50%)`;
+        case 'quadRes':
+            const isQR = isQuadraticResidue(r, m);
+            return isQR ? '#22c55e' : '#6366f1';
+        case 'sbDepth':
+            return `hsl(${260 - (sbDepth / 15) * 200}, 70%, 55%)`;
+        case 'totient':
+            const phiRatio = phi / m;
+            return `hsl(${phiRatio * 120}, 70%, 55%)`;
+        
+        // Gradients
+        case 'rainbow':
+            return `hsl(${(r/m)*360}, 80%, 55%)`;
+        case 'fire':
+            const fireT = m / state.nMax;
+            return fireT < 0.33 ? `rgb(${Math.floor(255*fireT*3)},0,0)` :
+                   fireT < 0.66 ? `rgb(255,${Math.floor(255*(fireT-0.33)*3)},0)` :
+                   `rgb(255,255,${Math.floor(255*(fireT-0.66)*3)})`;
+        case 'plasma':
+            const pt = (r/m + m/state.nMax) / 2;
+            return `hsl(${280 - pt * 200}, 100%, ${40 + pt * 30}%)`;
+        case 'viridis':
+            const vt = m / state.nMax;
+            return `hsl(${260 - vt * 200}, ${50 + vt * 30}%, ${30 + vt * 40}%)`;
+        case 'ocean':
+            const ot = (r/m);
+            return `hsl(${200 + ot * 60}, 70%, ${30 + ot * 40}%)`;
+        
+        default: return '#6366f1';
+    }
+}
+
+function isQuadraticResidue(a, n) {
+    if (n <= 1) return true;
+    a = a % n;
+    for (let x = 0; x < n; x++) {
+        if ((x * x) % n === a) return true;
+    }
+    return false;
+}
+
+function eulerPhi(n) {
+    let result = n;
+    for (let p = 2; p * p <= n; p++) {
+        if (n % p === 0) {
+            while (n % p === 0) n /= p;
+            result -= result / p;
+        }
+    }
+    if (n > 1) result -= result / n;
+    return Math.floor(result);
+}
+
+function resizeRingCanvas() {
+    const size = +(document.getElementById('ringCanvasSize')?.value || 600);
+    const canvas = document.getElementById('mainRing');
+    canvas.width = size;
+    canvas.height = size;
+    canvas.style.maxWidth = '100%';
+    drawMainRing();
+}
+
+function exportRingHiRes() {
+    const canvas = document.getElementById('mainRing');
+    const link = document.createElement('a');
+    link.download = `farey_sector_ring_${canvas.width}x${canvas.height}_${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
+
 function updateColorLegend(colorMode, showAll, sector) {
     const legend = document.getElementById('colorLegend');
     let html = '';
     switch(colorMode) {
-        case 'sector': if(showAll) { for(let s=1;s<=Math.min(10,state.sectorMax);s++) html+=`<div class="color-legend-item"><div class="color-swatch" style="background:${getSectorColor(s)}"></div>S${s}</div>`; } else html+=`<div class="color-legend-item"><div class="color-swatch" style="background:${getSectorColor(sector)}"></div>Sector ${sector}</div>`; break;
-        case 'prime': html+=`<div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Prime</div><div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Composite</div>`; break;
-        case 'denominator': html+=`<div class="color-legend-item"><div class="color-swatch" style="background:hsl(260,70%,60%)"></div>Small m</div><div class="color-legend-item"><div class="color-swatch" style="background:hsl(60,70%,60%)"></div>Large m</div>`; break;
-        case 'gap': html+=`<div class="color-legend-item"><div class="color-swatch" style="background:hsl(120,80%,50%)"></div>Small</div><div class="color-legend-item"><div class="color-swatch" style="background:hsl(0,80%,50%)"></div>Large</div>`; break;
+        case 'sector': 
+            if(showAll) { for(let s=1;s<=Math.min(10,state.sectorMax);s++) html+=`<div class="color-legend-item"><div class="color-swatch" style="background:${getSectorColor(s)}"></div>S${s}</div>`; } 
+            else html+=`<div class="color-legend-item"><div class="color-swatch" style="background:${getSectorColor(sector)}"></div>Sector ${sector}</div>`; 
+            break;
+        case 'prime': 
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Prime</div><div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Composite</div>`; 
+            break;
+        case 'denominator': 
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:hsl(260,70%,60%)"></div>Small m</div><div class="color-legend-item"><div class="color-swatch" style="background:hsl(60,70%,60%)"></div>Large m</div>`; 
+            break;
+        case 'numerator':
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:hsl(0,70%,55%)"></div>r≈0</div><div class="color-legend-item"><div class="color-swatch" style="background:hsl(180,70%,55%)"></div>r/m≈0.5</div><div class="color-legend-item"><div class="color-swatch" style="background:hsl(360,70%,55%)"></div>r≈m</div>`;
+            break;
+        case 'gap': 
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:hsl(120,80%,50%)"></div>Small</div><div class="color-legend-item"><div class="color-swatch" style="background:hsl(0,80%,50%)"></div>Large</div>`; 
+            break;
+        case 'harmonic':
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:#22c55e"></div>Unison</div><div class="color-legend-item"><div class="color-swatch" style="background:#3b82f6"></div>Consonant</div><div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Complex</div><div class="color-legend-item"><div class="color-swatch" style="background:#ef4444"></div>Dissonant</div>`;
+            break;
+        case 'primeLimit':
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:#22c55e"></div>2-lim</div><div class="color-legend-item"><div class="color-swatch" style="background:#3b82f6"></div>3-lim</div><div class="color-legend-item"><div class="color-swatch" style="background:#8b5cf6"></div>5-lim</div><div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>7-lim</div><div class="color-legend-item"><div class="color-swatch" style="background:#ef4444"></div>11+</div>`;
+            break;
+        case 'tenney':
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:hsl(120,70%,55%)"></div>Simple</div><div class="color-legend-item"><div class="color-swatch" style="background:hsl(0,70%,55%)"></div>Complex</div>`;
+            break;
+        case 'consonance':
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:#22c55e"></div>Perfect</div><div class="color-legend-item"><div class="color-swatch" style="background:#3b82f6"></div>Imperfect</div><div class="color-legend-item"><div class="color-swatch" style="background:#f59e0b"></div>Mixed</div><div class="color-legend-item"><div class="color-swatch" style="background:#ef4444"></div>Dissonant</div>`;
+            break;
+        case 'gcd':
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:#ffd700"></div>GCD=1</div><div class="color-legend-item"><div class="color-swatch" style="background:hsl(180,60%,50%)"></div>GCD>1</div>`;
+            break;
+        case 'quadRes':
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:#22c55e"></div>Quad Res</div><div class="color-legend-item"><div class="color-swatch" style="background:#6366f1"></div>Non-QR</div>`;
+            break;
+        case 'sbDepth':
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:hsl(260,70%,55%)"></div>Shallow</div><div class="color-legend-item"><div class="color-swatch" style="background:hsl(60,70%,55%)"></div>Deep</div>`;
+            break;
+        case 'totient':
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:hsl(0,70%,55%)"></div>φ/m low</div><div class="color-legend-item"><div class="color-swatch" style="background:hsl(120,70%,55%)"></div>φ/m high</div>`;
+            break;
+        case 'rainbow':
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:linear-gradient(90deg,red,yellow,green,cyan,blue,magenta)"></div>r/m→hue</div>`;
+            break;
+        case 'fire':
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:linear-gradient(90deg,#300,red,orange,yellow,white)"></div>m→heat</div>`;
+            break;
+        case 'plasma':
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:linear-gradient(90deg,#0d0887,#7e03a8,#cc4778,#f89540,#f0f921)"></div>Plasma</div>`;
+            break;
+        case 'viridis':
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:linear-gradient(90deg,#440154,#31688e,#35b779,#fde725)"></div>Viridis</div>`;
+            break;
+        case 'ocean':
+            html+=`<div class="color-legend-item"><div class="color-swatch" style="background:linear-gradient(90deg,#001133,#003366,#0066aa,#33aacc)"></div>Ocean</div>`;
+            break;
     }
     legend.innerHTML = html;
 }
@@ -10637,12 +10734,12 @@ function pulseToolbar() {
 // =============================================
 
 const presets = {
-    quick: { N: 50, sectorMin: 0, useBound: true, colorMode: 'sector', showAll: true },
-    standard: { N: 200, sectorMin: 0, useBound: true, colorMode: 'sector', showAll: true },
-    detailed: { N: 500, sectorMin: 0, useBound: true, colorMode: 'prime', showAll: true },
-    deep: { N: 1000, sectorMin: 0, useBound: true, colorMode: 'prime', showAll: false },
-    primes: { N: 300, sectorMin: 0, useBound: true, colorMode: 'prime', showAll: true },
-    musical: { N: 12, sectorMin: 0, sectorMax: 12, colorMode: 'sector', showAll: true, baseFreq: 440 }
+    quick: { N: 50, sectorMin: 1, useBound: true, colorMode: 'sector', showAll: true },
+    standard: { N: 200, sectorMin: 1, useBound: true, colorMode: 'sector', showAll: true },
+    detailed: { N: 500, sectorMin: 1, useBound: true, colorMode: 'prime', showAll: true },
+    deep: { N: 1000, sectorMin: 1, useBound: true, colorMode: 'prime', showAll: false },
+    primes: { N: 300, sectorMin: 1, useBound: true, colorMode: 'prime', showAll: true },
+    musical: { N: 12, sectorMin: 1, sectorMax: 12, colorMode: 'sector', showAll: true, baseFreq: 440 }
 };
 
 function applyPreset(name) {
@@ -11610,808 +11707,6 @@ function playNextRandomInterval() {
     randomIntervalId = setTimeout(playNextRandomInterval, duration + 50);
 }
 
-// =============================================
-// MATHEMATICAL MUSIC GENERATOR
-// =============================================
-
-const musicGenerator = {
-    isPlaying: false,
-    intervalId: null,
-    currentStyle: 'epic',
-    noteIndex: 0,
-    sequence: [],
-    bassSequence: [],
-    drumSequence: [],
-    startTime: 0,
-    oscillators: [],
-    
-    // Musical scales (semitone intervals from root)
-    scales: {
-        minor: [0, 2, 3, 5, 7, 8, 10],
-        harmonicMinor: [0, 2, 3, 5, 7, 8, 11],
-        major: [0, 2, 4, 5, 7, 9, 11],
-        pentatonic: [0, 2, 4, 7, 9],
-        phrygian: [0, 1, 3, 5, 7, 8, 10],
-        dorian: [0, 2, 3, 5, 7, 9, 10],
-        chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-    },
-    
-    // Style configurations
-    styles: {
-        epic: {
-            name: 'Epic Ascent',
-            scale: 'harmonicMinor',
-            bpmMultiplier: 1.0,
-            dynamics: 'crescendo',
-            notePattern: 'ascending',
-            bassWeight: 0.8,
-            accentPrimes: true,
-            octaveRange: [0, 2],
-            description: 'Building intensity with harmonic minor'
-        },
-        battle: {
-            name: 'Battle',
-            scale: 'phrygian',
-            bpmMultiplier: 1.3,
-            dynamics: 'aggressive',
-            notePattern: 'jagged',
-            bassWeight: 1.0,
-            accentPrimes: true,
-            octaveRange: [-1, 2],
-            description: 'Fast, intense Phrygian mode'
-        },
-        dark: {
-            name: 'Dark Pulse',
-            scale: 'minor',
-            bpmMultiplier: 0.7,
-            dynamics: 'heavy',
-            notePattern: 'pulse',
-            bassWeight: 1.2,
-            accentPrimes: false,
-            octaveRange: [-1, 1],
-            description: 'Deep, brooding minor'
-        },
-        triumph: {
-            name: 'Triumph',
-            scale: 'major',
-            bpmMultiplier: 1.1,
-            dynamics: 'fanfare',
-            notePattern: 'ascending',
-            bassWeight: 0.6,
-            accentPrimes: true,
-            octaveRange: [0, 3],
-            description: 'Victorious major key celebration'
-        },
-        mystical: {
-            name: 'Mystical',
-            scale: 'dorian',
-            bpmMultiplier: 0.8,
-            dynamics: 'flowing',
-            notePattern: 'wave',
-            bassWeight: 0.5,
-            accentPrimes: false,
-            octaveRange: [0, 2],
-            description: 'Ethereal Dorian exploration'
-        },
-        calm: {
-            name: 'Calm Flow',
-            scale: 'pentatonic',
-            bpmMultiplier: 0.6,
-            dynamics: 'gentle',
-            notePattern: 'smooth',
-            bassWeight: 0.4,
-            accentPrimes: false,
-            octaveRange: [0, 2],
-            description: 'Peaceful pentatonic meditation'
-        },
-        awakening: {
-            name: 'Awakening',
-            scale: 'harmonicMinor',
-            bpmMultiplier: 0.5,
-            dynamics: 'buildUp',
-            notePattern: 'ascending',
-            bassWeight: 1.0,
-            accentPrimes: true,
-            octaveRange: [-1, 3],
-            description: 'Power building from silence to intensity'
-        },
-        powerSurge: {
-            name: 'Power Surge',
-            scale: 'phrygian',
-            bpmMultiplier: 1.5,
-            dynamics: 'explosive',
-            notePattern: 'burst',
-            bassWeight: 1.2,
-            accentPrimes: true,
-            octaveRange: [-1, 3],
-            description: 'Explosive bursts of energy'
-        },
-        finalForm: {
-            name: 'Final Form',
-            scale: 'chromatic',
-            bpmMultiplier: 1.2,
-            dynamics: 'intense',
-            notePattern: 'chromatic',
-            bassWeight: 1.0,
-            accentPrimes: true,
-            octaveRange: [0, 3],
-            description: 'Chromatic tension and release'
-        },
-        hollow: {
-            name: 'Hollow',
-            scale: 'phrygian',
-            bpmMultiplier: 0.9,
-            dynamics: 'sinister',
-            notePattern: 'descending',
-            bassWeight: 1.3,
-            accentPrimes: false,
-            octaveRange: [-2, 1],
-            description: 'Dark, descending menace'
-        },
-        soulReaper: {
-            name: 'Soul Edge',
-            scale: 'harmonicMinor',
-            bpmMultiplier: 1.4,
-            dynamics: 'slashing',
-            notePattern: 'jagged',
-            bassWeight: 0.9,
-            accentPrimes: true,
-            octaveRange: [0, 3],
-            description: 'Sharp, cutting melodic lines'
-        },
-        resolve: {
-            name: 'Resolve',
-            scale: 'major',
-            bpmMultiplier: 1.0,
-            dynamics: 'determined',
-            notePattern: 'stepping',
-            bassWeight: 0.7,
-            accentPrimes: true,
-            octaveRange: [0, 2],
-            description: 'Determined, heroic progression'
-        }
-    }
-};
-
-function setMusicStyle(style) {
-    musicGenerator.currentStyle = style;
-    document.querySelectorAll('.music-style-btn').forEach(btn => {
-        btn.style.opacity = '0.6';
-        btn.style.transform = 'scale(0.95)';
-    });
-    const activeBtn = document.getElementById('musicStyle-' + style);
-    if (activeBtn) {
-        activeBtn.style.opacity = '1';
-        activeBtn.style.transform = 'scale(1)';
-    }
-    
-    const styleConfig = musicGenerator.styles[style];
-    if (styleConfig) {
-        document.getElementById('musicScale').value = styleConfig.scale;
-        document.getElementById('musicStatusDisplay').textContent = `Style: ${styleConfig.name} — ${styleConfig.description}`;
-    }
-}
-
-function updateMusicTempo() {
-    // Just updates the display, actual tempo used during generation
-}
-
-function updateMusicScale() {
-    // Updates when generation happens
-}
-
-function generateMathSequence() {
-    const style = musicGenerator.styles[musicGenerator.currentStyle];
-    const scale = musicGenerator.scales[document.getElementById('musicScale').value] || musicGenerator.scales.minor;
-    const baseFreq = parseFloat(document.getElementById('musicBaseNote').value) || 196;
-    const octaves = parseInt(document.getElementById('musicOctaves').value) || 3;
-    const sectorStart = parseInt(document.getElementById('musicSectorStart').value) || 1;
-    const sectorEnd = parseInt(document.getElementById('musicSectorEnd').value) || 10;
-    const source = document.getElementById('musicSource').value;
-    const pattern = document.getElementById('musicPattern').value;
-    
-    // Gather source data
-    let fractions = [];
-    
-    if (source === 'sectors' || source === 'primes') {
-        for (let s = sectorStart; s <= sectorEnd; s++) {
-            const residues = state.residuesBySector[s] || [];
-            let toAdd = source === 'primes' ? residues.filter(r => r.isPrime) : residues;
-            toAdd.forEach(r => fractions.push({ value: r.r / r.m, r: r.r, m: r.m, sector: s, isPrime: r.isPrime }));
-        }
-    } else if (source === 'farey') {
-        fractions = state.farey.slice(0, 500).map(f => ({ value: f.value, r: f.r, m: f.m, sector: getSector(f.r, f.m), isPrime: isPrime(f.m) }));
-    } else if (source === 'gaps') {
-        fractions = state.gaps.slice(0, 200).map(g => ({ value: g.gap * 1000, r: g.left.r, m: g.left.m, sector: g.sector, isPrime: false }));
-    } else if (source === 'errors') {
-        fractions = state.sectors.map(s => ({ value: Math.abs(s.relError || 0) / 100, r: s.n, m: 1, sector: s.n, isPrime: false }));
-    }
-    
-    if (fractions.length === 0) {
-        // Generate from formula if no data
-        for (let s = sectorStart; s <= sectorEnd; s++) {
-            for (let i = 0; i < 10; i++) {
-                const value = 1/(s+1) + (1/s - 1/(s+1)) * (i / 10);
-                fractions.push({ value, r: 1, m: s, sector: s, isPrime: isPrime(s) });
-            }
-        }
-    }
-    
-    // Sort based on pattern
-    if (style.notePattern === 'ascending') {
-        fractions.sort((a, b) => a.value - b.value);
-    } else if (style.notePattern === 'descending') {
-        fractions.sort((a, b) => b.value - a.value);
-    } else if (style.notePattern === 'jagged') {
-        // Interleave high and low
-        fractions.sort((a, b) => a.value - b.value);
-        const half = Math.floor(fractions.length / 2);
-        const low = fractions.slice(0, half);
-        const high = fractions.slice(half);
-        fractions = [];
-        for (let i = 0; i < Math.max(low.length, high.length); i++) {
-            if (low[i]) fractions.push(low[i]);
-            if (high[high.length - 1 - i]) fractions.push(high[high.length - 1 - i]);
-        }
-    } else if (style.notePattern === 'wave') {
-        // Sine wave pattern through the data
-        fractions.sort((a, b) => a.value - b.value);
-        const ordered = [...fractions];
-        fractions = [];
-        for (let i = 0; i < ordered.length; i++) {
-            const waveIdx = Math.floor((Math.sin(i * 0.3) + 1) / 2 * (ordered.length - 1));
-            fractions.push(ordered[waveIdx]);
-        }
-    } else if (style.notePattern === 'burst') {
-        // Explosive bursts - groups of rapid notes then pauses
-        fractions.sort((a, b) => a.value - b.value);
-        const ordered = [...fractions];
-        fractions = [];
-        for (let i = 0; i < ordered.length; i++) {
-            const burstPhase = (i % 8);
-            if (burstPhase < 5) {
-                // Fast burst
-                fractions.push(ordered[Math.min(i + burstPhase * 3, ordered.length - 1)]);
-            } else {
-                // Slow/pause
-                fractions.push(ordered[Math.floor(ordered.length / 2)]);
-            }
-        }
-    } else if (style.notePattern === 'chromatic') {
-        // Chromatic runs with tension building
-        fractions.sort((a, b) => a.value - b.value);
-        const ordered = [...fractions];
-        fractions = [];
-        for (let i = 0; i < ordered.length; i++) {
-            const tensionPhase = Math.floor(i / 16) % 2;
-            if (tensionPhase === 0) {
-                // Ascending chromatic
-                fractions.push(ordered[i % ordered.length]);
-            } else {
-                // Release/resolve
-                fractions.push(ordered[Math.floor(ordered.length * 0.3)]);
-            }
-        }
-    } else if (style.notePattern === 'descending') {
-        fractions.sort((a, b) => b.value - a.value);
-    } else if (style.notePattern === 'stepping') {
-        // Step up, step back pattern
-        fractions.sort((a, b) => a.value - b.value);
-        const ordered = [...fractions];
-        fractions = [];
-        for (let i = 0; i < ordered.length; i++) {
-            const stepPhase = i % 4;
-            const baseIdx = Math.floor(i / 4) * 3;
-            const idx = Math.min(baseIdx + stepPhase - (stepPhase === 3 ? 2 : 0), ordered.length - 1);
-            fractions.push(ordered[Math.max(0, idx)]);
-        }
-    }
-    
-    // Convert fractions to notes
-    const sequence = [];
-    const totalScaleNotes = scale.length * octaves;
-    
-    fractions.forEach((f, i) => {
-        // Map fraction value (0-1) to scale position
-        let scalePos = Math.floor(f.value * totalScaleNotes);
-        scalePos = Math.max(0, Math.min(totalScaleNotes - 1, scalePos));
-        
-        const octave = Math.floor(scalePos / scale.length) + style.octaveRange[0];
-        const noteInScale = scalePos % scale.length;
-        const semitones = scale[noteInScale] + (octave * 12);
-        const freq = baseFreq * Math.pow(2, semitones / 12);
-        
-        // Calculate velocity/dynamics
-        let velocity = 0.5;
-        if (style.dynamics === 'crescendo') {
-            velocity = 0.3 + (i / fractions.length) * 0.6;
-        } else if (style.dynamics === 'aggressive') {
-            velocity = 0.6 + Math.random() * 0.3;
-        } else if (style.dynamics === 'heavy') {
-            velocity = 0.7;
-        } else if (style.dynamics === 'fanfare') {
-            velocity = f.isPrime ? 0.9 : 0.6;
-        } else if (style.dynamics === 'gentle') {
-            velocity = 0.3 + Math.random() * 0.2;
-        } else if (style.dynamics === 'buildUp') {
-            // Slow build from very quiet to very loud
-            const phase = i / fractions.length;
-            velocity = 0.1 + Math.pow(phase, 2) * 0.8;
-        } else if (style.dynamics === 'explosive') {
-            // Random explosive hits
-            velocity = (i % 8 < 5) ? 0.7 + Math.random() * 0.3 : 0.3;
-        } else if (style.dynamics === 'intense') {
-            velocity = 0.6 + Math.sin(i * 0.5) * 0.2 + Math.random() * 0.2;
-        } else if (style.dynamics === 'sinister') {
-            // Low rumble with occasional spikes
-            velocity = 0.4 + (f.isPrime ? 0.4 : 0) + Math.random() * 0.1;
-        } else if (style.dynamics === 'slashing') {
-            // Sharp attacks
-            velocity = 0.5 + ((i % 3 === 0) ? 0.4 : 0);
-        } else if (style.dynamics === 'determined') {
-            // Steady with emphasis on beat
-            velocity = 0.5 + ((i % 4 === 0) ? 0.3 : 0);
-        } else if (style.dynamics === 'flowing') {
-            velocity = 0.4 + Math.sin(i * 0.2) * 0.2;
-        }
-        
-        // Accent primes
-        if (style.accentPrimes && f.isPrime) {
-            velocity = Math.min(1, velocity + 0.2);
-        }
-        
-        sequence.push({
-            freq,
-            velocity,
-            fraction: f,
-            scaleNote: noteInScale,
-            octave,
-            index: i
-        });
-    });
-    
-    // Generate bass line
-    const bassSequence = [];
-    if (document.getElementById('musicAddBass').checked) {
-        const bassOctave = style.octaveRange[0] - 1;
-        let lastBassNote = 0;
-        
-        for (let i = 0; i < sequence.length; i += 4) {
-            const rootSemitones = scale[0] + (bassOctave * 12);
-            const fifthSemitones = scale[Math.min(4, scale.length - 1)] + (bassOctave * 12);
-            
-            const useFifth = (i / 4) % 2 === 1;
-            const semitones = useFifth ? fifthSemitones : rootSemitones;
-            const freq = baseFreq * Math.pow(2, semitones / 12);
-            
-            bassSequence.push({
-                freq,
-                velocity: style.bassWeight * 0.5,
-                startIndex: i,
-                duration: 4
-            });
-        }
-    }
-    
-    // Generate drum sequence
-    const drumSequence = [];
-    if (document.getElementById('musicAddDrums').checked) {
-        for (let i = 0; i < sequence.length; i++) {
-            const beatInMeasure = i % 8;
-            
-            // Kick on 1 and 5 (or every 4 for intense styles)
-            if (beatInMeasure === 0 || beatInMeasure === 4 || 
-                (style.dynamics === 'aggressive' && beatInMeasure % 2 === 0) ||
-                (style.dynamics === 'explosive' && i % 3 === 0)) {
-                drumSequence.push({ type: 'kick', index: i, velocity: 0.7 });
-            }
-            
-            // Snare on 2 and 6 (backbeat)
-            if (beatInMeasure === 2 || beatInMeasure === 6) {
-                drumSequence.push({ type: 'snare', index: i, velocity: 0.6 });
-            }
-            
-            // Hi-hat on every beat for intense styles
-            if (style.bpmMultiplier >= 1.0) {
-                drumSequence.push({ type: 'hihat', index: i, velocity: 0.3 + (beatInMeasure % 2 === 0 ? 0.1 : 0) });
-            } else if (beatInMeasure % 2 === 0) {
-                drumSequence.push({ type: 'hihat', index: i, velocity: 0.25 });
-            }
-            
-            // Crash on phrase starts (every 16 notes)
-            if (i % 16 === 0 && i > 0) {
-                drumSequence.push({ type: 'crash', index: i, velocity: 0.5 });
-            }
-        }
-    }
-    
-    return { sequence, bassSequence, drumSequence };
-}
-
-function toggleMathMusic() {
-    if (musicGenerator.isPlaying) {
-        stopMathMusic();
-    } else {
-        startMathMusic();
-    }
-}
-
-function startMathMusic() {
-    initAudioContext();
-    stopMathMusic();
-    
-    const generated = generateMathSequence();
-    musicGenerator.sequence = generated.sequence;
-    musicGenerator.bassSequence = generated.bassSequence;
-    musicGenerator.drumSequence = generated.drumSequence || [];
-    
-    if (musicGenerator.sequence.length === 0) {
-        document.getElementById('musicStatusDisplay').textContent = 'No data to generate music - run computation first';
-        return;
-    }
-    
-    musicGenerator.isPlaying = true;
-    musicGenerator.noteIndex = 0;
-    musicGenerator.startTime = Date.now();
-    
-    const btn = document.getElementById('musicPlayBtn');
-    btn.innerHTML = '<span style="font-size:18px;">⏸</span> Playing...';
-    btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
-    
-    document.getElementById('musicProgressBar').style.display = 'block';
-    
-    // Draw initial visualization
-    drawMusicVisualization();
-    
-    // Start playback loop
-    playMathMusicNote();
-}
-
-function stopMathMusic() {
-    musicGenerator.isPlaying = false;
-    
-    if (musicGenerator.intervalId) {
-        clearTimeout(musicGenerator.intervalId);
-        musicGenerator.intervalId = null;
-    }
-    
-    // Stop any playing oscillators
-    musicGenerator.oscillators.forEach(osc => {
-        try { osc.stop(); } catch(e) {}
-    });
-    musicGenerator.oscillators = [];
-    
-    stopAudio();
-    
-    const btn = document.getElementById('musicPlayBtn');
-    btn.innerHTML = '<span style="font-size:18px;">▶</span> Generate & Play';
-    btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
-    
-    document.getElementById('musicProgressBar').style.display = 'none';
-    document.getElementById('musicStatusDisplay').textContent = 'Ready to generate mathematical music';
-    document.getElementById('musicCurrentNote').textContent = '—';
-}
-
-function playMathMusicNote() {
-    if (!musicGenerator.isPlaying) return;
-    
-    const seq = musicGenerator.sequence;
-    const duration = parseInt(document.getElementById('musicDuration').value) || 16;
-    const bpm = parseInt(document.getElementById('musicBPM').value) || 120;
-    const style = musicGenerator.styles[musicGenerator.currentStyle];
-    const actualBPM = bpm * style.bpmMultiplier;
-    const msPerBeat = 60000 / actualBPM;
-    const msPerNote = msPerBeat / 2; // Eighth notes
-    
-    // Check if done
-    if (duration > 0 && musicGenerator.noteIndex >= Math.min(seq.length, duration * 8)) {
-        stopMathMusic();
-        document.getElementById('musicStatusDisplay').textContent = 'Composition complete!';
-        return;
-    }
-    
-    // Loop if infinite
-    const idx = musicGenerator.noteIndex % seq.length;
-    const note = seq[idx];
-    
-    // Play the note
-    playMusicTone(note.freq, msPerNote / 1000 * 0.9, note.velocity);
-    
-    // Play bass if it's time
-    const bassNote = musicGenerator.bassSequence.find(b => b.startIndex === idx);
-    if (bassNote) {
-        playMusicTone(bassNote.freq, msPerNote / 1000 * bassNote.duration * 0.9, bassNote.velocity, 'triangle');
-    }
-    
-    // Play drums if enabled
-    const drums = musicGenerator.drumSequence.filter(d => d.index === idx);
-    drums.forEach(drum => {
-        playDrumSound(drum.type, drum.velocity);
-    });
-    
-    // Update display
-    const noteName = frequencyToNoteName(note.freq);
-    document.getElementById('musicCurrentNote').textContent = noteName;
-    
-    const fracStr = note.fraction ? `${note.fraction.r}/${note.fraction.m}` : '';
-    document.getElementById('musicStatusDisplay').textContent = 
-        `${style.name} | Note ${idx + 1}/${seq.length} | ${fracStr} → ${noteName} (${note.freq.toFixed(0)} Hz)`;
-    
-    // Update progress
-    const progress = duration > 0 ? (musicGenerator.noteIndex / (duration * 8)) * 100 : (idx / seq.length) * 100;
-    document.getElementById('musicProgressFill').style.width = progress + '%';
-    
-    // Visual feedback
-    const overlay = document.getElementById('musicNoteOverlay');
-    overlay.textContent = noteName;
-    overlay.style.opacity = note.velocity;
-    setTimeout(() => { overlay.style.opacity = '0'; }, msPerNote * 0.5);
-    
-    // Update visualization
-    drawMusicVisualization(idx);
-    
-    musicGenerator.noteIndex++;
-    musicGenerator.intervalId = setTimeout(playMathMusicNote, msPerNote);
-}
-
-function playMusicTone(freq, duration, volume, waveType = 'sawtooth') {
-    if (!audioCtx) return;
-    
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    const filter = audioCtx.createBiquadFilter();
-    
-    osc.type = waveType;
-    osc.frequency.value = freq;
-    
-    filter.type = 'lowpass';
-    filter.frequency.value = 2000 + volume * 3000;
-    filter.Q.value = 1;
-    
-    const vol = volume * (harmonicSettings?.volume || 0.5) * 0.4;
-    gain.gain.setValueAtTime(0, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.02);
-    gain.gain.exponentialRampToValueAtTime(vol * 0.3, audioCtx.currentTime + duration * 0.5);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-    
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(audioCtx.destination);
-    
-    osc.start();
-    osc.stop(audioCtx.currentTime + duration + 0.1);
-    
-    musicGenerator.oscillators.push(osc);
-    
-    // Cleanup
-    setTimeout(() => {
-        const idx = musicGenerator.oscillators.indexOf(osc);
-        if (idx > -1) musicGenerator.oscillators.splice(idx, 1);
-    }, (duration + 0.2) * 1000);
-}
-
-function playDrumSound(type, velocity) {
-    if (!audioCtx) return;
-    
-    const vol = velocity * (harmonicSettings?.volume || 0.5) * 0.5;
-    const now = audioCtx.currentTime;
-    
-    if (type === 'kick') {
-        // Kick drum - sine wave with pitch drop
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(150, now);
-        osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
-        
-        gain.gain.setValueAtTime(vol * 1.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-        
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + 0.3);
-        
-    } else if (type === 'snare') {
-        // Snare - noise burst + tone
-        const noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.2, audioCtx.sampleRate);
-        const noiseData = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < noiseData.length; i++) {
-            noiseData[i] = Math.random() * 2 - 1;
-        }
-        
-        const noise = audioCtx.createBufferSource();
-        noise.buffer = noiseBuffer;
-        
-        const noiseGain = audioCtx.createGain();
-        const noiseFilter = audioCtx.createBiquadFilter();
-        noiseFilter.type = 'highpass';
-        noiseFilter.frequency.value = 1000;
-        
-        noiseGain.gain.setValueAtTime(vol * 0.8, now);
-        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-        
-        noise.connect(noiseFilter);
-        noiseFilter.connect(noiseGain);
-        noiseGain.connect(audioCtx.destination);
-        noise.start(now);
-        
-        // Tone component
-        const osc = audioCtx.createOscillator();
-        const oscGain = audioCtx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.value = 180;
-        oscGain.gain.setValueAtTime(vol * 0.5, now);
-        oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-        osc.connect(oscGain);
-        oscGain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + 0.1);
-        
-    } else if (type === 'hihat') {
-        // Hi-hat - filtered noise
-        const noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.05, audioCtx.sampleRate);
-        const noiseData = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < noiseData.length; i++) {
-            noiseData[i] = Math.random() * 2 - 1;
-        }
-        
-        const noise = audioCtx.createBufferSource();
-        noise.buffer = noiseBuffer;
-        
-        const filter = audioCtx.createBiquadFilter();
-        filter.type = 'highpass';
-        filter.frequency.value = 7000;
-        
-        const gain = audioCtx.createGain();
-        gain.gain.setValueAtTime(vol * 0.4, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-        
-        noise.connect(filter);
-        filter.connect(gain);
-        gain.connect(audioCtx.destination);
-        noise.start(now);
-        
-    } else if (type === 'crash') {
-        // Crash cymbal - long noise decay
-        const noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.8, audioCtx.sampleRate);
-        const noiseData = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < noiseData.length; i++) {
-            noiseData[i] = Math.random() * 2 - 1;
-        }
-        
-        const noise = audioCtx.createBufferSource();
-        noise.buffer = noiseBuffer;
-        
-        const filter = audioCtx.createBiquadFilter();
-        filter.type = 'highpass';
-        filter.frequency.value = 4000;
-        
-        const gain = audioCtx.createGain();
-        gain.gain.setValueAtTime(vol * 0.6, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
-        
-        noise.connect(filter);
-        filter.connect(gain);
-        gain.connect(audioCtx.destination);
-        noise.start(now);
-    }
-}
-
-function frequencyToNoteName(freq) {
-    const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    const a4 = 440;
-    const semitones = 12 * Math.log2(freq / a4);
-    const noteNum = Math.round(semitones) + 69; // MIDI note number
-    const octave = Math.floor(noteNum / 12) - 1;
-    const noteName = noteNames[noteNum % 12];
-    return noteName + octave;
-}
-
-function drawMusicVisualization(currentIdx = -1) {
-    const canvas = document.getElementById('musicVisualizerCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, W, H);
-    
-    const seq = musicGenerator.sequence;
-    if (seq.length === 0) return;
-    
-    const barWidth = Math.max(2, W / Math.min(seq.length, 200));
-    const visibleNotes = Math.min(seq.length, Math.floor(W / barWidth));
-    const startIdx = Math.max(0, currentIdx - Math.floor(visibleNotes / 2));
-    
-    // Find frequency range for scaling
-    const freqs = seq.map(n => n.freq);
-    const minFreq = Math.min(...freqs);
-    const maxFreq = Math.max(...freqs);
-    const freqRange = maxFreq - minFreq || 1;
-    
-    // Draw notes
-    for (let i = 0; i < visibleNotes && (startIdx + i) < seq.length; i++) {
-        const note = seq[startIdx + i];
-        const x = i * barWidth;
-        const normalizedFreq = (note.freq - minFreq) / freqRange;
-        const barHeight = 20 + normalizedFreq * (H - 40);
-        const y = H - barHeight - 10;
-        
-        const isCurrent = (startIdx + i) === currentIdx;
-        
-        // Color based on velocity and current state
-        if (isCurrent) {
-            ctx.fillStyle = '#22c55e';
-            ctx.shadowColor = '#22c55e';
-            ctx.shadowBlur = 15;
-        } else {
-            const hue = 260 - normalizedFreq * 60;
-            ctx.fillStyle = `hsla(${hue}, 70%, ${40 + note.velocity * 30}%, ${0.5 + note.velocity * 0.5})`;
-            ctx.shadowBlur = 0;
-        }
-        
-        ctx.fillRect(x, y, barWidth - 1, barHeight);
-        
-        // Mark primes
-        if (note.fraction && note.fraction.isPrime) {
-            ctx.fillStyle = '#f59e0b';
-            ctx.beginPath();
-            ctx.arc(x + barWidth / 2, y - 5, 3, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
-    
-    ctx.shadowBlur = 0;
-    
-    // Draw playhead line
-    if (currentIdx >= 0) {
-        const playheadX = Math.floor(visibleNotes / 2) * barWidth;
-        ctx.strokeStyle = '#22c55e';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(playheadX, 0);
-        ctx.lineTo(playheadX, H);
-        ctx.stroke();
-    }
-}
-
-
-function exportMathMusicMIDI() {
-    // Export as a simple text representation (real MIDI would require a library)
-    const seq = musicGenerator.sequence;
-    if (seq.length === 0) {
-        alert('Generate music first!');
-        return;
-    }
-    
-    let csv = 'Mathematical Music Sequence Export\n';
-    csv += 'Style: ' + musicGenerator.currentStyle + '\n';
-    csv += 'Scale: ' + document.getElementById('musicScale').value + '\n';
-    csv += 'BPM: ' + document.getElementById('musicBPM').value + '\n\n';
-    csv += 'Index,Frequency,Note,Velocity,Fraction,Sector,IsPrime\n';
-    
-    seq.forEach((note, i) => {
-        const noteName = frequencyToNoteName(note.freq);
-        const frac = note.fraction ? `${note.fraction.r}/${note.fraction.m}` : '';
-        const sector = note.fraction ? note.fraction.sector : '';
-        const isPrime = note.fraction ? note.fraction.isPrime : false;
-        csv += `${i},${note.freq.toFixed(2)},${noteName},${note.velocity.toFixed(2)},${frac},${sector},${isPrime}\n`;
-    });
-    
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `math_music_${musicGenerator.currentStyle}_${Date.now()}.csv`;
-    a.click();
-}
-
-// Initialize music style buttons on load
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => setMusicStyle('epic'), 100);
-});
-
 </script>
 </body>
-                               </html>
+</html>
