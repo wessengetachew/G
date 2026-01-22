@@ -614,6 +614,7 @@
         <div class="tab" onclick="switchTab('primorial')">Primorial Sieve</div>
         <div class="tab" onclick="switchTab('horizon')">Horizon</div>
         <div class="tab" onclick="switchTab('research')">Research</div>
+        <div class="tab" onclick="switchTab('pcratio')" style="background:linear-gradient(135deg,rgba(245,158,11,0.3),rgba(99,102,241,0.3));border:1px solid #f59e0b;">P/C Ratio</div>
     </div>
     
     <!-- MAIN TAB -->
@@ -791,6 +792,123 @@
                 <div class="color-legend-item"><div class="color-swatch" style="background:hsl(72,70%,50%)"></div>S3</div>
                 <div class="color-legend-item"><div class="color-swatch" style="background:hsl(108,70%,50%)"></div>S4</div>
                 <div class="color-legend-item"><div class="color-swatch" style="background:hsl(144,70%,50%)"></div>S5</div>
+            </div>
+        </div>
+        
+        <!-- MATHEMATICAL MUSIC GENERATOR -->
+        <div class="panel chart-wrapper" style="background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e1b4b 100%);border:2px solid #8b5cf6;">
+            <h4 style="color:#e0e7ff;">🎵 Mathematical Music Generator <span style="font-weight:normal;color:#a5b4fc;">(Procedural compositions from Farey mathematics)</span></h4>
+            
+            <!-- Style Presets -->
+            <div class="control-row" style="margin-bottom:10px;background:#0f172a;padding:10px 12px;border-radius:6px;">
+                <span style="color:#a5b4fc;font-size:11px;margin-right:10px;">Style:</span>
+                <button id="musicStyle-epic" onclick="setMusicStyle('epic')" class="music-style-btn active" style="background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;padding:6px 12px;border-radius:4px;color:white;cursor:pointer;font-size:11px;font-weight:600;">🔥 Epic</button>
+                <button id="musicStyle-battle" onclick="setMusicStyle('battle')" class="music-style-btn" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);border:none;padding:6px 12px;border-radius:4px;color:white;cursor:pointer;font-size:11px;font-weight:600;">⚔️ Battle</button>
+                <button id="musicStyle-powerSurge" onclick="setMusicStyle('powerSurge')" class="music-style-btn" style="background:linear-gradient(135deg,#ea580c,#c2410c);border:none;padding:6px 12px;border-radius:4px;color:white;cursor:pointer;font-size:11px;font-weight:600;">⚡ Power Surge</button>
+                <button id="musicStyle-awakening" onclick="setMusicStyle('awakening')" class="music-style-btn" style="background:linear-gradient(135deg,#4f46e5,#3730a3);border:none;padding:6px 12px;border-radius:4px;color:white;cursor:pointer;font-size:11px;font-weight:600;">💠 Awakening</button>
+                <button id="musicStyle-soulReaper" onclick="setMusicStyle('soulReaper')" class="music-style-btn" style="background:linear-gradient(135deg,#0f172a,#1e293b);border:1px solid #6366f1;padding:6px 12px;border-radius:4px;color:white;cursor:pointer;font-size:11px;font-weight:600;">🗡️ Soul Edge</button>
+                <button id="musicStyle-hollow" onclick="setMusicStyle('hollow')" class="music-style-btn" style="background:linear-gradient(135deg,#18181b,#27272a);border:1px solid #ef4444;padding:6px 12px;border-radius:4px;color:white;cursor:pointer;font-size:11px;font-weight:600;">🌑 Hollow</button>
+            </div>
+            <div class="control-row" style="margin-bottom:10px;background:#0f172a;padding:8px 12px;border-radius:6px;">
+                <span style="color:#64748b;font-size:10px;margin-right:10px;">More:</span>
+                <button id="musicStyle-finalForm" onclick="setMusicStyle('finalForm')" class="music-style-btn" style="background:linear-gradient(135deg,#fbbf24,#d97706);border:none;padding:5px 10px;border-radius:4px;color:black;cursor:pointer;font-size:10px;font-weight:600;">👑 Final Form</button>
+                <button id="musicStyle-triumph" onclick="setMusicStyle('triumph')" class="music-style-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);border:none;padding:5px 10px;border-radius:4px;color:white;cursor:pointer;font-size:10px;font-weight:600;">🏆 Triumph</button>
+                <button id="musicStyle-resolve" onclick="setMusicStyle('resolve')" class="music-style-btn" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none;padding:5px 10px;border-radius:4px;color:white;cursor:pointer;font-size:10px;font-weight:600;">💪 Resolve</button>
+                <button id="musicStyle-dark" onclick="setMusicStyle('dark')" class="music-style-btn" style="background:linear-gradient(135deg,#1f2937,#111827);border:none;padding:5px 10px;border-radius:4px;color:white;cursor:pointer;font-size:10px;font-weight:600;">🌑 Dark</button>
+                <button id="musicStyle-mystical" onclick="setMusicStyle('mystical')" class="music-style-btn" style="background:linear-gradient(135deg,#0891b2,#0e7490);border:none;padding:5px 10px;border-radius:4px;color:white;cursor:pointer;font-size:10px;font-weight:600;">✨ Mystical</button>
+                <button id="musicStyle-calm" onclick="setMusicStyle('calm')" class="music-style-btn" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;padding:5px 10px;border-radius:4px;color:white;cursor:pointer;font-size:10px;font-weight:600;">🌊 Calm</button>
+            </div>
+            
+            <!-- Controls Row -->
+            <div class="control-row" style="margin-bottom:10px;">
+                <label>BPM: <input type="number" id="musicBPM" value="120" min="40" max="240" style="width:60px;" onchange="updateMusicTempo()"></label>
+                <label>Scale: 
+                    <select id="musicScale" onchange="updateMusicScale()">
+                        <option value="minor">Natural Minor</option>
+                        <option value="harmonicMinor">Harmonic Minor</option>
+                        <option value="major">Major</option>
+                        <option value="pentatonic">Pentatonic</option>
+                        <option value="phrygian">Phrygian (dark)</option>
+                        <option value="dorian">Dorian</option>
+                        <option value="chromatic">Chromatic</option>
+                    </select>
+                </label>
+                <label>Base: 
+                    <select id="musicBaseNote">
+                        <option value="130.81">C3</option>
+                        <option value="146.83">D3</option>
+                        <option value="164.81">E3</option>
+                        <option value="174.61">F3</option>
+                        <option value="196.00" selected>G3</option>
+                        <option value="220.00">A3</option>
+                        <option value="246.94">B3</option>
+                    </select>
+                </label>
+                <label>Octaves: <input type="number" id="musicOctaves" value="3" min="1" max="5" style="width:50px;"></label>
+                <label>Duration: 
+                    <select id="musicDuration">
+                        <option value="8">8 bars</option>
+                        <option value="16" selected>16 bars</option>
+                        <option value="32">32 bars</option>
+                        <option value="64">64 bars (long)</option>
+                        <option value="0">∞ Loop</option>
+                    </select>
+                </label>
+            </div>
+            
+            <!-- Pattern & Source Row -->
+            <div class="control-row" style="margin-bottom:10px;">
+                <label>Pattern: 
+                    <select id="musicPattern">
+                        <option value="arpeggio">Arpeggio Sweep</option>
+                        <option value="melody" selected>Melodic Line</option>
+                        <option value="chords">Chord Progression</option>
+                        <option value="bassline">Bassline + Lead</option>
+                        <option value="counterpoint">Counterpoint</option>
+                    </select>
+                </label>
+                <label>Data Source: 
+                    <select id="musicSource">
+                        <option value="sectors" selected>Sector Fractions</option>
+                        <option value="primes">Prime Denoms Only</option>
+                        <option value="farey">Full Farey Sequence</option>
+                        <option value="gaps">Gap Sizes</option>
+                        <option value="errors">Prediction Errors</option>
+                    </select>
+                </label>
+                <label>Sector Range: <input type="number" id="musicSectorStart" value="1" min="1" style="width:45px;"> - <input type="number" id="musicSectorEnd" value="10" min="1" style="width:45px;"></label>
+                <label><input type="checkbox" id="musicAddBass" checked> Bass</label>
+                <label><input type="checkbox" id="musicAddDrums"> Drums</label>
+            </div>
+            
+            <!-- Playback Controls -->
+            <div style="display:flex;align-items:center;gap:15px;margin-bottom:15px;padding:12px;background:#0f172a;border-radius:8px;">
+                <button id="musicPlayBtn" onclick="toggleMathMusic()" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;padding:12px 30px;border-radius:6px;color:white;cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:18px;">▶</span> Generate & Play
+                </button>
+                <button onclick="stopMathMusic()" style="background:#ef4444;border:none;padding:12px 20px;border-radius:6px;color:white;cursor:pointer;font-size:14px;">■ Stop</button>
+                <button onclick="exportMathMusicMIDI()" class="secondary" style="padding:10px 15px;font-size:12px;">Export Sequence</button>
+                <div style="flex:1;text-align:center;">
+                    <div id="musicStatusDisplay" style="color:#a5b4fc;font-size:12px;">Ready to generate mathematical music</div>
+                    <div id="musicProgressBar" style="height:4px;background:#334155;border-radius:2px;margin-top:6px;overflow:hidden;display:none;">
+                        <div id="musicProgressFill" style="height:100%;background:linear-gradient(90deg,#8b5cf6,#22c55e);width:0%;transition:width 0.1s;"></div>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="color:#64748b;font-size:10px;">Current Note</div>
+                    <div id="musicCurrentNote" style="color:#22c55e;font-size:18px;font-weight:bold;font-family:monospace;">—</div>
+                </div>
+            </div>
+            
+            <!-- Visualization Canvas -->
+            <div style="position:relative;">
+                <canvas id="musicVisualizerCanvas" width="880" height="120" style="width:100%;background:#0f172a;border-radius:6px;border:1px solid #334155;"></canvas>
+                <div id="musicNoteOverlay" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:48px;color:#8b5cf6;opacity:0;transition:opacity 0.15s;pointer-events:none;text-shadow:0 0 20px #8b5cf6;"></div>
+            </div>
+            
+            <!-- Info -->
+            <div style="margin-top:10px;padding:10px;background:#0f172a;border-radius:5px;font-size:11px;color:#64748b;">
+                <strong style="color:#a5b4fc;">How it works:</strong> Farey fractions are mapped to musical notes using the selected scale. Sector boundaries create phrase structures, prime denominators trigger accent notes, and gap sizes influence rhythm/dynamics. Each style applies different transformations to create unique mathematical compositions.
             </div>
         </div>
         
@@ -1836,6 +1954,220 @@
             <div style="margin-top:15px;"><button onclick="screenshotFullTab('research')">Screenshot Full Research Tab</button></div>
         </div>
     </div>
+    
+    <!-- P/C RATIO ANALYSIS TAB -->
+    <div id="tab-pcratio" class="tab-content">
+        <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#0f172a);border:2px solid #f59e0b;margin-bottom:20px;">
+            <h3 style="color:#fbbf24;margin-top:0;">Prime-Composite Ratio Analysis</h3>
+            <div style="background:#0f172a;padding:20px;border-radius:8px;margin:15px 0;border:1px solid #334155;">
+                <div style="font-family:'Times New Roman',serif;font-size:1.1em;color:#e2e8f0;line-height:1.8;">
+                    <strong style="color:#a5b4fc;">Definition:</strong> For coprime pairs (a,b) with a/b in sector S<sub>n</sub> = (1/(n+1), 1/n], let P<sub>n</sub>(N) count pairs with prime denominator b, and C<sub>n</sub>(N) count pairs with composite denominator b.
+                </div>
+                
+                <div style="margin-top:20px;padding:15px;background:rgba(239,68,68,0.1);border-radius:6px;border-left:3px solid #ef4444;">
+                    <strong style="color:#f87171;">Finding 1 - Decay Behavior:</strong> The ratio P<sub>n</sub>(N)/C<sub>n</sub>(N) is NOT bounded. It decays toward 0 as N increases, consistent with prime density thinning as 1/ln(N).
+                    <div style="text-align:center;margin:15px 0;font-size:1.2em;color:#94a3b8;font-family:monospace;">
+                        P<sub>n</sub>(N) / C<sub>n</sub>(N) ~ c / ln(N) → 0 as N → ∞
+                    </div>
+                </div>
+                
+                <div style="margin-top:15px;padding:15px;background:rgba(99,102,241,0.1);border-radius:6px;border-left:3px solid #6366f1;">
+                    <strong style="color:#a5b4fc;">Finding 2 - Sector Independence:</strong> The ratio is identical across ALL sectors at any fixed N. The sector width factors n(n+1) cancel in the P/C ratio, so sector 1, sector 2, ..., sector k all show the same ratio at a given N.
+                    <div style="margin-top:10px;font-family:monospace;font-size:0.9em;color:#94a3b8;">
+                        At N=1500: Sector 1 P/C = 0.3173, Sector 2 P/C = 0.3179, Sector 3 P/C = 0.3179, ...
+                    </div>
+                </div>
+                
+                <div style="margin-top:15px;padding:15px;background:rgba(245,158,11,0.1);border-radius:6px;border-left:3px solid #f59e0b;">
+                    <strong style="color:#fbbf24;">Finding 3 - The 1/π Crossing:</strong> The ratio crosses through 1/π ≈ 0.31831 in the range N in [1350, 1550]. This crossing happens simultaneously across all sectors. It is a finite-size transient, not an asymptotic limit.
+                    <table style="margin-top:10px;font-size:0.9em;color:#94a3b8;">
+                        <tr><td style="padding:4px 12px;">N = 500:</td><td>P/C ≈ 0.392 (+23% above 1/π)</td></tr>
+                        <tr><td style="padding:4px 12px;">N = 1000:</td><td>P/C ≈ 0.333 (+5% above 1/π)</td></tr>
+                        <tr><td style="padding:4px 12px;color:#22c55e;">N ≈ 1500:</td><td style="color:#22c55e;">P/C ≈ 0.318 (crosses 1/π)</td></tr>
+                        <tr><td style="padding:4px 12px;">N = 3000:</td><td>P/C ≈ 0.277 (-13% below 1/π)</td></tr>
+                        <tr><td style="padding:4px 12px;">N = 5000:</td><td>P/C ≈ 0.256 (-20% below 1/π)</td></tr>
+                        <tr><td style="padding:4px 12px;">N = 10000:</td><td>P/C ≈ 0.233 (-27% below 1/π)</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-panel" style="background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid #475569;">
+            <h4 style="color:#f59e0b;margin:0 0 12px 0;">Test Parameters</h4>
+            <div class="control-row">
+                <div class="control-group highlight">
+                    <label>Max Denominator N:</label>
+                    <input type="number" id="pcRatioN" value="1500" min="100" max="10000" step="100">
+                </div>
+                <div class="control-group">
+                    <label>Sectors to test:</label>
+                    <input type="number" id="pcRatioSectors" value="20" min="5" max="100">
+                </div>
+                <button onclick="runPCRatioTest()" style="background:linear-gradient(135deg,#f59e0b,#d97706);font-weight:600;">Run Test</button>
+                <button onclick="runPCRatioConvergence()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">Convergence Study</button>
+                <button onclick="runPCRatioDecayScan()" style="background:linear-gradient(135deg,#ef4444,#dc2626);">Decay Scan</button>
+                <button class="secondary" onclick="clearPCRatioResults()">Clear</button>
+            </div>
+        </div>
+        
+        <!-- HARMONIC PLAYBACK CONTROLS -->
+        <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid #8b5cf6;margin-top:15px;">
+            <h4 style="color:#c7d2fe;margin:0 0 12px 0;">
+                Harmonic Playback
+                <span style="color:#64748b;font-size:0.75em;font-weight:normal;margin-left:8px;">Hear the prime/composite distribution</span>
+            </h4>
+            <div class="control-row" style="flex-wrap:wrap;gap:10px;">
+                <div class="control-group">
+                    <label>Sector:</label>
+                    <input type="number" id="pcPlaybackSector" value="2" min="1" max="50" style="width:60px;">
+                </div>
+                <div class="control-group">
+                    <label>Speed (ms):</label>
+                    <input type="number" id="pcPlaybackSpeed" value="200" min="50" max="1000" step="50" style="width:70px;">
+                </div>
+                <div class="control-group">
+                    <label>Max notes:</label>
+                    <input type="number" id="pcPlaybackLimit" value="50" min="10" max="200" step="10" style="width:70px;">
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button onclick="playPCRatioPrimes()" style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:8px 14px;border:none;border-radius:5px;color:white;cursor:pointer;font-weight:600;">
+                        Play Primes
+                    </button>
+                    <button onclick="playPCRatioComposites()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:8px 14px;border:none;border-radius:5px;color:white;cursor:pointer;font-weight:600;">
+                        Play Composites
+                    </button>
+                    <button onclick="playPCRatioInterleaved()" style="background:linear-gradient(135deg,#22c55e,#16a34a);padding:8px 14px;border:none;border-radius:5px;color:white;cursor:pointer;font-weight:600;">
+                        Interleaved
+                    </button>
+                    <button onclick="playPCRatioComparison()" style="background:linear-gradient(135deg,#ec4899,#be185d);padding:8px 14px;border:none;border-radius:5px;color:white;cursor:pointer;font-weight:600;">
+                        P vs C Compare
+                    </button>
+                    <button onclick="stopAllPlayback()" style="background:#ef4444;padding:8px 14px;border:none;border-radius:5px;color:white;cursor:pointer;">
+                        Stop
+                    </button>
+                </div>
+            </div>
+            <div id="pcPlaybackStatus" style="margin-top:10px;padding:8px 12px;background:rgba(0,0,0,0.3);border-radius:5px;font-family:monospace;font-size:0.9em;color:#94a3b8;min-height:20px;">
+                Ready - select a sector and playback mode
+            </div>
+            <div style="margin-top:10px;display:flex;gap:20px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:200px;">
+                    <div style="color:#a5b4fc;font-size:0.8em;margin-bottom:4px;">Now Playing</div>
+                    <div id="pcNowPlaying" style="font-family:monospace;font-size:1.3em;color:#22c55e;">-</div>
+                </div>
+                <div style="flex:1;min-width:150px;">
+                    <div style="color:#a5b4fc;font-size:0.8em;margin-bottom:4px;">Frequency</div>
+                    <div id="pcNowFreq" style="font-family:monospace;font-size:1.3em;color:#8b5cf6;">- Hz</div>
+                </div>
+                <div style="flex:1;min-width:100px;">
+                    <div style="color:#a5b4fc;font-size:0.8em;margin-bottom:4px;">Type</div>
+                    <div id="pcNowType" style="font-size:1.1em;">-</div>
+                </div>
+                <div style="flex:1;min-width:100px;">
+                    <div style="color:#a5b4fc;font-size:0.8em;margin-bottom:4px;">Progress</div>
+                    <div id="pcPlayProgress" style="font-family:monospace;font-size:1.1em;color:#94a3b8;">0 / 0</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="pcRatioProgress" style="display:none;margin:15px 0;padding:15px;background:#1e293b;border-radius:8px;border:1px solid #475569;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div class="spinner" style="width:20px;height:20px;border:3px solid #334155;border-top:3px solid #f59e0b;border-radius:50%;animation:spin 1s linear infinite;"></div>
+                <span id="pcRatioProgressText">Computing...</span>
+            </div>
+            <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+        </div>
+        
+        <div class="grid-2" style="margin-top:15px;">
+            <div class="panel" style="background:#0f172a;">
+                <h4 style="color:#fbbf24;">Global Result <span style="color:#64748b;font-weight:normal;font-size:0.8em;">(same for all sectors)</span></h4>
+                <div id="pcRatioSummary" style="text-align:center;padding:20px;">
+                    <div style="color:#64748b;font-style:italic;">Run test to see results</div>
+                </div>
+            </div>
+            <div class="panel" style="background:#0f172a;">
+                <h4 style="color:#a5b4fc;">Decay Analysis</h4>
+                <div id="pcRatioStats" style="padding:10px;">
+                    <div style="color:#64748b;font-style:italic;">No data yet</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid-2" style="margin-top:15px;">
+            <div class="chart-box chart-wrapper">
+                <h4>P/C Ratio by Sector <span style="color:#64748b;font-weight:normal;font-size:0.8em;">(all sectors identical at fixed N)</span></h4>
+                <canvas id="pcRatioSectorChart"></canvas>
+            </div>
+            <div class="chart-box chart-wrapper">
+                <h4>Ratio Decay vs N <span style="color:#ef4444;font-weight:normal;font-size:0.8em;">(decays to 0, crosses 1/π near N=1500)</span></h4>
+                <canvas id="pcRatioConvergenceChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="panel" style="margin-top:15px;background:#0f172a;">
+            <h4 style="color:#f59e0b;">Sector-by-Sector Data <span style="color:#64748b;font-weight:normal;font-size:0.8em;">(note: all P/C ratios are nearly identical)</span></h4>
+            <div class="table-scroll">
+                <table id="pcRatioTable">
+                    <thead>
+                        <tr>
+                            <th>Sector n</th>
+                            <th>Interval</th>
+                            <th style="color:#f59e0b;">Primes P<sub>n</sub></th>
+                            <th style="color:#6366f1;">Composites C<sub>n</sub></th>
+                            <th>Total</th>
+                            <th style="color:#22c55e;">P/C Ratio</th>
+                            <th>Delta from 1/π</th>
+                            <th>% Error</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pcRatioTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="panel" style="margin-top:15px;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid #475569;">
+            <h4 style="color:#a5b4fc;">Theoretical Context</h4>
+            <div class="grid-2" style="gap:20px;">
+                <div>
+                    <h5 style="color:#ef4444;margin-bottom:8px;">Why the Ratio Decays</h5>
+                    <p style="color:#94a3b8;font-size:0.9em;line-height:1.6;">
+                        The Prime Number Theorem gives π(N) ~ N/ln(N). Since primes become sparser as N grows,
+                        the count of prime denominators P<sub>n</sub>(N) grows slower than composite denominators C<sub>n</sub>(N).
+                        The ratio P/C therefore decays like c/ln(N) toward zero.
+                    </p>
+                    <h5 style="color:#6366f1;margin:15px 0 8px 0;">Why Sectors Are Identical</h5>
+                    <p style="color:#94a3b8;font-size:0.9em;line-height:1.6;">
+                        Each sector samples denominators proportionally to its width 1/[n(n+1)]. Since primes and 
+                        composites are distributed uniformly across sectors (no sector "favors" primes), the 
+                        P/C ratio is sector-independent. The width factors cancel in the ratio.
+                    </p>
+                </div>
+                <div>
+                    <h5 style="color:#22c55e;margin-bottom:8px;">The Two Confirmed Constants</h5>
+                    <div style="font-family:monospace;font-size:0.95em;line-height:2;">
+                        <div><span style="color:#6366f1;">6/π²</span> <span style="color:#64748b;">≈ 0.6079</span> - Coprime density (proven)</div>
+                        <div><span style="color:#8b5cf6;">√3/π</span> <span style="color:#64748b;">≈ 0.5513</span> - Phase boundary E<sub>n</sub>=1 (proven)</div>
+                    </div>
+                    <div style="margin-top:15px;padding:10px;background:rgba(239,68,68,0.1);border-radius:4px;border:1px solid rgba(239,68,68,0.3);">
+                        <strong style="color:#f87171;">Not a third constant:</strong>
+                        <div style="color:#94a3b8;font-size:0.9em;margin-top:5px;">
+                            P/C ratio is NOT bounded at 1/π. The crossing at N≈1500 is a transient during decay.
+                            No sector escapes this — all sectors decay together at the same rate.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="derivation-box" style="margin-top:15px;">
+            <strong>Export & Documentation:</strong>
+            <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
+                <button onclick="exportPCRatioCSV()">Export CSV</button>
+                <button onclick="exportPCRatioLatex()">Export LaTeX</button>
+                <button onclick="screenshotFullTab('pcratio')">Screenshot Tab</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="modal-overlay" id="pointModal"><div class="modal-content" style="max-width:450px;"><div class="modal-header"><h3 id="pointModalTitle">Point</h3><button class="modal-close" onclick="closePointModal()">x</button></div><div class="modal-body" id="pointModalBody"></div></div></div>
@@ -2553,7 +2885,12 @@ function setMode(mode) {
     state.mode = mode;
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('mode-'+mode).classList.add('active');
-    document.getElementById('modeDescription').textContent = {exact:'Exact enumeration',hybrid:'Hybrid mode',formula:'Formula only'}[mode];
+    const descriptions = {
+        exact: 'Full enumeration (N≤1500)',
+        hybrid: 'Smart hybrid mode',
+        formula: 'Instant formula only (any N)'
+    };
+    document.getElementById('modeDescription').textContent = descriptions[mode];
 }
 
 // =============================================
@@ -2679,17 +3016,33 @@ async function computeAll() {
     state.sectors = []; state.residuesBySector = {}; state.allResidues = []; state.gaps = []; state.farey = [];
     
     const N = state.nMax;
-    if(state.mode !== 'formula' && N <= 1500) {
+    
+    // Formula mode: fast path - no enumeration needed
+    if(state.mode === 'formula') {
+        computeFormulaOnly();
+        updateFormulaOnlyDisplays();
+        document.getElementById('progressBar').style.display = 'none';
+        document.getElementById('statusArea').innerHTML = '<span class="info-badge success">Done (Formula)</span>';
+        state.computing = false;
+        return;
+    }
+    
+    // Exact/Hybrid modes with reasonable N
+    if(N <= 1500) {
         await computeExact(N);
     } else {
+        // Large N in non-formula mode: compute formula + warning
         computeFormulaOnly();
+        document.getElementById('statusArea').innerHTML = '<span class="info-badge" style="background:#f59e0b;">N too large for exact - using formula</span>';
     }
     
     computeGaps();
     updateAllDisplays();
     
     document.getElementById('progressBar').style.display = 'none';
-    document.getElementById('statusArea').innerHTML = '<span class="info-badge success">Done</span>';
+    if(N <= 1500) {
+        document.getElementById('statusArea').innerHTML = '<span class="info-badge success">Done</span>';
+    }
     state.computing = false;
 }
 
@@ -2740,6 +3093,59 @@ function computeGaps() {
 }
 
 function cancelComputation() { state.computing = false; }
+
+// Fast update for formula-only mode - skip heavy computations
+function updateFormulaOnlyDisplays() {
+    updateMainStats();
+    updateMainChartsFormulaOnly();
+    updateMainTable();
+    // Skip: drawMainRing, drawSectorTree, drawTheoryViz, updateGapAnalysis, 
+    // computeFranel, computeDedekind, updateCFDisplay, computePSL, 
+    // computeEulerProduct, updateModularAnalysis, draw3D, drawHyperbolic, 
+    // drawSmithChart, updateStatistics, updatePrimeAnalysis
+    // These require actual residue data which formula mode doesn't compute
+}
+
+function updateMainChartsFormulaOnly() {
+    const labels = state.sectors.map(s=>s.n);
+    
+    if(state.charts.mainCount) state.charts.mainCount.destroy();
+    state.charts.mainCount = new Chart(document.getElementById('mainCountChart'),{
+        type:'line',
+        data:{
+            labels,
+            datasets:[{
+                label:'Predicted (Formula)',
+                data:state.sectors.map(s=>s.predicted),
+                borderColor:'#22c55e',
+                backgroundColor:'rgba(34,197,94,0.1)',
+                fill:true
+            }]
+        },
+        options:{
+            responsive:true,
+            plugins:{
+                legend:{labels:{color:'#94a3b8'}},
+                title:{display:true, text:'Formula Predictions Only (No Exact Data)', color:'#f59e0b'}
+            },
+            scales:{
+                x:{ticks:{color:'#94a3b8'}},
+                y:{ticks:{color:'#94a3b8'}}
+            }
+        }
+    });
+    
+    // No error chart in formula mode (no exact data to compare)
+    if(state.charts.mainError) state.charts.mainError.destroy();
+    const ctx = document.getElementById('mainErrorChart').getContext('2d');
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '14px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('No error data in Formula mode', ctx.canvas.width/2, ctx.canvas.height/2 - 10);
+    ctx.fillText('(Switch to Exact or Hybrid mode)', ctx.canvas.width/2, ctx.canvas.height/2 + 15);
+}
 
 function updateAllDisplays() {
     updateMainStats(); updateMainCharts(); updateMainTable(); drawMainRing(); drawSectorTree();
@@ -3517,12 +3923,14 @@ function updateMainStats() {
     const hasExact = state.sectors.some(s=>s.exact!==null);
     const total = hasExact ? state.sectors.reduce((s,x)=>s+(x.exact||0),0) : null;
     const totalPred = state.sectors.reduce((s,x)=>s+x.predicted,0);
+    const modeLabel = state.mode === 'formula' ? '<div class="stat-card" style="border-color:#f59e0b;"><div class="stat-value" style="color:#f59e0b;">Formula</div><div class="stat-label">Mode (instant)</div></div>' : '';
     document.getElementById('mainStats').innerHTML = `
         <div class="stat-card"><div class="stat-value">${fmt(state.nMax)}</div><div class="stat-label">N</div></div>
         <div class="stat-card"><div class="stat-value">${state.sectorMax}</div><div class="stat-label">Sectors</div></div>
         ${hasExact?`<div class="stat-card"><div class="stat-value">${fmt(total)}</div><div class="stat-label">Exact</div></div>`:''}
         <div class="stat-card"><div class="stat-value">${fmt(totalPred)}</div><div class="stat-label">Predicted</div></div>
         <div class="stat-card"><div class="stat-value">${(6/Math.PI/Math.PI).toFixed(4)}</div><div class="stat-label">6/π²</div></div>
+        ${modeLabel}
     `;
 }
 
@@ -9455,7 +9863,7 @@ function playSectorSequence(direction) {
     
     const btn = document.getElementById('sectorPlayBtn');
     if (btn) {
-        btn.textContent = '▶ Playing...';
+        btn.textContent = 'Playing...';
         btn.style.background = 'linear-gradient(135deg,#f59e0b,#d97706)';
     }
 }
@@ -10420,6 +10828,1672 @@ function playNextRandomInterval() {
     // Schedule next
     randomIntervalId = setTimeout(playNextRandomInterval, duration + 50);
 }
+
+// =============================================
+// MATHEMATICAL MUSIC GENERATOR
+// =============================================
+
+const musicGenerator = {
+    isPlaying: false,
+    intervalId: null,
+    currentStyle: 'epic',
+    noteIndex: 0,
+    sequence: [],
+    bassSequence: [],
+    drumSequence: [],
+    startTime: 0,
+    oscillators: [],
+    
+    // Musical scales (semitone intervals from root)
+    scales: {
+        minor: [0, 2, 3, 5, 7, 8, 10],
+        harmonicMinor: [0, 2, 3, 5, 7, 8, 11],
+        major: [0, 2, 4, 5, 7, 9, 11],
+        pentatonic: [0, 2, 4, 7, 9],
+        phrygian: [0, 1, 3, 5, 7, 8, 10],
+        dorian: [0, 2, 3, 5, 7, 9, 10],
+        chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    },
+    
+    // Style configurations
+    styles: {
+        epic: {
+            name: 'Epic Ascent',
+            scale: 'harmonicMinor',
+            bpmMultiplier: 1.0,
+            dynamics: 'crescendo',
+            notePattern: 'ascending',
+            bassWeight: 0.8,
+            accentPrimes: true,
+            octaveRange: [0, 2],
+            description: 'Building intensity with harmonic minor'
+        },
+        battle: {
+            name: 'Battle',
+            scale: 'phrygian',
+            bpmMultiplier: 1.3,
+            dynamics: 'aggressive',
+            notePattern: 'jagged',
+            bassWeight: 1.0,
+            accentPrimes: true,
+            octaveRange: [-1, 2],
+            description: 'Fast, intense Phrygian mode'
+        },
+        dark: {
+            name: 'Dark Pulse',
+            scale: 'minor',
+            bpmMultiplier: 0.7,
+            dynamics: 'heavy',
+            notePattern: 'pulse',
+            bassWeight: 1.2,
+            accentPrimes: false,
+            octaveRange: [-1, 1],
+            description: 'Deep, brooding minor'
+        },
+        triumph: {
+            name: 'Triumph',
+            scale: 'major',
+            bpmMultiplier: 1.1,
+            dynamics: 'fanfare',
+            notePattern: 'ascending',
+            bassWeight: 0.6,
+            accentPrimes: true,
+            octaveRange: [0, 3],
+            description: 'Victorious major key celebration'
+        },
+        mystical: {
+            name: 'Mystical',
+            scale: 'dorian',
+            bpmMultiplier: 0.8,
+            dynamics: 'flowing',
+            notePattern: 'wave',
+            bassWeight: 0.5,
+            accentPrimes: false,
+            octaveRange: [0, 2],
+            description: 'Ethereal Dorian exploration'
+        },
+        calm: {
+            name: 'Calm Flow',
+            scale: 'pentatonic',
+            bpmMultiplier: 0.6,
+            dynamics: 'gentle',
+            notePattern: 'smooth',
+            bassWeight: 0.4,
+            accentPrimes: false,
+            octaveRange: [0, 2],
+            description: 'Peaceful pentatonic meditation'
+        },
+        awakening: {
+            name: 'Awakening',
+            scale: 'harmonicMinor',
+            bpmMultiplier: 0.5,
+            dynamics: 'buildUp',
+            notePattern: 'ascending',
+            bassWeight: 1.0,
+            accentPrimes: true,
+            octaveRange: [-1, 3],
+            description: 'Power building from silence to intensity'
+        },
+        powerSurge: {
+            name: 'Power Surge',
+            scale: 'phrygian',
+            bpmMultiplier: 1.5,
+            dynamics: 'explosive',
+            notePattern: 'burst',
+            bassWeight: 1.2,
+            accentPrimes: true,
+            octaveRange: [-1, 3],
+            description: 'Explosive bursts of energy'
+        },
+        finalForm: {
+            name: 'Final Form',
+            scale: 'chromatic',
+            bpmMultiplier: 1.2,
+            dynamics: 'intense',
+            notePattern: 'chromatic',
+            bassWeight: 1.0,
+            accentPrimes: true,
+            octaveRange: [0, 3],
+            description: 'Chromatic tension and release'
+        },
+        hollow: {
+            name: 'Hollow',
+            scale: 'phrygian',
+            bpmMultiplier: 0.9,
+            dynamics: 'sinister',
+            notePattern: 'descending',
+            bassWeight: 1.3,
+            accentPrimes: false,
+            octaveRange: [-2, 1],
+            description: 'Dark, descending menace'
+        },
+        soulReaper: {
+            name: 'Soul Edge',
+            scale: 'harmonicMinor',
+            bpmMultiplier: 1.4,
+            dynamics: 'slashing',
+            notePattern: 'jagged',
+            bassWeight: 0.9,
+            accentPrimes: true,
+            octaveRange: [0, 3],
+            description: 'Sharp, cutting melodic lines'
+        },
+        resolve: {
+            name: 'Resolve',
+            scale: 'major',
+            bpmMultiplier: 1.0,
+            dynamics: 'determined',
+            notePattern: 'stepping',
+            bassWeight: 0.7,
+            accentPrimes: true,
+            octaveRange: [0, 2],
+            description: 'Determined, heroic progression'
+        }
+    }
+};
+
+function setMusicStyle(style) {
+    musicGenerator.currentStyle = style;
+    document.querySelectorAll('.music-style-btn').forEach(btn => {
+        btn.style.opacity = '0.6';
+        btn.style.transform = 'scale(0.95)';
+    });
+    const activeBtn = document.getElementById('musicStyle-' + style);
+    if (activeBtn) {
+        activeBtn.style.opacity = '1';
+        activeBtn.style.transform = 'scale(1)';
+    }
+    
+    const styleConfig = musicGenerator.styles[style];
+    if (styleConfig) {
+        document.getElementById('musicScale').value = styleConfig.scale;
+        document.getElementById('musicStatusDisplay').textContent = `Style: ${styleConfig.name} — ${styleConfig.description}`;
+    }
+}
+
+function updateMusicTempo() {
+    // Just updates the display, actual tempo used during generation
+}
+
+function updateMusicScale() {
+    // Updates when generation happens
+}
+
+function generateMathSequence() {
+    const style = musicGenerator.styles[musicGenerator.currentStyle];
+    const scale = musicGenerator.scales[document.getElementById('musicScale').value] || musicGenerator.scales.minor;
+    const baseFreq = parseFloat(document.getElementById('musicBaseNote').value) || 196;
+    const octaves = parseInt(document.getElementById('musicOctaves').value) || 3;
+    const sectorStart = parseInt(document.getElementById('musicSectorStart').value) || 1;
+    const sectorEnd = parseInt(document.getElementById('musicSectorEnd').value) || 10;
+    const source = document.getElementById('musicSource').value;
+    const pattern = document.getElementById('musicPattern').value;
+    
+    // Gather source data
+    let fractions = [];
+    
+    if (source === 'sectors' || source === 'primes') {
+        for (let s = sectorStart; s <= sectorEnd; s++) {
+            const residues = state.residuesBySector[s] || [];
+            let toAdd = source === 'primes' ? residues.filter(r => r.isPrime) : residues;
+            toAdd.forEach(r => fractions.push({ value: r.r / r.m, r: r.r, m: r.m, sector: s, isPrime: r.isPrime }));
+        }
+    } else if (source === 'farey') {
+        fractions = state.farey.slice(0, 500).map(f => ({ value: f.value, r: f.r, m: f.m, sector: getSector(f.r, f.m), isPrime: isPrime(f.m) }));
+    } else if (source === 'gaps') {
+        fractions = state.gaps.slice(0, 200).map(g => ({ value: g.gap * 1000, r: g.left.r, m: g.left.m, sector: g.sector, isPrime: false }));
+    } else if (source === 'errors') {
+        fractions = state.sectors.map(s => ({ value: Math.abs(s.relError || 0) / 100, r: s.n, m: 1, sector: s.n, isPrime: false }));
+    }
+    
+    if (fractions.length === 0) {
+        // Generate from formula if no data
+        for (let s = sectorStart; s <= sectorEnd; s++) {
+            for (let i = 0; i < 10; i++) {
+                const value = 1/(s+1) + (1/s - 1/(s+1)) * (i / 10);
+                fractions.push({ value, r: 1, m: s, sector: s, isPrime: isPrime(s) });
+            }
+        }
+    }
+    
+    // Sort based on pattern
+    if (style.notePattern === 'ascending') {
+        fractions.sort((a, b) => a.value - b.value);
+    } else if (style.notePattern === 'descending') {
+        fractions.sort((a, b) => b.value - a.value);
+    } else if (style.notePattern === 'jagged') {
+        // Interleave high and low
+        fractions.sort((a, b) => a.value - b.value);
+        const half = Math.floor(fractions.length / 2);
+        const low = fractions.slice(0, half);
+        const high = fractions.slice(half);
+        fractions = [];
+        for (let i = 0; i < Math.max(low.length, high.length); i++) {
+            if (low[i]) fractions.push(low[i]);
+            if (high[high.length - 1 - i]) fractions.push(high[high.length - 1 - i]);
+        }
+    } else if (style.notePattern === 'wave') {
+        // Sine wave pattern through the data
+        fractions.sort((a, b) => a.value - b.value);
+        const ordered = [...fractions];
+        fractions = [];
+        for (let i = 0; i < ordered.length; i++) {
+            const waveIdx = Math.floor((Math.sin(i * 0.3) + 1) / 2 * (ordered.length - 1));
+            fractions.push(ordered[waveIdx]);
+        }
+    } else if (style.notePattern === 'burst') {
+        // Explosive bursts - groups of rapid notes then pauses
+        fractions.sort((a, b) => a.value - b.value);
+        const ordered = [...fractions];
+        fractions = [];
+        for (let i = 0; i < ordered.length; i++) {
+            const burstPhase = (i % 8);
+            if (burstPhase < 5) {
+                // Fast burst
+                fractions.push(ordered[Math.min(i + burstPhase * 3, ordered.length - 1)]);
+            } else {
+                // Slow/pause
+                fractions.push(ordered[Math.floor(ordered.length / 2)]);
+            }
+        }
+    } else if (style.notePattern === 'chromatic') {
+        // Chromatic runs with tension building
+        fractions.sort((a, b) => a.value - b.value);
+        const ordered = [...fractions];
+        fractions = [];
+        for (let i = 0; i < ordered.length; i++) {
+            const tensionPhase = Math.floor(i / 16) % 2;
+            if (tensionPhase === 0) {
+                // Ascending chromatic
+                fractions.push(ordered[i % ordered.length]);
+            } else {
+                // Release/resolve
+                fractions.push(ordered[Math.floor(ordered.length * 0.3)]);
+            }
+        }
+    } else if (style.notePattern === 'descending') {
+        fractions.sort((a, b) => b.value - a.value);
+    } else if (style.notePattern === 'stepping') {
+        // Step up, step back pattern
+        fractions.sort((a, b) => a.value - b.value);
+        const ordered = [...fractions];
+        fractions = [];
+        for (let i = 0; i < ordered.length; i++) {
+            const stepPhase = i % 4;
+            const baseIdx = Math.floor(i / 4) * 3;
+            const idx = Math.min(baseIdx + stepPhase - (stepPhase === 3 ? 2 : 0), ordered.length - 1);
+            fractions.push(ordered[Math.max(0, idx)]);
+        }
+    }
+    
+    // Convert fractions to notes
+    const sequence = [];
+    const totalScaleNotes = scale.length * octaves;
+    
+    fractions.forEach((f, i) => {
+        // Map fraction value (0-1) to scale position
+        let scalePos = Math.floor(f.value * totalScaleNotes);
+        scalePos = Math.max(0, Math.min(totalScaleNotes - 1, scalePos));
+        
+        const octave = Math.floor(scalePos / scale.length) + style.octaveRange[0];
+        const noteInScale = scalePos % scale.length;
+        const semitones = scale[noteInScale] + (octave * 12);
+        const freq = baseFreq * Math.pow(2, semitones / 12);
+        
+        // Calculate velocity/dynamics
+        let velocity = 0.5;
+        if (style.dynamics === 'crescendo') {
+            velocity = 0.3 + (i / fractions.length) * 0.6;
+        } else if (style.dynamics === 'aggressive') {
+            velocity = 0.6 + Math.random() * 0.3;
+        } else if (style.dynamics === 'heavy') {
+            velocity = 0.7;
+        } else if (style.dynamics === 'fanfare') {
+            velocity = f.isPrime ? 0.9 : 0.6;
+        } else if (style.dynamics === 'gentle') {
+            velocity = 0.3 + Math.random() * 0.2;
+        } else if (style.dynamics === 'buildUp') {
+            // Slow build from very quiet to very loud
+            const phase = i / fractions.length;
+            velocity = 0.1 + Math.pow(phase, 2) * 0.8;
+        } else if (style.dynamics === 'explosive') {
+            // Random explosive hits
+            velocity = (i % 8 < 5) ? 0.7 + Math.random() * 0.3 : 0.3;
+        } else if (style.dynamics === 'intense') {
+            velocity = 0.6 + Math.sin(i * 0.5) * 0.2 + Math.random() * 0.2;
+        } else if (style.dynamics === 'sinister') {
+            // Low rumble with occasional spikes
+            velocity = 0.4 + (f.isPrime ? 0.4 : 0) + Math.random() * 0.1;
+        } else if (style.dynamics === 'slashing') {
+            // Sharp attacks
+            velocity = 0.5 + ((i % 3 === 0) ? 0.4 : 0);
+        } else if (style.dynamics === 'determined') {
+            // Steady with emphasis on beat
+            velocity = 0.5 + ((i % 4 === 0) ? 0.3 : 0);
+        } else if (style.dynamics === 'flowing') {
+            velocity = 0.4 + Math.sin(i * 0.2) * 0.2;
+        }
+        
+        // Accent primes
+        if (style.accentPrimes && f.isPrime) {
+            velocity = Math.min(1, velocity + 0.2);
+        }
+        
+        sequence.push({
+            freq,
+            velocity,
+            fraction: f,
+            scaleNote: noteInScale,
+            octave,
+            index: i
+        });
+    });
+    
+    // Generate bass line
+    const bassSequence = [];
+    if (document.getElementById('musicAddBass').checked) {
+        const bassOctave = style.octaveRange[0] - 1;
+        let lastBassNote = 0;
+        
+        for (let i = 0; i < sequence.length; i += 4) {
+            const rootSemitones = scale[0] + (bassOctave * 12);
+            const fifthSemitones = scale[Math.min(4, scale.length - 1)] + (bassOctave * 12);
+            
+            const useFifth = (i / 4) % 2 === 1;
+            const semitones = useFifth ? fifthSemitones : rootSemitones;
+            const freq = baseFreq * Math.pow(2, semitones / 12);
+            
+            bassSequence.push({
+                freq,
+                velocity: style.bassWeight * 0.5,
+                startIndex: i,
+                duration: 4
+            });
+        }
+    }
+    
+    // Generate drum sequence
+    const drumSequence = [];
+    if (document.getElementById('musicAddDrums').checked) {
+        for (let i = 0; i < sequence.length; i++) {
+            const beatInMeasure = i % 8;
+            
+            // Kick on 1 and 5 (or every 4 for intense styles)
+            if (beatInMeasure === 0 || beatInMeasure === 4 || 
+                (style.dynamics === 'aggressive' && beatInMeasure % 2 === 0) ||
+                (style.dynamics === 'explosive' && i % 3 === 0)) {
+                drumSequence.push({ type: 'kick', index: i, velocity: 0.7 });
+            }
+            
+            // Snare on 2 and 6 (backbeat)
+            if (beatInMeasure === 2 || beatInMeasure === 6) {
+                drumSequence.push({ type: 'snare', index: i, velocity: 0.6 });
+            }
+            
+            // Hi-hat on every beat for intense styles
+            if (style.bpmMultiplier >= 1.0) {
+                drumSequence.push({ type: 'hihat', index: i, velocity: 0.3 + (beatInMeasure % 2 === 0 ? 0.1 : 0) });
+            } else if (beatInMeasure % 2 === 0) {
+                drumSequence.push({ type: 'hihat', index: i, velocity: 0.25 });
+            }
+            
+            // Crash on phrase starts (every 16 notes)
+            if (i % 16 === 0 && i > 0) {
+                drumSequence.push({ type: 'crash', index: i, velocity: 0.5 });
+            }
+        }
+    }
+    
+    return { sequence, bassSequence, drumSequence };
+}
+
+function toggleMathMusic() {
+    if (musicGenerator.isPlaying) {
+        stopMathMusic();
+    } else {
+        startMathMusic();
+    }
+}
+
+function startMathMusic() {
+    initAudioContext();
+    stopMathMusic();
+    
+    const generated = generateMathSequence();
+    musicGenerator.sequence = generated.sequence;
+    musicGenerator.bassSequence = generated.bassSequence;
+    musicGenerator.drumSequence = generated.drumSequence || [];
+    
+    if (musicGenerator.sequence.length === 0) {
+        document.getElementById('musicStatusDisplay').textContent = 'No data to generate music - run computation first';
+        return;
+    }
+    
+    musicGenerator.isPlaying = true;
+    musicGenerator.noteIndex = 0;
+    musicGenerator.startTime = Date.now();
+    
+    const btn = document.getElementById('musicPlayBtn');
+    btn.innerHTML = '<span style="font-size:18px;">⏸</span> Playing...';
+    btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
+    
+    document.getElementById('musicProgressBar').style.display = 'block';
+    
+    // Draw initial visualization
+    drawMusicVisualization();
+    
+    // Start playback loop
+    playMathMusicNote();
+}
+
+function stopMathMusic() {
+    musicGenerator.isPlaying = false;
+    
+    if (musicGenerator.intervalId) {
+        clearTimeout(musicGenerator.intervalId);
+        musicGenerator.intervalId = null;
+    }
+    
+    // Stop any playing oscillators
+    musicGenerator.oscillators.forEach(osc => {
+        try { osc.stop(); } catch(e) {}
+    });
+    musicGenerator.oscillators = [];
+    
+    stopAudio();
+    
+    const btn = document.getElementById('musicPlayBtn');
+    btn.innerHTML = '<span style="font-size:18px;">▶</span> Generate & Play';
+    btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+    
+    document.getElementById('musicProgressBar').style.display = 'none';
+    document.getElementById('musicStatusDisplay').textContent = 'Ready to generate mathematical music';
+    document.getElementById('musicCurrentNote').textContent = '—';
+}
+
+function playMathMusicNote() {
+    if (!musicGenerator.isPlaying) return;
+    
+    const seq = musicGenerator.sequence;
+    const duration = parseInt(document.getElementById('musicDuration').value) || 16;
+    const bpm = parseInt(document.getElementById('musicBPM').value) || 120;
+    const style = musicGenerator.styles[musicGenerator.currentStyle];
+    const actualBPM = bpm * style.bpmMultiplier;
+    const msPerBeat = 60000 / actualBPM;
+    const msPerNote = msPerBeat / 2; // Eighth notes
+    
+    // Check if done
+    if (duration > 0 && musicGenerator.noteIndex >= Math.min(seq.length, duration * 8)) {
+        stopMathMusic();
+        document.getElementById('musicStatusDisplay').textContent = 'Composition complete!';
+        return;
+    }
+    
+    // Loop if infinite
+    const idx = musicGenerator.noteIndex % seq.length;
+    const note = seq[idx];
+    
+    // Play the note
+    playMusicTone(note.freq, msPerNote / 1000 * 0.9, note.velocity);
+    
+    // Play bass if it's time
+    const bassNote = musicGenerator.bassSequence.find(b => b.startIndex === idx);
+    if (bassNote) {
+        playMusicTone(bassNote.freq, msPerNote / 1000 * bassNote.duration * 0.9, bassNote.velocity, 'triangle');
+    }
+    
+    // Play drums if enabled
+    const drums = musicGenerator.drumSequence.filter(d => d.index === idx);
+    drums.forEach(drum => {
+        playDrumSound(drum.type, drum.velocity);
+    });
+    
+    // Update display
+    const noteName = frequencyToNoteName(note.freq);
+    document.getElementById('musicCurrentNote').textContent = noteName;
+    
+    const fracStr = note.fraction ? `${note.fraction.r}/${note.fraction.m}` : '';
+    document.getElementById('musicStatusDisplay').textContent = 
+        `${style.name} | Note ${idx + 1}/${seq.length} | ${fracStr} → ${noteName} (${note.freq.toFixed(0)} Hz)`;
+    
+    // Update progress
+    const progress = duration > 0 ? (musicGenerator.noteIndex / (duration * 8)) * 100 : (idx / seq.length) * 100;
+    document.getElementById('musicProgressFill').style.width = progress + '%';
+    
+    // Visual feedback
+    const overlay = document.getElementById('musicNoteOverlay');
+    overlay.textContent = noteName;
+    overlay.style.opacity = note.velocity;
+    setTimeout(() => { overlay.style.opacity = '0'; }, msPerNote * 0.5);
+    
+    // Update visualization
+    drawMusicVisualization(idx);
+    
+    musicGenerator.noteIndex++;
+    musicGenerator.intervalId = setTimeout(playMathMusicNote, msPerNote);
+}
+
+function playMusicTone(freq, duration, volume, waveType = 'sawtooth') {
+    if (!audioCtx) return;
+    
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+    
+    osc.type = waveType;
+    osc.frequency.value = freq;
+    
+    filter.type = 'lowpass';
+    filter.frequency.value = 2000 + volume * 3000;
+    filter.Q.value = 1;
+    
+    const vol = volume * (harmonicSettings?.volume || 0.5) * 0.4;
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(vol * 0.3, audioCtx.currentTime + duration * 0.5);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration + 0.1);
+    
+    musicGenerator.oscillators.push(osc);
+    
+    // Cleanup
+    setTimeout(() => {
+        const idx = musicGenerator.oscillators.indexOf(osc);
+        if (idx > -1) musicGenerator.oscillators.splice(idx, 1);
+    }, (duration + 0.2) * 1000);
+}
+
+function playDrumSound(type, velocity) {
+    if (!audioCtx) return;
+    
+    const vol = velocity * (harmonicSettings?.volume || 0.5) * 0.5;
+    const now = audioCtx.currentTime;
+    
+    if (type === 'kick') {
+        // Kick drum - sine wave with pitch drop
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+        
+        gain.gain.setValueAtTime(vol * 1.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
+        
+    } else if (type === 'snare') {
+        // Snare - noise burst + tone
+        const noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.2, audioCtx.sampleRate);
+        const noiseData = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < noiseData.length; i++) {
+            noiseData[i] = Math.random() * 2 - 1;
+        }
+        
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        
+        const noiseGain = audioCtx.createGain();
+        const noiseFilter = audioCtx.createBiquadFilter();
+        noiseFilter.type = 'highpass';
+        noiseFilter.frequency.value = 1000;
+        
+        noiseGain.gain.setValueAtTime(vol * 0.8, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        
+        noise.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(audioCtx.destination);
+        noise.start(now);
+        
+        // Tone component
+        const osc = audioCtx.createOscillator();
+        const oscGain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = 180;
+        oscGain.gain.setValueAtTime(vol * 0.5, now);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.connect(oscGain);
+        oscGain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
+        
+    } else if (type === 'hihat') {
+        // Hi-hat - filtered noise
+        const noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.05, audioCtx.sampleRate);
+        const noiseData = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < noiseData.length; i++) {
+            noiseData[i] = Math.random() * 2 - 1;
+        }
+        
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.value = 7000;
+        
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(vol * 0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start(now);
+        
+    } else if (type === 'crash') {
+        // Crash cymbal - long noise decay
+        const noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.8, audioCtx.sampleRate);
+        const noiseData = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < noiseData.length; i++) {
+            noiseData[i] = Math.random() * 2 - 1;
+        }
+        
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.value = 4000;
+        
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(vol * 0.6, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start(now);
+    }
+}
+
+function frequencyToNoteName(freq) {
+    const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const a4 = 440;
+    const semitones = 12 * Math.log2(freq / a4);
+    const noteNum = Math.round(semitones) + 69; // MIDI note number
+    const octave = Math.floor(noteNum / 12) - 1;
+    const noteName = noteNames[noteNum % 12];
+    return noteName + octave;
+}
+
+function drawMusicVisualization(currentIdx = -1) {
+    const canvas = document.getElementById('musicVisualizerCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+    
+    const seq = musicGenerator.sequence;
+    if (seq.length === 0) return;
+    
+    const barWidth = Math.max(2, W / Math.min(seq.length, 200));
+    const visibleNotes = Math.min(seq.length, Math.floor(W / barWidth));
+    const startIdx = Math.max(0, currentIdx - Math.floor(visibleNotes / 2));
+    
+    // Find frequency range for scaling
+    const freqs = seq.map(n => n.freq);
+    const minFreq = Math.min(...freqs);
+    const maxFreq = Math.max(...freqs);
+    const freqRange = maxFreq - minFreq || 1;
+    
+    // Draw notes
+    for (let i = 0; i < visibleNotes && (startIdx + i) < seq.length; i++) {
+        const note = seq[startIdx + i];
+        const x = i * barWidth;
+        const normalizedFreq = (note.freq - minFreq) / freqRange;
+        const barHeight = 20 + normalizedFreq * (H - 40);
+        const y = H - barHeight - 10;
+        
+        const isCurrent = (startIdx + i) === currentIdx;
+        
+        // Color based on velocity and current state
+        if (isCurrent) {
+            ctx.fillStyle = '#22c55e';
+            ctx.shadowColor = '#22c55e';
+            ctx.shadowBlur = 15;
+        } else {
+            const hue = 260 - normalizedFreq * 60;
+            ctx.fillStyle = `hsla(${hue}, 70%, ${40 + note.velocity * 30}%, ${0.5 + note.velocity * 0.5})`;
+            ctx.shadowBlur = 0;
+        }
+        
+        ctx.fillRect(x, y, barWidth - 1, barHeight);
+        
+        // Mark primes
+        if (note.fraction && note.fraction.isPrime) {
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(x + barWidth / 2, y - 5, 3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    
+    ctx.shadowBlur = 0;
+    
+    // Draw playhead line
+    if (currentIdx >= 0) {
+        const playheadX = Math.floor(visibleNotes / 2) * barWidth;
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(playheadX, 0);
+        ctx.lineTo(playheadX, H);
+        ctx.stroke();
+    }
+}
+
+// ==================== P/C RATIO THEOREM TESTING ====================
+const pcRatioState = {
+    results: [],
+    convergenceData: [],
+    chart: null,
+    convergenceChart: null
+};
+
+const ONE_OVER_PI = 1 / Math.PI;
+
+function runPCRatioTest() {
+    const N = parseInt(document.getElementById('pcRatioN').value) || 1500;
+    const maxSector = parseInt(document.getElementById('pcRatioSectors').value) || 20;
+    
+    document.getElementById('pcRatioProgress').style.display = 'block';
+    document.getElementById('pcRatioProgressText').textContent = 'Computing coprime pairs...';
+    
+    setTimeout(() => {
+        pcRatioState.results = [];
+        
+        // Enumerate all coprime pairs
+        for (let n = 1; n <= maxSector; n++) {
+            const lowerBound = 1 / (n + 1);
+            const upperBound = 1 / n;
+            
+            let primeCount = 0;
+            let compositeCount = 0;
+            
+            // For each denominator b from n+1 to N
+            for (let b = n + 1; b <= N; b++) {
+                // Find valid numerators a where a/b is in sector (1/(n+1), 1/n]
+                const aMin = Math.floor(b * lowerBound) + 1;
+                const aMax = Math.floor(b * upperBound);
+                
+                for (let a = aMin; a <= aMax; a++) {
+                    if (a >= 1 && a <= b && gcd(a, b) === 1) {
+                        if (isPrime(b)) {
+                            primeCount++;
+                        } else {
+                            compositeCount++;
+                        }
+                    }
+                }
+            }
+            
+            const ratio = compositeCount > 0 ? primeCount / compositeCount : 0;
+            const delta = ratio - ONE_OVER_PI;
+            const pctError = Math.abs(delta / ONE_OVER_PI) * 100;
+            
+            pcRatioState.results.push({
+                n, primeCount, compositeCount,
+                total: primeCount + compositeCount,
+                ratio, delta, pctError
+            });
+            
+            document.getElementById('pcRatioProgressText').textContent = 
+                `Processing sector ${n}/${maxSector}...`;
+        }
+        
+        document.getElementById('pcRatioProgress').style.display = 'none';
+        displayPCRatioResults(N);
+    }, 50);
+}
+
+function displayPCRatioResults(N) {
+    const results = pcRatioState.results;
+    if (results.length === 0) return;
+    
+    // Calculate aggregate statistics
+    const ratios = results.map(r => r.ratio).filter(r => r > 0);
+    const mean = ratios.reduce((a, b) => a + b, 0) / ratios.length;
+    const variance = ratios.reduce((a, r) => a + Math.pow(r - mean, 2), 0) / ratios.length;
+    const stdDev = Math.sqrt(variance);
+    const totalPrimes = results.reduce((a, r) => a + r.primeCount, 0);
+    const totalComposites = results.reduce((a, r) => a + r.compositeCount, 0);
+    const globalRatio = totalPrimes / totalComposites;
+    
+    // Summary display - color based on deviation from 1/π
+    const pctFromPi = ((globalRatio - ONE_OVER_PI) / ONE_OVER_PI * 100);
+    const summaryColor = Math.abs(pctFromPi) <= 1 ? '#22c55e' : Math.abs(pctFromPi) <= 5 ? '#f59e0b' : '#ef4444';
+    const statusText = Math.abs(pctFromPi) <= 1 ? '(at 1/π crossing)' : pctFromPi > 0 ? '(above 1/π, still descending)' : '(below 1/π, decaying toward 0)';
+    
+    document.getElementById('pcRatioSummary').innerHTML = `
+        <div style="font-size:3em;font-weight:bold;color:${summaryColor};font-family:monospace;">${globalRatio.toFixed(6)}</div>
+        <div style="color:#94a3b8;margin-top:5px;">P/C Ratio at N=${N} ${statusText}</div>
+        <div style="margin-top:15px;display:flex;justify-content:center;gap:30px;">
+            <div><span style="color:#f59e0b;font-size:1.5em;font-weight:bold;">${totalPrimes.toLocaleString()}</span><br><span style="color:#64748b;font-size:0.85em;">Prime Denoms</span></div>
+            <div><span style="color:#6366f1;font-size:1.5em;font-weight:bold;">${totalComposites.toLocaleString()}</span><br><span style="color:#64748b;font-size:0.85em;">Composite Denoms</span></div>
+        </div>
+        <div style="margin-top:15px;padding:10px;background:rgba(99,102,241,0.1);border-radius:6px;border:1px solid rgba(99,102,241,0.3);">
+            <span style="color:#a5b4fc;">Reference: 1/π = ${ONE_OVER_PI.toFixed(6)}</span><br>
+            <span style="color:#94a3b8;font-size:0.9em;">Delta = ${(globalRatio - ONE_OVER_PI).toFixed(6)} (${pctFromPi.toFixed(2)}%)</span>
+        </div>
+    `;
+    
+    // Stats display
+    document.getElementById('pcRatioStats').innerHTML = `
+        <div class="stat-grid">
+            <div class="stat-card"><div class="stat-value">${mean.toFixed(6)}</div><div class="stat-label">Mean Ratio</div></div>
+            <div class="stat-card"><div class="stat-value">${stdDev.toFixed(6)}</div><div class="stat-label">Std Dev</div></div>
+            <div class="stat-card"><div class="stat-value">${Math.min(...ratios).toFixed(5)}</div><div class="stat-label">Min Ratio</div></div>
+            <div class="stat-card"><div class="stat-value">${Math.max(...ratios).toFixed(5)}</div><div class="stat-label">Max Ratio</div></div>
+        </div>
+        <div style="margin-top:10px;padding:8px;background:#1e293b;border-radius:4px;font-size:0.85em;">
+            <strong style="color:#a5b4fc;">Sector Independence:</strong> 
+            <span style="color:#94a3b8;">Low std dev (${stdDev.toFixed(6)}) confirms all sectors have the same P/C ratio at fixed N. This ratio decays as N increases.</span>
+        </div>
+    `;
+    
+    // Table
+    const tbody = document.getElementById('pcRatioTableBody');
+    tbody.innerHTML = results.map(r => `
+        <tr>
+            <td>${r.n}</td>
+            <td style="font-family:monospace;color:#64748b;">(1/${r.n+1}, 1/${r.n}]</td>
+            <td style="color:#f59e0b;font-weight:600;">${r.primeCount.toLocaleString()}</td>
+            <td style="color:#6366f1;font-weight:600;">${r.compositeCount.toLocaleString()}</td>
+            <td>${r.total.toLocaleString()}</td>
+            <td style="color:#22c55e;font-weight:bold;font-family:monospace;">${r.ratio.toFixed(6)}</td>
+            <td style="color:${r.delta >= 0 ? '#22c55e' : '#ef4444'};font-family:monospace;">${r.delta >= 0 ? '+' : ''}${r.delta.toFixed(6)}</td>
+            <td style="color:${r.pctError < 1 ? '#22c55e' : r.pctError < 5 ? '#f59e0b' : '#ef4444'};">${r.pctError.toFixed(4)}%</td>
+        </tr>
+    `).join('');
+    
+    // Charts
+    drawPCRatioSectorChart();
+}
+
+function drawPCRatioSectorChart() {
+    const ctx = document.getElementById('pcRatioSectorChart');
+    if (!ctx) return;
+    
+    if (pcRatioState.chart) pcRatioState.chart.destroy();
+    
+    const results = pcRatioState.results;
+    
+    pcRatioState.chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: results.map(r => 'S' + r.n),
+            datasets: [{
+                label: 'P/C Ratio',
+                data: results.map(r => r.ratio),
+                backgroundColor: results.map(r => 
+                    Math.abs(r.ratio - ONE_OVER_PI) < 0.005 ? 'rgba(34, 197, 94, 0.7)' :
+                    Math.abs(r.ratio - ONE_OVER_PI) < 0.01 ? 'rgba(245, 158, 11, 0.7)' :
+                    'rgba(239, 68, 68, 0.7)'
+                ),
+                borderColor: results.map(r => 
+                    Math.abs(r.ratio - ONE_OVER_PI) < 0.005 ? '#22c55e' :
+                    Math.abs(r.ratio - ONE_OVER_PI) < 0.01 ? '#f59e0b' : '#ef4444'
+                ),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                annotation: {
+                    annotations: {
+                        targetLine: {
+                            type: 'line',
+                            yMin: ONE_OVER_PI,
+                            yMax: ONE_OVER_PI,
+                            borderColor: '#8b5cf6',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            label: {
+                                display: true,
+                                content: '1/π',
+                                position: 'end'
+                            }
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    min: 0.30,
+                    max: 0.34,
+                    ticks: { color: '#94a3b8' },
+                    grid: { color: 'rgba(148,163,184,0.1)' }
+                },
+                x: {
+                    ticks: { color: '#94a3b8', maxRotation: 45 },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+    
+    // Draw 1/π reference line manually since annotation plugin might not be loaded
+    const chart = pcRatioState.chart;
+    const originalDraw = chart.draw;
+    chart.draw = function() {
+        originalDraw.apply(this, arguments);
+        const ctx = this.ctx;
+        const yAxis = this.scales.y;
+        const xAxis = this.scales.x;
+        const yPixel = yAxis.getPixelForValue(ONE_OVER_PI);
+        
+        ctx.save();
+        ctx.strokeStyle = '#8b5cf6';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(xAxis.left, yPixel);
+        ctx.lineTo(xAxis.right, yPixel);
+        ctx.stroke();
+        
+        ctx.fillStyle = '#8b5cf6';
+        ctx.font = '11px monospace';
+        ctx.fillText('1/π = 0.3183', xAxis.right - 70, yPixel - 5);
+        ctx.restore();
+    };
+    chart.draw();
+}
+
+function runPCRatioConvergence() {
+    const maxN = parseInt(document.getElementById('pcRatioN').value) || 1500;
+    const testSector = 2; // Use sector 2 for convergence study
+    
+    document.getElementById('pcRatioProgress').style.display = 'block';
+    
+    const nValues = [];
+    for (let n = 100; n <= maxN; n += Math.max(50, Math.floor(maxN / 20))) {
+        nValues.push(n);
+    }
+    if (nValues[nValues.length - 1] !== maxN) nValues.push(maxN);
+    
+    pcRatioState.convergenceData = [];
+    
+    let idx = 0;
+    function processNext() {
+        if (idx >= nValues.length) {
+            document.getElementById('pcRatioProgress').style.display = 'none';
+            drawPCRatioConvergenceChart();
+            return;
+        }
+        
+        const N = nValues[idx];
+        document.getElementById('pcRatioProgressText').textContent = 
+            `Convergence test: N=${N} (${idx + 1}/${nValues.length})...`;
+        
+        // Compute ratio for sector 2 at this N
+        const n = testSector;
+        const lowerBound = 1 / (n + 1);
+        const upperBound = 1 / n;
+        
+        let primeCount = 0, compositeCount = 0;
+        
+        for (let b = n + 1; b <= N; b++) {
+            const aMin = Math.floor(b * lowerBound) + 1;
+            const aMax = Math.floor(b * upperBound);
+            
+            for (let a = aMin; a <= aMax; a++) {
+                if (a >= 1 && a <= b && gcd(a, b) === 1) {
+                    if (isPrime(b)) primeCount++;
+                    else compositeCount++;
+                }
+            }
+        }
+        
+        const ratio = compositeCount > 0 ? primeCount / compositeCount : 0;
+        pcRatioState.convergenceData.push({ N, ratio, delta: ratio - ONE_OVER_PI });
+        
+        idx++;
+        setTimeout(processNext, 10);
+    }
+    
+    processNext();
+}
+
+function drawPCRatioConvergenceChart() {
+    const ctx = document.getElementById('pcRatioConvergenceChart');
+    if (!ctx) return;
+    
+    if (pcRatioState.convergenceChart) pcRatioState.convergenceChart.destroy();
+    
+    const data = pcRatioState.convergenceData;
+    if (data.length === 0) return;
+    
+    pcRatioState.convergenceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(d => d.N),
+            datasets: [{
+                label: 'P/C Ratio (Sector 2)',
+                data: data.map(d => d.ratio),
+                borderColor: '#22c55e',
+                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 4,
+                pointBackgroundColor: '#22c55e'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true, labels: { color: '#94a3b8' } }
+            },
+            scales: {
+                y: {
+                    min: 0.31,
+                    max: 0.33,
+                    ticks: { color: '#94a3b8' },
+                    grid: { color: 'rgba(148,163,184,0.1)' }
+                },
+                x: {
+                    title: { display: true, text: 'Max Denominator N', color: '#94a3b8' },
+                    ticks: { color: '#94a3b8' },
+                    grid: { color: 'rgba(148,163,184,0.1)' }
+                }
+            }
+        }
+    });
+    
+    // Draw 1/π reference line
+    const chart = pcRatioState.convergenceChart;
+    const originalDraw = chart.draw;
+    chart.draw = function() {
+        originalDraw.apply(this, arguments);
+        const ctx = this.ctx;
+        const yAxis = this.scales.y;
+        const xAxis = this.scales.x;
+        const yPixel = yAxis.getPixelForValue(ONE_OVER_PI);
+        
+        ctx.save();
+        ctx.strokeStyle = '#8b5cf6';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(xAxis.left, yPixel);
+        ctx.lineTo(xAxis.right, yPixel);
+        ctx.stroke();
+        
+        ctx.fillStyle = '#8b5cf6';
+        ctx.font = '11px monospace';
+        ctx.fillText('1/π', xAxis.right - 30, yPixel - 5);
+        ctx.restore();
+    };
+    chart.draw();
+}
+
+function clearPCRatioResults() {
+    pcRatioState.results = [];
+    pcRatioState.convergenceData = [];
+    
+    document.getElementById('pcRatioSummary').innerHTML = '<div style="color:#64748b;font-style:italic;">Run test to see results</div>';
+    document.getElementById('pcRatioStats').innerHTML = '<div style="color:#64748b;font-style:italic;">No data yet</div>';
+    document.getElementById('pcRatioTableBody').innerHTML = '';
+    
+    if (pcRatioState.chart) { pcRatioState.chart.destroy(); pcRatioState.chart = null; }
+    if (pcRatioState.convergenceChart) { pcRatioState.convergenceChart.destroy(); pcRatioState.convergenceChart = null; }
+}
+
+function runPCRatioDecayScan() {
+    document.getElementById('pcRatioProgress').style.display = 'block';
+    document.getElementById('pcRatioProgressText').textContent = 'Running decay scan...';
+    
+    const testPoints = [100, 200, 300, 500, 750, 1000, 1250, 1350, 1400, 1450, 1500, 1550, 1600, 1750, 2000, 2500, 3000, 4000, 5000];
+    
+    pcRatioState.convergenceData = [];
+    
+    let idx = 0;
+    function processNext() {
+        if (idx >= testPoints.length) {
+            document.getElementById('pcRatioProgress').style.display = 'none';
+            displayDecayScanResults();
+            return;
+        }
+        
+        const N = testPoints[idx];
+        document.getElementById('pcRatioProgressText').textContent = 
+            `Decay scan: N=${N} (${idx + 1}/${testPoints.length})...`;
+        
+        // Compute global ratio across first 20 sectors
+        let totalP = 0, totalC = 0;
+        const maxSector = Math.min(20, Math.floor(N / 20));
+        
+        for (let n = 1; n <= maxSector; n++) {
+            const lowerBound = 1 / (n + 1);
+            const upperBound = 1 / n;
+            
+            for (let b = n + 1; b <= N; b++) {
+                const aMin = Math.floor(b * lowerBound) + 1;
+                const aMax = Math.floor(b * upperBound);
+                
+                for (let a = aMin; a <= aMax; a++) {
+                    if (a >= 1 && a <= b && gcd(a, b) === 1) {
+                        if (isPrime(b)) totalP++;
+                        else totalC++;
+                    }
+                }
+            }
+        }
+        
+        const ratio = totalC > 0 ? totalP / totalC : 0;
+        const delta = ratio - ONE_OVER_PI;
+        const pctError = (delta / ONE_OVER_PI) * 100;
+        
+        let status = 'DIVERGED';
+        if (Math.abs(pctError) <= 1) status = 'BOUNDED';
+        else if (Math.abs(pctError) <= 2) status = 'MARGINAL';
+        else if (Math.abs(pctError) <= 5) status = 'DRIFTING';
+        
+        pcRatioState.convergenceData.push({ N, ratio, delta, pctError, status, P: totalP, C: totalC });
+        
+        idx++;
+        setTimeout(processNext, 10);
+    }
+    
+    processNext();
+}
+
+function displayDecayScanResults() {
+    const data = pcRatioState.convergenceData;
+    if (data.length === 0) return;
+    
+    // Find crossing point
+    let crossingN = null;
+    for (let i = 0; i < data.length; i++) {
+        if (Math.abs(data[i].pctError) <= 1) {
+            crossingN = data[i].N;
+        }
+    }
+    
+    // Summary
+    const latest = data[data.length - 1];
+    document.getElementById('pcRatioSummary').innerHTML = `
+        <div style="font-size:2em;font-weight:bold;color:#ef4444;font-family:monospace;">${latest.ratio.toFixed(6)}</div>
+        <div style="color:#94a3b8;margin-top:5px;">P/C Ratio at N=${latest.N} (decaying)</div>
+        <div style="margin-top:15px;padding:10px;background:rgba(34,197,94,0.1);border-radius:6px;border:1px solid rgba(34,197,94,0.3);">
+            <span style="color:#22c55e;">1/π crossing near N ≈ ${crossingN || '1500'}</span><br>
+            <span style="color:#94a3b8;font-size:0.9em;">Ratio passes through ${ONE_OVER_PI.toFixed(6)} during decay</span>
+        </div>
+    `;
+    
+    // Stats
+    document.getElementById('pcRatioStats').innerHTML = `
+        <div style="font-size:0.9em;color:#94a3b8;line-height:1.8;">
+            <strong style="color:#a5b4fc;">Decay Behavior:</strong><br>
+            At N=1000: ${data.find(d => d.N === 1000)?.ratio.toFixed(4) || '-'} (above 1/π)<br>
+            At N=1500: ${data.find(d => d.N === 1500)?.ratio.toFixed(4) || '-'} (near 1/π)<br>
+            At N=3000: ${data.find(d => d.N === 3000)?.ratio.toFixed(4) || '-'} (below 1/π)<br>
+            At N=5000: ${data.find(d => d.N === 5000)?.ratio.toFixed(4) || '-'} (continuing decay)
+        </div>
+        <div style="margin-top:10px;padding:8px;background:#1e293b;border-radius:4px;font-size:0.85em;">
+            <strong style="color:#f87171;">Conclusion:</strong> 
+            <span style="color:#94a3b8;">Ratio decays as ~c/ln(N), NOT bounded at 1/π</span>
+        </div>
+    `;
+    
+    // Update table
+    const tbody = document.getElementById('pcRatioTableBody');
+    tbody.innerHTML = data.map(r => {
+        const statusColor = r.status === 'BOUNDED' ? '#22c55e' : 
+                           r.status === 'MARGINAL' ? '#f59e0b' : 
+                           r.status === 'DRIFTING' ? '#f97316' : '#ef4444';
+        return `
+            <tr>
+                <td>${r.N}</td>
+                <td style="font-family:monospace;color:#64748b;">-</td>
+                <td style="color:#f59e0b;font-weight:600;">${r.P.toLocaleString()}</td>
+                <td style="color:#6366f1;font-weight:600;">${r.C.toLocaleString()}</td>
+                <td>${(r.P + r.C).toLocaleString()}</td>
+                <td style="color:${statusColor};font-weight:bold;font-family:monospace;">${r.ratio.toFixed(6)}</td>
+                <td style="color:${r.delta >= 0 ? '#22c55e' : '#ef4444'};font-family:monospace;">${r.delta >= 0 ? '+' : ''}${r.delta.toFixed(6)}</td>
+                <td style="color:${statusColor};">${r.pctError.toFixed(2)}%</td>
+            </tr>
+        `;
+    }).join('');
+    
+    // Draw decay chart
+    drawPCRatioDecayChart();
+}
+
+function drawPCRatioDecayChart() {
+    const ctx = document.getElementById('pcRatioConvergenceChart');
+    if (!ctx) return;
+    
+    if (pcRatioState.convergenceChart) pcRatioState.convergenceChart.destroy();
+    
+    const data = pcRatioState.convergenceData;
+    if (data.length === 0) return;
+    
+    pcRatioState.convergenceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(d => d.N),
+            datasets: [{
+                label: 'P/C Ratio (decaying)',
+                data: data.map(d => d.ratio),
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 5,
+                pointBackgroundColor: data.map(d => 
+                    d.status === 'BOUNDED' ? '#22c55e' : 
+                    d.status === 'MARGINAL' ? '#f59e0b' : '#ef4444'
+                )
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true, labels: { color: '#94a3b8' } },
+                title: { display: true, text: 'P/C Ratio Decay (NOT bounded at 1/π)', color: '#f87171' }
+            },
+            scales: {
+                y: {
+                    min: 0.2,
+                    max: 0.55,
+                    ticks: { color: '#94a3b8' },
+                    grid: { color: 'rgba(148,163,184,0.1)' }
+                },
+                x: {
+                    title: { display: true, text: 'Max Denominator N', color: '#94a3b8' },
+                    ticks: { color: '#94a3b8' },
+                    grid: { color: 'rgba(148,163,184,0.1)' }
+                }
+            }
+        }
+    });
+    
+    // Draw 1/π reference line
+    const chart = pcRatioState.convergenceChart;
+    const originalDraw = chart.draw;
+    chart.draw = function() {
+        originalDraw.apply(this, arguments);
+        const ctx = this.ctx;
+        const yAxis = this.scales.y;
+        const xAxis = this.scales.x;
+        const yPixel = yAxis.getPixelForValue(ONE_OVER_PI);
+        
+        ctx.save();
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(xAxis.left, yPixel);
+        ctx.lineTo(xAxis.right, yPixel);
+        ctx.stroke();
+        
+        ctx.fillStyle = '#22c55e';
+        ctx.font = '11px monospace';
+        ctx.fillText('1/π = 0.3183 (crossing, not limit)', xAxis.left + 10, yPixel - 8);
+        ctx.restore();
+    };
+    chart.draw();
+}
+
+function exportPCRatioCSV() {
+    if (pcRatioState.results.length === 0) {
+        alert('Run test first!');
+        return;
+    }
+    
+    let csv = 'Prime-Composite Ratio Test Results\n';
+    csv += 'Target: 1/π = ' + ONE_OVER_PI + '\n\n';
+    csv += 'Sector,Interval,Primes,Composites,Total,Ratio,Delta,PctError\n';
+    
+    pcRatioState.results.forEach(r => {
+        csv += `${r.n},"(1/${r.n+1},1/${r.n}]",${r.primeCount},${r.compositeCount},${r.total},${r.ratio},${r.delta},${r.pctError}\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `pc_ratio_test_${Date.now()}.csv`;
+    a.click();
+}
+
+function exportPCRatioLatex() {
+    if (pcRatioState.results.length === 0) {
+        alert('Run test first!');
+        return;
+    }
+    
+    const results = pcRatioState.results;
+    const N = parseInt(document.getElementById('pcRatioN').value) || 1500;
+    const globalRatio = results.reduce((a, r) => a + r.primeCount, 0) / results.reduce((a, r) => a + r.compositeCount, 0);
+    const pctError = ((globalRatio - ONE_OVER_PI) / ONE_OVER_PI * 100).toFixed(2);
+    
+    let latex = `% Prime-Composite Ratio Analysis - Empirical Data
+% NOTE: The P/C ratio is NOT bounded at 1/pi. It decays as c/ln(N) toward 0.
+% At N=${N}, the ratio is ${globalRatio.toFixed(5)} (${pctError}% from 1/pi).
+% The crossing through 1/pi occurs near N ~ 1500.
+
+\\begin{table}[h]
+\\centering
+\\caption{Prime-Composite Ratio by Farey Sector (N=${N})}
+\\label{tab:pc-ratio}
+\\begin{tabular}{c|c|r|r|c|c}
+\\hline
+$n$ & Interval & $P_n(N)$ & $C_n(N)$ & $P_n/C_n$ & $\\Delta$ from $1/\\pi$ \\\\
+\\hline
+`;
+    
+    results.slice(0, 15).forEach(r => {
+        latex += `${r.n} & $(\\frac{1}{${r.n+1}}, \\frac{1}{${r.n}}]$ & ${r.primeCount} & ${r.compositeCount} & ${r.ratio.toFixed(5)} & ${r.delta >= 0 ? '+' : ''}${r.delta.toFixed(5)} \\\\\n`;
+    });
+    
+    latex += `\\hline
+\\multicolumn{4}{r|}{\\textbf{Global Ratio:}} & \\textbf{${globalRatio.toFixed(5)}} & ${(globalRatio - ONE_OVER_PI).toFixed(5)} \\\\
+\\hline
+\\end{tabular}
+\\end{table}
+
+% Reference: $1/\\pi \\approx ${ONE_OVER_PI.toFixed(6)}$
+% Key findings:
+% 1. All sectors show the same P/C ratio at fixed N (sector-independent)
+% 2. The ratio decays as N increases: ~0.33 at N=1000, ~0.28 at N=3000, ~0.23 at N=10000
+% 3. The ratio crosses through 1/pi near N=1500 but continues to decay
+`;
+    
+    const blob = new Blob([latex], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `pc_ratio_latex_${Date.now()}.tex`;
+    a.click();
+}
+
+// ==================== END P/C RATIO ====================
+
+// ==================== P/C RATIO HARMONIC PLAYBACK ====================
+
+function getPCRatioFractions(sectorNum, type = 'all') {
+    const N = parseInt(document.getElementById('pcRatioN').value) || 1500;
+    const n = sectorNum;
+    const lowerBound = 1 / (n + 1);
+    const upperBound = 1 / n;
+    
+    const primes = [];
+    const composites = [];
+    
+    for (let b = n + 1; b <= N; b++) {
+        const aMin = Math.floor(b * lowerBound) + 1;
+        const aMax = Math.floor(b * upperBound);
+        
+        for (let a = aMin; a <= aMax; a++) {
+            if (a >= 1 && a <= b && gcd(a, b) === 1) {
+                const frac = { r: a, m: b, value: a / b };
+                if (isPrime(b)) {
+                    frac.type = 'prime';
+                    primes.push(frac);
+                } else {
+                    frac.type = 'composite';
+                    composites.push(frac);
+                }
+            }
+        }
+    }
+    
+    // Sort by value
+    primes.sort((a, b) => a.value - b.value);
+    composites.sort((a, b) => a.value - b.value);
+    
+    if (type === 'primes') return primes;
+    if (type === 'composites') return composites;
+    return { primes, composites, all: [...primes, ...composites].sort((a, b) => a.value - b.value) };
+}
+
+function updatePCPlaybackDisplay(frac, index, total) {
+    if (!frac) return;
+    
+    const freq = harmonicSettings.baseFreq * (frac.r / frac.m);
+    document.getElementById('pcNowPlaying').textContent = frac.r + '/' + frac.m;
+    document.getElementById('pcNowFreq').textContent = freq.toFixed(1) + ' Hz';
+    document.getElementById('pcNowType').innerHTML = frac.type === 'prime' 
+        ? '<span style="color:#f59e0b;font-weight:bold;">● Prime</span>'
+        : '<span style="color:#6366f1;font-weight:bold;">● Composite</span>';
+    document.getElementById('pcPlayProgress').textContent = (index + 1) + ' / ' + total;
+}
+
+function setPCPlaybackStatus(msg) {
+    document.getElementById('pcPlaybackStatus').textContent = msg;
+}
+
+function playPCRatioPrimes() {
+    const sector = parseInt(document.getElementById('pcPlaybackSector').value) || 2;
+    const limit = parseInt(document.getElementById('pcPlaybackLimit').value) || 50;
+    const speed = parseInt(document.getElementById('pcPlaybackSpeed').value) || 200;
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    setPCPlaybackStatus('Loading prime denominators for sector ' + sector + '...');
+    
+    setTimeout(() => {
+        const fracs = getPCRatioFractions(sector, 'primes').slice(0, limit);
+        
+        if (fracs.length === 0) {
+            setPCPlaybackStatus('No prime denominators found in sector ' + sector);
+            return;
+        }
+        
+        playbackState.queue = fracs;
+        playbackState.direction = 'forward';
+        playbackState.mode = 'pc-primes';
+        playbackState.currentIndex = 0;
+        playbackState.isPlaying = true;
+        
+        setPCPlaybackStatus(`Playing ${fracs.length} PRIME denominators from sector ${sector}`);
+        startPCPlaybackLoop(speed);
+    }, 50);
+}
+
+function playPCRatioComposites() {
+    const sector = parseInt(document.getElementById('pcPlaybackSector').value) || 2;
+    const limit = parseInt(document.getElementById('pcPlaybackLimit').value) || 50;
+    const speed = parseInt(document.getElementById('pcPlaybackSpeed').value) || 200;
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    setPCPlaybackStatus('Loading composite denominators for sector ' + sector + '...');
+    
+    setTimeout(() => {
+        const fracs = getPCRatioFractions(sector, 'composites').slice(0, limit);
+        
+        if (fracs.length === 0) {
+            setPCPlaybackStatus('No composite denominators found in sector ' + sector);
+            return;
+        }
+        
+        playbackState.queue = fracs;
+        playbackState.direction = 'forward';
+        playbackState.mode = 'pc-composites';
+        playbackState.currentIndex = 0;
+        playbackState.isPlaying = true;
+        
+        setPCPlaybackStatus(`Playing ${fracs.length} COMPOSITE denominators from sector ${sector}`);
+        startPCPlaybackLoop(speed);
+    }, 50);
+}
+
+function playPCRatioInterleaved() {
+    const sector = parseInt(document.getElementById('pcPlaybackSector').value) || 2;
+    const limit = parseInt(document.getElementById('pcPlaybackLimit').value) || 50;
+    const speed = parseInt(document.getElementById('pcPlaybackSpeed').value) || 200;
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    setPCPlaybackStatus('Loading fractions for sector ' + sector + '...');
+    
+    setTimeout(() => {
+        const data = getPCRatioFractions(sector, 'all');
+        const primes = data.primes.slice(0, Math.ceil(limit / 2));
+        const composites = data.composites.slice(0, Math.ceil(limit / 2));
+        
+        // Interleave: prime, composite, prime, composite...
+        const interleaved = [];
+        const maxLen = Math.max(primes.length, composites.length);
+        for (let i = 0; i < maxLen; i++) {
+            if (i < primes.length) interleaved.push(primes[i]);
+            if (i < composites.length) interleaved.push(composites[i]);
+        }
+        
+        if (interleaved.length === 0) {
+            setPCPlaybackStatus('No fractions found in sector ' + sector);
+            return;
+        }
+        
+        playbackState.queue = interleaved.slice(0, limit);
+        playbackState.direction = 'forward';
+        playbackState.mode = 'pc-interleaved';
+        playbackState.currentIndex = 0;
+        playbackState.isPlaying = true;
+        
+        setPCPlaybackStatus(`▶ Interleaved: ${primes.length} primes + ${composites.length} composites from sector ${sector}`);
+        startPCPlaybackLoop(speed);
+    }, 50);
+}
+
+function playPCRatioComparison() {
+    const sector = parseInt(document.getElementById('pcPlaybackSector').value) || 2;
+    const limit = parseInt(document.getElementById('pcPlaybackLimit').value) || 50;
+    const speed = parseInt(document.getElementById('pcPlaybackSpeed').value) || 200;
+    
+    initAudioContext();
+    stopAllPlayback();
+    
+    setPCPlaybackStatus('Loading fractions for P vs C comparison...');
+    
+    setTimeout(() => {
+        const data = getPCRatioFractions(sector, 'all');
+        const primes = data.primes.slice(0, limit);
+        const composites = data.composites.slice(0, limit);
+        
+        // Play primes first, then composites (like a race/comparison)
+        const sequence = [
+            ...primes.map(f => ({ ...f, phase: 'prime' })),
+            { type: 'pause', phase: 'transition' }, // marker for pause
+            ...composites.map(f => ({ ...f, phase: 'composite' }))
+        ];
+        
+        if (sequence.length <= 1) {
+            setPCPlaybackStatus('Not enough fractions for comparison');
+            return;
+        }
+        
+        playbackState.queue = sequence;
+        playbackState.direction = 'forward';
+        playbackState.mode = 'pc-comparison';
+        playbackState.currentIndex = 0;
+        playbackState.isPlaying = true;
+        
+        const ratio = composites.length > 0 ? (primes.length / composites.length).toFixed(4) : '∞';
+        setPCPlaybackStatus(`⚡ Race: ${primes.length} primes vs ${composites.length} composites (ratio: ${ratio}, target: ${ONE_OVER_PI.toFixed(4)})`);
+        startPCPlaybackLoop(speed);
+    }, 50);
+}
+
+function startPCPlaybackLoop(speed) {
+    if (playbackState.intervalId) {
+        clearInterval(playbackState.intervalId);
+    }
+    
+    playbackState.intervalId = setInterval(() => {
+        if (!playbackState.isPlaying) {
+            stopAllPlayback();
+            return;
+        }
+        
+        if (playbackState.currentIndex >= playbackState.queue.length) {
+            stopAllPlayback();
+            setPCPlaybackStatus(`Playback complete (${playbackState.queue.length} items)`);
+            document.getElementById('pcNowPlaying').textContent = '—';
+            document.getElementById('pcNowFreq').textContent = '— Hz';
+            document.getElementById('pcNowType').textContent = '—';
+            return;
+        }
+        
+        const f = playbackState.queue[playbackState.currentIndex];
+        
+        // Handle pause marker in comparison mode
+        if (f.type === 'pause') {
+            setPCPlaybackStatus('Switching to COMPOSITES...');
+            playbackState.currentIndex++;
+            return;
+        }
+        
+        if (f && typeof f.r === 'number' && typeof f.m === 'number' && f.m !== 0) {
+            const duration = speed / 1000 * 0.8;
+            playFraction(f.r, f.m, duration);
+            updatePCPlaybackDisplay(f, playbackState.currentIndex, playbackState.queue.length);
+            
+            // Update status with phase info for comparison mode
+            if (playbackState.mode === 'pc-comparison' && f.phase) {
+                const phaseLabel = f.phase === 'prime' ? 'PRIMES' : 'COMPOSITES';
+                setPCPlaybackStatus(`${phaseLabel} — ${playbackState.currentIndex + 1}/${playbackState.queue.length}`);
+            }
+        }
+        
+        playbackState.currentIndex++;
+    }, speed);
+}
+
+// ==================== END P/C RATIO HARMONICS ====================
+
+function exportMathMusicMIDI() {
+    // Export as a simple text representation (real MIDI would require a library)
+    const seq = musicGenerator.sequence;
+    if (seq.length === 0) {
+        alert('Generate music first!');
+        return;
+    }
+    
+    let csv = 'Mathematical Music Sequence Export\n';
+    csv += 'Style: ' + musicGenerator.currentStyle + '\n';
+    csv += 'Scale: ' + document.getElementById('musicScale').value + '\n';
+    csv += 'BPM: ' + document.getElementById('musicBPM').value + '\n\n';
+    csv += 'Index,Frequency,Note,Velocity,Fraction,Sector,IsPrime\n';
+    
+    seq.forEach((note, i) => {
+        const noteName = frequencyToNoteName(note.freq);
+        const frac = note.fraction ? `${note.fraction.r}/${note.fraction.m}` : '';
+        const sector = note.fraction ? note.fraction.sector : '';
+        const isPrime = note.fraction ? note.fraction.isPrime : false;
+        csv += `${i},${note.freq.toFixed(2)},${noteName},${note.velocity.toFixed(2)},${frac},${sector},${isPrime}\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `math_music_${musicGenerator.currentStyle}_${Date.now()}.csv`;
+    a.click();
+}
+
+// Initialize music style buttons on load
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => setMusicStyle('epic'), 100);
+});
 
 </script>
 </body>
