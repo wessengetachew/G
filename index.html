@@ -614,7 +614,6 @@
         <div class="tab" onclick="switchTab('primorial')">Primorial Sieve</div>
         <div class="tab" onclick="switchTab('horizon')">Horizon</div>
         <div class="tab" onclick="switchTab('research')">Research</div>
-        <div class="tab" onclick="switchTab('pcratio')" style="background:linear-gradient(135deg,rgba(245,158,11,0.3),rgba(99,102,241,0.3));border:1px solid #f59e0b;">P/C Ratio</div>
     </div>
     
     <!-- MAIN TAB -->
@@ -640,6 +639,15 @@
                     <button class="secondary" onclick="stopAllPlayback()" style="font-size:10px;padding:3px 8px;">■</button>
                     <span id="errorSelectionInfo" style="font-size:10px;color:#64748b;margin-left:10px;"></span>
                 </h4>
+                <div style="margin-bottom:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <label style="color:#94a3b8;font-size:11px;">Click/Selection Mode:</label>
+                    <select id="errorPlaybackMode" onchange="updateErrorModeHint()" style="font-size:11px;padding:3px 8px;background:#1e293b;border:1px solid #475569;border-radius:4px;color:#e2e8f0;">
+                        <option value="error">Error Magnitude (pitch = error%)</option>
+                        <option value="fractions">All Fractions in Sector</option>
+                        <option value="representative">Representative Fraction</option>
+                    </select>
+                    <span style="color:#64748b;font-size:10px;" id="errorModeHint">Higher error → higher pitch</span>
+                </div>
                 <canvas id="mainErrorChart"></canvas>
             </div>
         </div>
@@ -1952,220 +1960,6 @@
             </div>
             <div class="latex-output" id="latexFigures"></div>
             <div style="margin-top:15px;"><button onclick="screenshotFullTab('research')">Screenshot Full Research Tab</button></div>
-        </div>
-    </div>
-    
-    <!-- P/C RATIO ANALYSIS TAB -->
-    <div id="tab-pcratio" class="tab-content">
-        <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#0f172a);border:2px solid #f59e0b;margin-bottom:20px;">
-            <h3 style="color:#fbbf24;margin-top:0;">Prime-Composite Ratio Analysis</h3>
-            <div style="background:#0f172a;padding:20px;border-radius:8px;margin:15px 0;border:1px solid #334155;">
-                <div style="font-family:'Times New Roman',serif;font-size:1.1em;color:#e2e8f0;line-height:1.8;">
-                    <strong style="color:#a5b4fc;">Definition:</strong> For coprime pairs (a,b) with a/b in sector S<sub>n</sub> = (1/(n+1), 1/n], let P<sub>n</sub>(N) count pairs with prime denominator b, and C<sub>n</sub>(N) count pairs with composite denominator b.
-                </div>
-                
-                <div style="margin-top:20px;padding:15px;background:rgba(239,68,68,0.1);border-radius:6px;border-left:3px solid #ef4444;">
-                    <strong style="color:#f87171;">Finding 1 - Decay Behavior:</strong> The ratio P<sub>n</sub>(N)/C<sub>n</sub>(N) is NOT bounded. It decays toward 0 as N increases, consistent with prime density thinning as 1/ln(N).
-                    <div style="text-align:center;margin:15px 0;font-size:1.2em;color:#94a3b8;font-family:monospace;">
-                        P<sub>n</sub>(N) / C<sub>n</sub>(N) ~ c / ln(N) → 0 as N → ∞
-                    </div>
-                </div>
-                
-                <div style="margin-top:15px;padding:15px;background:rgba(99,102,241,0.1);border-radius:6px;border-left:3px solid #6366f1;">
-                    <strong style="color:#a5b4fc;">Finding 2 - Sector Independence:</strong> The ratio is identical across ALL sectors at any fixed N. The sector width factors n(n+1) cancel in the P/C ratio, so sector 1, sector 2, ..., sector k all show the same ratio at a given N.
-                    <div style="margin-top:10px;font-family:monospace;font-size:0.9em;color:#94a3b8;">
-                        At N=1500: Sector 1 P/C = 0.3173, Sector 2 P/C = 0.3179, Sector 3 P/C = 0.3179, ...
-                    </div>
-                </div>
-                
-                <div style="margin-top:15px;padding:15px;background:rgba(245,158,11,0.1);border-radius:6px;border-left:3px solid #f59e0b;">
-                    <strong style="color:#fbbf24;">Finding 3 - The 1/π Crossing:</strong> The ratio crosses through 1/π ≈ 0.31831 in the range N in [1350, 1550]. This crossing happens simultaneously across all sectors. It is a finite-size transient, not an asymptotic limit.
-                    <table style="margin-top:10px;font-size:0.9em;color:#94a3b8;">
-                        <tr><td style="padding:4px 12px;">N = 500:</td><td>P/C ≈ 0.392 (+23% above 1/π)</td></tr>
-                        <tr><td style="padding:4px 12px;">N = 1000:</td><td>P/C ≈ 0.333 (+5% above 1/π)</td></tr>
-                        <tr><td style="padding:4px 12px;color:#22c55e;">N ≈ 1500:</td><td style="color:#22c55e;">P/C ≈ 0.318 (crosses 1/π)</td></tr>
-                        <tr><td style="padding:4px 12px;">N = 3000:</td><td>P/C ≈ 0.277 (-13% below 1/π)</td></tr>
-                        <tr><td style="padding:4px 12px;">N = 5000:</td><td>P/C ≈ 0.256 (-20% below 1/π)</td></tr>
-                        <tr><td style="padding:4px 12px;">N = 10000:</td><td>P/C ≈ 0.233 (-27% below 1/π)</td></tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-        
-        <div class="control-panel" style="background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid #475569;">
-            <h4 style="color:#f59e0b;margin:0 0 12px 0;">Test Parameters</h4>
-            <div class="control-row">
-                <div class="control-group highlight">
-                    <label>Max Denominator N:</label>
-                    <input type="number" id="pcRatioN" value="1500" min="100" max="10000" step="100">
-                </div>
-                <div class="control-group">
-                    <label>Sectors to test:</label>
-                    <input type="number" id="pcRatioSectors" value="20" min="5" max="100">
-                </div>
-                <button onclick="runPCRatioTest()" style="background:linear-gradient(135deg,#f59e0b,#d97706);font-weight:600;">Run Test</button>
-                <button onclick="runPCRatioConvergence()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">Convergence Study</button>
-                <button onclick="runPCRatioDecayScan()" style="background:linear-gradient(135deg,#ef4444,#dc2626);">Decay Scan</button>
-                <button class="secondary" onclick="clearPCRatioResults()">Clear</button>
-            </div>
-        </div>
-        
-        <!-- HARMONIC PLAYBACK CONTROLS -->
-        <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid #8b5cf6;margin-top:15px;">
-            <h4 style="color:#c7d2fe;margin:0 0 12px 0;">
-                Harmonic Playback
-                <span style="color:#64748b;font-size:0.75em;font-weight:normal;margin-left:8px;">Hear the prime/composite distribution</span>
-            </h4>
-            <div class="control-row" style="flex-wrap:wrap;gap:10px;">
-                <div class="control-group">
-                    <label>Sector:</label>
-                    <input type="number" id="pcPlaybackSector" value="2" min="1" max="50" style="width:60px;">
-                </div>
-                <div class="control-group">
-                    <label>Speed (ms):</label>
-                    <input type="number" id="pcPlaybackSpeed" value="200" min="50" max="1000" step="50" style="width:70px;">
-                </div>
-                <div class="control-group">
-                    <label>Max notes:</label>
-                    <input type="number" id="pcPlaybackLimit" value="50" min="10" max="200" step="10" style="width:70px;">
-                </div>
-                <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                    <button onclick="playPCRatioPrimes()" style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:8px 14px;border:none;border-radius:5px;color:white;cursor:pointer;font-weight:600;">
-                        Play Primes
-                    </button>
-                    <button onclick="playPCRatioComposites()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:8px 14px;border:none;border-radius:5px;color:white;cursor:pointer;font-weight:600;">
-                        Play Composites
-                    </button>
-                    <button onclick="playPCRatioInterleaved()" style="background:linear-gradient(135deg,#22c55e,#16a34a);padding:8px 14px;border:none;border-radius:5px;color:white;cursor:pointer;font-weight:600;">
-                        Interleaved
-                    </button>
-                    <button onclick="playPCRatioComparison()" style="background:linear-gradient(135deg,#ec4899,#be185d);padding:8px 14px;border:none;border-radius:5px;color:white;cursor:pointer;font-weight:600;">
-                        P vs C Compare
-                    </button>
-                    <button onclick="stopAllPlayback()" style="background:#ef4444;padding:8px 14px;border:none;border-radius:5px;color:white;cursor:pointer;">
-                        Stop
-                    </button>
-                </div>
-            </div>
-            <div id="pcPlaybackStatus" style="margin-top:10px;padding:8px 12px;background:rgba(0,0,0,0.3);border-radius:5px;font-family:monospace;font-size:0.9em;color:#94a3b8;min-height:20px;">
-                Ready - select a sector and playback mode
-            </div>
-            <div style="margin-top:10px;display:flex;gap:20px;flex-wrap:wrap;">
-                <div style="flex:1;min-width:200px;">
-                    <div style="color:#a5b4fc;font-size:0.8em;margin-bottom:4px;">Now Playing</div>
-                    <div id="pcNowPlaying" style="font-family:monospace;font-size:1.3em;color:#22c55e;">-</div>
-                </div>
-                <div style="flex:1;min-width:150px;">
-                    <div style="color:#a5b4fc;font-size:0.8em;margin-bottom:4px;">Frequency</div>
-                    <div id="pcNowFreq" style="font-family:monospace;font-size:1.3em;color:#8b5cf6;">- Hz</div>
-                </div>
-                <div style="flex:1;min-width:100px;">
-                    <div style="color:#a5b4fc;font-size:0.8em;margin-bottom:4px;">Type</div>
-                    <div id="pcNowType" style="font-size:1.1em;">-</div>
-                </div>
-                <div style="flex:1;min-width:100px;">
-                    <div style="color:#a5b4fc;font-size:0.8em;margin-bottom:4px;">Progress</div>
-                    <div id="pcPlayProgress" style="font-family:monospace;font-size:1.1em;color:#94a3b8;">0 / 0</div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="pcRatioProgress" style="display:none;margin:15px 0;padding:15px;background:#1e293b;border-radius:8px;border:1px solid #475569;">
-            <div style="display:flex;align-items:center;gap:10px;">
-                <div class="spinner" style="width:20px;height:20px;border:3px solid #334155;border-top:3px solid #f59e0b;border-radius:50%;animation:spin 1s linear infinite;"></div>
-                <span id="pcRatioProgressText">Computing...</span>
-            </div>
-            <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
-        </div>
-        
-        <div class="grid-2" style="margin-top:15px;">
-            <div class="panel" style="background:#0f172a;">
-                <h4 style="color:#fbbf24;">Global Result <span style="color:#64748b;font-weight:normal;font-size:0.8em;">(same for all sectors)</span></h4>
-                <div id="pcRatioSummary" style="text-align:center;padding:20px;">
-                    <div style="color:#64748b;font-style:italic;">Run test to see results</div>
-                </div>
-            </div>
-            <div class="panel" style="background:#0f172a;">
-                <h4 style="color:#a5b4fc;">Decay Analysis</h4>
-                <div id="pcRatioStats" style="padding:10px;">
-                    <div style="color:#64748b;font-style:italic;">No data yet</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="grid-2" style="margin-top:15px;">
-            <div class="chart-box chart-wrapper">
-                <h4>P/C Ratio by Sector <span style="color:#64748b;font-weight:normal;font-size:0.8em;">(all sectors identical at fixed N)</span></h4>
-                <canvas id="pcRatioSectorChart"></canvas>
-            </div>
-            <div class="chart-box chart-wrapper">
-                <h4>Ratio Decay vs N <span style="color:#ef4444;font-weight:normal;font-size:0.8em;">(decays to 0, crosses 1/π near N=1500)</span></h4>
-                <canvas id="pcRatioConvergenceChart"></canvas>
-            </div>
-        </div>
-        
-        <div class="panel" style="margin-top:15px;background:#0f172a;">
-            <h4 style="color:#f59e0b;">Sector-by-Sector Data <span style="color:#64748b;font-weight:normal;font-size:0.8em;">(note: all P/C ratios are nearly identical)</span></h4>
-            <div class="table-scroll">
-                <table id="pcRatioTable">
-                    <thead>
-                        <tr>
-                            <th>Sector n</th>
-                            <th>Interval</th>
-                            <th style="color:#f59e0b;">Primes P<sub>n</sub></th>
-                            <th style="color:#6366f1;">Composites C<sub>n</sub></th>
-                            <th>Total</th>
-                            <th style="color:#22c55e;">P/C Ratio</th>
-                            <th>Delta from 1/π</th>
-                            <th>% Error</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pcRatioTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-        
-        <div class="panel" style="margin-top:15px;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid #475569;">
-            <h4 style="color:#a5b4fc;">Theoretical Context</h4>
-            <div class="grid-2" style="gap:20px;">
-                <div>
-                    <h5 style="color:#ef4444;margin-bottom:8px;">Why the Ratio Decays</h5>
-                    <p style="color:#94a3b8;font-size:0.9em;line-height:1.6;">
-                        The Prime Number Theorem gives π(N) ~ N/ln(N). Since primes become sparser as N grows,
-                        the count of prime denominators P<sub>n</sub>(N) grows slower than composite denominators C<sub>n</sub>(N).
-                        The ratio P/C therefore decays like c/ln(N) toward zero.
-                    </p>
-                    <h5 style="color:#6366f1;margin:15px 0 8px 0;">Why Sectors Are Identical</h5>
-                    <p style="color:#94a3b8;font-size:0.9em;line-height:1.6;">
-                        Each sector samples denominators proportionally to its width 1/[n(n+1)]. Since primes and 
-                        composites are distributed uniformly across sectors (no sector "favors" primes), the 
-                        P/C ratio is sector-independent. The width factors cancel in the ratio.
-                    </p>
-                </div>
-                <div>
-                    <h5 style="color:#22c55e;margin-bottom:8px;">The Two Confirmed Constants</h5>
-                    <div style="font-family:monospace;font-size:0.95em;line-height:2;">
-                        <div><span style="color:#6366f1;">6/π²</span> <span style="color:#64748b;">≈ 0.6079</span> - Coprime density (proven)</div>
-                        <div><span style="color:#8b5cf6;">√3/π</span> <span style="color:#64748b;">≈ 0.5513</span> - Phase boundary E<sub>n</sub>=1 (proven)</div>
-                    </div>
-                    <div style="margin-top:15px;padding:10px;background:rgba(239,68,68,0.1);border-radius:4px;border:1px solid rgba(239,68,68,0.3);">
-                        <strong style="color:#f87171;">Not a third constant:</strong>
-                        <div style="color:#94a3b8;font-size:0.9em;margin-top:5px;">
-                            P/C ratio is NOT bounded at 1/π. The crossing at N≈1500 is a transient during decay.
-                            No sector escapes this — all sectors decay together at the same rate.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="derivation-box" style="margin-top:15px;">
-            <strong>Export & Documentation:</strong>
-            <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
-                <button onclick="exportPCRatioCSV()">Export CSV</button>
-                <button onclick="exportPCRatioLatex()">Export LaTeX</button>
-                <button onclick="screenshotFullTab('pcratio')">Screenshot Tab</button>
-            </div>
         </div>
     </div>
 </div>
@@ -10387,9 +10181,33 @@ function playErrorBySector(mode = 'error') {
 
 let errorChartSelection = { start: null, end: null, isDragging: false };
 
+function updateErrorModeHint() {
+    const mode = document.getElementById('errorPlaybackMode')?.value || 'error';
+    const hint = document.getElementById('errorModeHint');
+    if (!hint) return;
+    
+    switch(mode) {
+        case 'error':
+            hint.textContent = 'Higher error → higher pitch (200-800 Hz)';
+            break;
+        case 'fractions':
+            hint.textContent = 'Plays ALL fractions in each sector sequentially';
+            break;
+        case 'representative':
+            hint.textContent = 'Plays mediant (middle) fraction of each sector';
+            break;
+    }
+}
+
 function setupErrorChartSelection() {
     const canvas = document.getElementById('mainErrorChart');
     if (!canvas || !state.charts.mainError) return;
+    
+    // Setup mode hint updater
+    const modeSelect = document.getElementById('errorPlaybackMode');
+    if (modeSelect) {
+        modeSelect.addEventListener('change', updateErrorModeHint);
+    }
     
     canvas.addEventListener('mousedown', (e) => {
         const chart = state.charts.mainError;
@@ -10489,12 +10307,27 @@ function playSelectedErrorRange() {
         return;
     }
     
+    const mode = document.getElementById('errorPlaybackMode')?.value || 'error';
+    
     initAudioContext();
     stopAllPlayback();
     
     const minIdx = Math.min(start, end);
     const maxIdx = Math.max(start, end);
     
+    if (mode === 'error') {
+        // Original behavior: play error magnitude as pitch
+        playErrorMagnitudeMode(minIdx, maxIdx);
+    } else if (mode === 'fractions') {
+        // Play all fractions in each selected sector
+        playAllFractionsMode(minIdx, maxIdx);
+    } else if (mode === 'representative') {
+        // Play representative fraction (mediant) of each sector
+        playRepresentativeMode(minIdx, maxIdx);
+    }
+}
+
+function playErrorMagnitudeMode(minIdx, maxIdx) {
     const data = [];
     for (let i = minIdx; i <= maxIdx; i++) {
         const s = state.sectors[i];
@@ -10527,7 +10360,125 @@ function playSelectedErrorRange() {
         playbackState.intervalId = setTimeout(playNext, speed);
     }
     
-    showPlaybackStatus(`Playing selected range: Sectors ${state.sectors[minIdx]?.n}-${state.sectors[maxIdx]?.n}`);
+    showPlaybackStatus(`Playing error magnitudes: Sectors ${state.sectors[minIdx]?.n}-${state.sectors[maxIdx]?.n}`);
+    playNext();
+}
+
+function playAllFractionsMode(minIdx, maxIdx) {
+    // Collect ALL fractions from selected sectors
+    const allFractions = [];
+    
+    for (let i = minIdx; i <= maxIdx; i++) {
+        const s = state.sectors[i];
+        if (!s) continue;
+        
+        const residues = state.residuesBySector[s.n] || [];
+        const sorted = [...residues].sort((a, b) => a.value - b.value);
+        
+        sorted.forEach(frac => {
+            allFractions.push({
+                r: frac.r,
+                m: frac.m,
+                value: frac.value,
+                sector: s.n,
+                sectorIdx: i
+            });
+        });
+    }
+    
+    if (allFractions.length === 0) {
+        showPlaybackStatus('No fractions found in selected sectors');
+        return;
+    }
+    
+    playbackState.isPlaying = true;
+    let idx = 0;
+    const speed = +(document.getElementById('playbackSpeed')?.value || 250);
+    const baseFreq = 220;
+    
+    function playNext() {
+        if (!playbackState.isPlaying || idx >= allFractions.length) {
+            stopAllPlayback();
+            showPlaybackStatus('Selection playback complete');
+            return;
+        }
+        
+        const f = allFractions[idx];
+        const freq = baseFreq * (f.m / f.r); // Harmonic frequency
+        const clampedFreq = Math.min(2000, Math.max(80, freq));
+        
+        playTone(clampedFreq, speed / 1000 * 0.8, (harmonicSettings.volume || 0.5) * 0.5);
+        showPlaybackStatus(`S${f.sector}: ${f.r}/${f.m} → ${clampedFreq.toFixed(0)} Hz (${idx + 1}/${allFractions.length})`);
+        
+        document.getElementById('viewSector').value = f.sector;
+        drawMainRing();
+        
+        idx++;
+        playbackState.intervalId = setTimeout(playNext, speed);
+    }
+    
+    showPlaybackStatus(`Playing all fractions: ${allFractions.length} notes from sectors ${state.sectors[minIdx]?.n}-${state.sectors[maxIdx]?.n}`);
+    playNext();
+}
+
+function playRepresentativeMode(minIdx, maxIdx) {
+    // Play mediant (middle fraction) of each sector
+    const data = [];
+    
+    for (let i = minIdx; i <= maxIdx; i++) {
+        const s = state.sectors[i];
+        if (!s) continue;
+        
+        const residues = state.residuesBySector[s.n] || [];
+        if (residues.length === 0) continue;
+        
+        const sorted = [...residues].sort((a, b) => a.value - b.value);
+        // Get mediant (middle fraction)
+        const mediantIdx = Math.floor(sorted.length / 2);
+        const mediant = sorted[mediantIdx];
+        
+        data.push({
+            r: mediant.r,
+            m: mediant.m,
+            value: mediant.value,
+            sector: s.n,
+            sectorIdx: i,
+            total: sorted.length
+        });
+    }
+    
+    if (data.length === 0) {
+        showPlaybackStatus('No fractions found in selected sectors');
+        return;
+    }
+    
+    playbackState.isPlaying = true;
+    let idx = 0;
+    const speed = +(document.getElementById('playbackSpeed')?.value || 250);
+    const baseFreq = 220;
+    
+    function playNext() {
+        if (!playbackState.isPlaying || idx >= data.length) {
+            stopAllPlayback();
+            showPlaybackStatus('Selection playback complete');
+            return;
+        }
+        
+        const f = data[idx];
+        const freq = baseFreq * (f.m / f.r);
+        const clampedFreq = Math.min(2000, Math.max(80, freq));
+        
+        playTone(clampedFreq, speed / 1000 * 0.8, (harmonicSettings.volume || 0.5) * 0.5);
+        showPlaybackStatus(`S${f.sector}: mediant ${f.r}/${f.m} (of ${f.total}) → ${clampedFreq.toFixed(0)} Hz (${idx + 1}/${data.length})`);
+        
+        document.getElementById('viewSector').value = f.sector;
+        drawMainRing();
+        
+        idx++;
+        playbackState.intervalId = setTimeout(playNext, speed);
+    }
+    
+    showPlaybackStatus(`Playing representative fractions: Sectors ${state.sectors[minIdx]?.n}-${state.sectors[maxIdx]?.n}`);
     playNext();
 }
 
@@ -11596,870 +11547,6 @@ function drawMusicVisualization(currentIdx = -1) {
     }
 }
 
-// ==================== P/C RATIO THEOREM TESTING ====================
-const pcRatioState = {
-    results: [],
-    convergenceData: [],
-    chart: null,
-    convergenceChart: null
-};
-
-const ONE_OVER_PI = 1 / Math.PI;
-
-function runPCRatioTest() {
-    const N = parseInt(document.getElementById('pcRatioN').value) || 1500;
-    const maxSector = parseInt(document.getElementById('pcRatioSectors').value) || 20;
-    
-    document.getElementById('pcRatioProgress').style.display = 'block';
-    document.getElementById('pcRatioProgressText').textContent = 'Computing coprime pairs...';
-    
-    setTimeout(() => {
-        pcRatioState.results = [];
-        
-        // Enumerate all coprime pairs
-        for (let n = 1; n <= maxSector; n++) {
-            const lowerBound = 1 / (n + 1);
-            const upperBound = 1 / n;
-            
-            let primeCount = 0;
-            let compositeCount = 0;
-            
-            // For each denominator b from n+1 to N
-            for (let b = n + 1; b <= N; b++) {
-                // Find valid numerators a where a/b is in sector (1/(n+1), 1/n]
-                const aMin = Math.floor(b * lowerBound) + 1;
-                const aMax = Math.floor(b * upperBound);
-                
-                for (let a = aMin; a <= aMax; a++) {
-                    if (a >= 1 && a <= b && gcd(a, b) === 1) {
-                        if (isPrime(b)) {
-                            primeCount++;
-                        } else {
-                            compositeCount++;
-                        }
-                    }
-                }
-            }
-            
-            const ratio = compositeCount > 0 ? primeCount / compositeCount : 0;
-            const delta = ratio - ONE_OVER_PI;
-            const pctError = Math.abs(delta / ONE_OVER_PI) * 100;
-            
-            pcRatioState.results.push({
-                n, primeCount, compositeCount,
-                total: primeCount + compositeCount,
-                ratio, delta, pctError
-            });
-            
-            document.getElementById('pcRatioProgressText').textContent = 
-                `Processing sector ${n}/${maxSector}...`;
-        }
-        
-        document.getElementById('pcRatioProgress').style.display = 'none';
-        displayPCRatioResults(N);
-    }, 50);
-}
-
-function displayPCRatioResults(N) {
-    const results = pcRatioState.results;
-    if (results.length === 0) return;
-    
-    // Calculate aggregate statistics
-    const ratios = results.map(r => r.ratio).filter(r => r > 0);
-    const mean = ratios.reduce((a, b) => a + b, 0) / ratios.length;
-    const variance = ratios.reduce((a, r) => a + Math.pow(r - mean, 2), 0) / ratios.length;
-    const stdDev = Math.sqrt(variance);
-    const totalPrimes = results.reduce((a, r) => a + r.primeCount, 0);
-    const totalComposites = results.reduce((a, r) => a + r.compositeCount, 0);
-    const globalRatio = totalPrimes / totalComposites;
-    
-    // Summary display - color based on deviation from 1/π
-    const pctFromPi = ((globalRatio - ONE_OVER_PI) / ONE_OVER_PI * 100);
-    const summaryColor = Math.abs(pctFromPi) <= 1 ? '#22c55e' : Math.abs(pctFromPi) <= 5 ? '#f59e0b' : '#ef4444';
-    const statusText = Math.abs(pctFromPi) <= 1 ? '(at 1/π crossing)' : pctFromPi > 0 ? '(above 1/π, still descending)' : '(below 1/π, decaying toward 0)';
-    
-    document.getElementById('pcRatioSummary').innerHTML = `
-        <div style="font-size:3em;font-weight:bold;color:${summaryColor};font-family:monospace;">${globalRatio.toFixed(6)}</div>
-        <div style="color:#94a3b8;margin-top:5px;">P/C Ratio at N=${N} ${statusText}</div>
-        <div style="margin-top:15px;display:flex;justify-content:center;gap:30px;">
-            <div><span style="color:#f59e0b;font-size:1.5em;font-weight:bold;">${totalPrimes.toLocaleString()}</span><br><span style="color:#64748b;font-size:0.85em;">Prime Denoms</span></div>
-            <div><span style="color:#6366f1;font-size:1.5em;font-weight:bold;">${totalComposites.toLocaleString()}</span><br><span style="color:#64748b;font-size:0.85em;">Composite Denoms</span></div>
-        </div>
-        <div style="margin-top:15px;padding:10px;background:rgba(99,102,241,0.1);border-radius:6px;border:1px solid rgba(99,102,241,0.3);">
-            <span style="color:#a5b4fc;">Reference: 1/π = ${ONE_OVER_PI.toFixed(6)}</span><br>
-            <span style="color:#94a3b8;font-size:0.9em;">Delta = ${(globalRatio - ONE_OVER_PI).toFixed(6)} (${pctFromPi.toFixed(2)}%)</span>
-        </div>
-    `;
-    
-    // Stats display
-    document.getElementById('pcRatioStats').innerHTML = `
-        <div class="stat-grid">
-            <div class="stat-card"><div class="stat-value">${mean.toFixed(6)}</div><div class="stat-label">Mean Ratio</div></div>
-            <div class="stat-card"><div class="stat-value">${stdDev.toFixed(6)}</div><div class="stat-label">Std Dev</div></div>
-            <div class="stat-card"><div class="stat-value">${Math.min(...ratios).toFixed(5)}</div><div class="stat-label">Min Ratio</div></div>
-            <div class="stat-card"><div class="stat-value">${Math.max(...ratios).toFixed(5)}</div><div class="stat-label">Max Ratio</div></div>
-        </div>
-        <div style="margin-top:10px;padding:8px;background:#1e293b;border-radius:4px;font-size:0.85em;">
-            <strong style="color:#a5b4fc;">Sector Independence:</strong> 
-            <span style="color:#94a3b8;">Low std dev (${stdDev.toFixed(6)}) confirms all sectors have the same P/C ratio at fixed N. This ratio decays as N increases.</span>
-        </div>
-    `;
-    
-    // Table
-    const tbody = document.getElementById('pcRatioTableBody');
-    tbody.innerHTML = results.map(r => `
-        <tr>
-            <td>${r.n}</td>
-            <td style="font-family:monospace;color:#64748b;">(1/${r.n+1}, 1/${r.n}]</td>
-            <td style="color:#f59e0b;font-weight:600;">${r.primeCount.toLocaleString()}</td>
-            <td style="color:#6366f1;font-weight:600;">${r.compositeCount.toLocaleString()}</td>
-            <td>${r.total.toLocaleString()}</td>
-            <td style="color:#22c55e;font-weight:bold;font-family:monospace;">${r.ratio.toFixed(6)}</td>
-            <td style="color:${r.delta >= 0 ? '#22c55e' : '#ef4444'};font-family:monospace;">${r.delta >= 0 ? '+' : ''}${r.delta.toFixed(6)}</td>
-            <td style="color:${r.pctError < 1 ? '#22c55e' : r.pctError < 5 ? '#f59e0b' : '#ef4444'};">${r.pctError.toFixed(4)}%</td>
-        </tr>
-    `).join('');
-    
-    // Charts
-    drawPCRatioSectorChart();
-}
-
-function drawPCRatioSectorChart() {
-    const ctx = document.getElementById('pcRatioSectorChart');
-    if (!ctx) return;
-    
-    if (pcRatioState.chart) pcRatioState.chart.destroy();
-    
-    const results = pcRatioState.results;
-    
-    pcRatioState.chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: results.map(r => 'S' + r.n),
-            datasets: [{
-                label: 'P/C Ratio',
-                data: results.map(r => r.ratio),
-                backgroundColor: results.map(r => 
-                    Math.abs(r.ratio - ONE_OVER_PI) < 0.005 ? 'rgba(34, 197, 94, 0.7)' :
-                    Math.abs(r.ratio - ONE_OVER_PI) < 0.01 ? 'rgba(245, 158, 11, 0.7)' :
-                    'rgba(239, 68, 68, 0.7)'
-                ),
-                borderColor: results.map(r => 
-                    Math.abs(r.ratio - ONE_OVER_PI) < 0.005 ? '#22c55e' :
-                    Math.abs(r.ratio - ONE_OVER_PI) < 0.01 ? '#f59e0b' : '#ef4444'
-                ),
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                annotation: {
-                    annotations: {
-                        targetLine: {
-                            type: 'line',
-                            yMin: ONE_OVER_PI,
-                            yMax: ONE_OVER_PI,
-                            borderColor: '#8b5cf6',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            label: {
-                                display: true,
-                                content: '1/π',
-                                position: 'end'
-                            }
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    min: 0.30,
-                    max: 0.34,
-                    ticks: { color: '#94a3b8' },
-                    grid: { color: 'rgba(148,163,184,0.1)' }
-                },
-                x: {
-                    ticks: { color: '#94a3b8', maxRotation: 45 },
-                    grid: { display: false }
-                }
-            }
-        }
-    });
-    
-    // Draw 1/π reference line manually since annotation plugin might not be loaded
-    const chart = pcRatioState.chart;
-    const originalDraw = chart.draw;
-    chart.draw = function() {
-        originalDraw.apply(this, arguments);
-        const ctx = this.ctx;
-        const yAxis = this.scales.y;
-        const xAxis = this.scales.x;
-        const yPixel = yAxis.getPixelForValue(ONE_OVER_PI);
-        
-        ctx.save();
-        ctx.strokeStyle = '#8b5cf6';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(xAxis.left, yPixel);
-        ctx.lineTo(xAxis.right, yPixel);
-        ctx.stroke();
-        
-        ctx.fillStyle = '#8b5cf6';
-        ctx.font = '11px monospace';
-        ctx.fillText('1/π = 0.3183', xAxis.right - 70, yPixel - 5);
-        ctx.restore();
-    };
-    chart.draw();
-}
-
-function runPCRatioConvergence() {
-    const maxN = parseInt(document.getElementById('pcRatioN').value) || 1500;
-    const testSector = 2; // Use sector 2 for convergence study
-    
-    document.getElementById('pcRatioProgress').style.display = 'block';
-    
-    const nValues = [];
-    for (let n = 100; n <= maxN; n += Math.max(50, Math.floor(maxN / 20))) {
-        nValues.push(n);
-    }
-    if (nValues[nValues.length - 1] !== maxN) nValues.push(maxN);
-    
-    pcRatioState.convergenceData = [];
-    
-    let idx = 0;
-    function processNext() {
-        if (idx >= nValues.length) {
-            document.getElementById('pcRatioProgress').style.display = 'none';
-            drawPCRatioConvergenceChart();
-            return;
-        }
-        
-        const N = nValues[idx];
-        document.getElementById('pcRatioProgressText').textContent = 
-            `Convergence test: N=${N} (${idx + 1}/${nValues.length})...`;
-        
-        // Compute ratio for sector 2 at this N
-        const n = testSector;
-        const lowerBound = 1 / (n + 1);
-        const upperBound = 1 / n;
-        
-        let primeCount = 0, compositeCount = 0;
-        
-        for (let b = n + 1; b <= N; b++) {
-            const aMin = Math.floor(b * lowerBound) + 1;
-            const aMax = Math.floor(b * upperBound);
-            
-            for (let a = aMin; a <= aMax; a++) {
-                if (a >= 1 && a <= b && gcd(a, b) === 1) {
-                    if (isPrime(b)) primeCount++;
-                    else compositeCount++;
-                }
-            }
-        }
-        
-        const ratio = compositeCount > 0 ? primeCount / compositeCount : 0;
-        pcRatioState.convergenceData.push({ N, ratio, delta: ratio - ONE_OVER_PI });
-        
-        idx++;
-        setTimeout(processNext, 10);
-    }
-    
-    processNext();
-}
-
-function drawPCRatioConvergenceChart() {
-    const ctx = document.getElementById('pcRatioConvergenceChart');
-    if (!ctx) return;
-    
-    if (pcRatioState.convergenceChart) pcRatioState.convergenceChart.destroy();
-    
-    const data = pcRatioState.convergenceData;
-    if (data.length === 0) return;
-    
-    pcRatioState.convergenceChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: data.map(d => d.N),
-            datasets: [{
-                label: 'P/C Ratio (Sector 2)',
-                data: data.map(d => d.ratio),
-                borderColor: '#22c55e',
-                backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                fill: true,
-                tension: 0.3,
-                pointRadius: 4,
-                pointBackgroundColor: '#22c55e'
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: true, labels: { color: '#94a3b8' } }
-            },
-            scales: {
-                y: {
-                    min: 0.31,
-                    max: 0.33,
-                    ticks: { color: '#94a3b8' },
-                    grid: { color: 'rgba(148,163,184,0.1)' }
-                },
-                x: {
-                    title: { display: true, text: 'Max Denominator N', color: '#94a3b8' },
-                    ticks: { color: '#94a3b8' },
-                    grid: { color: 'rgba(148,163,184,0.1)' }
-                }
-            }
-        }
-    });
-    
-    // Draw 1/π reference line
-    const chart = pcRatioState.convergenceChart;
-    const originalDraw = chart.draw;
-    chart.draw = function() {
-        originalDraw.apply(this, arguments);
-        const ctx = this.ctx;
-        const yAxis = this.scales.y;
-        const xAxis = this.scales.x;
-        const yPixel = yAxis.getPixelForValue(ONE_OVER_PI);
-        
-        ctx.save();
-        ctx.strokeStyle = '#8b5cf6';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(xAxis.left, yPixel);
-        ctx.lineTo(xAxis.right, yPixel);
-        ctx.stroke();
-        
-        ctx.fillStyle = '#8b5cf6';
-        ctx.font = '11px monospace';
-        ctx.fillText('1/π', xAxis.right - 30, yPixel - 5);
-        ctx.restore();
-    };
-    chart.draw();
-}
-
-function clearPCRatioResults() {
-    pcRatioState.results = [];
-    pcRatioState.convergenceData = [];
-    
-    document.getElementById('pcRatioSummary').innerHTML = '<div style="color:#64748b;font-style:italic;">Run test to see results</div>';
-    document.getElementById('pcRatioStats').innerHTML = '<div style="color:#64748b;font-style:italic;">No data yet</div>';
-    document.getElementById('pcRatioTableBody').innerHTML = '';
-    
-    if (pcRatioState.chart) { pcRatioState.chart.destroy(); pcRatioState.chart = null; }
-    if (pcRatioState.convergenceChart) { pcRatioState.convergenceChart.destroy(); pcRatioState.convergenceChart = null; }
-}
-
-function runPCRatioDecayScan() {
-    document.getElementById('pcRatioProgress').style.display = 'block';
-    document.getElementById('pcRatioProgressText').textContent = 'Running decay scan...';
-    
-    const testPoints = [100, 200, 300, 500, 750, 1000, 1250, 1350, 1400, 1450, 1500, 1550, 1600, 1750, 2000, 2500, 3000, 4000, 5000];
-    
-    pcRatioState.convergenceData = [];
-    
-    let idx = 0;
-    function processNext() {
-        if (idx >= testPoints.length) {
-            document.getElementById('pcRatioProgress').style.display = 'none';
-            displayDecayScanResults();
-            return;
-        }
-        
-        const N = testPoints[idx];
-        document.getElementById('pcRatioProgressText').textContent = 
-            `Decay scan: N=${N} (${idx + 1}/${testPoints.length})...`;
-        
-        // Compute global ratio across first 20 sectors
-        let totalP = 0, totalC = 0;
-        const maxSector = Math.min(20, Math.floor(N / 20));
-        
-        for (let n = 1; n <= maxSector; n++) {
-            const lowerBound = 1 / (n + 1);
-            const upperBound = 1 / n;
-            
-            for (let b = n + 1; b <= N; b++) {
-                const aMin = Math.floor(b * lowerBound) + 1;
-                const aMax = Math.floor(b * upperBound);
-                
-                for (let a = aMin; a <= aMax; a++) {
-                    if (a >= 1 && a <= b && gcd(a, b) === 1) {
-                        if (isPrime(b)) totalP++;
-                        else totalC++;
-                    }
-                }
-            }
-        }
-        
-        const ratio = totalC > 0 ? totalP / totalC : 0;
-        const delta = ratio - ONE_OVER_PI;
-        const pctError = (delta / ONE_OVER_PI) * 100;
-        
-        let status = 'DIVERGED';
-        if (Math.abs(pctError) <= 1) status = 'BOUNDED';
-        else if (Math.abs(pctError) <= 2) status = 'MARGINAL';
-        else if (Math.abs(pctError) <= 5) status = 'DRIFTING';
-        
-        pcRatioState.convergenceData.push({ N, ratio, delta, pctError, status, P: totalP, C: totalC });
-        
-        idx++;
-        setTimeout(processNext, 10);
-    }
-    
-    processNext();
-}
-
-function displayDecayScanResults() {
-    const data = pcRatioState.convergenceData;
-    if (data.length === 0) return;
-    
-    // Find crossing point
-    let crossingN = null;
-    for (let i = 0; i < data.length; i++) {
-        if (Math.abs(data[i].pctError) <= 1) {
-            crossingN = data[i].N;
-        }
-    }
-    
-    // Summary
-    const latest = data[data.length - 1];
-    document.getElementById('pcRatioSummary').innerHTML = `
-        <div style="font-size:2em;font-weight:bold;color:#ef4444;font-family:monospace;">${latest.ratio.toFixed(6)}</div>
-        <div style="color:#94a3b8;margin-top:5px;">P/C Ratio at N=${latest.N} (decaying)</div>
-        <div style="margin-top:15px;padding:10px;background:rgba(34,197,94,0.1);border-radius:6px;border:1px solid rgba(34,197,94,0.3);">
-            <span style="color:#22c55e;">1/π crossing near N ≈ ${crossingN || '1500'}</span><br>
-            <span style="color:#94a3b8;font-size:0.9em;">Ratio passes through ${ONE_OVER_PI.toFixed(6)} during decay</span>
-        </div>
-    `;
-    
-    // Stats
-    document.getElementById('pcRatioStats').innerHTML = `
-        <div style="font-size:0.9em;color:#94a3b8;line-height:1.8;">
-            <strong style="color:#a5b4fc;">Decay Behavior:</strong><br>
-            At N=1000: ${data.find(d => d.N === 1000)?.ratio.toFixed(4) || '-'} (above 1/π)<br>
-            At N=1500: ${data.find(d => d.N === 1500)?.ratio.toFixed(4) || '-'} (near 1/π)<br>
-            At N=3000: ${data.find(d => d.N === 3000)?.ratio.toFixed(4) || '-'} (below 1/π)<br>
-            At N=5000: ${data.find(d => d.N === 5000)?.ratio.toFixed(4) || '-'} (continuing decay)
-        </div>
-        <div style="margin-top:10px;padding:8px;background:#1e293b;border-radius:4px;font-size:0.85em;">
-            <strong style="color:#f87171;">Conclusion:</strong> 
-            <span style="color:#94a3b8;">Ratio decays as ~c/ln(N), NOT bounded at 1/π</span>
-        </div>
-    `;
-    
-    // Update table
-    const tbody = document.getElementById('pcRatioTableBody');
-    tbody.innerHTML = data.map(r => {
-        const statusColor = r.status === 'BOUNDED' ? '#22c55e' : 
-                           r.status === 'MARGINAL' ? '#f59e0b' : 
-                           r.status === 'DRIFTING' ? '#f97316' : '#ef4444';
-        return `
-            <tr>
-                <td>${r.N}</td>
-                <td style="font-family:monospace;color:#64748b;">-</td>
-                <td style="color:#f59e0b;font-weight:600;">${r.P.toLocaleString()}</td>
-                <td style="color:#6366f1;font-weight:600;">${r.C.toLocaleString()}</td>
-                <td>${(r.P + r.C).toLocaleString()}</td>
-                <td style="color:${statusColor};font-weight:bold;font-family:monospace;">${r.ratio.toFixed(6)}</td>
-                <td style="color:${r.delta >= 0 ? '#22c55e' : '#ef4444'};font-family:monospace;">${r.delta >= 0 ? '+' : ''}${r.delta.toFixed(6)}</td>
-                <td style="color:${statusColor};">${r.pctError.toFixed(2)}%</td>
-            </tr>
-        `;
-    }).join('');
-    
-    // Draw decay chart
-    drawPCRatioDecayChart();
-}
-
-function drawPCRatioDecayChart() {
-    const ctx = document.getElementById('pcRatioConvergenceChart');
-    if (!ctx) return;
-    
-    if (pcRatioState.convergenceChart) pcRatioState.convergenceChart.destroy();
-    
-    const data = pcRatioState.convergenceData;
-    if (data.length === 0) return;
-    
-    pcRatioState.convergenceChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: data.map(d => d.N),
-            datasets: [{
-                label: 'P/C Ratio (decaying)',
-                data: data.map(d => d.ratio),
-                borderColor: '#ef4444',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                fill: true,
-                tension: 0.3,
-                pointRadius: 5,
-                pointBackgroundColor: data.map(d => 
-                    d.status === 'BOUNDED' ? '#22c55e' : 
-                    d.status === 'MARGINAL' ? '#f59e0b' : '#ef4444'
-                )
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: true, labels: { color: '#94a3b8' } },
-                title: { display: true, text: 'P/C Ratio Decay (NOT bounded at 1/π)', color: '#f87171' }
-            },
-            scales: {
-                y: {
-                    min: 0.2,
-                    max: 0.55,
-                    ticks: { color: '#94a3b8' },
-                    grid: { color: 'rgba(148,163,184,0.1)' }
-                },
-                x: {
-                    title: { display: true, text: 'Max Denominator N', color: '#94a3b8' },
-                    ticks: { color: '#94a3b8' },
-                    grid: { color: 'rgba(148,163,184,0.1)' }
-                }
-            }
-        }
-    });
-    
-    // Draw 1/π reference line
-    const chart = pcRatioState.convergenceChart;
-    const originalDraw = chart.draw;
-    chart.draw = function() {
-        originalDraw.apply(this, arguments);
-        const ctx = this.ctx;
-        const yAxis = this.scales.y;
-        const xAxis = this.scales.x;
-        const yPixel = yAxis.getPixelForValue(ONE_OVER_PI);
-        
-        ctx.save();
-        ctx.strokeStyle = '#22c55e';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(xAxis.left, yPixel);
-        ctx.lineTo(xAxis.right, yPixel);
-        ctx.stroke();
-        
-        ctx.fillStyle = '#22c55e';
-        ctx.font = '11px monospace';
-        ctx.fillText('1/π = 0.3183 (crossing, not limit)', xAxis.left + 10, yPixel - 8);
-        ctx.restore();
-    };
-    chart.draw();
-}
-
-function exportPCRatioCSV() {
-    if (pcRatioState.results.length === 0) {
-        alert('Run test first!');
-        return;
-    }
-    
-    let csv = 'Prime-Composite Ratio Test Results\n';
-    csv += 'Target: 1/π = ' + ONE_OVER_PI + '\n\n';
-    csv += 'Sector,Interval,Primes,Composites,Total,Ratio,Delta,PctError\n';
-    
-    pcRatioState.results.forEach(r => {
-        csv += `${r.n},"(1/${r.n+1},1/${r.n}]",${r.primeCount},${r.compositeCount},${r.total},${r.ratio},${r.delta},${r.pctError}\n`;
-    });
-    
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `pc_ratio_test_${Date.now()}.csv`;
-    a.click();
-}
-
-function exportPCRatioLatex() {
-    if (pcRatioState.results.length === 0) {
-        alert('Run test first!');
-        return;
-    }
-    
-    const results = pcRatioState.results;
-    const N = parseInt(document.getElementById('pcRatioN').value) || 1500;
-    const globalRatio = results.reduce((a, r) => a + r.primeCount, 0) / results.reduce((a, r) => a + r.compositeCount, 0);
-    const pctError = ((globalRatio - ONE_OVER_PI) / ONE_OVER_PI * 100).toFixed(2);
-    
-    let latex = `% Prime-Composite Ratio Analysis - Empirical Data
-% NOTE: The P/C ratio is NOT bounded at 1/pi. It decays as c/ln(N) toward 0.
-% At N=${N}, the ratio is ${globalRatio.toFixed(5)} (${pctError}% from 1/pi).
-% The crossing through 1/pi occurs near N ~ 1500.
-
-\\begin{table}[h]
-\\centering
-\\caption{Prime-Composite Ratio by Farey Sector (N=${N})}
-\\label{tab:pc-ratio}
-\\begin{tabular}{c|c|r|r|c|c}
-\\hline
-$n$ & Interval & $P_n(N)$ & $C_n(N)$ & $P_n/C_n$ & $\\Delta$ from $1/\\pi$ \\\\
-\\hline
-`;
-    
-    results.slice(0, 15).forEach(r => {
-        latex += `${r.n} & $(\\frac{1}{${r.n+1}}, \\frac{1}{${r.n}}]$ & ${r.primeCount} & ${r.compositeCount} & ${r.ratio.toFixed(5)} & ${r.delta >= 0 ? '+' : ''}${r.delta.toFixed(5)} \\\\\n`;
-    });
-    
-    latex += `\\hline
-\\multicolumn{4}{r|}{\\textbf{Global Ratio:}} & \\textbf{${globalRatio.toFixed(5)}} & ${(globalRatio - ONE_OVER_PI).toFixed(5)} \\\\
-\\hline
-\\end{tabular}
-\\end{table}
-
-% Reference: $1/\\pi \\approx ${ONE_OVER_PI.toFixed(6)}$
-% Key findings:
-% 1. All sectors show the same P/C ratio at fixed N (sector-independent)
-% 2. The ratio decays as N increases: ~0.33 at N=1000, ~0.28 at N=3000, ~0.23 at N=10000
-% 3. The ratio crosses through 1/pi near N=1500 but continues to decay
-`;
-    
-    const blob = new Blob([latex], { type: 'text/plain' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `pc_ratio_latex_${Date.now()}.tex`;
-    a.click();
-}
-
-// ==================== END P/C RATIO ====================
-
-// ==================== P/C RATIO HARMONIC PLAYBACK ====================
-
-function getPCRatioFractions(sectorNum, type = 'all') {
-    const N = parseInt(document.getElementById('pcRatioN').value) || 1500;
-    const n = sectorNum;
-    const lowerBound = 1 / (n + 1);
-    const upperBound = 1 / n;
-    
-    const primes = [];
-    const composites = [];
-    
-    for (let b = n + 1; b <= N; b++) {
-        const aMin = Math.floor(b * lowerBound) + 1;
-        const aMax = Math.floor(b * upperBound);
-        
-        for (let a = aMin; a <= aMax; a++) {
-            if (a >= 1 && a <= b && gcd(a, b) === 1) {
-                const frac = { r: a, m: b, value: a / b };
-                if (isPrime(b)) {
-                    frac.type = 'prime';
-                    primes.push(frac);
-                } else {
-                    frac.type = 'composite';
-                    composites.push(frac);
-                }
-            }
-        }
-    }
-    
-    // Sort by value
-    primes.sort((a, b) => a.value - b.value);
-    composites.sort((a, b) => a.value - b.value);
-    
-    if (type === 'primes') return primes;
-    if (type === 'composites') return composites;
-    return { primes, composites, all: [...primes, ...composites].sort((a, b) => a.value - b.value) };
-}
-
-function updatePCPlaybackDisplay(frac, index, total) {
-    if (!frac) return;
-    
-    const freq = harmonicSettings.baseFreq * (frac.r / frac.m);
-    document.getElementById('pcNowPlaying').textContent = frac.r + '/' + frac.m;
-    document.getElementById('pcNowFreq').textContent = freq.toFixed(1) + ' Hz';
-    document.getElementById('pcNowType').innerHTML = frac.type === 'prime' 
-        ? '<span style="color:#f59e0b;font-weight:bold;">● Prime</span>'
-        : '<span style="color:#6366f1;font-weight:bold;">● Composite</span>';
-    document.getElementById('pcPlayProgress').textContent = (index + 1) + ' / ' + total;
-}
-
-function setPCPlaybackStatus(msg) {
-    document.getElementById('pcPlaybackStatus').textContent = msg;
-}
-
-function playPCRatioPrimes() {
-    const sector = parseInt(document.getElementById('pcPlaybackSector').value) || 2;
-    const limit = parseInt(document.getElementById('pcPlaybackLimit').value) || 50;
-    const speed = parseInt(document.getElementById('pcPlaybackSpeed').value) || 200;
-    
-    initAudioContext();
-    stopAllPlayback();
-    
-    setPCPlaybackStatus('Loading prime denominators for sector ' + sector + '...');
-    
-    setTimeout(() => {
-        const fracs = getPCRatioFractions(sector, 'primes').slice(0, limit);
-        
-        if (fracs.length === 0) {
-            setPCPlaybackStatus('No prime denominators found in sector ' + sector);
-            return;
-        }
-        
-        playbackState.queue = fracs;
-        playbackState.direction = 'forward';
-        playbackState.mode = 'pc-primes';
-        playbackState.currentIndex = 0;
-        playbackState.isPlaying = true;
-        
-        setPCPlaybackStatus(`Playing ${fracs.length} PRIME denominators from sector ${sector}`);
-        startPCPlaybackLoop(speed);
-    }, 50);
-}
-
-function playPCRatioComposites() {
-    const sector = parseInt(document.getElementById('pcPlaybackSector').value) || 2;
-    const limit = parseInt(document.getElementById('pcPlaybackLimit').value) || 50;
-    const speed = parseInt(document.getElementById('pcPlaybackSpeed').value) || 200;
-    
-    initAudioContext();
-    stopAllPlayback();
-    
-    setPCPlaybackStatus('Loading composite denominators for sector ' + sector + '...');
-    
-    setTimeout(() => {
-        const fracs = getPCRatioFractions(sector, 'composites').slice(0, limit);
-        
-        if (fracs.length === 0) {
-            setPCPlaybackStatus('No composite denominators found in sector ' + sector);
-            return;
-        }
-        
-        playbackState.queue = fracs;
-        playbackState.direction = 'forward';
-        playbackState.mode = 'pc-composites';
-        playbackState.currentIndex = 0;
-        playbackState.isPlaying = true;
-        
-        setPCPlaybackStatus(`Playing ${fracs.length} COMPOSITE denominators from sector ${sector}`);
-        startPCPlaybackLoop(speed);
-    }, 50);
-}
-
-function playPCRatioInterleaved() {
-    const sector = parseInt(document.getElementById('pcPlaybackSector').value) || 2;
-    const limit = parseInt(document.getElementById('pcPlaybackLimit').value) || 50;
-    const speed = parseInt(document.getElementById('pcPlaybackSpeed').value) || 200;
-    
-    initAudioContext();
-    stopAllPlayback();
-    
-    setPCPlaybackStatus('Loading fractions for sector ' + sector + '...');
-    
-    setTimeout(() => {
-        const data = getPCRatioFractions(sector, 'all');
-        const primes = data.primes.slice(0, Math.ceil(limit / 2));
-        const composites = data.composites.slice(0, Math.ceil(limit / 2));
-        
-        // Interleave: prime, composite, prime, composite...
-        const interleaved = [];
-        const maxLen = Math.max(primes.length, composites.length);
-        for (let i = 0; i < maxLen; i++) {
-            if (i < primes.length) interleaved.push(primes[i]);
-            if (i < composites.length) interleaved.push(composites[i]);
-        }
-        
-        if (interleaved.length === 0) {
-            setPCPlaybackStatus('No fractions found in sector ' + sector);
-            return;
-        }
-        
-        playbackState.queue = interleaved.slice(0, limit);
-        playbackState.direction = 'forward';
-        playbackState.mode = 'pc-interleaved';
-        playbackState.currentIndex = 0;
-        playbackState.isPlaying = true;
-        
-        setPCPlaybackStatus(`▶ Interleaved: ${primes.length} primes + ${composites.length} composites from sector ${sector}`);
-        startPCPlaybackLoop(speed);
-    }, 50);
-}
-
-function playPCRatioComparison() {
-    const sector = parseInt(document.getElementById('pcPlaybackSector').value) || 2;
-    const limit = parseInt(document.getElementById('pcPlaybackLimit').value) || 50;
-    const speed = parseInt(document.getElementById('pcPlaybackSpeed').value) || 200;
-    
-    initAudioContext();
-    stopAllPlayback();
-    
-    setPCPlaybackStatus('Loading fractions for P vs C comparison...');
-    
-    setTimeout(() => {
-        const data = getPCRatioFractions(sector, 'all');
-        const primes = data.primes.slice(0, limit);
-        const composites = data.composites.slice(0, limit);
-        
-        // Play primes first, then composites (like a race/comparison)
-        const sequence = [
-            ...primes.map(f => ({ ...f, phase: 'prime' })),
-            { type: 'pause', phase: 'transition' }, // marker for pause
-            ...composites.map(f => ({ ...f, phase: 'composite' }))
-        ];
-        
-        if (sequence.length <= 1) {
-            setPCPlaybackStatus('Not enough fractions for comparison');
-            return;
-        }
-        
-        playbackState.queue = sequence;
-        playbackState.direction = 'forward';
-        playbackState.mode = 'pc-comparison';
-        playbackState.currentIndex = 0;
-        playbackState.isPlaying = true;
-        
-        const ratio = composites.length > 0 ? (primes.length / composites.length).toFixed(4) : '∞';
-        setPCPlaybackStatus(`⚡ Race: ${primes.length} primes vs ${composites.length} composites (ratio: ${ratio}, target: ${ONE_OVER_PI.toFixed(4)})`);
-        startPCPlaybackLoop(speed);
-    }, 50);
-}
-
-function startPCPlaybackLoop(speed) {
-    if (playbackState.intervalId) {
-        clearInterval(playbackState.intervalId);
-    }
-    
-    playbackState.intervalId = setInterval(() => {
-        if (!playbackState.isPlaying) {
-            stopAllPlayback();
-            return;
-        }
-        
-        if (playbackState.currentIndex >= playbackState.queue.length) {
-            stopAllPlayback();
-            setPCPlaybackStatus(`Playback complete (${playbackState.queue.length} items)`);
-            document.getElementById('pcNowPlaying').textContent = '—';
-            document.getElementById('pcNowFreq').textContent = '— Hz';
-            document.getElementById('pcNowType').textContent = '—';
-            return;
-        }
-        
-        const f = playbackState.queue[playbackState.currentIndex];
-        
-        // Handle pause marker in comparison mode
-        if (f.type === 'pause') {
-            setPCPlaybackStatus('Switching to COMPOSITES...');
-            playbackState.currentIndex++;
-            return;
-        }
-        
-        if (f && typeof f.r === 'number' && typeof f.m === 'number' && f.m !== 0) {
-            const duration = speed / 1000 * 0.8;
-            playFraction(f.r, f.m, duration);
-            updatePCPlaybackDisplay(f, playbackState.currentIndex, playbackState.queue.length);
-            
-            // Update status with phase info for comparison mode
-            if (playbackState.mode === 'pc-comparison' && f.phase) {
-                const phaseLabel = f.phase === 'prime' ? 'PRIMES' : 'COMPOSITES';
-                setPCPlaybackStatus(`${phaseLabel} — ${playbackState.currentIndex + 1}/${playbackState.queue.length}`);
-            }
-        }
-        
-        playbackState.currentIndex++;
-    }, speed);
-}
-
-// ==================== END P/C RATIO HARMONICS ====================
 
 function exportMathMusicMIDI() {
     // Export as a simple text representation (real MIDI would require a library)
