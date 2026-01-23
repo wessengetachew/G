@@ -4,6 +4,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Farey Sector Formula - Complete Research Platform</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -959,6 +961,8 @@
             <div class="chart-box chart-wrapper">
                 <h4>Exact vs Predicted 
                     <button class="secondary" onclick="playErrorBySector('count')" style="font-size:10px;padding:3px 8px;margin-left:10px;">▶ Play</button>
+                    <button class="secondary" onclick="resetCountChartZoom()" style="font-size:10px;padding:3px 8px;" title="Reset zoom">Reset Zoom</button>
+                    <span style="font-size:9px;color:#64748b;margin-left:8px;">Scroll to zoom, drag to pan</span>
                 </h4>
                 <canvas id="mainCountChart"></canvas>
             </div>
@@ -1087,7 +1091,7 @@
                 <label>Color by: 
                     <select id="treeColorMode" onchange="drawSectorTree()">
                         <option value="default">Default</option>
-                        <option value="sector">Sector</option>
+                        <option value="sector" selected>Sector</option>
                         <option value="prime">Prime/Composite</option>
                         <option value="arnold">Arnold Tongue</option>
                     </select>
@@ -1096,8 +1100,8 @@
                 <button class="secondary" onclick="playTreeSectorFractions()" style="font-size:11px;">▶ Play Sector</button>
             </div>
             <div class="control-row" style="margin-bottom:10px;">
-                <label>Tree Depth: <input type="number" id="treeDepth" value="8" min="3" max="15" onchange="drawSectorTree()"></label>
-                <label>Point Size: <input type="number" id="treePointSize" value="4" min="0.5" max="20" step="0.5" style="width:60px;" onchange="drawSectorTree()"></label>
+                <label>Tree Depth: <input type="number" id="treeDepth" value="200" min="3" max="500" onchange="drawSectorTree()"></label>
+                <label>Point Size: <input type="number" id="treePointSize" value="2" min="0.5" max="20" step="0.5" style="width:60px;" onchange="drawSectorTree()"></label>
                 <label>Canvas: <select id="treeCanvasSize" onchange="resizeTreeCanvas()" style="padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;">
                     <option value="900x500">900x500</option>
                     <option value="1920x1080">1K (1920x1080)</option>
@@ -2559,7 +2563,17 @@ function screenshotFullTab(tabName) {
             title: 'Main Sector Analysis',
             formula: 'C(n, N) = 3N² / (π² n(n+1))',
             description: 'Asymptotic count of coprime pairs (r, m) with r/m in sector Sn',
-            params: ['Coprime density: 6/π² ≈ 0.6079', 'P(m)=Prime denom, C(m)=Comp denom', 'P/C = P(m)/C(m) ratio']
+            params: [
+                'Coprime density: 6/π² ≈ 0.6079',
+                'P(m) = Prime denominator count',
+                'C(m) = Composite denominator count',
+                'P/C = P(m)/C(m) ratio',
+                'P(r) = Prime numerator count',
+                'PP = Both prime (r,m prime)',
+                'PC = Prime num, Composite denom',
+                'CP = Composite num, Prime denom',
+                'CC = Both composite'
+            ]
         },
         'theory': {
             title: 'Farey Sector Density Theory',
@@ -2810,12 +2824,21 @@ function screenshotFullTab(tabName) {
         const rows = mainTable.querySelectorAll('tbody tr');
         
         if (rows.length > 0) {
-            // Find the scroll container and calculate visible row start
+            // Find the scroll container and determine visible rows
             const tableScroll = mainTable.closest('.table-scroll');
             let startRowIndex = 0;
-            if (tableScroll && tableScroll.scrollTop > 0) {
-                const rowHeight = 24;
-                startRowIndex = Math.floor(tableScroll.scrollTop / rowHeight);
+            
+            if (tableScroll) {
+                const scrollRect = tableScroll.getBoundingClientRect();
+                // Find first row that's visible in the scroll container
+                for (let i = 0; i < rows.length; i++) {
+                    const rowRect = rows[i].getBoundingClientRect();
+                    // Row is visible if its bottom is below the scroll top and its top is above scroll bottom
+                    if (rowRect.bottom > scrollRect.top && rowRect.top < scrollRect.bottom) {
+                        startRowIndex = i;
+                        break;
+                    }
+                }
             }
             
             const endRowIndex = Math.min(startRowIndex + 12, rows.length);
@@ -2866,9 +2889,18 @@ function screenshotFullTab(tabName) {
             }
             
             const remainingRows = rows.length - endRowIndex;
-            if (remainingRows > 0) {
+            const rowsAbove = startRowIndex;
+            if (rowsAbove > 0 || remainingRows > 0) {
                 ctx.fillStyle = '#64748b';
-                ctx.fillText('... and ' + remainingRows + ' more rows below', tableStartX + 4, currentY + 12);
+                let rangeText = '';
+                if (rowsAbove > 0 && remainingRows > 0) {
+                    rangeText = '(' + rowsAbove + ' rows above, ' + remainingRows + ' below)';
+                } else if (rowsAbove > 0) {
+                    rangeText = '(' + rowsAbove + ' rows above)';
+                } else {
+                    rangeText = '... and ' + remainingRows + ' more rows below';
+                }
+                ctx.fillText(rangeText, tableStartX + 4, currentY + 12);
                 currentY += 16;
             }
         }
@@ -2912,8 +2944,11 @@ function screenshotFullTab(tabName) {
         ctx.fillText(line, padding + 25, currentY + 110 + i * 14);
     });
     
-    // Right side - Parameters and constants
+    // Right side - Parameters and constants side by side
     const rightX = padding + (totalWidth - padding * 2) / 2 + 20;
+    const constBoxX = rightX + 220; // Constants box beside definitions
+    
+    // Definitions column
     ctx.fillStyle = '#c7d2fe';
     ctx.font = 'bold 13px system-ui';
     ctx.fillText('Definitions', rightX, currentY + 25);
@@ -2921,22 +2956,28 @@ function screenshotFullTab(tabName) {
     ctx.fillStyle = '#a5b4fc';
     ctx.font = '10px system-ui';
     info.params.forEach((param, i) => {
-        ctx.fillText('• ' + param, rightX + 5, currentY + 45 + i * 16);
+        ctx.fillText('• ' + param, rightX + 5, currentY + 45 + i * 14);
     });
     
-    // Constants box
-    const constY = currentY + 45 + info.params.length * 16 + 10;
+    // Constants box - beside definitions
     ctx.fillStyle = '#0f172a';
-    ctx.fillRect(rightX, constY, 200, 55);
+    ctx.fillRect(constBoxX, currentY + 10, 210, 120);
     ctx.strokeStyle = '#334155';
-    ctx.strokeRect(rightX, constY, 200, 55);
-    ctx.fillStyle = '#64748b';
-    ctx.font = '10px system-ui';
-    ctx.fillText('Universal Constants:', rightX + 10, constY + 18);
+    ctx.strokeRect(constBoxX, currentY + 10, 210, 120);
+    ctx.fillStyle = '#c7d2fe';
+    ctx.font = 'bold 13px system-ui';
+    ctx.fillText('Universal Constants', constBoxX + 10, currentY + 30);
     ctx.fillStyle = '#6366f1';
     ctx.font = '11px monospace';
-    ctx.fillText('6/π² = ' + (6/Math.PI/Math.PI).toFixed(8), rightX + 10, constY + 35);
-    ctx.fillText('π²/6 = ' + (Math.PI*Math.PI/6).toFixed(8), rightX + 10, constY + 50);
+    ctx.fillText('6/π² = ' + (6/Math.PI/Math.PI).toFixed(8), constBoxX + 10, currentY + 50);
+    ctx.fillText('π²/6 = ' + (Math.PI*Math.PI/6).toFixed(8), constBoxX + 10, currentY + 66);
+    ctx.fillText('√3/π = ' + (Math.sqrt(3)/Math.PI).toFixed(8), constBoxX + 10, currentY + 82);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '10px system-ui';
+    ctx.fillText('Current Bounds:', constBoxX + 10, currentY + 100);
+    ctx.fillStyle = '#22c55e';
+    ctx.font = '10px monospace';
+    ctx.fillText('N = ' + state.nMax.toLocaleString() + ', S = [' + state.sectorMin + ',' + state.sectorMax + ']', constBoxX + 10, currentY + 115);
     
     // Footer
     ctx.fillStyle = '#475569';
@@ -4497,7 +4538,7 @@ function updateMainCharts() {
     if(state.charts.mainCount) state.charts.mainCount.destroy();
     const ds = [{label:'Predicted',data:state.sectors.map(s=>s.predicted),borderColor:'#22c55e',borderDash:[5,5],fill:false}];
     if(hasExact) ds.unshift({label:'Exact',data:state.sectors.map(s=>s.exact),borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,0.1)',fill:true});
-    state.charts.mainCount = new Chart(document.getElementById('mainCountChart'),{type:'line',data:{labels,datasets:ds},options:{responsive:true,plugins:{legend:{labels:{color:'#94a3b8'}}},scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
+    state.charts.mainCount = new Chart(document.getElementById('mainCountChart'),{type:'line',data:{labels,datasets:ds},options:{responsive:true,plugins:{legend:{labels:{color:'#94a3b8'}},zoom:{zoom:{wheel:{enabled:true},pinch:{enabled:true},mode:'xy'},pan:{enabled:true,mode:'xy'}}},scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
     
     if(state.charts.mainError) state.charts.mainError.destroy();
     if(hasExact) {
@@ -13701,6 +13742,12 @@ function playSectorPrimes(sectorNum) {
 // =============================================
 // PLAY ERROR/COUNT BY SECTOR
 // =============================================
+
+function resetCountChartZoom() {
+    if (state.charts.mainCount) {
+        state.charts.mainCount.resetZoom();
+    }
+}
 
 function playErrorBySector(mode = 'error') {
     if (state.sectors.length === 0) {
