@@ -783,6 +783,12 @@
                     <button onclick="setPointSize(1)" class="secondary" style="font-size:10px;padding:3px 6px;">1</button>
                     <button onclick="setPointSize(3)" class="secondary" style="font-size:10px;padding:3px 6px;">3</button>
                     <button onclick="setPointSize(6)" class="secondary" style="font-size:10px;padding:3px 6px;">6</button>
+                    <label style="font-size:12px;margin-left:10px;">Canvas: <select id="ringCanvasSize" onchange="resizeRingCanvas()" style="padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-size:11px;">
+                        <option value="800">800x800</option>
+                        <option value="1024">1K (1024x1024)</option>
+                        <option value="2048">2K (2048x2048)</option>
+                        <option value="4096">4K (4096x4096)</option>
+                    </select></label>
                 </div>
             </div>
             <div style="display:flex;gap:8px;">
@@ -794,54 +800,125 @@
         <!-- Advanced Controls (collapsed by default) -->
         <div id="advancedControlsPanel" style="display:none;margin-bottom:15px;">
             <div class="panel" style="background:#0f172a;border:1px solid #334155;">
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;">
                     <!-- Rotation Controls -->
-                    <div style="padding:10px;background:rgba(255,215,0,0.05);border-radius:6px;border:1px solid rgba(255,215,0,0.2);">
-                        <strong style="color:#ffd700;font-size:11px;display:block;margin-bottom:8px;">Per-Ring Rotation</strong>
-                        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-                            <label style="font-size:10px;"><input type="checkbox" id="enableRingRotation" onchange="drawMainRing()"> Enable</label>
-                            <label style="font-size:10px;">Δθ: <input type="range" id="ringRotationAmount" min="0" max="180" value="0" step="0.5" style="width:60px;" onchange="updateRotationDisplay();drawMainRing()"><span id="rotationAmountV" style="color:#ffd700;">0°</span></label>
-                            <label style="font-size:10px;"><input type="checkbox" id="rotationCumulative" checked onchange="drawMainRing()"> Cumulative</label>
+                    <div style="padding:12px;background:rgba(255,215,0,0.05);border-radius:6px;border:1px solid rgba(255,215,0,0.2);">
+                        <strong style="color:#ffd700;font-size:11px;display:block;margin-bottom:10px;">Per-Ring Rotation</strong>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
+                            <label style="font-size:11px;"><input type="checkbox" id="enableRingRotation" onchange="drawMainRing()"> Enable</label>
+                            <label style="font-size:11px;">Δθ: <input type="range" id="ringRotationAmount" min="0" max="360" value="0" step="0.5" style="width:80px;vertical-align:middle;" oninput="updateRotationDisplay();drawMainRing()"><span id="rotationAmountV" style="color:#ffd700;margin-left:4px;">0°</span></label>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                            <label style="font-size:11px;"><input type="checkbox" id="rotationCumulative" checked onchange="drawMainRing()"> Cumulative</label>
+                            <label style="font-size:11px;">Phase: <input type="number" id="ringGlobalPhase" value="0" min="-360" max="360" step="1" style="width:50px;font-size:10px;padding:2px;" onchange="drawMainRing()">°</label>
+                            <button onclick="document.getElementById('ringRotationAmount').value=137.5;updateRotationDisplay();drawMainRing()" class="secondary" style="font-size:9px;padding:2px 6px;" title="Golden angle">φ</button>
+                            <button onclick="document.getElementById('ringRotationAmount').value=60;updateRotationDisplay();drawMainRing()" class="secondary" style="font-size:9px;padding:2px 6px;">60°</button>
+                            <button onclick="document.getElementById('ringRotationAmount').value=90;updateRotationDisplay();drawMainRing()" class="secondary" style="font-size:9px;padding:2px 6px;">90°</button>
                         </div>
                     </div>
+                    
                     <!-- Sector Analysis -->
-                    <div style="padding:10px;background:rgba(150,100,255,0.05);border-radius:6px;border:1px solid rgba(150,100,255,0.2);">
-                        <strong style="color:#9664ff;font-size:11px;display:block;margin-bottom:8px;">Sector Analysis</strong>
-                        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-                            <label style="font-size:10px;"><input type="checkbox" id="showSectorBounds" onchange="drawMainRing()"> Bounds</label>
-                            <label style="font-size:10px;"><input type="checkbox" id="showMedianLine" onchange="drawMainRing()"> Median</label>
-                            <label style="font-size:10px;"><input type="checkbox" id="dimOutsideSector" onchange="drawMainRing()"> Dim Outside</label>
+                    <div style="padding:12px;background:rgba(150,100,255,0.05);border-radius:6px;border:1px solid rgba(150,100,255,0.2);">
+                        <strong style="color:#9664ff;font-size:11px;display:block;margin-bottom:10px;">Sector Analysis</strong>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
+                            <label style="font-size:11px;"><input type="checkbox" id="showSectorBounds" onchange="drawMainRing()"> Bounds</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="showMedianLine" onchange="drawMainRing()"> Median</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="dimOutsideSector" onchange="drawMainRing()"> Dim Outside</label>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                            <label style="font-size:11px;">Mode: <select id="sectorAnalysisMode" onchange="drawMainRing()" style="font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#e2e8f0;">
+                                <option value="count">Count</option>
+                                <option value="density">Density</option>
+                                <option value="error">Error</option>
+                            </select></label>
+                            <label style="font-size:11px;"><input type="checkbox" id="highlightPrimeRings" onchange="drawMainRing()"> Prime Rings</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="showSectorStats" onchange="drawMainRing()"> Show Stats</label>
                         </div>
                     </div>
-                    <!-- Tracker -->
-                    <div style="padding:10px;background:rgba(0,255,255,0.05);border-radius:6px;border:1px solid rgba(0,255,255,0.2);">
-                        <strong style="color:#00ffff;font-size:11px;display:block;margin-bottom:8px;">Residue Tracker</strong>
+                    
+                    <!-- Residue Tracker -->
+                    <div style="padding:12px;background:rgba(0,255,255,0.05);border-radius:6px;border:1px solid rgba(0,255,255,0.2);">
+                        <strong style="color:#00ffff;font-size:11px;display:block;margin-bottom:10px;">Residue Tracker</strong>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
+                            <label style="font-size:11px;"><input type="checkbox" id="enableResidueTracker" onchange="drawMainRing()"> Enable</label>
+                            <input type="text" id="trackResidues" placeholder="1,5,7 or 1-10" style="width:90px;font-size:10px;padding:4px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;" onchange="drawMainRing()">
+                            <input type="color" id="trackerColor" value="#00ffff" style="width:28px;height:24px;border:none;cursor:pointer;" onchange="drawMainRing()">
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
+                            <label style="font-size:11px;"><input type="checkbox" id="trackerGlow" onchange="drawMainRing()"> Glow</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="trackerConnect" onchange="drawMainRing()"> Connect</label>
+                            <label style="font-size:11px;">Size: <input type="number" id="trackerSize" value="8" min="1" max="30" step="0.5" style="width:45px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
+                        </div>
                         <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-                            <label style="font-size:10px;"><input type="checkbox" id="enableResidueTracker" onchange="drawMainRing()"> Enable</label>
-                            <input type="text" id="trackResidues" placeholder="1,5,7..." style="width:80px;font-size:10px;padding:3px;" onchange="drawMainRing()">
-                            <input type="color" id="trackerColor" value="#00ffff" style="width:24px;height:20px;" onchange="drawMainRing()">
-                            <label style="font-size:10px;"><input type="checkbox" id="trackerGlow" onchange="drawMainRing()"> Glow</label>
-                            <label style="font-size:10px;"><input type="checkbox" id="trackerConnect" onchange="drawMainRing()"> Connect</label>
+                            <label style="font-size:11px;">Filter: <select id="trackerModFilter" onchange="applyTrackerFilter()" style="font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#e2e8f0;">
+                                <option value="">None</option>
+                                <option value="prime">Primes only</option>
+                                <option value="composite">Composites only</option>
+                                <option value="mod2_1">m≡1 (mod 2)</option>
+                                <option value="mod3_1">m≡1 (mod 3)</option>
+                                <option value="mod6_1">m≡1 (mod 6)</option>
+                            </select></label>
+                            <button onclick="clearTracker()" class="secondary" style="font-size:9px;padding:3px 8px;">Clear</button>
                         </div>
                         <input type="hidden" id="trackerMode" value="manual">
                         <input type="hidden" id="trackerSliderR" value="1">
-                        <input type="hidden" id="trackerSize" value="8">
-                        <input type="hidden" id="trackerModFilter" value="">
                     </div>
-                    <!-- Display -->
-                    <div style="padding:10px;background:rgba(99,102,241,0.05);border-radius:6px;border:1px solid rgba(99,102,241,0.2);">
-                        <strong style="color:#6366f1;font-size:11px;display:block;margin-bottom:8px;">Display</strong>
-                        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-                            <label style="font-size:10px;"><input type="checkbox" id="invertRingOrder" onchange="drawMainRing()"> Invert</label>
-                            <label style="font-size:10px;"><input type="checkbox" id="showRingLabels" onchange="drawMainRing()"> Ring Labels</label>
-                            <label style="font-size:10px;"><input type="checkbox" id="showAllSectorLines" onchange="drawMainRing()"> All 1/n Lines</label>
-                            <label style="font-size:10px;">Canvas: <select id="ringCanvasSize" onchange="resizeRingCanvas()" style="font-size:10px;padding:2px;"><option value="600">600</option><option value="800" selected>800</option><option value="1000">1000</option></select></label>
+                    
+                    <!-- Display Options -->
+                    <div style="padding:12px;background:rgba(99,102,241,0.05);border-radius:6px;border:1px solid rgba(99,102,241,0.2);">
+                        <strong style="color:#6366f1;font-size:11px;display:block;margin-bottom:10px;">Display Options</strong>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
+                            <label style="font-size:11px;"><input type="checkbox" id="invertRingOrder" onchange="drawMainRing()"> Invert Order</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="showRingLabels" onchange="drawMainRing()"> Ring Labels</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="showAllSectorLines" onchange="drawMainRing()"> All 1/n Lines</label>
                         </div>
-                        <input type="hidden" id="ringGlobalPhase" value="0">
-                        <input type="hidden" id="sectorColorMode" value="preserve">
-                        <input type="hidden" id="sectorAnalysisMode" value="count">
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                            <label style="font-size:11px;"><input type="checkbox" id="showFractionLabels" onchange="drawMainRing()"> Point Labels</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="antialiasRing" checked onchange="drawMainRing()"> Antialias</label>
+                            <label style="font-size:11px;">BG: <input type="color" id="ringBgColor" value="#0f172a" style="width:28px;height:20px;border:none;cursor:pointer;" onchange="drawMainRing()"></label>
+                        </div>
+                    </div>
+                    
+                    <!-- Filtering -->
+                    <div style="padding:12px;background:rgba(34,197,94,0.05);border-radius:6px;border:1px solid rgba(34,197,94,0.2);">
+                        <strong style="color:#22c55e;font-size:11px;display:block;margin-bottom:10px;">Filtering</strong>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
+                            <label style="font-size:11px;">Show: <select id="pointFilter" onchange="drawMainRing()" style="font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#e2e8f0;">
+                                <option value="all">All Points</option>
+                                <option value="prime_denom">Prime Denom</option>
+                                <option value="composite_denom">Composite Denom</option>
+                                <option value="prime_num">Prime Numerator</option>
+                                <option value="twin_prime">Twin Prime Denom</option>
+                            </select></label>
+                            <label style="font-size:11px;">Min m: <input type="number" id="minDenomFilter" value="2" min="2" max="1000" style="width:55px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                            <label style="font-size:11px;">Max m: <input type="number" id="maxDenomFilter" value="" placeholder="∞" min="2" style="width:55px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
+                            <label style="font-size:11px;"><input type="checkbox" id="hideSmallDenom" onchange="drawMainRing()"> Hide m≤5</label>
+                            <button onclick="resetFilters()" class="secondary" style="font-size:9px;padding:3px 8px;">Reset</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Animation -->
+                    <div style="padding:12px;background:rgba(239,68,68,0.05);border-radius:6px;border:1px solid rgba(239,68,68,0.2);">
+                        <strong style="color:#ef4444;font-size:11px;display:block;margin-bottom:10px;">Animation</strong>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
+                            <button onclick="startRingAnimation()" id="ringAnimBtn" style="font-size:10px;padding:4px 10px;background:linear-gradient(135deg,#ef4444,#dc2626);border:none;border-radius:4px;color:white;cursor:pointer;">▶ Animate</button>
+                            <button onclick="stopRingAnimation()" class="secondary" style="font-size:10px;padding:4px 10px;">■ Stop</button>
+                            <label style="font-size:11px;">Speed: <input type="range" id="ringAnimSpeed" min="1" max="100" value="30" style="width:60px;vertical-align:middle;"></label>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                            <label style="font-size:11px;">Mode: <select id="ringAnimMode" style="font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#e2e8f0;">
+                                <option value="rotation">Rotate</option>
+                                <option value="growth">Growth</option>
+                                <option value="pulse">Pulse</option>
+                                <option value="wave">Wave</option>
+                            </select></label>
+                            <label style="font-size:11px;"><input type="checkbox" id="ringAnimLoop" checked> Loop</label>
+                        </div>
                     </div>
                 </div>
+                <input type="hidden" id="sectorColorMode" value="preserve">
             </div>
         </div>
         
@@ -1020,6 +1097,13 @@
             </div>
             <div class="control-row" style="margin-bottom:10px;">
                 <label>Tree Depth: <input type="number" id="treeDepth" value="8" min="3" max="15" onchange="drawSectorTree()"></label>
+                <label>Point Size: <input type="number" id="treePointSize" value="4" min="0.5" max="20" step="0.5" style="width:60px;" onchange="drawSectorTree()"></label>
+                <label>Canvas: <select id="treeCanvasSize" onchange="resizeTreeCanvas()" style="padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;">
+                    <option value="900x500">900x500</option>
+                    <option value="1920x1080">1K (1920x1080)</option>
+                    <option value="2560x1440">2K (2560x1440)</option>
+                    <option value="3840x2160">4K (3840x2160)</option>
+                </select></label>
                 <label><input type="checkbox" id="showTreeLabels" checked onchange="drawSectorTree()"> Labels</label>
                 <label><input type="checkbox" id="showTreeGrid" onchange="drawSectorTree()"> Grid</label>
                 <label><input type="checkbox" id="animatePath" checked> Animate</label>
@@ -2415,11 +2499,18 @@ function screenshotFullTab(tabName) {
     
     const canvases = tabElement.querySelectorAll('canvas');
     const statGrids = tabElement.querySelectorAll('.stat-grid');
-    const tables = tabElement.querySelectorAll('table');
+    // Also capture individual stat cards and panels
+    const statCards = tabElement.querySelectorAll('.stat-card');
+    const panels = tabElement.querySelectorAll('.panel');
     
     const padding = 40;
     const titleHeight = 120;
-    const statsHeight = statGrids.length > 0 ? 100 : 0;
+    
+    // Calculate stats section height - capture ALL stat grids
+    let statsHeight = 0;
+    if (statGrids.length > 0) {
+        statsHeight = statGrids.length * 100; // 100px per stat grid row
+    }
     
     // Calculate canvas section - 2 per row
     const canvasCount = canvases.length;
@@ -2431,9 +2522,13 @@ function screenshotFullTab(tabName) {
     
     // Calculate table height - compact rows
     let tableHeight = 0;
-    if (tables.length > 0) {
-        const rows = Math.min(tables[0].querySelectorAll('tbody tr').length, 12);
-        tableHeight = rows * 16 + 52; // 16px per row + header + title
+    const mainTable = tabElement.querySelector('#mainTable') || tabElement.querySelector('table');
+    if (mainTable) {
+        const tableRows = mainTable.querySelectorAll('tbody tr');
+        const rowCount = Math.min(tableRows.length, 12);
+        if (rowCount > 0) {
+            tableHeight = rowCount * 16 + 52;
+        }
     }
     tableHeight = Math.min(tableHeight, 280);
     
@@ -2441,7 +2536,7 @@ function screenshotFullTab(tabName) {
     const formulaPanelHeight = 200;
     
     // Solver section height (if active)
-    const solverHeight = solverCurrentMatch ? 90 : 0;
+    const solverHeight = solverCurrentMatch && tabName === 'main' ? 90 : 0;
     
     const totalWidth = 1000;
     const totalHeight = titleHeight + statsHeight + canvasSectionHeight + solverHeight + tableHeight + formulaPanelHeight + padding * 2;
@@ -2463,130 +2558,68 @@ function screenshotFullTab(tabName) {
         'main': {
             title: 'Main Sector Analysis',
             formula: 'C(n, N) = 3N² / (π² n(n+1))',
-            description: 'Asymptotic count of coprime pairs (r, m) with r/m in sector Sₙ = (1/(n+1), 1/n]',
-            params: (function() {
-                const baseParams = ['Coprime density: 6/π² ≈ 0.6079', 'P(m)=Prime denom, C(m)=Comp denom', 'P/C = P(m)/C(m) ratio'];
-                const showCats = document.getElementById('showCategoryColumns')?.checked;
-                if (showCats) {
-                    baseParams.push('PP=Both prime, PC=Prime r Comp m');
-                    baseParams.push('CP=Comp r Prime m, CC=Both comp');
-                }
-                return baseParams;
-            })()
+            description: 'Asymptotic count of coprime pairs (r, m) with r/m in sector Sn',
+            params: ['Coprime density: 6/π² ≈ 0.6079', 'P(m)=Prime denom, C(m)=Comp denom', 'P/C = P(m)/C(m) ratio']
         },
         'theory': {
             title: 'Farey Sector Density Theory',
             formula: 'C(n, N) ~ (3/π²) · N² / n(n+1)',
-            description: 'Distribution of coprime integer pairs with bounded height whose rational slope lies in a fixed Farey sector',
-            params: ['Σφ(b) = 3N²/π² + O(N log N)', 'Global density: 1/ζ(2) = 6/π²', 'Visible lattice points']
+            description: 'Distribution of coprime integer pairs with bounded height',
+            params: ['Summatory totient ~ 3N²/π²', 'Global density: 1/ζ(2) = 6/π²', 'Visible lattice points']
         },
         'theoryviz': {
             title: 'Theory Visualization',
             formula: 'C(n, N) = 3N² / (π² n(n+1))',
-            description: 'Interactive visual exploration of the Farey Sector Density Theorem',
+            description: 'Visual exploration of the Farey Sector Density Theorem',
             params: ['Summatory totient: Σφ(b) ~ 3N²/π²', 'Sector partition of (0,1]', 'Convergence analysis']
         },
         'gaps': {
             title: 'Farey Gap Analysis',
-            formula: 'gap(a/b, c/d) = |c/d - a/b| = 1/(b·d)',
-            description: 'For consecutive Farey fractions, the gap equals exactly 1/(b·d)',
+            formula: 'gap(a/b, c/d) = 1/(b·d)',
+            description: 'For consecutive Farey fractions, gap = 1/(b·d)',
             params: ['Mediant property: |ad - bc| = 1', 'Gap decreases with denominator', 'Uniform distribution']
         },
         'franel': {
             title: 'Franel-Landau Theorem',
-            formula: 'Σ|δₖ| = O(N^(1/2+ε)) ⟺ RH',
-            description: 'Equivalence between Farey sequence deviation growth and the Riemann Hypothesis',
-            params: ['δₖ = Fₖ - k/|Fₙ|', 'RH implies bounded Σ|δ|/√N', 'Computational verification']
+            formula: 'Σ|δk| = O(N^(1/2+ε)) ⟺ RH',
+            description: 'Equivalence with Riemann Hypothesis',
+            params: ['δk = Fk - k/|Fn|', 'RH implies bounded Σ|δ|/√N', 'Computational verification']
         },
         'dedekind': {
             title: 'Dedekind Sums',
-            formula: 's(h,k) = Σⱼ₌₁ᵏ⁻¹ ((j/k))((hj/k))',
-            description: 'Arithmetic functions encoding properties of coprime pairs with reciprocity laws',
-            params: ['Reciprocity: s(h,k) + s(k,h) = -1/4 + ...', 'Sawtooth function ((x))', 'Modular forms connection']
+            formula: 's(h,k) = Σ ((j/k))((hj/k))',
+            description: 'Arithmetic functions with reciprocity laws',
+            params: ['Reciprocity law', 'Sawtooth function ((x))', 'Modular forms connection']
         },
         'cf': {
             title: 'Continued Fractions',
-            formula: 'r/m = [a₀; a₁, a₂, ...]',
-            description: 'Stern-Brocot tree encoding via continued fraction expansion',
-            params: ['Path L^a R^b encodes [0; a, b, ...]', 'Convergents approximate r/m', 'Best rational approximations']
-        },
-        'psl': {
-            title: 'PSL(2,ℤ) Matrices',
-            formula: '[a,c; b,d] ∈ SL(2,ℤ) with |ad-bc|=1',
-            description: 'Farey neighbors correspond to matrices with determinant ±1',
-            params: ['Ford circles tangency', 'Hyperbolic tessellation', 'Modular group action']
+            formula: 'r/m = [a0; a1, a2, ...]',
+            description: 'Stern-Brocot tree encoding',
+            params: ['Path encoding', 'Convergents', 'Best rational approximations']
         },
         'euler': {
             title: 'Euler Product for ζ(2)',
-            formula: 'ζ(2) = Πₚ 1/(1-1/p²) = π²/6',
-            description: 'The coprime density emerges from excluding prime multiples',
-            params: ['6/π² = Πₚ(1-1/p²)', 'Prime sieve interpretation', 'Basel problem solution']
+            formula: 'ζ(2) = Πp 1/(1-1/p²) = π²/6',
+            description: 'Coprime density from prime exclusion',
+            params: ['6/π² = Πp(1-1/p²)', 'Prime sieve interpretation', 'Basel problem']
         },
-        'modular': {
-            title: 'Modular Arithmetic Analysis',
-            formula: 'm ≡ a (mod k)',
-            description: 'Residue class distribution and prime channel analysis',
-            params: ['Lifting tower: m → 2m, 3m, ...', 'Prime channel ownership', 'Residue class uniformity']
+        'stats': {
+            title: 'Statistical Analysis',
+            formula: 'Expected: 6N²/π²',
+            description: 'Statistical distribution of Farey fractions',
+            params: ['Chi-squared tests', 'Uniformity measures', 'Prime distribution']
         },
-        '3d': {
-            title: '3D Sector Cone Visualization',
-            formula: 'Points at height m have coprime r with r/m ∈ Sₙ',
-            description: 'Third axis represents denominator m, showing density growth with m²',
-            params: ['Perspective projection', 'Color by prime/composite', 'Rotation controls']
-        },
-        'hyperbolic': {
-            title: 'Hyperbolic Plane / Poincaré Disk',
-            formula: 'Farey tessellation of ℍ',
-            description: 'The hyperbolic plane is tessellated by ideal triangles with Farey vertices',
-            params: ['Geodesics between neighbors', 'Ford circles on boundary', 'PSL(2,ℤ) action']
-        },
-        'animation': {
-            title: 'Farey Sequence Growth Animation',
-            formula: '|Fₙ| ~ 3N²/π²',
-            description: 'Watch the Farey sequence grow as N increases',
-            params: ['Progressive density increase', 'Prime/composite distribution', 'Mediant insertion']
+        'primes': {
+            title: 'Prime Analysis',
+            formula: 'π(N) ~ N/ln(N)',
+            description: 'Prime denominator distribution',
+            params: ['Prime counting', 'P/C ratios', 'Density analysis']
         },
         'smith': {
             title: 'Smith Chart Transform',
             formula: 'Γ = (Z-1)/(Z+1)',
-            description: 'Map Farey fractions to Smith chart coordinates',
+            description: 'Map Farey fractions to Smith chart',
             params: ['Impedance transformation', 'Reflection coefficient', 'Complex plane mapping']
-        },
-        'stats': {
-            title: 'Statistical Analysis',
-            formula: 'Expected: 6N²/π², Actual: |coprimes|',
-            description: 'Statistical comparison of actual vs theoretical distributions',
-            params: ['Cross-sector correlation', 'Error term analysis', 'Local density variation']
-        },
-        'primes': {
-            title: 'Prime Analysis',
-            formula: 'φ(p) = p-1 for prime p',
-            description: 'Prime denominator distribution and twin prime patterns',
-            params: ['Prime vs composite ratio', 'k-tuple correlations', 'Gap patterns at primes']
-        },
-        'harmonic': {
-            title: 'Harmonic Analysis',
-            formula: 'freq = baseHz × (r/m)',
-            description: 'Musical interpretation of Farey fractions as harmonic ratios',
-            params: ['Just intonation ratios', 'Consonance by denominator', 'Interval relationships']
-        },
-        'primorial': {
-            title: 'Primorial Sieve',
-            formula: 'P# = Π p≤n',
-            description: 'Analysis using primorial moduli to study coprime structure',
-            params: ['Coprime residue classes', 'Sieve density φ(k)/k', 'Prime channel distribution']
-        },
-        'horizon': {
-            title: 'Farey Horizon & Mediant Generation',
-            formula: 'med(a/b, c/d) = (a+c)/(b+d)',
-            description: 'Mediant operation generates all Farey fractions within a sector from boundaries',
-            params: ['Gatekeeper: 2/(2n+1)', 'BFS tree generation', 'Sector confinement property']
-        },
-        'research': {
-            title: 'Research Tools',
-            formula: 'Custom: C(n,N) = f(n,N)',
-            description: 'Tools for testing custom formulas and batch parameter sweeps',
-            params: ['LaTeX export', 'CSV/JSON data export', 'Parameter sweep analysis']
         }
     };
     
@@ -2622,147 +2655,39 @@ function screenshotFullTab(tabName) {
     
     currentY = titleHeight;
     
-    // Stats section
+    // Stats section - capture ALL stat grids
     if (statGrids.length > 0) {
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(padding, currentY + 10, totalWidth - padding * 2, statsHeight - 20);
-        ctx.strokeStyle = '#334155';
-        ctx.strokeRect(padding, currentY + 10, totalWidth - padding * 2, statsHeight - 20);
-        
-        const statCards = statGrids[0].querySelectorAll('.stat-card');
-        const statWidth = (totalWidth - padding * 2) / Math.min(statCards.length, 6);
-        
-        statCards.forEach((card, i) => {
-            if (i >= 6) return;
-            const x = padding + i * statWidth + statWidth / 2;
-            const label = card.querySelector('.stat-label');
-            const value = card.querySelector('.stat-value');
+        statGrids.forEach((statGrid, gridIdx) => {
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(padding, currentY + 10, totalWidth - padding * 2, 80);
+            ctx.strokeStyle = '#334155';
+            ctx.strokeRect(padding, currentY + 10, totalWidth - padding * 2, 80);
             
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = '11px system-ui';
-            ctx.textAlign = 'center';
-            ctx.fillText(label ? label.textContent : '', x, currentY + 35);
+            const statCardsInGrid = statGrid.querySelectorAll('.stat-card');
+            const statWidth = (totalWidth - padding * 2) / Math.min(statCardsInGrid.length, 8);
             
-            const valueEl = card.querySelector('.stat-value');
-            ctx.fillStyle = valueEl && valueEl.style.color ? valueEl.style.color : '#6366f1';
-            ctx.font = 'bold 18px system-ui';
-            ctx.fillText(value ? value.textContent : '', x, currentY + 60);
+            statCardsInGrid.forEach((card, i) => {
+                if (i >= 8) return; // Max 8 stats per row
+                const x = padding + i * statWidth + statWidth / 2;
+                const label = card.querySelector('.stat-label');
+                const value = card.querySelector('.stat-value');
+                
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '10px system-ui';
+                ctx.textAlign = 'center';
+                ctx.fillText(label ? label.textContent : '', x, currentY + 35);
+                
+                const valueEl = card.querySelector('.stat-value');
+                ctx.fillStyle = valueEl && valueEl.style.color ? valueEl.style.color : '#6366f1';
+                ctx.font = 'bold 16px system-ui';
+                ctx.fillText(value ? value.textContent : '', x, currentY + 58);
+            });
+            currentY += 100;
         });
-        currentY += statsHeight;
     }
     
-    // Canvases - 2 per row
-    const canvasWidth = (totalWidth - padding * 3) / 2;
-    const canvasHeight = 300;
-    
-    canvases.forEach((canvas, i) => {
-        const col = i % 2;
-        const row = Math.floor(i / 2);
-        const x = padding + col * (canvasWidth + padding);
-        const y = currentY + row * (canvasHeight + 40);
-        
-        // Get title from parent chart-box
-        const chartBox = canvas.closest('.chart-box');
-        const title = chartBox ? (chartBox.querySelector('h4') ? chartBox.querySelector('h4').textContent : 'Chart') : 'Chart';
-        
-        // Background
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(x, y, canvasWidth, canvasHeight);
-        ctx.strokeStyle = '#334155';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(x, y, canvasWidth, canvasHeight);
-        
-        // Title bar
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(x, y, canvasWidth, 25);
-        ctx.fillStyle = '#e2e8f0';
-        ctx.font = 'bold 11px system-ui';
-        ctx.textAlign = 'left';
-        ctx.fillText(title, x + 10, y + 17);
-        
-        // Draw canvas scaled
-        const scale = Math.min((canvasWidth - 20) / canvas.width, (canvasHeight - 45) / canvas.height);
-        const drawWidth = canvas.width * scale;
-        const drawHeight = canvas.height * scale;
-        const drawX = x + (canvasWidth - drawWidth) / 2;
-        const drawY = y + 30 + (canvasHeight - 40 - drawHeight) / 2;
-        
-        try {
-            ctx.drawImage(canvas, drawX, drawY, drawWidth, drawHeight);
-        } catch (e) {
-            ctx.fillStyle = '#64748b';
-            ctx.fillText('Canvas render error', drawX + 20, drawY + 50);
-        }
-    });
-    
-    // Fill empty space if odd number of canvases
-    if (hasEmptySpace && canvasCount > 0) {
-        const col = canvasCount % 2;
-        const row = Math.floor(canvasCount / 2);
-        const x = padding + col * (canvasWidth + padding);
-        const y = currentY + row * (canvasHeight + 40);
-        
-        // Formula/Info panel in empty space
-        ctx.fillStyle = '#1e1b4b';
-        ctx.fillRect(x, y, canvasWidth, canvasHeight);
-        ctx.strokeStyle = '#6366f1';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x, y, canvasWidth, canvasHeight);
-        
-        // Title
-        ctx.fillStyle = '#c7d2fe';
-        ctx.font = 'bold 14px system-ui';
-        ctx.textAlign = 'center';
-        ctx.fillText('Key Formulas & Parameters', x + canvasWidth/2, y + 30);
-        
-        // Main formula box
-        ctx.fillStyle = 'rgba(99, 102, 241, 0.2)';
-        ctx.fillRect(x + 20, y + 50, canvasWidth - 40, 50);
-        ctx.strokeStyle = '#8b5cf6';
-        ctx.strokeRect(x + 20, y + 50, canvasWidth - 40, 50);
-        ctx.fillStyle = '#f1f5f9';
-        ctx.font = 'bold 16px "Cambria Math", serif';
-        ctx.fillText(info.formula, x + canvasWidth/2, y + 82);
-        
-        // Computed example
-        const viewSector = parseInt(document.getElementById('viewSector')?.value || 1);
-        const N = state.nMax;
-        const pi2 = Math.PI * Math.PI;
-        const computedResult = (3 * N * N) / (pi2 * viewSector * (viewSector + 1));
-        ctx.fillStyle = '#22c55e';
-        ctx.font = '12px system-ui';
-        ctx.fillText(`Example: C(${viewSector}, ${N.toLocaleString()}) = ${computedResult.toFixed(4)}`, x + canvasWidth/2, y + 115);
-        
-        // Description
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '11px system-ui';
-        const descLines = wrapText(ctx, info.description, canvasWidth - 40);
-        descLines.forEach((line, i) => {
-            ctx.fillText(line, x + canvasWidth/2, y + 140 + i * 16);
-        });
-        
-        // Parameters
-        ctx.fillStyle = '#cbd5e1';
-        ctx.font = 'bold 12px system-ui';
-        ctx.textAlign = 'left';
-        ctx.fillText('Definitions:', x + 25, y + 185);
-        
-        ctx.font = '11px system-ui';
-        ctx.fillStyle = '#a5b4fc';
-        info.params.forEach((param, i) => {
-            ctx.fillText('• ' + param, x + 30, y + 203 + i * 18);
-        });
-        
-        // Current values
-        ctx.fillStyle = '#64748b';
-        ctx.font = '10px system-ui';
-        ctx.fillText('Current: N=' + state.nMax + ', Sectors=' + state.sectorMin + '-' + state.sectorMax, x + 25, y + canvasHeight - 20);
-    }
-    
-    currentY += canvasSectionHeight;
-    
-    // Solver section (if solver has results)
-    if (solverCurrentMatch) {
+    // Solver section (if active on main tab)
+    if (solverCurrentMatch && tabName === 'main') {
         ctx.fillStyle = '#064e3b';
         ctx.fillRect(padding, currentY + 10, totalWidth - padding * 2, 70);
         ctx.strokeStyle = '#10b981';
@@ -2797,79 +2722,155 @@ function screenshotFullTab(tabName) {
         currentY += 90;
     }
     
-    // Tables section
-    if (tables.length > 0 && tableHeight > 60) {
-        const table = tables[0];
-        const headers = table.querySelectorAll('thead th');
-        const rows = table.querySelectorAll('tbody tr');
+    // Canvases - 2 per row
+    const canvasWidth = (totalWidth - padding * 3) / 2;
+    const canvasHeight = 300;
+    
+    canvases.forEach((canvas, i) => {
+        const col = i % 2;
+        const row = Math.floor(i / 2);
+        const x = padding + col * (canvasWidth + padding);
+        const y = currentY + row * (canvasHeight + 40);
         
-        // Find the scroll container and calculate visible row start
-        const tableScroll = table.closest('.table-scroll');
-        let startRowIndex = 0;
-        if (tableScroll && tableScroll.scrollTop > 0) {
-            // Estimate row height (~24px in the actual table)
-            const rowHeight = 24;
-            startRowIndex = Math.floor(tableScroll.scrollTop / rowHeight);
-        }
+        // Get title from parent chart-box
+        const chartBox = canvas.closest('.chart-box');
+        const title = chartBox ? (chartBox.querySelector('h4') ? chartBox.querySelector('h4').textContent : 'Chart') : 'Chart';
         
-        // Calculate which sector range we're showing
-        const endRowIndex = Math.min(startRowIndex + 12, rows.length);
-        const showingFrom = startRowIndex + 1;
-        const showingTo = endRowIndex;
+        // Background
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(x, y, canvasWidth, canvasHeight);
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, canvasWidth, canvasHeight);
         
-        ctx.fillStyle = '#cbd5e1';
-        ctx.font = 'bold 12px system-ui';
-        ctx.textAlign = 'left';
-        ctx.fillText('Sector Data' + (startRowIndex > 0 ? ' (rows ' + showingFrom + '-' + showingTo + ' of ' + rows.length + ')' : ''), padding, currentY + 20);
-        currentY += 30;
-        
-        // Full width table matching canvas width
-        const tableWidth = totalWidth - padding * 2;
-        const numCols = headers.length;
-        const colWidth = tableWidth / numCols;
-        const tableStartX = padding;
-        
-        // Header
-        ctx.fillStyle = '#334155';
-        ctx.fillRect(tableStartX, currentY, tableWidth, 22);
-        
+        // Title bar
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(x, y, canvasWidth, 25);
         ctx.fillStyle = '#e2e8f0';
-        ctx.font = 'bold 9px system-ui';
-        headers.forEach((h, i) => {
-            ctx.fillText(h.textContent.substring(0, 12), tableStartX + 4 + i * colWidth, currentY + 15);
-        });
-        currentY += 22;
+        ctx.font = 'bold 11px system-ui';
+        ctx.textAlign = 'left';
+        ctx.fillText(title.substring(0, 50), x + 10, y + 17);
         
-        // Rows - start from scroll position
-        ctx.font = '9px system-ui';
-        const maxRows = 12;
-        for (let r = startRowIndex; r < Math.min(startRowIndex + maxRows, rows.length); r++) {
-            const row = rows[r];
-            const cells = row.querySelectorAll('td');
-            const displayIdx = r - startRowIndex;
-            
-            if (displayIdx % 2 === 0) {
-                ctx.fillStyle = '#1e293b';
-                ctx.fillRect(tableStartX, currentY, tableWidth, 16);
+        // Draw canvas scaled
+        const scale = Math.min((canvasWidth - 20) / canvas.width, (canvasHeight - 45) / canvas.height);
+        const drawWidth = canvas.width * scale;
+        const drawHeight = canvas.height * scale;
+        const drawX = x + (canvasWidth - drawWidth) / 2;
+        const drawY = y + 30 + (canvasHeight - 40 - drawHeight) / 2;
+        
+        try {
+            ctx.drawImage(canvas, drawX, drawY, drawWidth, drawHeight);
+        } catch (e) {
+            ctx.fillStyle = '#64748b';
+            ctx.fillText('Canvas render error', drawX + 20, drawY + 50);
+        }
+    });
+    
+    // Fill empty space if odd number of canvases with formula panel
+    if (hasEmptySpace && canvasCount > 0) {
+        const col = canvasCount % 2;
+        const row = Math.floor(canvasCount / 2);
+        const x = padding + col * (canvasWidth + padding);
+        const y = currentY + row * (canvasHeight + 40);
+        
+        ctx.fillStyle = '#1e1b4b';
+        ctx.fillRect(x, y, canvasWidth, canvasHeight);
+        ctx.strokeStyle = '#6366f1';
+        ctx.strokeRect(x, y, canvasWidth, canvasHeight);
+        
+        ctx.fillStyle = '#c7d2fe';
+        ctx.font = 'bold 14px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText(info.title, x + canvasWidth/2, y + 30);
+        
+        ctx.fillStyle = '#f1f5f9';
+        ctx.font = 'bold 20px "Cambria Math", serif';
+        ctx.fillText(info.formula, x + canvasWidth/2, y + 70);
+        
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '11px system-ui';
+        const descLines = wrapText(ctx, info.description, canvasWidth - 40);
+        descLines.forEach((line, i) => {
+            ctx.fillText(line, x + canvasWidth/2, y + 100 + i * 16);
+        });
+        
+        ctx.fillStyle = '#a5b4fc';
+        ctx.font = '10px system-ui';
+        ctx.textAlign = 'left';
+        info.params.forEach((param, i) => {
+            ctx.fillText('• ' + param, x + 20, y + 150 + i * 18);
+        });
+    }
+    
+    currentY += canvasSectionHeight;
+    
+    // Tables section
+    if (mainTable && tableHeight > 52) {
+        const headers = mainTable.querySelectorAll('thead th');
+        const rows = mainTable.querySelectorAll('tbody tr');
+        
+        if (rows.length > 0) {
+            // Find the scroll container and calculate visible row start
+            const tableScroll = mainTable.closest('.table-scroll');
+            let startRowIndex = 0;
+            if (tableScroll && tableScroll.scrollTop > 0) {
+                const rowHeight = 24;
+                startRowIndex = Math.floor(tableScroll.scrollTop / rowHeight);
             }
             
-            cells.forEach((cell, i) => {
-                ctx.fillStyle = cell.style.color || '#e2e8f0';
-                ctx.fillText(cell.textContent.substring(0, 14), tableStartX + 4 + i * colWidth, currentY + 12);
+            const endRowIndex = Math.min(startRowIndex + 12, rows.length);
+            const showingFrom = startRowIndex + 1;
+            const showingTo = endRowIndex;
+            
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = 'bold 12px system-ui';
+            ctx.textAlign = 'left';
+            ctx.fillText('Sector Data' + (startRowIndex > 0 ? ' (rows ' + showingFrom + '-' + showingTo + ' of ' + rows.length + ')' : ''), padding, currentY + 20);
+            currentY += 30;
+            
+            // Full width table
+            const tableWidth = totalWidth - padding * 2;
+            const numCols = headers.length;
+            const colWidth = tableWidth / numCols;
+            const tableStartX = padding;
+            
+            // Header
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(tableStartX, currentY, tableWidth, 22);
+            
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = 'bold 9px system-ui';
+            headers.forEach((h, i) => {
+                ctx.fillText(h.textContent.substring(0, 12), tableStartX + 4 + i * colWidth, currentY + 15);
             });
-            currentY += 16;
-        }
-        
-        // Show remaining rows indicator
-        const remainingRows = rows.length - endRowIndex;
-        if (remainingRows > 0) {
-            ctx.fillStyle = '#64748b';
-            ctx.fillText('... and ' + remainingRows + ' more rows below', tableStartX + 4, currentY + 12);
-            currentY += 16;
-        }
-        if (startRowIndex > 0) {
-            ctx.fillStyle = '#64748b';
-            ctx.fillText('(' + startRowIndex + ' rows above)', tableStartX + 200, currentY - 4);
+            currentY += 22;
+            
+            // Rows
+            ctx.font = '9px system-ui';
+            const maxRows = 12;
+            for (let r = startRowIndex; r < Math.min(startRowIndex + maxRows, rows.length); r++) {
+                const row = rows[r];
+                const cells = row.querySelectorAll('td');
+                const displayIdx = r - startRowIndex;
+                
+                if (displayIdx % 2 === 0) {
+                    ctx.fillStyle = '#1e293b';
+                    ctx.fillRect(tableStartX, currentY, tableWidth, 16);
+                }
+                
+                cells.forEach((cell, i) => {
+                    ctx.fillStyle = cell.style.color || '#e2e8f0';
+                    ctx.fillText(cell.textContent.substring(0, 14), tableStartX + 4 + i * colWidth, currentY + 12);
+                });
+                currentY += 16;
+            }
+            
+            const remainingRows = rows.length - endRowIndex;
+            if (remainingRows > 0) {
+                ctx.fillStyle = '#64748b';
+                ctx.fillText('... and ' + remainingRows + ' more rows below', tableStartX + 4, currentY + 12);
+                currentY += 16;
+            }
         }
     }
     
@@ -2901,7 +2902,7 @@ function screenshotFullTab(tabName) {
     const bottomResult = (3 * bottomN * bottomN) / (bottomPi2 * bottomViewSector * (bottomViewSector + 1));
     ctx.fillStyle = '#22c55e';
     ctx.font = '11px system-ui';
-    ctx.fillText(`C(${bottomViewSector}, ${bottomN.toLocaleString()}) = ${bottomResult.toFixed(4)}`, padding + 20 + ((totalWidth - padding * 2) / 2 - 40) / 2, currentY + 90);
+    ctx.fillText('C(' + bottomViewSector + ', ' + bottomN.toLocaleString() + ') = ' + bottomResult.toFixed(4), padding + 20 + ((totalWidth - padding * 2) / 2 - 40) / 2, currentY + 90);
     
     ctx.fillStyle = '#94a3b8';
     ctx.font = '10px system-ui';
@@ -2946,6 +2947,25 @@ function screenshotFullTab(tabName) {
     currentScreenshotData = composite.toDataURL('image/png');
     document.getElementById('screenshotPreview').src = currentScreenshotData;
     document.getElementById('screenshotOverlay').classList.add('active');
+}
+
+function wrapText(ctx, text, maxWidth) {
+    const words = text.split(' ');
+    const lines = [];
+    let currentLine = '';
+    
+    words.forEach(word => {
+        const testLine = currentLine + (currentLine ? ' ' : '') + word;
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && currentLine) {
+            lines.push(currentLine);
+            currentLine = word;
+        } else {
+            currentLine = testLine;
+        }
+    });
+    if (currentLine) lines.push(currentLine);
+    return lines;
 }
 
 // Special screenshot function for Horizon tab using html2canvas
@@ -3033,25 +3053,6 @@ async function screenshotHorizonTab() {
     } finally {
         document.body.removeChild(loadingDiv);
     }
-}
-
-// Helper function to wrap text
-function wrapText(ctx, text, maxWidth) {
-    const words = text.split(' ');
-    const lines = [];
-    let currentLine = '';
-    
-    words.forEach(word => {
-        const testLine = currentLine + (currentLine ? ' ' : '') + word;
-        if (ctx.measureText(testLine).width > maxWidth && currentLine) {
-            lines.push(currentLine);
-            currentLine = word;
-        } else {
-            currentLine = testLine;
-        }
-    });
-    if (currentLine) lines.push(currentLine);
-    return lines.slice(0, 3); // Max 3 lines
 }
 
 // Utilities
@@ -5169,6 +5170,27 @@ function updatePtSizeDisplay() {
     }
 }
 
+function resizeRingCanvas() {
+    const size = parseInt(document.getElementById('ringCanvasSize').value);
+    const canvas = document.getElementById('mainRing');
+    if (canvas) {
+        canvas.width = size;
+        canvas.height = size;
+        drawMainRing();
+    }
+}
+
+function resizeTreeCanvas() {
+    const sizeStr = document.getElementById('treeCanvasSize').value;
+    const [w, h] = sizeStr.split('x').map(Number);
+    const canvas = document.getElementById('sectorTreeCanvas');
+    if (canvas) {
+        canvas.width = w;
+        canvas.height = h;
+        drawSectorTree();
+    }
+}
+
 // Ring zoom and pan state
 const ringView = {
     zoom: 1,
@@ -5316,6 +5338,9 @@ function zoomToSector(sectorNum) {
     updateRingTransform();
 }
 
+// Track highlighted point on ring (for click selection)
+let highlightedRingPoint = null;
+
 function drawMainRing() {
     const canvas = document.getElementById('mainRing'), ctx = canvas.getContext('2d');
     const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2, maxR=Math.min(W,H)/2-35;
@@ -5355,8 +5380,10 @@ function drawMainRing() {
     const showAllLines = document.getElementById('showAllSectorLines')?.checked || false;
     const dimOutside = document.getElementById('dimOutsideSector')?.checked || false;
     const sectorColorMode = document.getElementById('sectorColorMode')?.value || 'preserve';
+    const ringBgColor = document.getElementById('ringBgColor')?.value || '#0f172a';
     
-    ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,W,H);
+    // Clear canvas with background color
+    ctx.fillStyle = ringBgColor; ctx.fillRect(0,0,W,H);
     
     // Draw all 1/n sector lines if enabled
     if (showAllLines) {
@@ -5460,6 +5487,14 @@ function drawMainRing() {
         }
     }
     
+    // Get filter settings
+    const pointFilterVal = document.getElementById('pointFilter')?.value || 'all';
+    const minDenom = parseInt(document.getElementById('minDenomFilter')?.value) || 2;
+    const maxDenom = parseInt(document.getElementById('maxDenomFilter')?.value) || Infinity;
+    const hideSmall = document.getElementById('hideSmallDenom')?.checked || false;
+    const showFractionLabels = document.getElementById('showFractionLabels')?.checked || false;
+    const highlightPrimeRings = document.getElementById('highlightPrimeRings')?.checked || false;
+    
     let maxGap=0, minGap=Infinity;
     residues.forEach(r => { const g=r.gapRight||0; if(g>maxGap)maxGap=g; if(g>0&&g<minGap)minGap=g; });
     
@@ -5468,9 +5503,33 @@ function drawMainRing() {
     let debugDrawnCount = 0;
     let debugNaNCount = 0;
     
+    // Draw prime ring highlights if enabled
+    if (highlightPrimeRings) {
+        const primeMs = [...new Set(residues.filter(r => r.isPrime).map(r => r.m))].sort((a,b) => a-b);
+        ctx.strokeStyle = 'rgba(245,158,11,0.3)';
+        ctx.lineWidth = 2;
+        primeMs.forEach(pm => {
+            const radNorm = invertOrder ? (1 - (pm-state.nMin)/(state.nMax-state.nMin+1)) : ((pm-state.nMin)/(state.nMax-state.nMin+1));
+            const rad = Math.max(radNorm, 0.05) * maxR;
+            ctx.beginPath();
+            ctx.arc(cx, cy, rad, 0, 2 * Math.PI);
+            ctx.stroke();
+        });
+    }
+    
     // Draw points
+    const labeledPoints = [];
     residues.forEach(res => {
         const {r,m,sector:s,isPrime:ip} = res;
+        
+        // Apply filters
+        if (hideSmall && m <= 5) return;
+        if (m < minDenom || m > maxDenom) return;
+        if (pointFilterVal === 'prime_denom' && !ip) return;
+        if (pointFilterVal === 'composite_denom' && ip) return;
+        if (pointFilterVal === 'prime_num' && !isPrime(r)) return;
+        if (pointFilterVal === 'twin_prime' && !(ip && (isPrime(m-2) || isPrime(m+2)))) return;
+        
         let angle = (r/m)*2*Math.PI;
         
         // Apply rotation (cumulative per ring + global phase)
@@ -5543,6 +5602,20 @@ function drawMainRing() {
         });
     }
     
+    // Draw highlighted point (from click) - white circle
+    if (highlightedRingPoint) {
+        const hp = state.ringPoints.find(p => p.r === highlightedRingPoint.r && p.m === highlightedRingPoint.m);
+        if (hp) {
+            const highlightSize = Math.max(finalPointSize * 2, 6);
+            // White circle outline
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(hp.x, hp.y, highlightSize + 5, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+    }
+    
     // Update tracker info panel
     updateTrackerInfo(trackerPoints, trackerOn);
     
@@ -5561,6 +5634,17 @@ function drawMainRing() {
             }
             ctx.fillStyle = '#e2e8f0';
             ctx.fillText(txt, p.x, p.y - finalPointSize - 2);
+        });
+    }
+    
+    // Simple fraction labels for all points when enabled (limited to avoid clutter)
+    if (showFractionLabels && state.ringPoints.length <= 500) {
+        ctx.font = '8px system-ui';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        state.ringPoints.forEach(p => {
+            ctx.fillStyle = 'rgba(226, 232, 240, 0.8)';
+            ctx.fillText(`${p.r}/${p.m}`, p.x, p.y - finalPointSize - 1);
         });
     }
     
@@ -5797,6 +5881,110 @@ function setRotationPreset(degrees) {
     document.getElementById('enableRingRotation').checked = true;
     toggleRingSection('secRotation', true);
     drawMainRing();
+}
+
+// Advanced controls helper functions
+function applyTrackerFilter() {
+    const filter = document.getElementById('trackerModFilter').value;
+    if (!filter) {
+        document.getElementById('trackResidues').value = '';
+        drawMainRing();
+        return;
+    }
+    
+    // Generate residues based on filter
+    const maxM = state.nMax || 100;
+    let residues = [];
+    
+    if (filter === 'prime') {
+        for (let m = 2; m <= Math.min(maxM, 500); m++) {
+            if (isPrime(m)) residues.push(m);
+        }
+    } else if (filter === 'composite') {
+        for (let m = 4; m <= Math.min(maxM, 500); m++) {
+            if (!isPrime(m)) residues.push(m);
+        }
+    } else if (filter.startsWith('mod')) {
+        const [, mod, rem] = filter.match(/mod(\d+)_(\d+)/);
+        for (let m = 2; m <= Math.min(maxM, 500); m++) {
+            if (m % parseInt(mod) === parseInt(rem)) residues.push(m);
+        }
+    }
+    
+    document.getElementById('trackResidues').value = residues.slice(0, 50).join(',');
+    document.getElementById('enableResidueTracker').checked = true;
+    drawMainRing();
+}
+
+function clearTracker() {
+    document.getElementById('enableResidueTracker').checked = false;
+    document.getElementById('trackResidues').value = '';
+    document.getElementById('trackerModFilter').value = '';
+    drawMainRing();
+}
+
+function resetFilters() {
+    document.getElementById('pointFilter').value = 'all';
+    document.getElementById('minDenomFilter').value = '2';
+    document.getElementById('maxDenomFilter').value = '';
+    document.getElementById('hideSmallDenom').checked = false;
+    drawMainRing();
+}
+
+let ringAnimationId = null;
+let ringAnimFrame = 0;
+
+function startRingAnimation() {
+    if (ringAnimationId) return;
+    
+    const mode = document.getElementById('ringAnimMode').value;
+    const speed = parseInt(document.getElementById('ringAnimSpeed').value);
+    const loop = document.getElementById('ringAnimLoop').checked;
+    
+    document.getElementById('ringAnimBtn').textContent = '⏸ Pause';
+    
+    function animate() {
+        ringAnimFrame++;
+        
+        if (mode === 'rotation') {
+            const phase = (ringAnimFrame * speed / 10) % 360;
+            document.getElementById('ringGlobalPhase').value = phase;
+            document.getElementById('enableRingRotation').checked = true;
+        } else if (mode === 'growth') {
+            // Animate N range growth
+            const maxN = state.nMax;
+            const currentN = Math.min(2 + Math.floor(ringAnimFrame * speed / 50), maxN);
+            // This would need deeper integration
+        } else if (mode === 'pulse') {
+            const scale = 1 + 0.3 * Math.sin(ringAnimFrame * speed / 100);
+            ringView.zoom = scale;
+            updateRingTransform();
+        } else if (mode === 'wave') {
+            const phase = ringAnimFrame * speed / 20;
+            document.getElementById('ringRotationAmount').value = 30 * Math.sin(phase);
+            updateRotationDisplay();
+            document.getElementById('enableRingRotation').checked = true;
+        }
+        
+        drawMainRing();
+        
+        if (loop || ringAnimFrame < 360) {
+            ringAnimationId = requestAnimationFrame(animate);
+        } else {
+            stopRingAnimation();
+        }
+    }
+    
+    animate();
+}
+
+function stopRingAnimation() {
+    if (ringAnimationId) {
+        cancelAnimationFrame(ringAnimationId);
+        ringAnimationId = null;
+    }
+    ringAnimFrame = 0;
+    document.getElementById('ringAnimBtn').textContent = '▶ Animate';
 }
 
 function applyRotationFraction() {
@@ -6042,26 +6230,46 @@ function updateColorLegend(colorMode, showAll, sector) {
 }
 
 document.getElementById('mainRing').addEventListener('click', function(e) {
-    const rect = this.getBoundingClientRect(), x=e.clientX-rect.left, y=e.clientY-rect.top;
-    let closest=null, minDist=15;
-    state.ringPoints.forEach(p => { const d=Math.sqrt((p.x-x)**2+(p.y-y)**2); if(d<minDist){minDist=d;closest=p;} });
-    if(closest) {
+    const canvas = this;
+    const rect = canvas.getBoundingClientRect();
+    // Account for canvas scaling (canvas size vs display size)
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+    
+    // Hide tooltip on click
+    document.getElementById('pointTooltip').classList.remove('visible');
+    
+    let closest = null, minDist = 20 * Math.max(scaleX, scaleY); // Scale hit detection too
+    state.ringPoints.forEach(p => { 
+        const d = Math.sqrt((p.x - x) ** 2 + (p.y - y) ** 2); 
+        if (d < minDist) { minDist = d; closest = p; } 
+    });
+    
+    if (closest) {
+        // Just highlight the point, don't change sector view
+        highlightedRingPoint = closest;
+        drawMainRing(); // Redraw to show highlight
+        
+        // Show info modal
         openPointModal(closest);
+        
+        // Update tree path
         selectPointForTree(closest);
         selectFractionForHarmonic(closest.r, closest.m);
+    } else {
+        // Clicked empty space - clear highlight
+        if (highlightedRingPoint) {
+            highlightedRingPoint = null;
+            drawMainRing();
+        }
     }
 });
 
+// Disable hover tooltip - only show on click
 document.getElementById('mainRing').addEventListener('mousemove', function(e) {
-    const rect=this.getBoundingClientRect(), x=e.clientX-rect.left, y=e.clientY-rect.top;
-    let closest=null, minDist=12;
-    state.ringPoints.forEach(p => { const d=Math.sqrt((p.x-x)**2+(p.y-y)**2); if(d<minDist){minDist=d;closest=p;} });
-    const tooltip = document.getElementById('pointTooltip');
-    if(closest) {
-        tooltip.innerHTML = `<h5>${closest.r}/${closest.m}</h5><div class="row"><span class="label">Value:</span><span class="val">${(closest.r/closest.m).toFixed(6)}</span></div><div class="row"><span class="label">Sector:</span><span class="val">${closest.sector}</span></div><div class="row"><span class="label">Mod:</span><span class="val">${closest.m} (${closest.isPrime?'P':'C'})</span></div>`;
-        tooltip.style.left = (e.clientX-rect.left+10)+'px'; tooltip.style.top = (e.clientY-rect.top-10)+'px';
-        tooltip.classList.add('visible');
-    } else tooltip.classList.remove('visible');
+    // Tooltip disabled - info shown via click modal only
 });
 
 function openPointModal(p) {
@@ -6074,14 +6282,23 @@ function openPointModal(p) {
             <div class="detail-card"><h5>Modulus</h5><div class="value" style="color:${p.isPrime?'#f59e0b':'#6366f1'}">${p.m}</div><div class="sub">${p.isPrime?'Prime':'Composite'}</div></div>
         </div>
         <div class="theorem-box"><strong>CF:</strong> [${cf.join('; ')}]<br><strong>Path:</strong> ${cfPath(cf)}</div>
-        <div style="margin-top:12px;">
-            <button onclick="closePointModal(); openSectorModal(${p.sector});">View All in Sector ${p.sector}</button>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button onclick="closePointModal();playFraction(${p.r},${p.m},1.0)" style="background:linear-gradient(135deg,#22c55e,#16a34a);">▶ Play</button>
+            <button onclick="closePointModal();playTreePathAudio('forward')" style="background:linear-gradient(135deg,#f59e0b,#d97706);">▶ Play Path</button>
+            <button onclick="closePointModal();scrollToSectorTree()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">See on Tree</button>
+            <button onclick="closePointModal();addToSolver(${p.r}/${p.m})" style="background:linear-gradient(135deg,#10b981,#059669);">Add to Solver</button>
         </div>
     `;
     document.getElementById('pointModal').classList.add('active');
 }
 function closePointModal() { document.getElementById('pointModal').classList.remove('active'); }
 function openSectorModal(n) { document.getElementById('viewSector').value=n; document.getElementById('showAllSectors').checked=false; drawMainRing(); }
+function scrollToSectorTree() { document.getElementById('sectorTreeCanvas').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+function addToSolver(value) {
+    document.getElementById('solverInput').value = value;
+    document.getElementById('solverPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    solverSearch();
+}
 
 // SECTOR TREE VISUALIZATION
 let selectedTreePoint = null;
@@ -6098,6 +6315,7 @@ function drawSectorTree() {
     const sectorFilter = document.getElementById('treeSectorFilter')?.value || 'all';
     const colorMode = document.getElementById('treeColorMode')?.value || 'default';
     const highlightOnly = document.getElementById('treeHighlightOnly')?.checked || false;
+    const basePointSize = parseFloat(document.getElementById('treePointSize')?.value || 4);
     
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, W, H);
@@ -6191,13 +6409,14 @@ function drawSectorTree() {
         if (highlightOnly && sectorFilter !== 'all' && !inSector && !isOnPath && !isTarget) {
             ctx.fillStyle = '#1e293b';
             ctx.beginPath();
-            ctx.arc(node.x, node.y, 2, 0, 2 * Math.PI);
+            ctx.arc(node.x, node.y, basePointSize * 0.4, 0, 2 * Math.PI);
             ctx.fill();
             return;
         }
         
         ctx.beginPath();
-        ctx.arc(node.x, node.y, isTarget ? 10 : (isOnPath ? 7 : (inSector && sectorFilter !== 'all' ? 6 : 5)), 0, 2 * Math.PI);
+        const nodeSize = isTarget ? basePointSize * 2.5 : (isOnPath ? basePointSize * 1.75 : (inSector && sectorFilter !== 'all' ? basePointSize * 1.5 : basePointSize));
+        ctx.arc(node.x, node.y, nodeSize, 0, 2 * Math.PI);
         
         if (isTarget) {
             ctx.fillStyle = '#22c55e';
@@ -6627,6 +6846,7 @@ function animateTreePath(point) {
         const ctx = canvas.getContext('2d');
         const depth = +document.getElementById('treeDepth').value;
         const showLabels = document.getElementById('showTreeLabels').checked;
+        const basePointSize = parseFloat(document.getElementById('treePointSize')?.value || 4);
         
         // Redraw base tree
         ctx.fillStyle = '#0f172a';
@@ -6649,7 +6869,7 @@ function animateTreePath(point) {
         // Draw nodes
         treeNodes.forEach(node => {
             ctx.beginPath();
-            ctx.arc(node.x, node.y, 5, 0, 2 * Math.PI);
+            ctx.arc(node.x, node.y, basePointSize, 0, 2 * Math.PI);
             ctx.fillStyle = '#6366f1';
             ctx.fill();
             
@@ -6697,7 +6917,7 @@ function animateTreePath(point) {
         // Highlight current position
         if (currentNode) {
             ctx.beginPath();
-            ctx.arc(currentNode.x, currentNode.y, currentStep === path.length ? 12 : 8, 0, 2 * Math.PI);
+            ctx.arc(currentNode.x, currentNode.y, currentStep === path.length ? basePointSize * 3 : basePointSize * 2, 0, 2 * Math.PI);
             ctx.fillStyle = currentStep === path.length ? '#22c55e' : '#f59e0b';
             ctx.fill();
             ctx.strokeStyle = '#fff';
@@ -14449,6 +14669,15 @@ function solverHighlightOnRing() {
     document.getElementById('trackerGlow').checked = true;
     
     drawMainRing();
+    
+    // Also highlight path on sector tree
+    const solverPoint = {
+        r: solverCurrentMatch.r,
+        m: solverCurrentMatch.m,
+        sector: solverCurrentMatch.sector,
+        isPrime: isPrime(solverCurrentMatch.m)
+    };
+    selectPointForTree(solverPoint);
     
     // Scroll to ring
     document.getElementById('mainRing').scrollIntoView({ behavior: 'smooth', block: 'center' });
