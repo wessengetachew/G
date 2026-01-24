@@ -705,17 +705,18 @@
                         <option value="rainbow">Rainbow</option>
                     </select></label>
                     <label style="font-size:12px;"><input type="checkbox" id="showAllSectors" checked onchange="state.highlightSectorOnly=null;drawMainRing()"> All Sectors</label>
-                    <label style="font-size:12px;">Size: <input type="number" id="ringPointSize" min="0" max="100" value="0" step="0.001" style="width:65px;font-size:11px;" onchange="drawMainRing();updatePtSizeDisplay()"><span id="ptSizeDisplay" style="color:#6366f1;margin-left:4px;font-size:11px;">auto</span></label>
+                    <label style="font-size:12px;">Size: <input type="number" id="ringPointSize" min="0" max="100" value="5" step="0.5" style="width:65px;font-size:11px;" onchange="drawMainRing();updatePtSizeDisplay()"><span id="ptSizeDisplay" style="color:#6366f1;margin-left:4px;font-size:11px;">5</span></label>
                     <button onclick="setPointSize(0)" class="secondary" style="font-size:10px;padding:3px 6px;">Auto</button>
-                    <button onclick="setPointSize(0.5)" class="secondary" style="font-size:10px;padding:3px 6px;">0.5</button>
                     <button onclick="setPointSize(1)" class="secondary" style="font-size:10px;padding:3px 6px;">1</button>
                     <button onclick="setPointSize(3)" class="secondary" style="font-size:10px;padding:3px 6px;">3</button>
-                    <button onclick="setPointSize(6)" class="secondary" style="font-size:10px;padding:3px 6px;">6</button>
+                    <button onclick="setPointSize(5)" class="secondary" style="font-size:10px;padding:3px 6px;">5</button>
+                    <button onclick="setPointSize(8)" class="secondary" style="font-size:10px;padding:3px 6px;">8</button>
+                    <label style="font-size:12px;margin-left:8px;">Spacing: <input type="number" id="ringSpacing" min="1" max="10" value="1" step="0.1" style="width:50px;font-size:11px;" onchange="drawMainRing()" title="Ring spacing multiplier"></label>
                     <label style="font-size:12px;margin-left:10px;">Canvas: <select id="ringCanvasSize" onchange="resizeRingCanvas()" style="padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-size:11px;">
                         <option value="800">800x800</option>
                         <option value="1024">1K (1024x1024)</option>
                         <option value="2048">2K (2048x2048)</option>
-                        <option value="4096">4K (4096x4096)</option>
+                        <option value="4096" selected>4K (4096x4096)</option>
                     </select></label>
                 </div>
             </div>
@@ -896,6 +897,30 @@
                 <span style="color:#a5b4fc;font-size:10px;">Ring: <span id="ringLoopCurrent" style="color:#fbbf24;font-family:monospace;">-</span></span>
             </div>
             
+            <!-- Ring Rotation Animation Controls -->
+            <div style="margin-top:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;background:#1a2e1a;border-radius:6px;border:1px solid #22c55e;">
+                <span style="color:#86efac;font-size:11px;font-weight:600;">Ring Spin:</span>
+                <button onclick="startRingRotation('cw')" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:5px 10px;cursor:pointer;font-size:11px;">↻ CW</button>
+                <button onclick="startRingRotation('ccw')" style="background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:4px;color:white;padding:5px 10px;cursor:pointer;font-size:11px;">↺ CCW</button>
+                <button onclick="stopRingRotation()" style="background:#ef4444;border:none;border-radius:4px;color:white;padding:5px 10px;cursor:pointer;font-size:11px;">■ Stop</button>
+                <label style="color:#86efac;font-size:10px;">Speed:
+                    <select id="ringRotationSpeed" style="padding:3px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#e2e8f0;">
+                        <option value="0.5">Slow</option>
+                        <option value="1" selected>Medium</option>
+                        <option value="2">Fast</option>
+                        <option value="4">Very Fast</option>
+                    </select>
+                </label>
+                <label style="color:#86efac;font-size:10px;">Mode:
+                    <select id="ringRotationMode" style="padding:3px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#e2e8f0;">
+                        <option value="cumulative" selected>Cumulative</option>
+                        <option value="uniform">Uniform</option>
+                        <option value="alternate">Alternate</option>
+                    </select>
+                </label>
+                <span style="color:#86efac;font-size:10px;">Phase: <span id="ringRotationPhase" style="color:#fbbf24;font-family:monospace;">0°</span></span>
+            </div>
+            
             <!-- Color Legend -->
             <div class="color-legend" id="colorLegend" style="margin-top:12px;justify-content:center;"></div>
             
@@ -926,9 +951,13 @@
                                 <label style="color:#6ee7b7;font-size:10px;">Tolerance</label>
                                 <select id="solverTolerance" style="display:block;margin-top:4px;padding:6px 10px;background:#0f172a;border:1px solid #10b981;border-radius:4px;color:#e2e8f0;font-size:12px;">
                                     <option value="0.0001">±0.0001</option>
-                                    <option value="0.001" selected>±0.001</option>
-                                    <option value="0.01">±0.01</option>
+                                    <option value="0.001">±0.001</option>
+                                    <option value="0.01" selected>±0.01</option>
+                                    <option value="0.05">±0.05</option>
                                     <option value="0.1">±0.1</option>
+                                    <option value="0.2">±0.2</option>
+                                    <option value="0.5">±0.5</option>
+                                    <option value="1.0">±1.0</option>
                                 </select>
                             </div>
                             <div>
@@ -942,7 +971,7 @@
                             </div>
                             <div>
                                 <label style="color:#6ee7b7;font-size:10px;">Point Size</label>
-                                <input type="number" id="solverPointSize" min="0.5" max="20" value="1" step="0.5" style="display:block;margin-top:4px;width:60px;padding:6px 10px;background:#0f172a;border:1px solid #10b981;border-radius:4px;color:#e2e8f0;font-size:12px;">
+                                <input type="number" id="solverPointSize" min="0.5" max="20" value="5" step="0.5" style="display:block;margin-top:4px;width:60px;padding:6px 10px;background:#0f172a;border:1px solid #10b981;border-radius:4px;color:#e2e8f0;font-size:12px;">
                             </div>
                         </div>
                     </div>
@@ -1221,12 +1250,19 @@
                     <option value="900x500">900x500</option>
                     <option value="1920x1080">1K (1920x1080)</option>
                     <option value="2560x1440">2K (2560x1440)</option>
-                    <option value="3840x2160">4K (3840x2160)</option>
+                    <option value="3840x2160" selected>4K (3840x2160)</option>
                 </select></label>
                 <label><input type="checkbox" id="showTreeLabels" checked onchange="drawSectorTree()"> Labels</label>
                 <label><input type="checkbox" id="showTreeGrid" onchange="drawSectorTree()"> Grid</label>
                 <label><input type="checkbox" id="animatePath" checked> Animate</label>
+                <label><input type="checkbox" id="zoomToPath" checked> Zoom to Path</label>
                 <button class="secondary" onclick="clearTreePath()">Clear Path</button>
+            </div>
+            <div class="control-row" style="margin-bottom:10px;background:#064e3b;padding:8px 12px;border-radius:6px;border:1px solid #10b981;">
+                <span style="color:#6ee7b7;font-size:11px;font-weight:600;margin-right:8px;">Go to Fraction:</span>
+                <input type="text" id="treeFractionInput" placeholder="a/b" style="width:80px;padding:5px 8px;background:#0f172a;border:1px solid #10b981;border-radius:4px;color:#f0fdf4;font-family:monospace;text-align:center;">
+                <button onclick="goToTreeFraction()" style="background:linear-gradient(135deg,#10b981,#059669);border:none;border-radius:4px;color:white;padding:5px 12px;cursor:pointer;font-size:11px;">Go</button>
+                <span style="color:#6ee7b7;font-size:10px;margin-left:10px;">or click ring/tree</span>
             </div>
             <div class="control-row" style="margin-bottom:10px;background:#1e293b;padding:8px 12px;border-radius:6px;border:1px solid #475569;">
                 <span style="color:#94a3b8;font-size:11px;margin-right:8px;">Zoom:</span>
@@ -6279,6 +6315,7 @@ function drawMainRing() {
     const rotationCumulative = document.getElementById('rotationCumulative')?.checked || true;
     const globalPhase = +(document.getElementById('ringGlobalPhase')?.value || 0) * Math.PI / 180;
     const showRingLabels = document.getElementById('showRingLabels')?.checked || false;
+    const ringSpacing = parseFloat(document.getElementById('ringSpacing')?.value || 1);
     
     // Sector analysis
     const showBounds = document.getElementById('showSectorBounds')?.checked || false;
@@ -6380,7 +6417,7 @@ function drawMainRing() {
     adaptiveSize = Math.max(1, Math.min(10, adaptiveSize));
     
     // Slider: 0 = auto (use adaptive), >0 = direct override
-    const sliderVal = +(document.getElementById('ringPointSize')?.value || 0);
+    const sliderVal = +(document.getElementById('ringPointSize')?.value || 5);
     const finalPointSize = sliderVal > 0 ? sliderVal : adaptiveSize;
     
     // Update display
@@ -6415,7 +6452,8 @@ function drawMainRing() {
         ctx.strokeStyle = 'rgba(245,158,11,0.3)';
         ctx.lineWidth = 2;
         primeMs.forEach(pm => {
-            const radNorm = invertOrder ? (1 - (pm-state.nMin)/(state.nMax-state.nMin+1)) : ((pm-state.nMin)/(state.nMax-state.nMin+1));
+            let radNorm = invertOrder ? (1 - (pm-state.nMin)/(state.nMax-state.nMin+1)) : ((pm-state.nMin)/(state.nMax-state.nMin+1));
+            if (ringSpacing !== 1) radNorm = Math.pow(radNorm, 1/ringSpacing);
             const rad = Math.max(radNorm, 0.05) * maxR;
             ctx.beginPath();
             ctx.arc(cx, cy, rad, 0, 2 * Math.PI);
@@ -6445,7 +6483,11 @@ function drawMainRing() {
             angle += ringRotation + globalPhase;
         }
         
-        const radNorm = invertOrder ? (1 - (m-state.nMin)/(state.nMax-state.nMin+1)) : ((m-state.nMin)/(state.nMax-state.nMin+1));
+        let radNorm = invertOrder ? (1 - (m-state.nMin)/(state.nMax-state.nMin+1)) : ((m-state.nMin)/(state.nMax-state.nMin+1));
+        // Apply ring spacing - power function spreads outer rings more
+        if (ringSpacing !== 1) {
+            radNorm = Math.pow(radNorm, 1/ringSpacing);
+        }
         const rad = Math.max(radNorm, 0.05) * maxR;
         const x = cx+rad*Math.cos(angle), y = cy-rad*Math.sin(angle);
         
@@ -6575,7 +6617,8 @@ function drawMainRing() {
         residues.forEach(res => {
             if (labeledRings.has(res.m)) return;
             labeledRings.add(res.m);
-            const radNorm = invertOrder ? (1 - (res.m-state.nMin)/(state.nMax-state.nMin+1)) : ((res.m-state.nMin)/(state.nMax-state.nMin+1));
+            let radNorm = invertOrder ? (1 - (res.m-state.nMin)/(state.nMax-state.nMin+1)) : ((res.m-state.nMin)/(state.nMax-state.nMin+1));
+            if (ringSpacing !== 1) radNorm = Math.pow(radNorm, 1/ringSpacing);
             const rad = Math.max(radNorm, 0.05) * maxR;
             const ringRotation = rotationCumulative ? rotationAmt * res.m : rotationAmt;
             const labelAngle = -Math.PI/2 + ringRotation + globalPhase;
@@ -6590,7 +6633,8 @@ function drawMainRing() {
     // Draw highlighted ring circle during loop playback
     if (typeof highlightedRingM !== 'undefined' && highlightedRingM !== null) {
         const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
-        const radNorm = invertOrder ? (1 - (highlightedRingM-state.nMin)/(state.nMax-state.nMin+1)) : ((highlightedRingM-state.nMin)/(state.nMax-state.nMin+1));
+        let radNorm = invertOrder ? (1 - (highlightedRingM-state.nMin)/(state.nMax-state.nMin+1)) : ((highlightedRingM-state.nMin)/(state.nMax-state.nMin+1));
+        if (ringSpacing !== 1) radNorm = Math.pow(radNorm, 1/ringSpacing);
         const ringRad = Math.max(radNorm, 0.05) * maxR;
         ctx.strokeStyle = '#fbbf24';
         ctx.lineWidth = 3;
@@ -7303,7 +7347,7 @@ function viewPointOnAll(r, m, sector) {
     state.highlightSectorOnly = sector;
     
     // Set point size from solver control if available
-    const solverPtSize = parseFloat(document.getElementById('solverPointSize')?.value || 1);
+    const solverPtSize = parseFloat(document.getElementById('solverPointSize')?.value || 5);
     document.getElementById('ringPointSize').value = solverPtSize;
     updatePtSizeDisplay();
     
@@ -7605,6 +7649,7 @@ function playWordArt(direction) {
         // Validate point before playing
         if (p && p.r && p.m && p.m > 0) {
             playFraction(p.r, p.m, 0.3);
+            updateSolverLive(p.r, p.m);
             
             // Highlight point
             const fullPoint = state.ringPoints.find(rp => rp.r === p.r && rp.m === p.m);
@@ -8255,6 +8300,7 @@ function playTreeScale() {
     fractions.forEach((f, i) => {
         setTimeout(() => {
             playFraction(f.r, f.m, 0.35);
+            updateSolverLive(f.r, f.m);
             
             // Highlight in tree path info
             const info = document.getElementById('treePathInfo');
@@ -8290,6 +8336,65 @@ function selectPointForTree(point) {
     }
 }
 
+// Go to fraction from a/b input
+function goToTreeFraction() {
+    const input = document.getElementById('treeFractionInput').value.trim();
+    const match = input.match(/^(\d+)\s*[\/]\s*(\d+)$/);
+    
+    if (!match) {
+        alert('Enter fraction as a/b (e.g., 3/7)');
+        return;
+    }
+    
+    const r = parseInt(match[1]);
+    const m = parseInt(match[2]);
+    
+    if (m === 0 || r > m || r < 0) {
+        alert('Invalid fraction. Must be 0 < a < b');
+        return;
+    }
+    
+    // Check if coprime
+    if (gcd(r, m) !== 1) {
+        const g = gcd(r, m);
+        alert(`Fraction ${r}/${m} reduces to ${r/g}/${m/g}. Using reduced form.`);
+        const rr = r / g;
+        const mm = m / g;
+        goToTreeFractionDirect(rr, mm);
+        return;
+    }
+    
+    goToTreeFractionDirect(r, m);
+}
+
+function goToTreeFractionDirect(r, m) {
+    const sector = getSector(r, m);
+    const point = {
+        r: r,
+        m: m,
+        sector: sector,
+        isPrime: isPrime(m)
+    };
+    
+    selectPointForTree(point);
+    
+    // Also update solver live
+    updateSolverLive(r, m);
+    
+    // Scroll to tree
+    document.getElementById('sectorTreeCanvas').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// Enter key support for tree fraction input
+document.addEventListener('DOMContentLoaded', function() {
+    const treeFracInput = document.getElementById('treeFractionInput');
+    if (treeFracInput) {
+        treeFracInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') goToTreeFraction();
+        });
+    }
+});
+
 function animateTreePath(point) {
     if (treeAnimationId) {
         cancelAnimationFrame(treeAnimationId);
@@ -8297,6 +8402,12 @@ function animateTreePath(point) {
     
     const path = getPathToFraction(point.r, point.m);
     let currentStep = 0;
+    const zoomToPath = document.getElementById('zoomToPath')?.checked;
+    
+    // Store original zoom state to restore later
+    const originalZoom = treeViewState.zoom;
+    const originalOffsetX = treeViewState.offsetX;
+    const originalOffsetY = treeViewState.offsetY;
     
     function animateStep() {
         const canvas = document.getElementById('sectorTreeCanvas');
@@ -8304,6 +8415,18 @@ function animateTreePath(point) {
         const depth = +document.getElementById('treeDepth').value;
         const showLabels = document.getElementById('showTreeLabels').checked;
         const basePointSize = parseFloat(document.getElementById('treePointSize')?.value || 4);
+        
+        // Calculate zoom for current step if zoomToPath is enabled
+        if (zoomToPath && path.length > 0) {
+            const progress = currentStep / path.length;
+            if (currentStep < path.length) {
+                // Zoom in progressively as we traverse the path
+                const targetZoom = Math.min(300, 100 + progress * 150);
+                treeViewState.zoom = targetZoom;
+                document.getElementById('treeZoomDisplay').textContent = Math.round(targetZoom);
+                document.getElementById('treeZoomSlider').value = targetZoom;
+            }
+        }
         
         // Redraw base tree
         ctx.fillStyle = '#0f172a';
@@ -8380,16 +8503,59 @@ function animateTreePath(point) {
             ctx.strokeStyle = '#fff';
             ctx.lineWidth = 2;
             ctx.stroke();
+            
+            // Pan to keep current node in view if zooming
+            if (zoomToPath && currentNode) {
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                // Gradually shift view toward current node
+                treeViewState.offsetX += (centerX - currentNode.x) * 0.1;
+                treeViewState.offsetY += (centerY - currentNode.y) * 0.05;
+            }
         }
         
         currentStep++;
         
         if (currentStep <= path.length) {
             treeAnimationId = requestAnimationFrame(() => setTimeout(animateStep, 150));
+        } else if (zoomToPath) {
+            // Animation complete - zoom back out smoothly
+            setTimeout(() => zoomOutAfterPath(originalZoom, originalOffsetX, originalOffsetY), 500);
         }
     }
     
     animateStep();
+}
+
+// Smooth zoom out after path animation completes
+function zoomOutAfterPath(targetZoom, targetOffsetX, targetOffsetY) {
+    const steps = 30;
+    let step = 0;
+    
+    const startZoom = treeViewState.zoom;
+    const startOffsetX = treeViewState.offsetX;
+    const startOffsetY = treeViewState.offsetY;
+    
+    function animateZoomOut() {
+        step++;
+        const t = step / steps;
+        const eased = 1 - Math.pow(1 - t, 3); // ease out cubic
+        
+        treeViewState.zoom = startZoom + (targetZoom - startZoom) * eased;
+        treeViewState.offsetX = startOffsetX + (targetOffsetX - startOffsetX) * eased;
+        treeViewState.offsetY = startOffsetY + (targetOffsetY - startOffsetY) * eased;
+        
+        document.getElementById('treeZoomDisplay').textContent = Math.round(treeViewState.zoom);
+        document.getElementById('treeZoomSlider').value = treeViewState.zoom;
+        
+        drawSectorTree();
+        
+        if (step < steps) {
+            requestAnimationFrame(animateZoomOut);
+        }
+    }
+    
+    animateZoomOut();
 }
 
 // Add click handler for tree canvas to select and play nodes
@@ -11533,6 +11699,10 @@ function initSolverDefault() {
         return;
     }
     
+    // Resize canvases to match dropdown selections (4K default)
+    if (typeof resizeRingCanvas === 'function') resizeRingCanvas();
+    if (typeof resizeTreeCanvas === 'function') resizeTreeCanvas();
+    
     // Set solver input to 0.5 and search (keep panel collapsed)
     document.getElementById('solverInput').value = '0.5';
     solverSearch('0.5');
@@ -12145,6 +12315,7 @@ function startHorizonPlaybackLoop() {
             playFraction(f.r, f.m, duration);
             highlightCurrentFraction({ r: f.r, m: f.m });
             updatePlaybackDisplay({ r: f.r, m: f.m }, playbackState.currentIndex, playbackState.queue.length);
+            updateSolverLive(f.r, f.m);
             pulseToolbar();
             
             // Update horizon harmonic info
@@ -14997,6 +15168,7 @@ function startPlaybackLoop() {
             playFraction(f.r, f.m, duration);
             highlightCurrentFraction(f);
             updatePlaybackDisplay(f, playbackState.currentIndex, playbackState.queue.length);
+            updateSolverLive(f.r, f.m);
             pulseToolbar();
         }
         
@@ -15014,6 +15186,11 @@ function stopAllPlayback() {
     
     // Stop ring loop
     stopRingLoop();
+    
+    // Stop ring rotation animation
+    if (typeof stopRingRotation === 'function') {
+        stopRingRotation();
+    }
     
     // Stop word art playback
     if (typeof stopWordArtPlayback === 'function') {
@@ -15086,9 +15263,11 @@ function playRingLoop(direction) {
             const midIdx = Math.floor(ringFractions.length / 2);
             const f = ringFractions[midIdx];
             playFraction(f.r, f.m, 0.2);
+            updateSolverLive(f.r, f.m);
         } else {
             // Play the ring number as a tone
             playFraction(1, m, 0.2);
+            updateSolverLive(1, m);
         }
         
         // Highlight this ring on the canvas
@@ -15130,6 +15309,71 @@ function stopRingLoop() {
 function highlightRingOnCanvas(m) {
     highlightedRingM = m;
     drawMainRing();
+}
+
+// Ring Rotation Animation
+let ringRotationState = {
+    isAnimating: false,
+    animationId: null,
+    direction: 'cw',
+    phase: 0
+};
+
+function startRingRotation(direction) {
+    stopRingRotation();
+    
+    ringRotationState.isAnimating = true;
+    ringRotationState.direction = direction;
+    
+    // Enable rotation in the ring settings
+    const rotationCheckbox = document.getElementById('enableRingRotation');
+    if (rotationCheckbox) rotationCheckbox.checked = true;
+    
+    function animateRotation() {
+        if (!ringRotationState.isAnimating) return;
+        
+        const speed = parseFloat(document.getElementById('ringRotationSpeed')?.value || 1);
+        const mode = document.getElementById('ringRotationMode')?.value || 'cumulative';
+        
+        // Update phase
+        const delta = (direction === 'cw' ? 1 : -1) * speed * 0.5;
+        ringRotationState.phase += delta;
+        
+        // Keep phase in reasonable range
+        if (ringRotationState.phase > 360) ringRotationState.phase -= 360;
+        if (ringRotationState.phase < -360) ringRotationState.phase += 360;
+        
+        // Update rotation amount input
+        const rotInput = document.getElementById('ringRotationAmount');
+        if (rotInput) {
+            if (mode === 'cumulative') {
+                rotInput.value = ringRotationState.phase.toFixed(1);
+            } else if (mode === 'uniform') {
+                rotInput.value = (ringRotationState.phase * 0.1).toFixed(1);
+            } else if (mode === 'alternate') {
+                // Alternate direction per ring - use a sin wave effect
+                rotInput.value = (Math.sin(ringRotationState.phase * Math.PI / 180) * 30).toFixed(1);
+            }
+        }
+        
+        // Update display
+        document.getElementById('ringRotationPhase').textContent = Math.abs(ringRotationState.phase).toFixed(0) + '°';
+        
+        // Redraw
+        drawMainRing();
+        
+        ringRotationState.animationId = requestAnimationFrame(animateRotation);
+    }
+    
+    animateRotation();
+}
+
+function stopRingRotation() {
+    ringRotationState.isAnimating = false;
+    if (ringRotationState.animationId) {
+        cancelAnimationFrame(ringRotationState.animationId);
+        ringRotationState.animationId = null;
+    }
 }
 
 function highlightCurrentFraction(f) {
@@ -16267,6 +16511,7 @@ function startAllSectorsPlaybackLoop() {
         if (f && typeof f.r === 'number' && typeof f.m === 'number' && f.m !== 0) {
             const duration = speed / 1000 * 0.8;
             playFraction(f.r, f.m, duration);
+            updateSolverLive(f.r, f.m);
             
             // Update sector view when sector changes
             if (f.sector !== lastSector) {
@@ -16677,6 +16922,57 @@ function solverSelectAlternative(r, m) {
         parseInt(document.getElementById('solverMaxDenom').value), 10));
 }
 
+// Live update solver display during playback
+function updateSolverLive(r, m) {
+    if (!r || !m || m === 0) return;
+    
+    const value = r / m;
+    const sector = getSector(r, m);
+    const cf = getContinuedFraction(value, 10);
+    const denomIsPrime = isPrime(m);
+    const numIsPrime = isPrime(r);
+    
+    // Show solver results panel
+    document.getElementById('solverResults').style.display = 'block';
+    
+    // Update fraction
+    document.getElementById('solverBestFrac').textContent = r + '/' + m;
+    document.getElementById('solverBestFrac').style.color = '#fbbf24'; // Yellow for live
+    
+    // Update decimal
+    document.getElementById('solverBestDecimal').textContent = value.toFixed(8);
+    
+    // Update error (show as "LIVE" indicator)
+    document.getElementById('solverError').innerHTML = '<span style="color:#22c55e;font-size:12px;">● LIVE</span>';
+    
+    // Update sector
+    document.getElementById('solverSector').textContent = 'S' + sector + ' (1/' + (sector+1) + ', 1/' + sector + ']';
+    
+    // Update CF
+    document.getElementById('solverCF').textContent = '[' + cf.join('; ') + ']';
+    
+    // Update gear ratio
+    document.getElementById('solverGear').textContent = m + ':' + r + ' (teeth ratio)';
+    
+    // Category
+    const category = (numIsPrime && denomIsPrime) ? 'PP' : (numIsPrime && !denomIsPrime) ? 'PC' : (!numIsPrime && denomIsPrime) ? 'CP' : 'CC';
+    const catColors = { 'PP': '#22c55e', 'PC': '#f59e0b', 'CP': '#6366f1', 'CC': '#94a3b8' };
+    const catLabels = { 'PP': 'Both Prime', 'PC': 'Prime/Comp', 'CP': 'Comp/Prime', 'CC': 'Both Comp' };
+    document.getElementById('solverCategory').textContent = category + ' (' + catLabels[category] + ')';
+    document.getElementById('solverCategory').style.color = catColors[category];
+    
+    // Denom type
+    document.getElementById('solverDenomType').textContent = denomIsPrime ? 'Prime' : 'Composite';
+    document.getElementById('solverDenomType').style.color = denomIsPrime ? '#f59e0b' : '#6366f1';
+    
+    // Path
+    const path = cfPath(cf);
+    document.getElementById('solverPath').textContent = path;
+    
+    // Update preview
+    document.getElementById('solverMatchPreview').innerHTML = '<span style="color:#22c55e;">●</span> ' + r + '/' + m + ' = ' + value.toFixed(6);
+}
+
 function solverHighlightOnRing() {
     if (!solverCurrentMatch) return;
     
@@ -16685,7 +16981,7 @@ function solverHighlightOnRing() {
     state.highlightSectorOnly = solverCurrentMatch.sector;
     
     // Set point size from solver control
-    const solverPtSize = parseFloat(document.getElementById('solverPointSize')?.value || 1);
+    const solverPtSize = parseFloat(document.getElementById('solverPointSize')?.value || 5);
     document.getElementById('ringPointSize').value = solverPtSize;
     updatePtSizeDisplay();
     
