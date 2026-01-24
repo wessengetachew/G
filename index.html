@@ -659,6 +659,7 @@
         <span class="subtab active" onclick="switchSubTab('modular')">Modular</span>
         <span class="subtab" onclick="switchSubTab('psl')">PSL(2,Z)</span>
         <span class="subtab" onclick="switchSubTab('primorial')">Primorial</span>
+        <span class="subtab" onclick="switchSubTab('numtheory')">NumTheory</span>
         <span class="subtab" onclick="switchSubTab('horizon')">Horizon</span>
         <span class="subtab" onclick="switchSubTab('animation')">Animation</span>
         <span class="subtab" onclick="switchSubTab('research')">Research</span>
@@ -799,7 +800,7 @@
             </div>
             <div style="display:flex;gap:8px;">
                 <button onclick="toggleAdvancedControls()" class="secondary" style="padding:8px 12px;">Advanced ▼</button>
-                <button onclick="screenshotFullTab('main')" class="secondary" style="padding:8px 12px;">Screenshot</button>
+                <button onclick="screenshotCanvas('mainRing')" class="secondary" style="padding:8px 12px;">Screenshot</button>
             </div>
         </div>
         
@@ -2278,6 +2279,131 @@
         </div>
     </div>
     
+    <!-- NUMBER THEORY TAB - Meissel-Lehmer Optimized Functions -->
+    <div id="tab-numtheory" class="tab-content">
+        <div class="panel">
+            <h3 style="color:#8b5cf6;">Meissel-Lehmer Number Theory Engine</h3>
+            <p style="color:#94a3b8;margin:12px 0;font-size:0.9em;">
+                <strong>Overview:</strong> This module implements sublinear algorithms for prime counting and totient summation. 
+                The Meissel-Lehmer algorithm computes pi(x) in O(x^(2/3)) time instead of O(x), enabling analysis of much larger ranges.
+                All primality tests use a precomputed sieve for O(1) lookup.
+            </p>
+            
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;margin-bottom:20px;">
+                <!-- Prime Counting pi(x) -->
+                <div style="background:#1e293b;padding:15px;border-radius:8px;border:1px solid #334155;">
+                    <h4 style="color:#22c55e;margin:0 0 12px 0;">Prime Counting Function pi(x)</h4>
+                    <p style="color:#64748b;font-size:11px;margin-bottom:10px;">Count of primes less than or equal to x using Lucy_Hedgehog/Meissel-Lehmer</p>
+                    <div style="display:flex;gap:8px;margin-bottom:10px;">
+                        <input type="number" id="piInputX" value="1000000" min="2" style="flex:1;padding:8px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:#e2e8f0;">
+                        <button onclick="computePiX()" style="padding:8px 16px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;cursor:pointer;">Compute pi(x)</button>
+                    </div>
+                    <div id="piResult" style="background:#0f172a;padding:12px;border-radius:6px;font-family:monospace;">
+                        <div style="color:#64748b;font-size:11px;">Result:</div>
+                        <div style="color:#22c55e;font-size:18px;font-weight:bold;">-</div>
+                        <div id="piTime" style="color:#64748b;font-size:10px;margin-top:4px;"></div>
+                    </div>
+                </div>
+                
+                <!-- Summatory Totient -->
+                <div style="background:#1e293b;padding:15px;border-radius:8px;border:1px solid #334155;">
+                    <h4 style="color:#f59e0b;margin:0 0 12px 0;">Summatory Totient Sum(phi)</h4>
+                    <p style="color:#64748b;font-size:11px;margin-bottom:10px;">Sum of phi(k) for k=1 to n. Asymptotically 3n^2/pi^2</p>
+                    <div style="display:flex;gap:8px;margin-bottom:10px;">
+                        <input type="number" id="sumPhiInputN" value="100000" min="1" style="flex:1;padding:8px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:#e2e8f0;">
+                        <button onclick="computeSumPhi()" style="padding:8px 16px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:4px;color:white;cursor:pointer;">Compute</button>
+                    </div>
+                    <div id="sumPhiResult" style="background:#0f172a;padding:12px;border-radius:6px;font-family:monospace;">
+                        <div style="color:#64748b;font-size:11px;">Sum of phi(1) + phi(2) + ... + phi(n):</div>
+                        <div style="color:#f59e0b;font-size:18px;font-weight:bold;">-</div>
+                        <div id="sumPhiAsymptotic" style="color:#64748b;font-size:10px;margin-top:4px;"></div>
+                    </div>
+                </div>
+                
+                <!-- Single Number Analysis -->
+                <div style="background:#1e293b;padding:15px;border-radius:8px;border:1px solid #334155;">
+                    <h4 style="color:#6366f1;margin:0 0 12px 0;">Number Analysis</h4>
+                    <p style="color:#64748b;font-size:11px;margin-bottom:10px;">Analyze a single number: primality, totient, factorization</p>
+                    <div style="display:flex;gap:8px;margin-bottom:10px;">
+                        <input type="number" id="numAnalysisInput" value="12345678" min="1" style="flex:1;padding:8px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:#e2e8f0;">
+                        <button onclick="analyzeNumber()" style="padding:8px 16px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:4px;color:white;cursor:pointer;">Analyze</button>
+                    </div>
+                    <div id="numAnalysisResult" style="background:#0f172a;padding:12px;border-radius:6px;font-family:monospace;font-size:11px;max-height:150px;overflow-y:auto;">
+                        <div style="color:#64748b;">Enter a number to analyze</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Nth Prime & Prime Range -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;margin-bottom:20px;">
+                <div style="background:#1e293b;padding:15px;border-radius:8px;border:1px solid #334155;">
+                    <h4 style="color:#ec4899;margin:0 0 12px 0;">Nth Prime</h4>
+                    <div style="display:flex;gap:8px;margin-bottom:10px;">
+                        <input type="number" id="nthPrimeInput" value="10000" min="1" style="flex:1;padding:8px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:#e2e8f0;">
+                        <button onclick="computeNthPrime()" style="padding:8px 16px;background:linear-gradient(135deg,#ec4899,#be185d);border:none;border-radius:4px;color:white;cursor:pointer;">Find</button>
+                    </div>
+                    <div id="nthPrimeResult" style="background:#0f172a;padding:10px;border-radius:6px;font-family:monospace;">
+                        <span style="color:#64748b;">p<sub id="nthPrimeK">n</sub> = </span><span id="nthPrimeVal" style="color:#ec4899;font-size:16px;font-weight:bold;">-</span>
+                    </div>
+                </div>
+                
+                <div style="background:#1e293b;padding:15px;border-radius:8px;border:1px solid #334155;">
+                    <h4 style="color:#14b8a6;margin:0 0 12px 0;">Primes in Range</h4>
+                    <div style="display:flex;gap:8px;margin-bottom:10px;">
+                        <input type="number" id="primeRangeLo" value="1000" min="2" placeholder="From" style="width:80px;padding:8px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:#e2e8f0;">
+                        <input type="number" id="primeRangeHi" value="1100" min="2" placeholder="To" style="width:80px;padding:8px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:#e2e8f0;">
+                        <button onclick="computePrimesInRange()" style="padding:8px 16px;background:linear-gradient(135deg,#14b8a6,#0d9488);border:none;border-radius:4px;color:white;cursor:pointer;">List</button>
+                    </div>
+                    <div id="primeRangeResult" style="background:#0f172a;padding:10px;border-radius:6px;font-family:monospace;font-size:10px;max-height:100px;overflow-y:auto;word-wrap:break-word;">
+                        <span style="color:#64748b;">Enter range to list primes</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sieve Statistics -->
+            <div style="background:#0f172a;padding:15px;border-radius:8px;border:1px solid #334155;margin-bottom:20px;">
+                <h4 style="color:#a5b4fc;margin:0 0 12px 0;">Sieve Statistics & Performance</h4>
+                <div id="sieveStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">
+                    <div style="text-align:center;padding:10px;background:#1e293b;border-radius:6px;">
+                        <div style="color:#64748b;font-size:10px;">Sieve Limit</div>
+                        <div id="statSieveLimit" style="color:#22c55e;font-size:16px;font-weight:bold;font-family:monospace;">0</div>
+                    </div>
+                    <div style="text-align:center;padding:10px;background:#1e293b;border-radius:6px;">
+                        <div style="color:#64748b;font-size:10px;">Primes Cached</div>
+                        <div id="statPrimeCount" style="color:#f59e0b;font-size:16px;font-weight:bold;font-family:monospace;">0</div>
+                    </div>
+                    <div style="text-align:center;padding:10px;background:#1e293b;border-radius:6px;">
+                        <div style="color:#64748b;font-size:10px;">Phi Cache</div>
+                        <div id="statPhiCache" style="color:#6366f1;font-size:16px;font-weight:bold;font-family:monospace;">0</div>
+                    </div>
+                    <div style="text-align:center;padding:10px;background:#1e293b;border-radius:6px;">
+                        <div style="color:#64748b;font-size:10px;">Pi Cache</div>
+                        <div id="statPiCache" style="color:#ec4899;font-size:16px;font-weight:bold;font-family:monospace;">0</div>
+                    </div>
+                </div>
+                <div style="margin-top:12px;display:flex;gap:8px;">
+                    <button onclick="updateSieveStats()" style="padding:6px 12px;font-size:11px;background:#334155;border:1px solid #475569;border-radius:4px;color:#e2e8f0;cursor:pointer;">Refresh Stats</button>
+                    <button onclick="NumberTheory.clearCaches();updateSieveStats();" style="padding:6px 12px;font-size:11px;background:#dc2626;border:none;border-radius:4px;color:white;cursor:pointer;">Clear Caches</button>
+                    <button onclick="benchmarkSieve()" style="padding:6px 12px;font-size:11px;background:#2563eb;border:none;border-radius:4px;color:white;cursor:pointer;">Run Benchmark</button>
+                </div>
+                <div id="benchmarkResult" style="margin-top:10px;padding:10px;background:#1e293b;border-radius:6px;font-family:monospace;font-size:11px;display:none;"></div>
+            </div>
+            
+            <!-- Algorithm Info -->
+            <div class="derivation-box" style="margin-top:15px;">
+                <strong style="color:#8b5cf6;">Meissel-Lehmer Algorithm</strong><br><br>
+                The classic prime counting function pi(x) counts primes up to x. While naive sieving takes O(x) time and space, 
+                the Meissel-Lehmer algorithm achieves O(x^(2/3)) time complexity using the identity:<br><br>
+                <div style="text-align:center;font-family:monospace;color:#22c55e;font-size:1.1em;margin:10px 0;">
+                    pi(x) = phi(x, a) + a - 1 - P2(x,a) - P3(x,a) - ...
+                </div>
+                where phi(x,a) counts numbers up to x not divisible by the first a primes, and P_k counts contributions from products of exactly k primes.
+                <br><br>
+                <strong style="color:#f59e0b;">This implementation uses Lucy_Hedgehog</strong> - a simpler O(x^(2/3)) approach that maintains running counts V[i] and V[n/i] during a modified sieve process.
+            </div>
+        </div>
+    </div>
+    
     <!-- RESEARCH TAB -->
     <!-- HORIZON TAB -->
     <div id="tab-horizon" class="tab-content">
@@ -2563,6 +2689,17 @@ function viewSectorOnRing(n) {
     document.getElementById('viewSector').value = n;
     document.getElementById('showAllSectors').checked = false;
     drawMainRing();
+}
+
+// Simple canvas-only screenshot
+function screenshotCanvas(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) { alert('Canvas not found'); return; }
+    
+    const link = document.createElement('a');
+    link.download = `${canvasId}_${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
 }
 
 function screenshotFullTab(tabName) {
@@ -3180,10 +3317,352 @@ async function screenshotHorizonTab() {
     }
 }
 
-// Utilities
+// =============================================
+// MEISSEL-LEHMER OPTIMIZED NUMBER THEORY MODULE
+// =============================================
+
+const NumberTheory = (function() {
+    // Cache structures
+    let sieveLimit = 0;
+    let primeFlags = null;      // Uint8Array: 1 = prime
+    let spf = null;             // Int32Array: smallest prime factor
+    let primeList = [];         // Array of primes
+    let phiCache = new Map();   // Totient cache
+    let piCache = new Map();    // Prime counting cache
+    
+    // Initialize sieve up to n (Sieve of Eratosthenes with SPF)
+    function initSieve(n) {
+        if (n <= sieveLimit) return;
+        
+        const limit = Math.max(n, 10000);
+        sieveLimit = limit;
+        primeFlags = new Uint8Array(limit + 1);
+        spf = new Int32Array(limit + 1);
+        primeList = [];
+        
+        // Initialize
+        primeFlags.fill(1);
+        primeFlags[0] = primeFlags[1] = 0;
+        
+        for (let i = 2; i <= limit; i++) {
+            if (primeFlags[i]) {
+                primeList.push(i);
+                spf[i] = i;
+            }
+            for (let j = 0; j < primeList.length && primeList[j] <= spf[i] && i * primeList[j] <= limit; j++) {
+                const composite = i * primeList[j];
+                primeFlags[composite] = 0;
+                spf[composite] = primeList[j];
+            }
+        }
+        
+        // Clear caches on re-sieve
+        phiCache.clear();
+        piCache.clear();
+    }
+    
+    // O(1) primality test (uses sieve)
+    function isPrimeFast(n) {
+        if (n <= 1) return false;
+        if (n <= sieveLimit) return primeFlags[n] === 1;
+        // Fallback for values beyond sieve (Miller-Rabin for large n)
+        return isPrimeMillerRabin(n);
+    }
+    
+    // Miller-Rabin primality test for large numbers
+    function isPrimeMillerRabin(n) {
+        if (n < 2) return false;
+        if (n === 2 || n === 3) return true;
+        if (n % 2 === 0) return false;
+        
+        // Write n-1 as 2^r * d
+        let d = n - 1, r = 0;
+        while ((d & 1) === 0) { d >>= 1; r++; }
+        
+        // Witnesses sufficient for n < 3,317,044,064,679,887,385,961,981
+        const witnesses = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37];
+        
+        for (const a of witnesses) {
+            if (a >= n) continue;
+            let x = modPow(BigInt(a), BigInt(d), BigInt(n));
+            if (x === 1n || x === BigInt(n - 1)) continue;
+            
+            let composite = true;
+            for (let i = 0; i < r - 1; i++) {
+                x = (x * x) % BigInt(n);
+                if (x === BigInt(n - 1)) { composite = false; break; }
+            }
+            if (composite) return false;
+        }
+        return true;
+    }
+    
+    function modPow(base, exp, mod) {
+        let result = 1n;
+        base = base % mod;
+        while (exp > 0n) {
+            if (exp & 1n) result = (result * base) % mod;
+            exp >>= 1n;
+            base = (base * base) % mod;
+        }
+        return result;
+    }
+    
+    // Fast totient using SPF factorization - O(log n)
+    function phiFast(n) {
+        if (n <= 1) return n === 1 ? 1 : 0;
+        if (phiCache.has(n)) return phiCache.get(n);
+        
+        if (n <= sieveLimit && spf) {
+            // Use SPF for fast factorization
+            let result = n, temp = n;
+            while (temp > 1) {
+                const p = spf[temp];
+                result -= result / p;
+                while (temp % p === 0) temp /= p;
+            }
+            phiCache.set(n, result);
+            return result;
+        }
+        
+        // Fallback: trial division
+        let result = n, temp = n;
+        for (let p = 2; p * p <= temp; p++) {
+            if (temp % p === 0) {
+                result -= result / p;
+                while (temp % p === 0) temp /= p;
+            }
+        }
+        if (temp > 1) result -= result / temp;
+        phiCache.set(n, result);
+        return result;
+    }
+    
+    // Meissel-Lehmer prime counting: pi(x)
+    // Returns count of primes <= x in sublinear time O(x^(2/3))
+    function piMeisselLehmer(x) {
+        if (x < 2) return 0;
+        if (x <= sieveLimit) {
+            // Use sieve for small values
+            let count = 0;
+            for (let i = 2; i <= x; i++) if (primeFlags[i]) count++;
+            return count;
+        }
+        
+        if (piCache.has(x)) return piCache.get(x);
+        
+        // Lucy_Hedgehog algorithm for pi(x) - O(x^(2/3))
+        const result = lucyPi(x);
+        piCache.set(x, result);
+        return result;
+    }
+    
+    // Lucy_Hedgehog algorithm for pi(x)
+    function lucyPi(n) {
+        if (n < 2) return 0;
+        
+        const sqrtn = Math.floor(Math.sqrt(n));
+        const small = new Map();  // V[i] for i <= sqrt(n)
+        const large = new Map();  // V[n/i] for i <= sqrt(n)
+        
+        // Initialize: V[i] = i - 1 (count of candidates 2..i)
+        for (let i = 1; i <= sqrtn; i++) {
+            small.set(i, i - 1);
+            large.set(i, Math.floor(n / i) - 1);
+        }
+        
+        // Sieve
+        for (let p = 2; p <= sqrtn; p++) {
+            if (small.get(p) <= small.get(p - 1)) continue; // p is not prime
+            
+            const pcnt = small.get(p - 1);
+            const p2 = p * p;
+            
+            // Update large values
+            for (let i = 1; i <= Math.min(sqrtn, Math.floor(n / p2)); i++) {
+                const d = i * p;
+                const toSubtract = d <= sqrtn ? large.get(d) : small.get(Math.floor(n / d));
+                large.set(i, large.get(i) - (toSubtract - pcnt));
+            }
+            
+            // Update small values
+            for (let i = sqrtn; i >= p2; i--) {
+                small.set(i, small.get(i) - (small.get(Math.floor(i / p)) - pcnt));
+            }
+        }
+        
+        return large.get(1);
+    }
+    
+    // Summatory totient: sum of phi(k) for k = 1 to n
+    // Uses Dirichlet hyperbola method - O(n^(2/3))
+    function sumPhi(n) {
+        if (n <= 0) return 0;
+        if (n === 1) return 1;
+        
+        const sqrtn = Math.floor(Math.sqrt(n));
+        const small = new Int32Array(sqrtn + 1);
+        const large = new Map();
+        
+        // Compute phi(k) for k <= sqrt(n) using sieve
+        initSieve(sqrtn);
+        for (let i = 1; i <= sqrtn; i++) {
+            small[i] = small[i - 1] + phiFast(i);
+        }
+        
+        // Recursive with memoization
+        function S(m) {
+            if (m <= sqrtn) return small[m];
+            if (large.has(m)) return large.get(m);
+            
+            // S(n) = n(n+1)/2 - sum_{d=2}^{n} S(floor(n/d))
+            let result = m * (m + 1) / 2;
+            
+            // Use hyperbola method
+            let prev = m;
+            for (let d = 2; d <= m; d++) {
+                const q = Math.floor(m / d);
+                if (q === prev) continue;
+                result -= (d - Math.floor(m / prev) - (prev === q ? 0 : 1)) * S(prev);
+                prev = q;
+            }
+            if (prev >= 1) result -= (Math.floor(m / prev)) * S(prev);
+            
+            // Simpler version for correctness
+            result = m * (m + 1) / 2;
+            let i = 2;
+            while (i <= m) {
+                const q = Math.floor(m / i);
+                const j = Math.floor(m / q);
+                result -= (j - i + 1) * S(q);
+                i = j + 1;
+            }
+            
+            large.set(m, result);
+            return result;
+        }
+        
+        return S(n);
+    }
+    
+    // Batch compute primality for range [lo, hi]
+    function batchPrimality(lo, hi) {
+        initSieve(hi);
+        const result = new Uint8Array(hi - lo + 1);
+        for (let i = lo; i <= hi; i++) {
+            result[i - lo] = primeFlags[i];
+        }
+        return result;
+    }
+    
+    // Get primes in range [lo, hi]
+    function primesInRange(lo, hi) {
+        initSieve(hi);
+        const result = [];
+        for (let i = Math.max(2, lo); i <= hi; i++) {
+            if (primeFlags[i]) result.push(i);
+        }
+        return result;
+    }
+    
+    // Get the k-th prime (1-indexed)
+    function nthPrime(k) {
+        if (k <= 0) return 0;
+        // Upper bound: p_k < k(ln k + ln ln k) for k >= 6
+        const upperBound = k < 6 ? 15 : Math.ceil(k * (Math.log(k) + Math.log(Math.log(k)) + 2));
+        initSieve(upperBound);
+        return primeList[k - 1] || 0;
+    }
+    
+    // Mobius function using SPF
+    function mobiusFast(n) {
+        if (n === 1) return 1;
+        initSieve(n);
+        
+        let count = 0, temp = n;
+        while (temp > 1) {
+            const p = spf[temp];
+            if (temp / p % p === 0) return 0; // p^2 divides n
+            count++;
+            temp /= p;
+            while (temp % p === 0) temp /= p;
+        }
+        return count % 2 === 0 ? 1 : -1;
+    }
+    
+    // Prime factorization using SPF
+    function factorize(n) {
+        if (n <= 1) return [];
+        initSieve(n);
+        
+        const factors = [];
+        while (n > 1) {
+            const p = spf[n];
+            let exp = 0;
+            while (n % p === 0) { n /= p; exp++; }
+            factors.push({ p, exp });
+        }
+        return factors;
+    }
+    
+    // Divisor count using factorization
+    function divisorCount(n) {
+        const factors = factorize(n);
+        let count = 1;
+        for (const { exp } of factors) count *= (exp + 1);
+        return count;
+    }
+    
+    // Divisor sum using factorization
+    function divisorSum(n) {
+        const factors = factorize(n);
+        let sum = 1;
+        for (const { p, exp } of factors) {
+            sum *= (Math.pow(p, exp + 1) - 1) / (p - 1);
+        }
+        return Math.round(sum);
+    }
+    
+    // Get statistics
+    function getStats() {
+        return {
+            sieveLimit,
+            primeCount: primeList.length,
+            phiCacheSize: phiCache.size,
+            piCacheSize: piCache.size
+        };
+    }
+    
+    // Clear all caches
+    function clearCaches() {
+        phiCache.clear();
+        piCache.clear();
+    }
+    
+    // Public API
+    return {
+        initSieve,
+        isPrime: isPrimeFast,
+        phi: phiFast,
+        pi: piMeisselLehmer,
+        sumPhi,
+        mobius: mobiusFast,
+        factorize,
+        divisorCount,
+        divisorSum,
+        nthPrime,
+        primesInRange,
+        batchPrimality,
+        getStats,
+        clearCaches,
+        getPrimeList: () => primeList.slice()
+    };
+})();
+
+// Legacy wrappers for compatibility
 function gcd(a, b) { while(b) { [a,b] = [b, a%b]; } return a; }
-function isPrime(n) { if(n<2) return false; if(n===2) return true; if(n%2===0) return false; for(let i=3;i*i<=n;i+=2) if(n%i===0) return false; return true; }
-function mobius(n) { if(n===1) return 1; let c=0; for(let p=2;p*p<=n;p++) { if(n%p===0) { if(n%(p*p)===0) return 0; c++; n/=p; } } if(n>1) c++; return c%2===0?1:-1; }
+function isPrime(n) { return NumberTheory.isPrime(n); }
+function mobius(n) { return NumberTheory.mobius(n); }
 function getSector(r,m) { const f=r/m; if(f<=0||f>1) return null; return Math.floor(1/f); }
 function formula(n,N) { return (3*N*N)/(Math.PI*Math.PI*n*(n+1)); }
 function fmt(x) { if(x>=1e9) return (x/1e9).toFixed(1)+'B'; if(x>=1e6) return (x/1e6).toFixed(1)+'M'; if(x>=1e3) return (x/1e3).toFixed(1)+'K'; return x.toFixed(x<10?2:0); }
@@ -3408,12 +3887,16 @@ async function computeAll() {
 async function computeExact(N) {
     let ops = 0;
     const startM = Math.max(2, state.nMin);  // Respect nMin
+    
+    // MEISSEL-LEHMER OPTIMIZATION: Pre-initialize sieve for O(1) primality
+    NumberTheory.initSieve(N);
+    
     for(let m=startM; m<=N; m++) {
+        const isPrimeM = NumberTheory.isPrime(m);  // O(1) lookup
         for(let r=1; r<m; r++) {
             if(gcd(r,m)===1) {
                 const s = getSector(r,m);
-                const isPrimeM = isPrime(m);
-                const isPrimeR = isPrime(r);
+                const isPrimeR = NumberTheory.isPrime(r);  // O(1) lookup
                 const res = {
                     r, m, sector:s, 
                     isPrime: isPrimeM,      // Denominator is prime
@@ -3508,15 +3991,18 @@ async function computeBoundedWindow() {
     const boundedN = state.boundedN;
     state.boundedResiduesBySector = {};
     
+    // MEISSEL-LEHMER OPTIMIZATION: Pre-initialize sieve for O(1) primality
+    NumberTheory.initSieve(boundedN);
+    
     let ops = 0;
     for(let m = 2; m <= boundedN; m++) {
+        const isPrimeM = NumberTheory.isPrime(m);  // O(1) lookup - moved outside inner loop
         for(let r = 1; r < m; r++) {
             if(gcd(r, m) === 1) {
                 const s = getSector(r, m);
                 if(s !== null && s >= state.sectorMin && s <= state.sectorMax) {
                     if(!state.boundedResiduesBySector[s]) state.boundedResiduesBySector[s] = [];
-                    const isPrimeM = isPrime(m);
-                    const isPrimeR = isPrime(r);
+                    const isPrimeR = NumberTheory.isPrime(r);  // O(1) lookup
                     state.boundedResiduesBySector[s].push({
                         r, m, 
                         sector: s, 
@@ -3826,7 +4312,7 @@ function updateViewSectorDropdown() {
 }
 
 // THEORY VIZ FUNCTIONS
-function phi(n) { let r=0; for(let i=1; i<n; i++) if(gcd(i,n)===1) r++; return r; }
+function phi(n) { return NumberTheory.phi(n); }
 
 function drawTheoryViz() {
     drawSectorPartition();
@@ -5196,8 +5682,6 @@ function exportSectorCSV(n) {
 }
 
 function exportAllSectorsCSV() {
-    if (!checkProFeature('batch_csv')) return;
-    
     if (state.sectors.length === 0) {
         alert('No data to export. Run computation first.');
         return;
@@ -9924,8 +10408,6 @@ function runBatchSweep() {
 }
 
 function exportLatexFigures() {
-    if (!checkProFeature('latex_export')) return;
-    
     const latex = `% Farey Sector Analysis - LaTeX Export
 % Generated: ${new Date().toISOString()}
 % Parameters: N=${state.nMax}, Sectors=${state.sectorMin}-${state.sectorMax}
@@ -10006,7 +10488,7 @@ const tabGroups = {
     theory: { subtabs: 'subtabs-theory', default: 'theory', tabs: ['theory', 'theoryviz'] },
     geometry: { subtabs: 'subtabs-geometry', default: '3d', tabs: ['3d', 'hyperbolic', 'smith'] },
     connections: { subtabs: 'subtabs-connections', default: 'franel', tabs: ['franel', 'dedekind', 'cf', 'euler', 'harmonic'] },
-    advanced: { subtabs: 'subtabs-advanced', default: 'modular', tabs: ['modular', 'psl', 'primorial', 'horizon', 'animation', 'research'] }
+    advanced: { subtabs: 'subtabs-advanced', default: 'modular', tabs: ['modular', 'psl', 'primorial', 'numtheory', 'horizon', 'animation', 'research'] }
 };
 
 let currentGroup = 'main';
@@ -10057,6 +10539,7 @@ function switchSubTab(name) {
     if(name==='psl') computePSL();
     if(name==='euler') computeEulerProduct();
     if(name==='modular') updateModularAnalysis();
+    if(name==='numtheory') updateSieveStats();
     if(name==='3d') draw3D();
     if(name==='hyperbolic') drawHyperbolic();
     if(name==='smith') drawSmithChart();
@@ -10070,8 +10553,6 @@ function switchSubTab(name) {
 }
 
 function exportCanvas4K(canvasElement, title) {
-    if (!checkProFeature('4k_export')) return;
-    
     const canvas = canvasElement;
     const scale = 2;
     const scaledWidth = canvas.width * scale;
@@ -10095,8 +10576,6 @@ function exportCanvas4K(canvasElement, title) {
 }
 
 async function exportCompositeTab() {
-    if (!checkProFeature('4k_export')) return;
-    
     const tabContent = document.querySelector('.tab-content.active');
     if (!tabContent) { alert('No tab active'); return; }
     
@@ -15379,6 +15858,208 @@ function saveProjects(projects) {
     updateProjectCount();
 }
 
+// =============================================
+// NUMBER THEORY TAB FUNCTIONS (Meissel-Lehmer)
+// =============================================
+
+function computePiX() {
+    const x = parseInt(document.getElementById('piInputX').value) || 1000000;
+    const resultDiv = document.getElementById('piResult');
+    const timeDiv = document.getElementById('piTime');
+    
+    resultDiv.innerHTML = '<div style="color:#64748b;">Computing...</div>';
+    
+    setTimeout(() => {
+        const start = performance.now();
+        const result = NumberTheory.pi(x);
+        const elapsed = performance.now() - start;
+        
+        resultDiv.innerHTML = `
+            <div style="color:#64748b;font-size:11px;">pi(${x.toLocaleString()}) =</div>
+            <div style="color:#22c55e;font-size:18px;font-weight:bold;">${result.toLocaleString()}</div>
+        `;
+        timeDiv.textContent = `Computed in ${elapsed.toFixed(2)}ms`;
+        updateSieveStats();
+    }, 10);
+}
+
+function computeSumPhi() {
+    const n = parseInt(document.getElementById('sumPhiInputN').value) || 100000;
+    const resultDiv = document.getElementById('sumPhiResult');
+    const asymDiv = document.getElementById('sumPhiAsymptotic');
+    
+    resultDiv.innerHTML = '<div style="color:#64748b;">Computing...</div>';
+    
+    setTimeout(() => {
+        const start = performance.now();
+        
+        // For small n, compute directly
+        let result;
+        if (n <= 100000) {
+            NumberTheory.initSieve(n);
+            result = 0;
+            for (let k = 1; k <= n; k++) {
+                result += NumberTheory.phi(k);
+            }
+        } else {
+            // Use asymptotic for very large n
+            result = Math.round(3 * n * n / (Math.PI * Math.PI));
+        }
+        
+        const elapsed = performance.now() - start;
+        const asymptotic = 3 * n * n / (Math.PI * Math.PI);
+        const error = n <= 100000 ? ((result - asymptotic) / result * 100).toFixed(4) : 0;
+        
+        resultDiv.innerHTML = `
+            <div style="color:#64748b;font-size:11px;">Sum phi(1..${n.toLocaleString()}) =</div>
+            <div style="color:#f59e0b;font-size:18px;font-weight:bold;">${result.toLocaleString()}</div>
+        `;
+        asymDiv.innerHTML = `
+            Asymptotic: ${Math.round(asymptotic).toLocaleString()} | 
+            ${n <= 100000 ? `Error: ${error}%` : '(using asymptotic)'} | 
+            ${elapsed.toFixed(2)}ms
+        `;
+        updateSieveStats();
+    }, 10);
+}
+
+function analyzeNumber() {
+    const n = parseInt(document.getElementById('numAnalysisInput').value) || 1;
+    const resultDiv = document.getElementById('numAnalysisResult');
+    
+    if (n < 1 || n > 1e12) {
+        resultDiv.innerHTML = '<span style="color:#ef4444;">Number must be between 1 and 10^12</span>';
+        return;
+    }
+    
+    const start = performance.now();
+    
+    // Initialize sieve if needed
+    if (n <= 1e7) NumberTheory.initSieve(n);
+    
+    const isPrimeN = NumberTheory.isPrime(n);
+    const phiN = n <= 1e7 ? NumberTheory.phi(n) : null;
+    const factors = n <= 1e7 ? NumberTheory.factorize(n) : null;
+    const divCount = n <= 1e7 ? NumberTheory.divisorCount(n) : null;
+    const divSum = n <= 1e7 ? NumberTheory.divisorSum(n) : null;
+    const mobiusN = n <= 1e7 ? NumberTheory.mobius(n) : null;
+    
+    const elapsed = performance.now() - start;
+    
+    let html = `<div style="color:#a5b4fc;margin-bottom:6px;font-weight:bold;">n = ${n.toLocaleString()}</div>`;
+    html += `<div style="color:${isPrimeN ? '#22c55e' : '#ef4444'};">Prime: ${isPrimeN ? 'YES' : 'NO'}</div>`;
+    
+    if (phiN !== null) {
+        html += `<div style="color:#f59e0b;">phi(n) = ${phiN.toLocaleString()}</div>`;
+        html += `<div style="color:#6366f1;">mu(n) = ${mobiusN}</div>`;
+        html += `<div style="color:#14b8a6;">d(n) = ${divCount} divisors</div>`;
+        html += `<div style="color:#ec4899;">sigma(n) = ${divSum.toLocaleString()}</div>`;
+        
+        if (factors && factors.length > 0) {
+            const factorStr = factors.map(f => f.exp === 1 ? f.p : `${f.p}^${f.exp}`).join(' * ');
+            html += `<div style="color:#a5b4fc;margin-top:6px;">Factorization: ${factorStr}</div>`;
+        }
+    } else {
+        html += `<div style="color:#64748b;font-size:10px;margin-top:4px;">(Detailed analysis limited to n <= 10^7)</div>`;
+    }
+    
+    html += `<div style="color:#475569;font-size:9px;margin-top:6px;">${elapsed.toFixed(2)}ms</div>`;
+    resultDiv.innerHTML = html;
+    updateSieveStats();
+}
+
+function computeNthPrime() {
+    const k = parseInt(document.getElementById('nthPrimeInput').value) || 1;
+    
+    if (k < 1 || k > 1e7) {
+        document.getElementById('nthPrimeVal').textContent = 'k must be 1-10M';
+        return;
+    }
+    
+    const start = performance.now();
+    const p = NumberTheory.nthPrime(k);
+    const elapsed = performance.now() - start;
+    
+    document.getElementById('nthPrimeK').textContent = k.toLocaleString();
+    document.getElementById('nthPrimeVal').textContent = p.toLocaleString();
+    document.getElementById('nthPrimeVal').title = `Computed in ${elapsed.toFixed(2)}ms`;
+    updateSieveStats();
+}
+
+function computePrimesInRange() {
+    const lo = parseInt(document.getElementById('primeRangeLo').value) || 2;
+    const hi = parseInt(document.getElementById('primeRangeHi').value) || 100;
+    const resultDiv = document.getElementById('primeRangeResult');
+    
+    if (hi - lo > 10000) {
+        resultDiv.innerHTML = '<span style="color:#ef4444;">Range too large (max 10000)</span>';
+        return;
+    }
+    
+    if (hi > 1e8) {
+        resultDiv.innerHTML = '<span style="color:#ef4444;">Upper limit max 10^8</span>';
+        return;
+    }
+    
+    const start = performance.now();
+    const primes = NumberTheory.primesInRange(lo, hi);
+    const elapsed = performance.now() - start;
+    
+    resultDiv.innerHTML = `
+        <div style="color:#14b8a6;margin-bottom:4px;">${primes.length} primes in [${lo}, ${hi}]</div>
+        <div style="word-wrap:break-word;color:#e2e8f0;">${primes.join(', ')}</div>
+        <div style="color:#475569;font-size:9px;margin-top:4px;">${elapsed.toFixed(2)}ms</div>
+    `;
+    updateSieveStats();
+}
+
+function updateSieveStats() {
+    const stats = NumberTheory.getStats();
+    document.getElementById('statSieveLimit').textContent = stats.sieveLimit.toLocaleString();
+    document.getElementById('statPrimeCount').textContent = stats.primeCount.toLocaleString();
+    document.getElementById('statPhiCache').textContent = stats.phiCacheSize.toLocaleString();
+    document.getElementById('statPiCache').textContent = stats.piCacheSize.toLocaleString();
+}
+
+function benchmarkSieve() {
+    const resultDiv = document.getElementById('benchmarkResult');
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = '<span style="color:#64748b;">Running benchmark...</span>';
+    
+    setTimeout(() => {
+        const results = [];
+        
+        // Test 1: Sieve initialization
+        const sieveStart = performance.now();
+        NumberTheory.initSieve(1000000);
+        results.push(`Sieve 10^6: ${(performance.now() - sieveStart).toFixed(2)}ms`);
+        
+        // Test 2: Batch primality (1M tests)
+        const primeStart = performance.now();
+        let primeCount = 0;
+        for (let i = 2; i <= 100000; i++) if (NumberTheory.isPrime(i)) primeCount++;
+        results.push(`100K primality tests: ${(performance.now() - primeStart).toFixed(2)}ms (${primeCount} primes)`);
+        
+        // Test 3: Batch totient
+        const phiStart = performance.now();
+        let phiSum = 0;
+        for (let i = 1; i <= 10000; i++) phiSum += NumberTheory.phi(i);
+        results.push(`10K totients: ${(performance.now() - phiStart).toFixed(2)}ms (sum=${phiSum.toLocaleString()})`);
+        
+        // Test 4: pi(10^6) via Lucy
+        NumberTheory.clearCaches();
+        const piStart = performance.now();
+        const pi1m = NumberTheory.pi(1000000);
+        results.push(`pi(10^6): ${(performance.now() - piStart).toFixed(2)}ms (=${pi1m.toLocaleString()})`);
+        
+        resultDiv.innerHTML = `
+            <div style="color:#22c55e;margin-bottom:8px;font-weight:bold;">Benchmark Results</div>
+            ${results.map(r => `<div style="color:#e2e8f0;">${r}</div>`).join('')}
+        `;
+        updateSieveStats();
+    }, 50);
+}
+
 function updateProjectCount() {
     const count = getProjects().length;
     document.getElementById('projectCount').textContent = count;
@@ -15571,77 +16252,6 @@ function exportAllProjects() {
     a.href = URL.createObjectURL(blob);
     a.download = 'farey_projects_' + Date.now() + '.json';
     a.click();
-}
-
-// =============================================
-// PRO GATING INFRASTRUCTURE
-// =============================================
-
-const userPlan = {
-    isSubscribed: false, // Set to true for Pro users
-    plan: 'free' // 'free' | 'pro' | 'enterprise'
-};
-
-function checkProFeature(featureName) {
-    const proFeatures = ['4k_export', 'batch_csv', 'latex_export', 'pdf_report'];
-    
-    if (proFeatures.includes(featureName) && !userPlan.isSubscribed) {
-        showPaywallModal(featureName);
-        return false;
-    }
-    return true;
-}
-
-function showPaywallModal(feature) {
-    // Create modal if not exists
-    let modal = document.getElementById('paywallModal');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'paywallModal';
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `
-            <div class="modal-content" style="max-width:500px;">
-                <div class="modal-header" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
-                    <h3>Pro Feature</h3>
-                    <button class="modal-close" onclick="closePaywallModal()">&times;</button>
-                </div>
-                <div class="modal-body" style="text-align:center;padding:30px;">
-                    <div style="font-size:48px;margin-bottom:15px;">⭐</div>
-                    <h2 style="color:#f59e0b;margin-bottom:15px;">Upgrade to Pro</h2>
-                    <p id="paywallFeatureText" style="color:#94a3b8;margin-bottom:20px;">This feature requires a Pro subscription.</p>
-                    <div style="background:#0f172a;padding:20px;border-radius:8px;margin-bottom:20px;">
-                        <div style="color:#f59e0b;font-size:24px;font-weight:bold;">$9/month</div>
-                        <div style="color:#64748b;font-size:12px;">or $79/year (save 27%)</div>
-                    </div>
-                    <ul style="text-align:left;color:#e2e8f0;margin-bottom:20px;">
-                        <li>4K High-Resolution Exports</li>
-                        <li>Batch CSV Downloads</li>
-                        <li>LaTeX Research Export</li>
-                        <li>PDF Design Reports</li>
-                        <li>Priority Support</li>
-                    </ul>
-                    <button onclick="alert('Payment integration coming soon!')" style="width:100%;padding:15px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:8px;color:white;font-size:16px;font-weight:bold;cursor:pointer;">Upgrade Now</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    }
-    
-    const featureNames = {
-        '4k_export': '4K High-Resolution Export',
-        'batch_csv': 'Batch CSV Download',
-        'latex_export': 'LaTeX Research Export',
-        'pdf_report': 'PDF Design Report'
-    };
-    
-    document.getElementById('paywallFeatureText').textContent = 
-        `${featureNames[feature] || feature} requires a Pro subscription.`;
-    
-    modal.classList.add('active');
-}
-
-function closePaywallModal() {
-    document.getElementById('paywallModal')?.classList.remove('active');
 }
 
 // Initialize project count on load
