@@ -693,7 +693,7 @@
         <div style="display:flex;gap:15px;margin-bottom:15px;flex-wrap:wrap;">
             <div class="panel" style="flex:1;min-width:300px;padding:12px;">
                 <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-                    <label style="font-size:12px;">Sector: <select id="viewSector" onchange="drawMainRing();updateSectorStats(+this.value,state.residuesBySector[+this.value]||[])">
+                    <label style="font-size:12px;">Sector: <select id="viewSector" onchange="state.highlightSectorOnly=null;drawMainRing();updateSectorStats(+this.value,state.residuesBySector[+this.value]||[])">
                         <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>
                     </select></label>
                     <label style="font-size:12px;">Color: <select id="colorMode" onchange="drawMainRing()" style="padding:4px;">
@@ -703,7 +703,7 @@
                         <option value="harmonic">Harmonic</option>
                         <option value="rainbow">Rainbow</option>
                     </select></label>
-                    <label style="font-size:12px;"><input type="checkbox" id="showAllSectors" checked onchange="drawMainRing()"> All Sectors</label>
+                    <label style="font-size:12px;"><input type="checkbox" id="showAllSectors" checked onchange="state.highlightSectorOnly=null;drawMainRing()"> All Sectors</label>
                     <label style="font-size:12px;">Size: <input type="number" id="ringPointSize" min="0" max="100" value="0" step="0.001" style="width:65px;font-size:11px;" onchange="drawMainRing();updatePtSizeDisplay()"><span id="ptSizeDisplay" style="color:#6366f1;margin-left:4px;font-size:11px;">auto</span></label>
                     <button onclick="setPointSize(0)" class="secondary" style="font-size:10px;padding:3px 6px;">Auto</button>
                     <button onclick="setPointSize(0.5)" class="secondary" style="font-size:10px;padding:3px 6px;">0.5</button>
@@ -878,6 +878,23 @@
                 <button class="secondary" onclick="exportRingHiRes()" style="padding:6px 12px;">Export Ring</button>
             </div>
             
+            <!-- Ring Loop Playback Controls -->
+            <div style="margin-top:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;background:#1e1b4b;border-radius:6px;border:1px solid #6366f1;">
+                <span style="color:#a5b4fc;font-size:11px;font-weight:600;">Ring Loop:</span>
+                <button onclick="playRingLoop('forward')" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:4px;color:white;padding:5px 10px;cursor:pointer;font-size:11px;">▶ Forward</button>
+                <button onclick="playRingLoop('backward')" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa);border:none;border-radius:4px;color:white;padding:5px 10px;cursor:pointer;font-size:11px;">◀ Backward</button>
+                <button onclick="stopRingLoop()" style="background:#ef4444;border:none;border-radius:4px;color:white;padding:5px 10px;cursor:pointer;font-size:11px;">■ Stop</button>
+                <label style="color:#a5b4fc;font-size:10px;">Speed:
+                    <select id="ringLoopSpeed" style="padding:3px 6px;font-size:10px;background:#0f172a;border:1px solid #6366f1;border-radius:3px;color:#e2e8f0;">
+                        <option value="500">Slow</option>
+                        <option value="250" selected>Medium</option>
+                        <option value="100">Fast</option>
+                        <option value="50">Very Fast</option>
+                    </select>
+                </label>
+                <span style="color:#a5b4fc;font-size:10px;">Ring: <span id="ringLoopCurrent" style="color:#fbbf24;font-family:monospace;">-</span></span>
+            </div>
+            
             <!-- Color Legend -->
             <div class="color-legend" id="colorLegend" style="margin-top:12px;justify-content:center;"></div>
             
@@ -922,10 +939,6 @@
                                     <option value="5000">5000</option>
                                 </select>
                             </div>
-                            <div>
-                                <label style="color:#6ee7b7;font-size:10px;">Point Size</label>
-                                <input type="number" id="solverPointSize" min="0.001" max="50" value="8" step="0.5" style="display:block;margin-top:4px;width:70px;padding:6px 10px;background:#0f172a;border:1px solid #10b981;border-radius:4px;color:#e2e8f0;font-size:12px;">
-                            </div>
                         </div>
                     </div>
                     <!-- Solver Results -->
@@ -948,6 +961,14 @@
                                 <div id="solverSector" style="font-size:18px;color:#a78bfa;font-family:monospace;">-</div>
                             </div>
                             <div class="solver-result-item">
+                                <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Category</div>
+                                <div id="solverCategory" style="font-size:18px;font-family:monospace;">-</div>
+                            </div>
+                            <div class="solver-result-item">
+                                <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Denom Type</div>
+                                <div id="solverDenomType" style="font-size:18px;font-family:monospace;">-</div>
+                            </div>
+                            <div class="solver-result-item">
                                 <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Continued Fraction</div>
                                 <div id="solverCF" style="font-size:14px;color:#94a3b8;font-family:monospace;word-break:break-all;">-</div>
                             </div>
@@ -955,10 +976,16 @@
                                 <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Gear Ratio</div>
                                 <div id="solverGear" style="font-size:14px;color:#f472b6;font-family:monospace;">-</div>
                             </div>
+                            <div class="solver-result-item">
+                                <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Path</div>
+                                <div id="solverPath" style="font-size:12px;color:#94a3b8;font-family:monospace;word-break:break-all;">-</div>
+                            </div>
                         </div>
                         <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
                             <button onclick="solverHighlightOnRing()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:4px;color:white;padding:8px 16px;cursor:pointer;font-size:12px;">View on Ring</button>
                             <button onclick="solverPlayFraction()" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:8px 16px;cursor:pointer;font-size:12px;">Play Sound</button>
+                            <button onclick="solverPlayPath('forward')" style="background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:4px;color:white;padding:8px 16px;cursor:pointer;font-size:12px;">▶ Path</button>
+                            <button onclick="solverPlayPath('backward')" style="background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:4px;color:white;padding:8px 16px;cursor:pointer;font-size:12px;">◀ Path</button>
                             <button onclick="solverCopyReport()" style="background:#475569;border:none;border-radius:4px;color:white;padding:8px 16px;cursor:pointer;font-size:12px;">Copy Report</button>
                             <button onclick="solverSaveToProject()" style="background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:4px;color:white;padding:8px 16px;cursor:pointer;font-size:12px;">Save to Project</button>
                         </div>
@@ -968,6 +995,63 @@
                 </div>
             </div>
         </div>
+        
+        <!-- WORD ART PANEL - Collapsible -->
+        <div style="margin-top:12px;">
+            <div onclick="toggleWordArtPanel()" style="background:linear-gradient(135deg,#4c1d95,#5b21b6);border:2px solid #8b5cf6;border-radius:8px 8px 0 0;padding:10px 15px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="color:#c4b5fd;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Word Art</span>
+                    <span id="wordArtPreview" style="color:#f0fdf4;font-family:monospace;font-size:13px;"></span>
+                </div>
+                <span id="wordArtArrow" style="color:#c4b5fd;font-size:14px;transition:transform 0.3s;">▼</span>
+            </div>
+            <div id="wordArtPanel" style="display:none;background:linear-gradient(135deg,#4c1d95,#5b21b6);border:2px solid #8b5cf6;border-top:none;border-radius:0 0 8px 8px;padding:12px;">
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <label style="color:#c4b5fd;font-size:11px;"><input type="checkbox" id="wordArtEnabled" checked onchange="drawMainRing()"> Enable</label>
+                    <input type="text" id="wordArtText" value="Wessen" placeholder="Enter text" style="width:100px;padding:6px 10px;font-size:12px;background:#1e1b4b;border:1px solid #8b5cf6;border-radius:4px;color:#f0fdf4;text-align:center;">
+                    <button onclick="generateWordArt()" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">Generate</button>
+                    <button onclick="playWordArt('forward')" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">▶ Play</button>
+                    <button onclick="playWordArt('backward')" style="background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">◀ Play</button>
+                    <button onclick="clearWordArt()" style="background:#475569;border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">Clear</button>
+                </div>
+                <div style="margin-top:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <label style="color:#c4b5fd;font-size:11px;">Size: <input type="number" id="wordArtSize" value="3" min="1" max="10" step="0.5" style="width:50px;padding:4px;font-size:11px;background:#1e1b4b;border:1px solid #8b5cf6;border-radius:3px;color:#f0fdf4;" onchange="drawMainRing()"></label>
+                    <input type="color" id="wordArtColor" value="#ffd700" style="width:30px;height:24px;border:none;cursor:pointer;" onchange="drawMainRing()">
+                    <label style="color:#c4b5fd;font-size:11px;">Sector: <select id="wordArtSector" style="padding:4px;font-size:11px;background:#1e1b4b;border:1px solid #8b5cf6;border-radius:3px;color:#f0fdf4;" onchange="generateWordArt()">
+                        <option value="1">S1</option>
+                        <option value="2" selected>S2</option>
+                        <option value="3">S3</option>
+                        <option value="4">S4</option>
+                        <option value="5">S5</option>
+                        <option value="6">S6</option>
+                        <option value="7">S7</option>
+                        <option value="8">S8</option>
+                        <option value="9">S9</option>
+                        <option value="10">S10</option>
+                        <option value="15">S15</option>
+                        <option value="20">S20</option>
+                        <option value="25">S25</option>
+                        <option value="30">S30</option>
+                        <option value="40">S40</option>
+                        <option value="50">S50</option>
+                        <option value="75">S75</option>
+                        <option value="100">S100</option>
+                        <option value="150">S150</option>
+                        <option value="200">S200</option>
+                        <option value="all">All Sectors</option>
+                    </select></label>
+                    <span style="font-size:10px;color:#a78bfa;">Points: <span id="wordArtPointCount">0</span></span>
+                </div>
+                <div style="margin-top:8px;">
+                    <label style="color:#c4b5fd;font-size:10px;">Points: </label>
+                    <select id="wordArtPointsDropdown" onchange="highlightWordArtPoint(this.value)" style="max-width:300px;padding:4px;font-size:10px;background:#1e1b4b;border:1px solid #8b5cf6;border-radius:3px;color:#f0fdf4;">
+                        <option value="">-- Select to highlight --</option>
+                    </select>
+                </div>
+                <div style="margin-top:6px;font-size:9px;color:#a78bfa;">Shift+click on ring to add points manually</div>
+            </div>
+        </div>
+        
         <div class="grid-2" style="margin-top:15px;">
             <div class="chart-box chart-wrapper">
                 <h4>Exact vs Predicted 
@@ -2586,11 +2670,16 @@ const state = {
     // Bounded window data for P/C analysis in large N mode
     boundedResiduesBySector: {},
     boundedN: 2000,
-    useBoundedPC: true
+    useBoundedPC: true,
+    // Highlight specific sector when showing all (dim others)
+    highlightSectorOnly: null
 };
 
 const sectorColors = ['#6366f1','#8b5cf6','#a855f7','#d946ef','#ec4899','#f43f5e','#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e','#10b981','#14b8a6','#06b6d4','#0ea5e9','#3b82f6'];
 function getSectorColor(n) { return sectorColors[(n) % sectorColors.length]; }
+
+// Ring loop playback state
+let highlightedRingM = null;
 
 // Safe array max/min that won't overflow stack with large arrays
 function safeMax(arr, defaultVal = -Infinity) {
@@ -5458,10 +5547,17 @@ function formatFractionGlobal(f) {
 function showSectorDataDetail(n) {
     if (!n) {
         document.getElementById('sectorDetailPanel').style.display = 'none';
+        state.highlightSectorOnly = null;
+        drawMainRing();
         return;
     }
     
     n = parseInt(n);
+    
+    // Highlight this sector on the ring (show all, dim others)
+    document.getElementById('showAllSectors').checked = true;
+    state.highlightSectorOnly = n;
+    drawMainRing();
     
     // Use actual residues if available, otherwise use bounded data
     let res = state.residuesBySector[n] || [];
@@ -5546,6 +5642,8 @@ function showSectorDataDetail(n) {
 function closeSectorDetail() {
     document.getElementById('sectorDetailPanel').style.display = 'none';
     document.getElementById('sectorDataSelect').value = '';
+    state.highlightSectorOnly = null;
+    drawMainRing();
 }
 
 function playSectorDetailFractions(type, direction) {
@@ -6191,9 +6289,21 @@ function drawMainRing() {
             }
         }
         
-        // Dim outside sector
+        // Dim outside sector (or highlight specific sector when showAll)
         let alpha = 1;
         if ((dimOutside || sectorColorMode === 'dim') && !showAll && !inSector) alpha = 0.2;
+        // When showAll is true but we have a highlighted sector, dim others
+        if (showAll && state.highlightSectorOnly !== null && s !== state.highlightSectorOnly) alpha = 0.5;
+        
+        // Ring loop highlight - brighten current ring, dim others
+        if (typeof highlightedRingM !== 'undefined' && highlightedRingM !== null) {
+            if (m === highlightedRingM) {
+                alpha = 1;
+                size = finalPointSize * 2; // Make highlighted ring points bigger
+            } else {
+                alpha = 0.3;
+            }
+        }
         
         ctx.globalAlpha = alpha;
         ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x,y,size,0,2*Math.PI); ctx.fill();
@@ -6294,12 +6404,34 @@ function drawMainRing() {
     
     ctx.fillStyle='#e2e8f0'; ctx.beginPath(); ctx.arc(cx,cy,4,0,2*Math.PI); ctx.fill();
     
+    // Draw highlighted ring circle during loop playback
+    if (typeof highlightedRingM !== 'undefined' && highlightedRingM !== null) {
+        const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
+        const radNorm = invertOrder ? (1 - (highlightedRingM-state.nMin)/(state.nMax-state.nMin+1)) : ((highlightedRingM-state.nMin)/(state.nMax-state.nMin+1));
+        const ringRad = Math.max(radNorm, 0.05) * maxR;
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 3;
+        ctx.globalAlpha = 0.8;
+        ctx.beginPath();
+        ctx.arc(cx, cy, ringRad, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        
+        // Label the ring
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 14px monospace';
+        ctx.fillText(`Ring m=${highlightedRingM}`, cx + ringRad + 10, cy);
+    }
+    
     // Debug info on canvas - show point size and data source
     const usingBounded = fullData.length === 0 && boundedData.length > 0;
     ctx.fillStyle = usingBounded ? '#f59e0b' : '#94a3b8'; 
     ctx.font = '11px monospace';
     const dataLabel = usingBounded ? `Bounded N≤${state.boundedN}` : `N: ${state.nMin}-${state.nMax}`;
     ctx.fillText(`${dataLabel} | Points: ${debugDrawnCount} | Size: ${finalPointSize.toFixed(1)}px${usingBounded ? ' (Formula mode - limited data)' : ''}`, 10, H - 10);
+    
+    // Draw word art on top
+    drawWordArt(ctx);
     
     updateColorLegend(colorMode, showAll, sector);
     updateSectorStats(sector, residues);
@@ -6929,6 +7061,12 @@ document.getElementById('mainRing').addEventListener('click', function(e) {
     });
     
     if (closest) {
+        // Shift-click adds to word art
+        if (e.shiftKey && document.getElementById('wordArtEnabled')?.checked) {
+            addPointToWordArt(closest);
+            return;
+        }
+        
         // Just highlight the point, don't change sector view
         highlightedRingPoint = closest;
         drawMainRing(); // Redraw to show highlight
@@ -6961,18 +7099,39 @@ function openPointModal(p) {
             <div class="detail-card"><h5>Fraction</h5><div class="value">${p.r}/${p.m}</div><div class="sub">= ${(p.r/p.m).toFixed(8)}</div></div>
             <div class="detail-card"><h5>Sector</h5><div class="value">${p.sector}</div><div class="sub">(1/${p.sector+1}, 1/${p.sector}]</div></div>
             <div class="detail-card"><h5>Modulus</h5><div class="value" style="color:${p.isPrime?'#f59e0b':'#6366f1'}">${p.m}</div><div class="sub">${p.isPrime?'Prime':'Composite'}</div></div>
+            <div class="detail-card"><h5>Category</h5><div class="value" style="color:${p.category==='PP'?'#22c55e':p.category==='PC'?'#f59e0b':p.category==='CP'?'#6366f1':'#94a3b8'}">${p.category || 'N/A'}</div><div class="sub">${p.category==='PP'?'Both Prime':p.category==='PC'?'Prime/Comp':p.category==='CP'?'Comp/Prime':'Both Comp'}</div></div>
         </div>
         <div class="theorem-box"><strong>CF:</strong> [${cf.join('; ')}]<br><strong>Path:</strong> ${cfPath(cf)}</div>
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
             <button onclick="closePointModal();playFraction(${p.r},${p.m},1.0)" style="background:linear-gradient(135deg,#22c55e,#16a34a);">▶ Play</button>
-            <button onclick="closePointModal();playTreePathAudio('forward')" style="background:linear-gradient(135deg,#f59e0b,#d97706);">▶ Play Path</button>
-            <button onclick="closePointModal();scrollToSectorTree()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">See on Tree</button>
+            <button onclick="closePointModal();playTreePathAudio('forward')" style="background:linear-gradient(135deg,#f59e0b,#d97706);">▶ Path</button>
+            <button onclick="closePointModal();viewPointOnAll(${p.r},${p.m},${p.sector})" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">View on All</button>
+            <button onclick="closePointModal();scrollToSectorTree()" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">See on Tree</button>
             <button onclick="closePointModal();addToSolver(${p.r}/${p.m})" style="background:linear-gradient(135deg,#10b981,#059669);">Add to Solver</button>
         </div>
     `;
     document.getElementById('pointModal').classList.add('active');
 }
 function closePointModal() { document.getElementById('pointModal').classList.remove('active'); }
+
+// View point on all sectors with its sector highlighted
+function viewPointOnAll(r, m, sector) {
+    document.getElementById('showAllSectors').checked = true;
+    state.highlightSectorOnly = sector;
+    
+    // Set point size to 1 for cleaner view
+    document.getElementById('ringPointSize').value = 1;
+    updatePtSizeDisplay();
+    
+    // Enable tracker to highlight the specific fraction
+    document.getElementById('enableResidueTracker').checked = true;
+    document.getElementById('trackResidues').value = r;
+    document.getElementById('trackerColor').value = '#10b981';
+    document.getElementById('trackerGlow').checked = true;
+    document.getElementById('trackerSize').value = 1;
+    
+    drawMainRing();
+}
 
 // Select point by a/b input
 function selectPointByFraction() {
@@ -7056,6 +7215,260 @@ function toggleSolverPanel() {
     arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
 }
 
+// Word Art panel toggle and functions
+let wordArtPoints = [];
+
+function toggleWordArtPanel() {
+    const panel = document.getElementById('wordArtPanel');
+    const arrow = document.getElementById('wordArtArrow');
+    const isHidden = panel.style.display === 'none';
+    panel.style.display = isHidden ? 'block' : 'none';
+    arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
+function clearWordArt() {
+    wordArtPoints = [];
+    stopWordArtPlayback();
+    const previewEl = document.getElementById('wordArtPreview');
+    if (previewEl) previewEl.textContent = '';
+    updateWordArtUI();
+    drawMainRing();
+}
+
+function addPointToWordArt(p) {
+    if (!document.getElementById('wordArtEnabled')?.checked) return false;
+    
+    // Avoid duplicates
+    if (wordArtPoints.find(wp => wp.r === p.r && wp.m === p.m)) return true;
+    
+    // Add point to word art
+    wordArtPoints.push({ r: p.r, m: p.m, x: p.x, y: p.y });
+    updateWordArtUI();
+    drawMainRing();
+    return true;
+}
+
+// Generate word art from text - writes within specified sector from left to right
+function generateWordArt() {
+    const text = document.getElementById('wordArtText').value.toUpperCase();
+    if (!text) return;
+    
+    clearWordArt();
+    
+    const sectorVal = document.getElementById('wordArtSector')?.value || '2';
+    
+    // Sector bounds in angle (as fraction of circle)
+    let leftBound, rightBound;
+    if (sectorVal === 'all') {
+        leftBound = 0;
+        rightBound = 1;
+    } else {
+        const sector = parseInt(sectorVal);
+        leftBound = 1 / (sector + 1);  // e.g., 1/3 for sector 2
+        rightBound = 1 / sector;        // e.g., 1/2 for sector 2
+    }
+    
+    // Letter patterns - relative positions within a character cell
+    // Each letter is array of [xOffset, yOffset] where x is 0-1 (left-right), y is 0-1 (inner-outer)
+    const letterPatterns = {
+        'W': [[0,0.9],[0.25,0.2],[0.5,0.6],[0.75,0.2],[1,0.9]],
+        'E': [[0,0.9],[0,0.5],[0,0.1],[0.7,0.1],[0,0.5],[0.5,0.5],[0,0.9],[0.7,0.9]],
+        'S': [[0.8,0.1],[0.2,0.2],[0.2,0.45],[0.8,0.55],[0.8,0.8],[0.2,0.9]],
+        'N': [[0,0.9],[0,0.1],[0.9,0.9],[0.9,0.1]],
+        'A': [[0,0.9],[0.5,0.1],[1,0.9],[0.25,0.5],[0.75,0.5]],
+        'B': [[0,0.9],[0,0.1],[0.7,0.2],[0,0.5],[0.7,0.7],[0,0.9]],
+        'C': [[0.8,0.2],[0.2,0.1],[0.2,0.9],[0.8,0.8]],
+        'D': [[0,0.1],[0,0.9],[0.7,0.5],[0,0.1]],
+        'F': [[0,0.9],[0,0.1],[0.8,0.1],[0,0.5],[0.6,0.5]],
+        'G': [[0.8,0.2],[0.2,0.1],[0.2,0.9],[0.8,0.8],[0.8,0.5],[0.5,0.5]],
+        'H': [[0,0.1],[0,0.9],[0,0.5],[1,0.5],[1,0.1],[1,0.9]],
+        'I': [[0.5,0.1],[0.5,0.9]],
+        'J': [[0.2,0.8],[0.5,0.9],[0.8,0.8],[0.8,0.1]],
+        'K': [[0,0.1],[0,0.9],[0,0.5],[0.9,0.1],[0,0.5],[0.9,0.9]],
+        'L': [[0,0.1],[0,0.9],[0.8,0.9]],
+        'M': [[0,0.9],[0,0.1],[0.5,0.5],[1,0.1],[1,0.9]],
+        'O': [[0.5,0.1],[0,0.5],[0.5,0.9],[1,0.5],[0.5,0.1]],
+        'P': [[0,0.9],[0,0.1],[0.8,0.2],[0,0.5]],
+        'Q': [[0.5,0.1],[0,0.5],[0.5,0.9],[1,0.5],[0.5,0.1],[0.8,0.8]],
+        'R': [[0,0.9],[0,0.1],[0.8,0.2],[0,0.5],[0.9,0.9]],
+        'T': [[0,0.1],[1,0.1],[0.5,0.1],[0.5,0.9]],
+        'U': [[0,0.1],[0,0.9],[1,0.9],[1,0.1]],
+        'V': [[0,0.1],[0.5,0.9],[1,0.1]],
+        'X': [[0,0.1],[1,0.9],[0.5,0.5],[1,0.1],[0,0.9]],
+        'Y': [[0,0.1],[0.5,0.5],[1,0.1],[0.5,0.5],[0.5,0.9]],
+        'Z': [[0,0.1],[1,0.1],[0,0.9],[1,0.9]],
+        ' ': []
+    };
+    
+    const canvas = document.getElementById('mainRing');
+    const W = canvas.width, H = canvas.height;
+    const cx = W/2, cy = H/2;
+    const maxR = Math.min(W, H) * 0.42;
+    
+    const numChars = text.replace(/ /g, '').length;
+    const sectorWidth = rightBound - leftBound;
+    const charWidth = sectorWidth / Math.max(numChars, 1);
+    const padding = charWidth * 0.1;
+    
+    let charIndex = 0;
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === ' ') continue;
+        
+        const pattern = letterPatterns[char] || [];
+        const charStart = leftBound + charIndex * charWidth + padding;
+        const charEnd = leftBound + (charIndex + 1) * charWidth - padding;
+        
+        pattern.forEach(([xOff, yOff]) => {
+            // Map x offset to angle within character's slice
+            const angle = (charStart + xOff * (charEnd - charStart)) * 2 * Math.PI;
+            // Map y offset to radius (0.3 to 0.9 of maxR)
+            const rad = (0.3 + yOff * 0.6) * maxR;
+            
+            const targetX = cx + rad * Math.cos(angle);
+            const targetY = cy - rad * Math.sin(angle);
+            
+            // Find closest ring point
+            let closest = null, minDist = Infinity;
+            state.ringPoints.forEach(p => {
+                const d = Math.sqrt((p.x - targetX)**2 + (p.y - targetY)**2);
+                if (d < minDist) {
+                    minDist = d;
+                    closest = p;
+                }
+            });
+            
+            if (closest && minDist < 80) {
+                // Avoid duplicates
+                if (!wordArtPoints.find(wp => wp.r === closest.r && wp.m === closest.m)) {
+                    wordArtPoints.push({ r: closest.r, m: closest.m, x: closest.x, y: closest.y, char: char });
+                }
+            }
+        });
+        
+        charIndex++;
+    }
+    
+    updateWordArtUI();
+    drawMainRing();
+}
+
+function updateWordArtUI() {
+    const countEl = document.getElementById('wordArtPointCount');
+    const previewEl = document.getElementById('wordArtPreview');
+    const textEl = document.getElementById('wordArtText');
+    const dropdown = document.getElementById('wordArtPointsDropdown');
+    
+    if (countEl) countEl.textContent = wordArtPoints.length;
+    if (previewEl && textEl && wordArtPoints.length > 0) {
+        previewEl.textContent = textEl.value || '';
+    }
+    
+    // Update dropdown
+    if (dropdown) {
+        dropdown.innerHTML = '<option value="">-- Select to highlight --</option>';
+        wordArtPoints.forEach((p, i) => {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = `${i+1}. ${p.r}/${p.m} = ${(p.r/p.m).toFixed(6)}${p.char ? ' ('+p.char+')' : ''}`;
+            dropdown.appendChild(opt);
+        });
+    }
+}
+
+function highlightWordArtPoint(idx) {
+    if (idx === '' || idx === null) return;
+    const p = wordArtPoints[parseInt(idx)];
+    if (!p) return;
+    
+    // Find full point data from ring points
+    const fullPoint = state.ringPoints.find(rp => rp.r === p.r && rp.m === p.m);
+    if (fullPoint) {
+        highlightedRingPoint = fullPoint;
+        selectPointForTree(fullPoint);
+        drawMainRing();
+    }
+}
+
+let wordArtPlaybackId = null;
+
+function playWordArt(direction) {
+    if (wordArtPoints.length === 0) return;
+    
+    stopWordArtPlayback();
+    initAudioContext();
+    
+    const points = direction === 'backward' ? [...wordArtPoints].reverse() : wordArtPoints;
+    let idx = 0;
+    
+    function playNext() {
+        if (idx >= points.length) {
+            wordArtPlaybackId = null;
+            return;
+        }
+        
+        const p = points[idx];
+        playFraction(p.r, p.m, 0.3);
+        
+        // Highlight point
+        const fullPoint = state.ringPoints.find(rp => rp.r === p.r && rp.m === p.m);
+        if (fullPoint) {
+            highlightedRingPoint = fullPoint;
+            drawMainRing();
+        }
+        
+        // Update dropdown selection
+        const realIdx = direction === 'backward' ? wordArtPoints.length - 1 - idx : idx;
+        document.getElementById('wordArtPointsDropdown').value = realIdx;
+        
+        idx++;
+        wordArtPlaybackId = setTimeout(playNext, 250);
+    }
+    
+    playNext();
+}
+
+function stopWordArtPlayback() {
+    if (wordArtPlaybackId) {
+        clearTimeout(wordArtPlaybackId);
+        wordArtPlaybackId = null;
+    }
+}
+
+// Draw word art on ring canvas
+function drawWordArt(ctx) {
+    if (!document.getElementById('wordArtEnabled')?.checked) return;
+    if (wordArtPoints.length < 2) return;
+    
+    const color = document.getElementById('wordArtColor')?.value || '#ffd700';
+    const size = parseFloat(document.getElementById('wordArtSize')?.value || 3);
+    
+    // Draw connecting lines
+    ctx.strokeStyle = color;
+    ctx.lineWidth = size;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalAlpha = 0.8;
+    
+    ctx.beginPath();
+    ctx.moveTo(wordArtPoints[0].x, wordArtPoints[0].y);
+    for (let i = 1; i < wordArtPoints.length; i++) {
+        ctx.lineTo(wordArtPoints[i].x, wordArtPoints[i].y);
+    }
+    ctx.stroke();
+    
+    // Draw points
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 1;
+    wordArtPoints.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, size * 1.5, 0, 2 * Math.PI);
+        ctx.fill();
+    });
+    
+    ctx.globalAlpha = 1;
+}
+
 function addToSolver(value) {
     // Open solver panel if closed
     const panel = document.getElementById('solverPanel');
@@ -7063,8 +7476,14 @@ function addToSolver(value) {
         toggleSolverPanel();
     }
     document.getElementById('solverInput').value = value;
-    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
     solverSearch(value.toString());
+    
+    // Apply view on ring after search completes
+    setTimeout(() => {
+        if (solverCurrentMatch) {
+            solverHighlightOnRing();
+        }
+    }, 100);
 }
 
 // SECTOR TREE VISUALIZATION
@@ -10906,6 +11325,33 @@ setTimeout(addExportButtons, 500);
 
 computeAll();
 
+// Initialize solver with 0.5 and apply view on ring after computation completes
+function initSolverDefault() {
+    if (state.computing) {
+        // Still computing, wait more
+        setTimeout(initSolverDefault, 500);
+        return;
+    }
+    
+    // Set solver input to 0.5 and search (keep panel collapsed)
+    document.getElementById('solverInput').value = '0.5';
+    solverSearch('0.5');
+    
+    // Apply view on ring after search
+    setTimeout(function() {
+        if (solverCurrentMatch) {
+            solverHighlightOnRing();
+        }
+        
+        // Generate Wessen word art by default (keep panel collapsed)
+        setTimeout(function() {
+            document.getElementById('wordArtText').value = 'Wessen';
+            generateWordArt();
+        }, 300);
+    }, 200);
+}
+setTimeout(initSolverDefault, 1000);
+
 // Add zoom controls to all chart boxes
 function addZoomControlsToCharts() {
     // Charts already have 4K export buttons, no additional controls needed
@@ -14372,6 +14818,9 @@ function stopAllPlayback() {
     }
     stopAudio();
     
+    // Stop ring loop
+    stopRingLoop();
+    
     // Clear playback highlights
     if (typeof clearAllPlaybackHighlights === 'function') {
         clearAllPlaybackHighlights();
@@ -14398,6 +14847,90 @@ function stopAllPlayback() {
     if (typeof resetAllSectorsBtn === 'function') {
         resetAllSectorsBtn();
     }
+}
+
+// Ring loop playback - cycles through rings (denominators)
+let ringLoopState = {
+    isPlaying: false,
+    intervalId: null,
+    currentRing: 2,
+    direction: 'forward'
+};
+
+function playRingLoop(direction) {
+    stopRingLoop();
+    
+    initAudioContext();
+    
+    const minRing = state.nMin || 2;
+    const maxRing = state.nMax || 500;
+    const speed = parseInt(document.getElementById('ringLoopSpeed')?.value || 250);
+    
+    ringLoopState.isPlaying = true;
+    ringLoopState.direction = direction;
+    ringLoopState.currentRing = direction === 'forward' ? minRing : maxRing;
+    
+    function playNextRing() {
+        if (!ringLoopState.isPlaying) return;
+        
+        const m = ringLoopState.currentRing;
+        
+        // Get all fractions in this ring (denominator m)
+        const ringFractions = state.allResidues.filter(f => f.m === m);
+        
+        // Update display
+        document.getElementById('ringLoopCurrent').textContent = m + ' (' + ringFractions.length + ' pts)';
+        
+        // Play a representative sound for this ring
+        if (ringFractions.length > 0) {
+            // Play the median fraction in the ring
+            const midIdx = Math.floor(ringFractions.length / 2);
+            const f = ringFractions[midIdx];
+            playFraction(f.r, f.m, 0.2);
+        } else {
+            // Play the ring number as a tone
+            playFraction(1, m, 0.2);
+        }
+        
+        // Highlight this ring on the canvas
+        highlightRingOnCanvas(m);
+        
+        // Move to next ring
+        if (direction === 'forward') {
+            ringLoopState.currentRing++;
+            if (ringLoopState.currentRing > maxRing) {
+                ringLoopState.currentRing = minRing; // Loop back
+            }
+        } else {
+            ringLoopState.currentRing--;
+            if (ringLoopState.currentRing < minRing) {
+                ringLoopState.currentRing = maxRing; // Loop back
+            }
+        }
+    }
+    
+    // Start immediately
+    playNextRing();
+    
+    // Continue looping
+    ringLoopState.intervalId = setInterval(playNextRing, speed);
+}
+
+function stopRingLoop() {
+    ringLoopState.isPlaying = false;
+    if (ringLoopState.intervalId) {
+        clearInterval(ringLoopState.intervalId);
+        ringLoopState.intervalId = null;
+    }
+    document.getElementById('ringLoopCurrent').textContent = '-';
+    // Clear ring highlight
+    highlightedRingM = null;
+    drawMainRing();
+}
+
+function highlightRingOnCanvas(m) {
+    highlightedRingM = m;
+    drawMainRing();
 }
 
 function highlightCurrentFraction(f) {
@@ -15885,6 +16418,23 @@ function displaySolverResults(best, target, alternatives) {
     document.getElementById('solverCF').textContent = '[' + best.cf.join('; ') + ']';
     document.getElementById('solverGear').textContent = best.m + ':' + best.r + ' (teeth ratio)';
     
+    // Category (PP/PC/CP/CC)
+    const isPrimeR = isPrime(best.r);
+    const isPrimeM = best.isPrime;
+    const category = (isPrimeR && isPrimeM) ? 'PP' : (isPrimeR && !isPrimeM) ? 'PC' : (!isPrimeR && isPrimeM) ? 'CP' : 'CC';
+    const catColors = { 'PP': '#22c55e', 'PC': '#f59e0b', 'CP': '#6366f1', 'CC': '#94a3b8' };
+    const catLabels = { 'PP': 'Both Prime', 'PC': 'Prime/Comp', 'CP': 'Comp/Prime', 'CC': 'Both Comp' };
+    document.getElementById('solverCategory').textContent = category + ' (' + catLabels[category] + ')';
+    document.getElementById('solverCategory').style.color = catColors[category];
+    
+    // Denom Type
+    document.getElementById('solverDenomType').textContent = best.isPrime ? 'Prime' : 'Composite';
+    document.getElementById('solverDenomType').style.color = best.isPrime ? '#f59e0b' : '#6366f1';
+    
+    // Path (L/R sequence from CF)
+    const path = cfPath(best.cf);
+    document.getElementById('solverPath').textContent = path;
+    
     // Update preview in collapsed header
     document.getElementById('solverMatchPreview').textContent = best.r + '/' + best.m + ' = ' + best.value.toFixed(6);
     
@@ -15931,13 +16481,12 @@ function solverSelectAlternative(r, m) {
 function solverHighlightOnRing() {
     if (!solverCurrentMatch) return;
     
-    // Set view to the matching sector
-    document.getElementById('viewSector').value = solverCurrentMatch.sector;
-    document.getElementById('showAllSectors').checked = false;
+    // Show all sectors but highlight the matching one (dim others)
+    document.getElementById('showAllSectors').checked = true;
+    state.highlightSectorOnly = solverCurrentMatch.sector;
     
-    // Set point size from solver
-    const solverPtSize = parseFloat(document.getElementById('solverPointSize')?.value || 8);
-    document.getElementById('ringPointSize').value = solverPtSize;
+    // Set point size to 1 for cleaner view
+    document.getElementById('ringPointSize').value = 1;
     updatePtSizeDisplay();
     
     // Enable tracker to highlight the specific fraction
@@ -15945,6 +16494,7 @@ function solverHighlightOnRing() {
     document.getElementById('trackResidues').value = solverCurrentMatch.r;
     document.getElementById('trackerColor').value = '#10b981';
     document.getElementById('trackerGlow').checked = true;
+    document.getElementById('trackerSize').value = 1;
     
     drawMainRing();
     
@@ -15966,6 +16516,22 @@ function solverPlayFraction() {
     initAudioContext();
     playFraction(solverCurrentMatch.r, solverCurrentMatch.m, 1.0);
     setHarmonicInterval(solverCurrentMatch.r, solverCurrentMatch.m);
+}
+
+function solverPlayPath(direction) {
+    if (!solverCurrentMatch) return;
+    
+    // Select the point for tree and play its path
+    const solverPoint = {
+        r: solverCurrentMatch.r,
+        m: solverCurrentMatch.m,
+        sector: solverCurrentMatch.sector,
+        isPrime: isPrime(solverCurrentMatch.m)
+    };
+    selectPointForTree(solverPoint);
+    
+    // Play the tree path
+    playTreePathAudio(direction);
 }
 
 function solverCopyReport() {
