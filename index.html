@@ -630,6 +630,7 @@
         <div class="tab" onclick="switchTab('geometry')">Geometry</div>
         <div class="tab" onclick="switchTab('connections')">Connections</div>
         <div class="tab" onclick="switchTab('advanced')">Advanced</div>
+        <div class="tab" onclick="switchTab('references')">References</div>
     </div>
     
     <!-- SUB-TABS (shown based on active main tab) -->
@@ -1011,7 +1012,7 @@
             </div>
             <div id="wordArtPanel" style="display:none;background:linear-gradient(135deg,#4c1d95,#5b21b6);border:2px solid #8b5cf6;border-top:none;border-radius:0 0 8px 8px;padding:12px;">
                 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                    <label style="color:#c4b5fd;font-size:11px;"><input type="checkbox" id="wordArtEnabled" checked onchange="drawMainRing()"> Enable</label>
+                    <label style="color:#c4b5fd;font-size:11px;"><input type="checkbox" id="wordArtEnabled" onchange="drawMainRing()"> Enable</label>
                     <input type="text" id="wordArtText" value="Wessen" placeholder="Enter text" style="width:100px;padding:6px 10px;font-size:12px;background:#1e1b4b;border:1px solid #8b5cf6;border-radius:4px;color:#f0fdf4;text-align:center;">
                     <button onclick="generateWordArt()" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">Generate</button>
                     <button onclick="playWordArt('forward')" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">▶ Loop</button>
@@ -1357,12 +1358,77 @@
                 </div>
             </div>
             
-            <h3>7. Conclusion</h3>
-            <div style="background:#0f172a; padding:12px; border-radius:6px; border-left:3px solid #3b82f6; margin:10px 0;">
-                <p style="margin:0;">Farey sectors provide a natural geometric decomposition of rational directions. By combining this structure with classical coprime density results, we obtain an explicit directional refinement of visible lattice point counts. This framework enables anisotropic analysis of arithmetic distributions and provides foundation for modular constraints, higher-dimensional generalizations, and computational number theory.</p>
+            <h3 style="margin-top:20px;">7. The Sector Boundary: A Phase Transition in Number Theory</h3>
+            <div class="derivation-box" style="background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%); border-left-color: #38bdf8;">
+                <strong style="color:#7dd3fc; font-size:1.1em;">The Nyquist Limit of the Farey Sequence</strong>
+                <p style="margin:12px 0 0 0;">For any order N, there exists a critical sector n* where the asymptotic formula transitions from continuous density estimation to discrete arithmetic counting. This boundary represents a fundamental phase transition in number-theoretic behavior.</p>
+                <div style="background:#0f172a; padding:12px; border-radius:5px; font-family:monospace; font-size:1em; margin:10px 0; text-align:center;">
+                    <strong>n* ≈ (√3/π) · N ≈ 0.5513 · N</strong>
+                </div>
+                <p style="margin:10px 0 0 0; font-size:0.9em;">Just as the Nyquist frequency in signal processing defines the limit where wave reconstruction fails, this bound marks where the "Farey density wave" can no longer be treated as continuous.</p>
             </div>
             
-            <p style="margin-top:20px; text-align:center; color:#64748b; font-size:0.85em;">Acknowledgments: Foundational work of Euler, Mertens, and others on totient summation and Farey geometry.</p>
+            <h4 style="margin-top:15px; color:#7dd3fc;">7.1 Derivation of the Boundary Constant</h4>
+            <div style="background:#0f172a; padding:12px; border-radius:6px; border-left:3px solid #0ea5e9; margin:10px 0;">
+                <p><strong>Condition:</strong> The predicted count C(n,N) falls below unity when:</p>
+                <div style="background:#0a0f1a; padding:8px; margin:8px 0; border-radius:4px; font-family:monospace; text-align:center;">
+                    (3/π²) · N² / (n(n+1)) < 1
+                </div>
+                <p style="margin:8px 0;"><strong>Solving for n:</strong> n² + n > (3/π²)N² implies n > (√3/π)N for large n</p>
+                <p style="margin:8px 0;"><strong>The Constant:</strong> √3/π ≈ 0.5513 emerges naturally from the interaction of:</p>
+                <ul style="margin:8px 0 0 15px; font-size:0.9em;">
+                    <li>The coprime density constant 3/π² (from Euler's totient asymptotics)</li>
+                    <li>The geometric sector width 1/(n(n+1))</li>
+                </ul>
+            </div>
+            
+            <h4 style="margin-top:15px; color:#7dd3fc;">7.2 Behavioral Regimes</h4>
+            <table style="width:100%; margin-top:10px; border-collapse:collapse; font-size:0.85em;">
+                <thead><tr style="background:#1e3a5f;"><th style="padding:10px; text-align:left;">Property</th><th style="padding:10px;">Dense Regime (n < 0.55N)</th><th style="padding:10px;">Boundary (n ≈ 0.55N)</th><th style="padding:10px;">Sparse Regime (n > 0.55N)</th></tr></thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid #334155;"><td style="padding:10px;"><strong>Predicted Count</strong></td><td style="padding:10px; text-align:center;">C(n,N) >> 1</td><td style="padding:10px; text-align:center;">C(n,N) ≈ 1</td><td style="padding:10px; text-align:center;">C(n,N) < 1</td></tr>
+                    <tr style="border-bottom:1px solid #334155;"><td style="padding:10px;"><strong>Relative Error</strong></td><td style="padding:10px; text-align:center;">Low, stable (< 5%)</td><td style="padding:10px; text-align:center;">Increasing noise</td><td style="padding:10px; text-align:center;">Oscillatory, unbounded</td></tr>
+                    <tr style="border-bottom:1px solid #334155;"><td style="padding:10px;"><strong>Identity Distribution</strong></td><td style="padding:10px; text-align:center;">Spread across PP, PC, CP, CC</td><td style="padding:10px; text-align:center;">Concentrating</td><td style="padding:10px; text-align:center;">Single category dominates</td></tr>
+                    <tr style="border-bottom:1px solid #334155;"><td style="padding:10px;"><strong>Mathematical Regime</strong></td><td style="padding:10px; text-align:center; color:#4ade80;">Analytic (Density)</td><td style="padding:10px; text-align:center; color:#fbbf24;">Transitional</td><td style="padding:10px; text-align:center; color:#f472b6;">Discrete (Counting)</td></tr>
+                </tbody>
+            </table>
+            
+            <h4 style="margin-top:15px; color:#7dd3fc;">7.3 The Quantum Arithmetic Regime</h4>
+            <div style="background:#0f172a; padding:12px; border-radius:6px; border-left:3px solid #f472b6; margin:10px 0;">
+                <p style="margin:0 0 10px 0;">Beyond the boundary, sectors enter a "quantum" regime where:</p>
+                <div class="grid-2" style="gap:12px;">
+                    <div style="background:#1e1b4b; padding:10px; border-radius:4px;">
+                        <strong style="color:#c4b5fd;">Discrete Counting Dominates</strong>
+                        <p style="margin:6px 0 0 0; font-size:0.85em;">The formula predicts fractional counts (0.4, 0.7) but actual counts must be integers (0 or 1), causing wild relative error oscillations.</p>
+                    </div>
+                    <div style="background:#1e1b4b; padding:10px; border-radius:4px;">
+                        <strong style="color:#c4b5fd;">Identity Collapse</strong>
+                        <p style="margin:6px 0 0 0; font-size:0.85em;">When a sector contains exactly one fraction, that fraction occupies precisely one P/C category, trivially satisfying the identity: 0+0+0+1 = 1.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h4 style="margin-top:15px; color:#7dd3fc;">7.4 Physical Interpretation: A Resolution Map of the Primes</h4>
+            <div style="background:#0f172a; padding:12px; border-radius:6px; border-left:3px solid #22c55e; margin:10px 0;">
+                <p style="margin:0 0 10px 0;">The boundary constant provides a "resolution limit" for prime distribution analysis:</p>
+                <ul style="margin:0 0 0 15px; font-size:0.9em;">
+                    <li><strong>Zooming In:</strong> Increasing N allows the asymptotic formula to penetrate deeper into higher-numbered sectors before encountering empty regions.</li>
+                    <li><strong>Information Limit:</strong> At n ≈ 0.55N, we reach the maximum "resolution" where statistical methods remain valid.</li>
+                    <li><strong>Prime Chaos:</strong> Beyond this limit, individual prime locations dominate over statistical patterns.</li>
+                </ul>
+            </div>
+            
+            <div class="theorem-box" style="background: linear-gradient(135deg, #422006 0%, #5a3a1a 100%); border-left-color: #fbbf24; margin-top:15px;">
+                <strong style="color:#fcd34d; font-size:1em;">Key Observation</strong>
+                <p style="margin:10px 0 0 0; font-size:0.9em;">The Prime/Composite identities (PP + PC + CP + CC = Total) hold <em>exactly</em> in all regimes, including at and beyond the boundary. This persistence demonstrates that while density estimates fail, the underlying arithmetic structure remains inviolate. The boundary thus separates where we can <em>predict</em> counts from where we can only <em>verify</em> identities.</p>
+            </div>
+            
+            <h3 style="margin-top:20px;">8. Conclusion</h3>
+            <div style="background:#0f172a; padding:12px; border-radius:6px; border-left:3px solid #3b82f6; margin:10px 0;">
+                <p style="margin:0;">Farey sectors provide a natural geometric decomposition of rational directions. By combining this structure with classical coprime density results, we obtain an explicit directional refinement of visible lattice point counts. The discovery of the sector boundary at n ≈ 0.55N reveals a fundamental phase transition between analytic and discrete number-theoretic regimes. This framework enables anisotropic analysis of arithmetic distributions and provides foundation for modular constraints, higher-dimensional generalizations, and computational exploration of the density-discreteness interface.</p>
+            </div>
+            
+            <p style="margin-top:20px; text-align:center; color:#64748b; font-size:0.85em;">See References tab for foundational works and acknowledgments.</p>
             <div style="margin-top:15px;"><button onclick="screenshotFullTab('theory')">Screenshot Full Theory Tab</button></div>
         </div>
     </div>
@@ -2655,6 +2721,118 @@
 <div class="modal-overlay" id="pointModal"><div class="modal-content" style="max-width:450px;"><div class="modal-header"><h3 id="pointModalTitle">Point</h3><button class="modal-close" onclick="closePointModal()">x</button></div><div class="modal-body" id="pointModalBody"></div></div></div>
 
 <div class="modal-overlay" id="sectorModal"><div class="modal-content" style="max-width:700px;"><div class="modal-header"><h3 id="sectorModalTitle">Sector Details</h3><button class="modal-close" onclick="closeSectorModal()">x</button></div><div class="modal-body" id="sectorModalBody"></div></div></div>
+
+    <!-- REFERENCES TAB -->
+    <div id="tab-references" class="tab-content">
+        <div class="panel">
+            <h2 style="text-align:center; font-size:1.4em; margin-bottom:8px;">References & Acknowledgments</h2>
+            <p style="text-align:center; color:#94a3b8; font-style:italic; margin-bottom:25px;">Foundational works and resources underlying this exploration</p>
+            
+            <h3 style="color:#6366f1; border-bottom:2px solid #6366f1; padding-bottom:8px;">Classical Number Theory</h3>
+            
+            <div class="theorem-box" style="background:#1e1b4b; margin:15px 0;">
+                <strong style="color:#c4b5fd;">Euler, Leonhard (1737)</strong>
+                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">"Variae observationes circa series infinitas" - Introduction of the totient function φ(n) and the product formula for ζ(s). Established the fundamental result that the density of coprime pairs is 6/π².</p>
+            </div>
+            
+            <div class="theorem-box" style="background:#1e1b4b; margin:15px 0;">
+                <strong style="color:#c4b5fd;">Mertens, Franz (1874)</strong>
+                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">"Ein Beitrag zur analytischen Zahlentheorie" - Asymptotic formula for the summatory totient function: Σφ(n) = (3/π²)N² + O(N log N). This result is central to our sector density theorem.</p>
+            </div>
+            
+            <div class="theorem-box" style="background:#1e1b4b; margin:15px 0;">
+                <strong style="color:#c4b5fd;">Farey, John (1816)</strong>
+                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">Letter to Philosophical Magazine describing the mediant property of Farey sequences. The sequence F_N of fractions p/q with 0 ≤ p ≤ q ≤ N and gcd(p,q) = 1 forms the basis of our sector decomposition.</p>
+            </div>
+            
+            <div class="theorem-box" style="background:#1e1b4b; margin:15px 0;">
+                <strong style="color:#c4b5fd;">Cauchy, Augustin-Louis (1816)</strong>
+                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">First rigorous proof of the Farey sequence mediant property, establishing that between any two adjacent Farey fractions a/b and c/d, we have |ad - bc| = 1.</p>
+            </div>
+            
+            <h3 style="color:#22c55e; border-bottom:2px solid #22c55e; padding-bottom:8px; margin-top:25px;">Connections to the Riemann Hypothesis</h3>
+            
+            <div class="theorem-box" style="background:#064e3b; margin:15px 0;">
+                <strong style="color:#6ee7b7;">Franel, Jérôme (1924)</strong>
+                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">"Les suites de Farey et le problème des nombres premiers" - Demonstrated that RH is equivalent to: Σ|F_k - k/|F_N|| = O(N^(1/2+ε)) for any ε > 0.</p>
+            </div>
+            
+            <div class="theorem-box" style="background:#064e3b; margin:15px 0;">
+                <strong style="color:#6ee7b7;">Landau, Edmund (1924)</strong>
+                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">Independent proof of the Franel connection, establishing Farey sequences as a geometric lens for viewing prime distribution and the Riemann Hypothesis.</p>
+            </div>
+            
+            <h3 style="color:#f59e0b; border-bottom:2px solid #f59e0b; padding-bottom:8px; margin-top:25px;">Computational Number Theory</h3>
+            
+            <div class="theorem-box" style="background:#422006; margin:15px 0;">
+                <strong style="color:#fcd34d;">Meissel, Ernst (1870) & Lehmer, Derrick Henry (1959)</strong>
+                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">Development of the Meissel-Lehmer algorithm for computing π(x), the prime counting function, in sublinear time. This work enables efficient computation of prime distributions used in our P/C analysis.</p>
+            </div>
+            
+            <div class="theorem-box" style="background:#422006; margin:15px 0;">
+                <strong style="color:#fcd34d;">Stern, Moritz (1858) & Brocot, Achille (1861)</strong>
+                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">Independent discovery of the Stern-Brocot tree, a binary tree structure that generates all positive rationals exactly once in lowest terms. Our tree path visualization and audio playback use this structure.</p>
+            </div>
+            
+            <h3 style="color:#ec4899; border-bottom:2px solid #ec4899; padding-bottom:8px; margin-top:25px;">Harmonic Analysis & Music Theory</h3>
+            
+            <div class="theorem-box" style="background:#4c1d4c; margin:15px 0;">
+                <strong style="color:#f9a8d4;">Pythagoras (c. 500 BCE)</strong>
+                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">Discovery that consonant musical intervals correspond to simple rational frequency ratios. The audio features in this tool map Farey fractions to harmonic intervals, connecting number theory to acoustic perception.</p>
+            </div>
+            
+            <div class="theorem-box" style="background:#4c1d4c; margin:15px 0;">
+                <strong style="color:#f9a8d4;">Dedekind, Richard (1877)</strong>
+                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">"Schreiben an Herrn Borchardt über die Theorie der elliptischen Modulfunktionen" - Introduction of the Dedekind eta function and Dedekind sums, connecting modular forms to number theory.</p>
+            </div>
+            
+            <h3 style="color:#06b6d4; border-bottom:2px solid #06b6d4; padding-bottom:8px; margin-top:25px;">Modern References</h3>
+            
+            <div class="theorem-box" style="background:#164e63; margin:15px 0;">
+                <strong style="color:#67e8f9;">Hardy, G.H. & Wright, E.M.</strong>
+                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;"><em>An Introduction to the Theory of Numbers</em> (Oxford University Press) - Comprehensive treatment of Farey sequences, totient function, and continued fractions. Essential reference for theoretical foundations.</p>
+            </div>
+            
+            <div class="theorem-box" style="background:#164e63; margin:15px 0;">
+                <strong style="color:#67e8f9;">Graham, Knuth & Patashnik</strong>
+                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;"><em>Concrete Mathematics</em> (Addison-Wesley) - Detailed treatment of the Stern-Brocot tree and its algorithmic applications.</p>
+            </div>
+            
+            <h3 style="color:#a78bfa; border-bottom:2px solid #a78bfa; padding-bottom:8px; margin-top:25px;">Original Contributions</h3>
+            
+            <div class="derivation-box" style="background: linear-gradient(135deg, #312e81 0%, #4c1d95 100%); border-left-color: #a78bfa; margin:15px 0;">
+                <strong style="color:#e0e7ff; font-size:1.1em;">Getachew, Wessen (2024-2025)</strong>
+                <p style="margin:12px 0 0 0; font-size:0.95em; color:#e2e8f0;"><strong>Novel contributions presented in this work:</strong></p>
+                <ul style="margin:10px 0 0 15px; font-size:0.9em; color:#c7d2fe;">
+                    <li><strong>Farey Sector Density Theorem:</strong> Explicit asymptotic formula C(n,N) ~ (3/π²)N²/(n(n+1)) for coprime pairs in directional sectors.</li>
+                    <li><strong>Sector Boundary Constant:</strong> Identification of n* ≈ (√3/π)N ≈ 0.5513N as the phase transition between analytic and discrete regimes.</li>
+                    <li><strong>Prime/Composite Identity System:</strong> Four-way decomposition (PP, PC, CP, CC) with exact sector-level counting identities.</li>
+                    <li><strong>Interactive Visualization Framework:</strong> Comprehensive tools for exploring sector structure, including ring visualization, tree paths, and harmonic sonification.</li>
+                    <li><strong>Boundary Phase Transition Analysis:</strong> Documentation of the transition from density-based prediction to discrete counting at the sector boundary.</li>
+                </ul>
+            </div>
+            
+            <h3 style="color:#64748b; border-bottom:2px solid #475569; padding-bottom:8px; margin-top:25px;">Software & Tools</h3>
+            
+            <div style="background:#1e293b; padding:15px; border-radius:8px; margin:15px 0;">
+                <p style="margin:0; font-size:0.9em; color:#94a3b8;">This interactive explorer was developed using:</p>
+                <ul style="margin:10px 0 0 15px; font-size:0.85em; color:#cbd5e1;">
+                    <li>Pure JavaScript for computation and visualization</li>
+                    <li>HTML5 Canvas for ring, tree, and chart rendering</li>
+                    <li>Web Audio API for harmonic sonification</li>
+                    <li>Chart.js for statistical visualizations</li>
+                    <li>Custom implementations of Meissel-Lehmer algorithm, Stern-Brocot tree traversal, and Farey sequence generation</li>
+                </ul>
+            </div>
+            
+            <div style="margin-top:25px; padding:15px; background:linear-gradient(135deg, #1e1b4b, #312e81); border-radius:8px; text-align:center;">
+                <p style="margin:0; color:#c7d2fe; font-size:0.95em;">"Mathematics is the music of reason." — James Joseph Sylvester</p>
+                <p style="margin:10px 0 0 0; color:#94a3b8; font-size:0.85em;">This work bridges the visual, auditory, and analytical dimensions of number theory.</p>
+            </div>
+            
+            <div style="margin-top:15px;"><button onclick="screenshotFullTab('references')">Screenshot Full References Tab</button></div>
+        </div>
+    </div>
 
 <div class="screenshot-overlay" id="screenshotOverlay">
     <h3 style="color:#f1f5f9; margin-bottom:20px;">Screenshot Preview (with Legend)</h3>
@@ -11073,7 +11251,8 @@ const tabGroups = {
     theory: { subtabs: 'subtabs-theory', default: 'theory', tabs: ['theory', 'theoryviz'] },
     geometry: { subtabs: 'subtabs-geometry', default: '3d', tabs: ['3d', 'hyperbolic', 'smith'] },
     connections: { subtabs: 'subtabs-connections', default: 'franel', tabs: ['franel', 'dedekind', 'cf', 'euler', 'harmonic'] },
-    advanced: { subtabs: 'subtabs-advanced', default: 'modular', tabs: ['modular', 'psl', 'primorial', 'numtheory', 'horizon', 'animation', 'research'] }
+    advanced: { subtabs: 'subtabs-advanced', default: 'modular', tabs: ['modular', 'psl', 'primorial', 'numtheory', 'horizon', 'animation', 'research'] },
+    references: { subtabs: null, default: 'references' }
 };
 
 let currentGroup = 'main';
@@ -11363,12 +11542,6 @@ function initSolverDefault() {
         if (solverCurrentMatch) {
             solverHighlightOnRing();
         }
-        
-        // Generate Wessen word art by default (keep panel collapsed)
-        setTimeout(function() {
-            document.getElementById('wordArtText').value = 'Wessen';
-            generateWordArt();
-        }, 300);
     }, 200);
 }
 setTimeout(initSolverDefault, 1000);
