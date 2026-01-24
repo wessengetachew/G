@@ -939,6 +939,10 @@
                                     <option value="5000">5000</option>
                                 </select>
                             </div>
+                            <div>
+                                <label style="color:#6ee7b7;font-size:10px;">Point Size</label>
+                                <input type="number" id="solverPointSize" min="0.5" max="20" value="1" step="0.5" style="display:block;margin-top:4px;width:60px;padding:6px 10px;background:#0f172a;border:1px solid #10b981;border-radius:4px;color:#e2e8f0;font-size:12px;">
+                            </div>
                         </div>
                     </div>
                     <!-- Solver Results -->
@@ -1010,8 +1014,9 @@
                     <label style="color:#c4b5fd;font-size:11px;"><input type="checkbox" id="wordArtEnabled" checked onchange="drawMainRing()"> Enable</label>
                     <input type="text" id="wordArtText" value="Wessen" placeholder="Enter text" style="width:100px;padding:6px 10px;font-size:12px;background:#1e1b4b;border:1px solid #8b5cf6;border-radius:4px;color:#f0fdf4;text-align:center;">
                     <button onclick="generateWordArt()" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">Generate</button>
-                    <button onclick="playWordArt('forward')" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">▶ Play</button>
-                    <button onclick="playWordArt('backward')" style="background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">◀ Play</button>
+                    <button onclick="playWordArt('forward')" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">▶ Loop</button>
+                    <button onclick="playWordArt('backward')" style="background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">◀ Loop</button>
+                    <button onclick="stopWordArtPlayback()" style="background:#ef4444;border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">■ Stop</button>
                     <button onclick="clearWordArt()" style="background:#475569;border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;font-size:11px;">Clear</button>
                 </div>
                 <div style="margin-top:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
@@ -7119,8 +7124,9 @@ function viewPointOnAll(r, m, sector) {
     document.getElementById('showAllSectors').checked = true;
     state.highlightSectorOnly = sector;
     
-    // Set point size to 1 for cleaner view
-    document.getElementById('ringPointSize').value = 1;
+    // Set point size from solver control if available
+    const solverPtSize = parseFloat(document.getElementById('solverPointSize')?.value || 1);
+    document.getElementById('ringPointSize').value = solverPtSize;
     updatePtSizeDisplay();
     
     // Enable tracker to highlight the specific fraction
@@ -7128,7 +7134,7 @@ function viewPointOnAll(r, m, sector) {
     document.getElementById('trackResidues').value = r;
     document.getElementById('trackerColor').value = '#10b981';
     document.getElementById('trackerGlow').checked = true;
-    document.getElementById('trackerSize').value = 1;
+    document.getElementById('trackerSize').value = solverPtSize;
     
     drawMainRing();
 }
@@ -7316,14 +7322,16 @@ function generateWordArt() {
         if (char === ' ') continue;
         
         const pattern = letterPatterns[char] || [];
-        const charStart = leftBound + charIndex * charWidth + padding;
-        const charEnd = leftBound + (charIndex + 1) * charWidth - padding;
+        
+        // Mirror: write from right to left (rightBound going left)
+        const charStart = rightBound - (charIndex + 1) * charWidth + padding;
+        const charEnd = rightBound - charIndex * charWidth - padding;
         
         pattern.forEach(([xOff, yOff]) => {
-            // Map x offset to angle within character's slice
-            const angle = (charStart + xOff * (charEnd - charStart)) * 2 * Math.PI;
-            // Map y offset to radius (0.3 to 0.9 of maxR)
-            const rad = (0.3 + yOff * 0.6) * maxR;
+            // Map x offset to angle within character's slice (mirrored)
+            const angle = (charStart + (1 - xOff) * (charEnd - charStart)) * 2 * Math.PI;
+            // Map y offset to radius - use OUTER rings (0.75 to 0.98 of maxR)
+            const rad = (0.75 + yOff * 0.23) * maxR;
             
             const targetX = cx + rad * Math.cos(angle);
             const targetY = cy - rad * Math.sin(angle);
@@ -7391,35 +7399,47 @@ function highlightWordArtPoint(idx) {
 }
 
 let wordArtPlaybackId = null;
+let wordArtLooping = false;
 
 function playWordArt(direction) {
-    if (wordArtPoints.length === 0) return;
+    if (wordArtPoints.length === 0) {
+        console.warn('No word art points to play');
+        return;
+    }
     
     stopWordArtPlayback();
     initAudioContext();
+    wordArtLooping = true;
     
-    const points = direction === 'backward' ? [...wordArtPoints].reverse() : wordArtPoints;
+    const points = direction === 'backward' ? [...wordArtPoints].reverse() : [...wordArtPoints];
     let idx = 0;
     
     function playNext() {
+        if (!wordArtLooping) return;
+        
         if (idx >= points.length) {
-            wordArtPlaybackId = null;
-            return;
+            // Loop back to start
+            idx = 0;
         }
         
         const p = points[idx];
-        playFraction(p.r, p.m, 0.3);
         
-        // Highlight point
-        const fullPoint = state.ringPoints.find(rp => rp.r === p.r && rp.m === p.m);
-        if (fullPoint) {
-            highlightedRingPoint = fullPoint;
-            drawMainRing();
+        // Validate point before playing
+        if (p && p.r && p.m && p.m > 0) {
+            playFraction(p.r, p.m, 0.3);
+            
+            // Highlight point
+            const fullPoint = state.ringPoints.find(rp => rp.r === p.r && rp.m === p.m);
+            if (fullPoint) {
+                highlightedRingPoint = fullPoint;
+                drawMainRing();
+            }
+            
+            // Update dropdown selection
+            const realIdx = direction === 'backward' ? wordArtPoints.length - 1 - idx : idx;
+            const dropdown = document.getElementById('wordArtPointsDropdown');
+            if (dropdown) dropdown.value = realIdx;
         }
-        
-        // Update dropdown selection
-        const realIdx = direction === 'backward' ? wordArtPoints.length - 1 - idx : idx;
-        document.getElementById('wordArtPointsDropdown').value = realIdx;
         
         idx++;
         wordArtPlaybackId = setTimeout(playNext, 250);
@@ -7429,6 +7449,7 @@ function playWordArt(direction) {
 }
 
 function stopWordArtPlayback() {
+    wordArtLooping = false;
     if (wordArtPlaybackId) {
         clearTimeout(wordArtPlaybackId);
         wordArtPlaybackId = null;
@@ -14821,6 +14842,11 @@ function stopAllPlayback() {
     // Stop ring loop
     stopRingLoop();
     
+    // Stop word art playback
+    if (typeof stopWordArtPlayback === 'function') {
+        stopWordArtPlayback();
+    }
+    
     // Clear playback highlights
     if (typeof clearAllPlaybackHighlights === 'function') {
         clearAllPlaybackHighlights();
@@ -16485,8 +16511,9 @@ function solverHighlightOnRing() {
     document.getElementById('showAllSectors').checked = true;
     state.highlightSectorOnly = solverCurrentMatch.sector;
     
-    // Set point size to 1 for cleaner view
-    document.getElementById('ringPointSize').value = 1;
+    // Set point size from solver control
+    const solverPtSize = parseFloat(document.getElementById('solverPointSize')?.value || 1);
+    document.getElementById('ringPointSize').value = solverPtSize;
     updatePtSizeDisplay();
     
     // Enable tracker to highlight the specific fraction
@@ -16494,7 +16521,7 @@ function solverHighlightOnRing() {
     document.getElementById('trackResidues').value = solverCurrentMatch.r;
     document.getElementById('trackerColor').value = '#10b981';
     document.getElementById('trackerGlow').checked = true;
-    document.getElementById('trackerSize').value = 1;
+    document.getElementById('trackerSize').value = solverPtSize;
     
     drawMainRing();
     
