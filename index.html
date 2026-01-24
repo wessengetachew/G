@@ -185,8 +185,7 @@
         #solverResults table tr:hover { background: rgba(16,185,129,0.1); }
         #solverResults th { border-bottom: 1px solid #334155; padding-bottom: 8px; }
         
-        /* PRO BADGE */
-        .pro-badge { display: inline-block; background: linear-gradient(135deg,#f59e0b,#d97706); color: white; font-size: 9px; padding: 2px 6px; border-radius: 3px; margin-left: 6px; font-weight: 700; vertical-align: middle; }
+        /* Export buttons */
         
         .container { max-width: 1800px; margin: 0 auto; padding: 15px; }
         h1 { color: #f8fafc; font-size: 1.5em; margin-bottom: 4px; }
@@ -565,7 +564,7 @@
             <button onclick="computeAll()">Compute</button>
             <button class="secondary" onclick="cancelComputation()">Cancel</button>
             <button class="secondary" onclick="exportAllData()">Export All</button>
-            <button class="composite-export-btn" onclick="exportCompositeTab()" title="Export all visible charts to single 4K image">4K Composite Export<span class="pro-badge">PRO</span></button>
+            <button class="composite-export-btn" onclick="exportCompositeTab()" title="Export all visible charts to single 4K image">4K Composite Export</button>
         </div>
         
         <!-- Sector Bound Controls -->
@@ -591,7 +590,7 @@
         <!-- Bounded P/C Analysis for Large N -->
         <div class="control-row" style="background:#1e1b4b;padding:8px 12px;border-radius:6px;margin-top:8px;border:1px solid #6366f1;">
             <label style="color:#a5b4fc;font-size:11px;font-weight:bold;margin-right:8px;">Large N P/C Analysis:</label>
-            <label style="font-size:11px;"><input type="checkbox" id="computeBoundedPC" checked> Compute bounded window for P/C ratios</label>
+            <label style="font-size:11px;"><input type="checkbox" id="computeBoundedPC"> Compute bounded window for P/C ratios</label>
             <label style="margin-left:12px;font-size:11px;">Window N:</label>
             <input type="number" id="boundedWindowN" value="2000" min="100" max="5000" style="width:70px;font-size:11px;padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;">
             <span style="color:#64748b;font-size:10px;margin-left:8px;">(exact data computed up to this N for P/C ratios)</span>
@@ -678,85 +677,6 @@
             </div>
         </div>
         
-        <!-- SOLVER PANEL - Target Ratio Finder -->
-        <div id="solverPanel" class="panel" style="background:linear-gradient(135deg,#064e3b,#065f46);border:2px solid #10b981;margin-bottom:15px;padding:15px;">
-            <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;">
-                <div style="flex:1;min-width:200px;">
-                    <label style="color:#6ee7b7;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Target Ratio Solver</label>
-                    <div style="display:flex;gap:8px;margin-top:6px;">
-                        <input type="text" id="solverInput" placeholder="Enter decimal (e.g. 0.3183)" 
-                            style="flex:1;padding:10px 14px;font-size:16px;font-family:monospace;background:#0f172a;border:2px solid #10b981;border-radius:6px;color:#f0fdf4;outline:none;"
-                            oninput="solverSearch(this.value)" onkeydown="if(event.key==='Enter')solverSearch(this.value)">
-                        <button onclick="solverSearch(document.getElementById('solverInput').value)" 
-                            style="background:linear-gradient(135deg,#10b981,#059669);border:none;border-radius:6px;color:white;padding:10px 20px;cursor:pointer;font-weight:600;">
-                            Find
-                        </button>
-                    </div>
-                </div>
-                <div style="display:flex;gap:15px;align-items:center;">
-                    <div>
-                        <label style="color:#6ee7b7;font-size:10px;">Tolerance</label>
-                        <select id="solverTolerance" style="display:block;margin-top:4px;padding:6px 10px;background:#0f172a;border:1px solid #10b981;border-radius:4px;color:#e2e8f0;font-size:12px;">
-                            <option value="0.0001">±0.0001</option>
-                            <option value="0.001" selected>±0.001</option>
-                            <option value="0.01">±0.01</option>
-                            <option value="0.1">±0.1</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="color:#6ee7b7;font-size:10px;">Max Denom</label>
-                        <select id="solverMaxDenom" style="display:block;margin-top:4px;padding:6px 10px;background:#0f172a;border:1px solid #10b981;border-radius:4px;color:#e2e8f0;font-size:12px;">
-                            <option value="100">100</option>
-                            <option value="500" selected>500</option>
-                            <option value="1000">1000</option>
-                            <option value="5000">5000</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="color:#6ee7b7;font-size:10px;">Point Size</label>
-                        <input type="number" id="solverPointSize" min="0.001" max="50" value="8" step="0.5" style="display:block;margin-top:4px;width:70px;padding:6px 10px;background:#0f172a;border:1px solid #10b981;border-radius:4px;color:#e2e8f0;font-size:12px;">
-                    </div>
-                </div>
-            </div>
-            <!-- Solver Results -->
-            <div id="solverResults" style="display:none;margin-top:15px;padding:15px;background:#0f172a;border-radius:8px;border:1px solid #10b981;">
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;">
-                    <div class="solver-result-item">
-                        <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Best Match</div>
-                        <div id="solverBestFrac" style="font-size:28px;font-weight:bold;color:#f0fdf4;font-family:monospace;">-</div>
-                    </div>
-                    <div class="solver-result-item">
-                        <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Decimal Value</div>
-                        <div id="solverBestDecimal" style="font-size:18px;color:#a7f3d0;font-family:monospace;">-</div>
-                    </div>
-                    <div class="solver-result-item">
-                        <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Error</div>
-                        <div id="solverError" style="font-size:18px;color:#fbbf24;font-family:monospace;">-</div>
-                    </div>
-                    <div class="solver-result-item">
-                        <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Sector</div>
-                        <div id="solverSector" style="font-size:18px;color:#a78bfa;font-family:monospace;">-</div>
-                    </div>
-                    <div class="solver-result-item">
-                        <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Continued Fraction</div>
-                        <div id="solverCF" style="font-size:14px;color:#94a3b8;font-family:monospace;word-break:break-all;">-</div>
-                    </div>
-                    <div class="solver-result-item">
-                        <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Gear Ratio</div>
-                        <div id="solverGear" style="font-size:14px;color:#f472b6;font-family:monospace;">-</div>
-                    </div>
-                </div>
-                <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
-                    <button onclick="solverHighlightOnRing()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:4px;color:white;padding:8px 16px;cursor:pointer;font-size:12px;">View on Ring</button>
-                    <button onclick="solverPlayFraction()" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:8px 16px;cursor:pointer;font-size:12px;">Play Sound</button>
-                    <button onclick="solverCopyReport()" style="background:#475569;border:none;border-radius:4px;color:white;padding:8px 16px;cursor:pointer;font-size:12px;">Copy Report</button>
-                    <button onclick="solverSaveToProject()" style="background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:4px;color:white;padding:8px 16px;cursor:pointer;font-size:12px;">Save to Project</button>
-                </div>
-                <!-- Alternatives Table -->
-                <div id="solverAlternatives" style="margin-top:15px;"></div>
-            </div>
-        </div>
-        
         <!-- PROJECTS SIDEBAR TOGGLE -->
         <div style="display:flex;gap:10px;margin-bottom:15px;">
             <button onclick="toggleProjectsSidebar()" style="background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:6px;color:white;padding:8px 16px;cursor:pointer;font-weight:600;font-size:12px;">
@@ -800,7 +720,7 @@
             </div>
             <div style="display:flex;gap:8px;">
                 <button onclick="toggleAdvancedControls()" class="secondary" style="padding:8px 12px;">Advanced ▼</button>
-                <button onclick="screenshotCanvas('mainRing')" class="secondary" style="padding:8px 12px;">Screenshot</button>
+                <button onclick="screenshotFullTab('main')" class="secondary" style="padding:8px 12px;">Screenshot</button>
             </div>
         </div>
         
@@ -813,14 +733,16 @@
                         <strong style="color:#ffd700;font-size:11px;display:block;margin-bottom:10px;">Per-Ring Rotation</strong>
                         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
                             <label style="font-size:11px;"><input type="checkbox" id="enableRingRotation" onchange="drawMainRing()"> Enable</label>
-                            <label style="font-size:11px;">Δθ: <input type="range" id="ringRotationAmount" min="0" max="360" value="0" step="0.5" style="width:80px;vertical-align:middle;" oninput="updateRotationDisplay();drawMainRing()"><span id="rotationAmountV" style="color:#ffd700;margin-left:4px;">0°</span></label>
+                            <label style="font-size:11px;">Δθ: <input type="range" id="ringRotationAmount" min="0" max="360" value="0" step="0.5" style="width:80px;vertical-align:middle;" oninput="updateRotationFromSlider()"><span id="rotationAmountV" style="color:#ffd700;margin-left:4px;">0°</span></label>
+                            <label style="font-size:11px;">a/b: <input type="text" id="ringRotationFrac" value="0/1" style="width:50px;font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#ffd700;border-radius:3px;text-align:center;" onchange="updateRotationFromFrac()"></label>
                         </div>
                         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
                             <label style="font-size:11px;"><input type="checkbox" id="rotationCumulative" checked onchange="drawMainRing()"> Cumulative</label>
                             <label style="font-size:11px;">Phase: <input type="number" id="ringGlobalPhase" value="0" min="-360" max="360" step="1" style="width:50px;font-size:10px;padding:2px;" onchange="drawMainRing()">°</label>
-                            <button onclick="document.getElementById('ringRotationAmount').value=137.5;updateRotationDisplay();drawMainRing()" class="secondary" style="font-size:9px;padding:2px 6px;" title="Golden angle">φ</button>
-                            <button onclick="document.getElementById('ringRotationAmount').value=60;updateRotationDisplay();drawMainRing()" class="secondary" style="font-size:9px;padding:2px 6px;">60°</button>
-                            <button onclick="document.getElementById('ringRotationAmount').value=90;updateRotationDisplay();drawMainRing()" class="secondary" style="font-size:9px;padding:2px 6px;">90°</button>
+                            <button onclick="setRotationPreset(137.5078,'1/φ²')" class="secondary" style="font-size:9px;padding:2px 6px;" title="Golden angle">φ</button>
+                            <button onclick="setRotationPreset(60,'1/6')" class="secondary" style="font-size:9px;padding:2px 6px;">60°</button>
+                            <button onclick="setRotationPreset(90,'1/4')" class="secondary" style="font-size:9px;padding:2px 6px;">90°</button>
+                            <button onclick="setRotationPreset(120,'1/3')" class="secondary" style="font-size:9px;padding:2px 6px;">120°</button>
                         </div>
                     </div>
                     
@@ -831,15 +753,7 @@
                             <label style="font-size:11px;"><input type="checkbox" id="showSectorBounds" onchange="drawMainRing()"> Bounds</label>
                             <label style="font-size:11px;"><input type="checkbox" id="showMedianLine" onchange="drawMainRing()"> Median</label>
                             <label style="font-size:11px;"><input type="checkbox" id="dimOutsideSector" onchange="drawMainRing()"> Dim Outside</label>
-                        </div>
-                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-                            <label style="font-size:11px;">Mode: <select id="sectorAnalysisMode" onchange="drawMainRing()" style="font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#e2e8f0;">
-                                <option value="count">Count</option>
-                                <option value="density">Density</option>
-                                <option value="error">Error</option>
-                            </select></label>
                             <label style="font-size:11px;"><input type="checkbox" id="highlightPrimeRings" onchange="drawMainRing()"> Prime Rings</label>
-                            <label style="font-size:11px;"><input type="checkbox" id="showSectorStats" onchange="drawMainRing()"> Show Stats</label>
                         </div>
                     </div>
                     
@@ -951,8 +865,13 @@
             </div>
             <div class="point-tooltip" id="pointTooltip"></div>
             
-            <!-- Playback Controls -->
-            <div style="display:flex;justify-content:center;gap:10px;margin-top:12px;flex-wrap:wrap;">
+            <!-- Point Selector & Playback Controls -->
+            <div style="display:flex;justify-content:center;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center;">
+                <div style="display:flex;align-items:center;gap:6px;background:#1e293b;padding:6px 10px;border-radius:6px;border:1px solid #334155;">
+                    <label style="font-size:11px;color:#94a3b8;">Select:</label>
+                    <input type="text" id="pointSelectInput" placeholder="a/b" style="width:60px;padding:4px 6px;font-size:12px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:#22c55e;text-align:center;font-family:monospace;" onkeydown="if(event.key==='Enter')selectPointByFraction()">
+                    <button onclick="selectPointByFraction()" style="padding:4px 8px;font-size:11px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:4px;color:white;cursor:pointer;">Go</button>
+                </div>
                 <button style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:6px 12px;cursor:pointer;" onclick="playSectorSequence('forward')">▶ Play Sector</button>
                 <button class="secondary" onclick="stopAllPlayback()" style="padding:6px 12px;">■ Stop</button>
                 <button class="secondary" onclick="openSectorModal(+document.getElementById('viewSector').value)" style="padding:6px 12px;">View Details</button>
@@ -961,6 +880,93 @@
             
             <!-- Color Legend -->
             <div class="color-legend" id="colorLegend" style="margin-top:12px;justify-content:center;"></div>
+            
+            <!-- SOLVER PANEL - Collapsible Dropdown -->
+            <div style="margin-top:12px;">
+                <div onclick="toggleSolverPanel()" style="background:linear-gradient(135deg,#064e3b,#065f46);border:2px solid #10b981;border-radius:8px 8px 0 0;padding:10px 15px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span style="color:#6ee7b7;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Target Ratio Solver</span>
+                        <span id="solverMatchPreview" style="color:#f0fdf4;font-family:monospace;font-size:13px;"></span>
+                    </div>
+                    <span id="solverArrow" style="color:#6ee7b7;font-size:14px;transition:transform 0.3s;">▼</span>
+                </div>
+                <div id="solverPanel" style="display:none;background:linear-gradient(135deg,#064e3b,#065f46);border:2px solid #10b981;border-top:none;border-radius:0 0 8px 8px;padding:15px;">
+                    <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;">
+                        <div style="flex:1;min-width:200px;">
+                            <div style="display:flex;gap:8px;">
+                                <input type="text" id="solverInput" placeholder="Enter decimal (e.g. 0.3183)" 
+                                    style="flex:1;padding:10px 14px;font-size:16px;font-family:monospace;background:#0f172a;border:2px solid #10b981;border-radius:6px;color:#f0fdf4;outline:none;"
+                                    oninput="solverSearch(this.value)" onkeydown="if(event.key==='Enter')solverSearch(this.value)">
+                                <button onclick="solverSearch(document.getElementById('solverInput').value)" 
+                                    style="background:linear-gradient(135deg,#10b981,#059669);border:none;border-radius:6px;color:white;padding:10px 20px;cursor:pointer;font-weight:600;">
+                                    Find
+                                </button>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:15px;align-items:center;">
+                            <div>
+                                <label style="color:#6ee7b7;font-size:10px;">Tolerance</label>
+                                <select id="solverTolerance" style="display:block;margin-top:4px;padding:6px 10px;background:#0f172a;border:1px solid #10b981;border-radius:4px;color:#e2e8f0;font-size:12px;">
+                                    <option value="0.0001">±0.0001</option>
+                                    <option value="0.001" selected>±0.001</option>
+                                    <option value="0.01">±0.01</option>
+                                    <option value="0.1">±0.1</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="color:#6ee7b7;font-size:10px;">Max Denom</label>
+                                <select id="solverMaxDenom" style="display:block;margin-top:4px;padding:6px 10px;background:#0f172a;border:1px solid #10b981;border-radius:4px;color:#e2e8f0;font-size:12px;">
+                                    <option value="100">100</option>
+                                    <option value="500" selected>500</option>
+                                    <option value="1000">1000</option>
+                                    <option value="5000">5000</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="color:#6ee7b7;font-size:10px;">Point Size</label>
+                                <input type="number" id="solverPointSize" min="0.001" max="50" value="8" step="0.5" style="display:block;margin-top:4px;width:70px;padding:6px 10px;background:#0f172a;border:1px solid #10b981;border-radius:4px;color:#e2e8f0;font-size:12px;">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Solver Results -->
+                    <div id="solverResults" style="display:none;margin-top:15px;padding:15px;background:#0f172a;border-radius:8px;border:1px solid #10b981;">
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;">
+                            <div class="solver-result-item">
+                                <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Best Match</div>
+                                <div id="solverBestFrac" style="font-size:28px;font-weight:bold;color:#f0fdf4;font-family:monospace;">-</div>
+                            </div>
+                            <div class="solver-result-item">
+                                <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Decimal Value</div>
+                                <div id="solverBestDecimal" style="font-size:18px;color:#a7f3d0;font-family:monospace;">-</div>
+                            </div>
+                            <div class="solver-result-item">
+                                <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Error</div>
+                                <div id="solverError" style="font-size:18px;color:#fbbf24;font-family:monospace;">-</div>
+                            </div>
+                            <div class="solver-result-item">
+                                <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Sector</div>
+                                <div id="solverSector" style="font-size:18px;color:#a78bfa;font-family:monospace;">-</div>
+                            </div>
+                            <div class="solver-result-item">
+                                <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Continued Fraction</div>
+                                <div id="solverCF" style="font-size:14px;color:#94a3b8;font-family:monospace;word-break:break-all;">-</div>
+                            </div>
+                            <div class="solver-result-item">
+                                <div style="color:#6ee7b7;font-size:10px;text-transform:uppercase;">Gear Ratio</div>
+                                <div id="solverGear" style="font-size:14px;color:#f472b6;font-family:monospace;">-</div>
+                            </div>
+                        </div>
+                        <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
+                            <button onclick="solverHighlightOnRing()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:4px;color:white;padding:8px 16px;cursor:pointer;font-size:12px;">View on Ring</button>
+                            <button onclick="solverPlayFraction()" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:8px 16px;cursor:pointer;font-size:12px;">Play Sound</button>
+                            <button onclick="solverCopyReport()" style="background:#475569;border:none;border-radius:4px;color:white;padding:8px 16px;cursor:pointer;font-size:12px;">Copy Report</button>
+                            <button onclick="solverSaveToProject()" style="background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:4px;color:white;padding:8px 16px;cursor:pointer;font-size:12px;">Save to Project</button>
+                        </div>
+                        <!-- Alternatives Table -->
+                        <div id="solverAlternatives" style="margin-top:15px;max-height:200px;overflow-y:auto;"></div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="grid-2" style="margin-top:15px;">
             <div class="chart-box chart-wrapper">
@@ -1008,7 +1014,7 @@
                         <option value="3">3</option>
                         <option value="4">4</option>
                     </select></label>
-                    <label style="font-size:11px;color:#94a3b8;"><input type="checkbox" id="showCategoryColumns" onchange="updateMainTable()"> Show Categories</label>
+                    <label style="font-size:11px;color:#94a3b8;"><input type="checkbox" id="showCategoryColumns" checked onchange="updateMainTable()"> Show Categories</label>
                     <button id="playAllSectorsBtn" onclick="playAllSectorsSequentially()" style="padding:5px 12px;font-size:11px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;cursor:pointer;">▶ Play All Sectors</button>
                     <button onclick="stopAllPlayback()" style="padding:5px 8px;font-size:11px;background:#ef4444;border:none;border-radius:4px;color:white;cursor:pointer;">■ Stop</button>
                     <label style="color:#94a3b8;">View Sector:</label>
@@ -1016,7 +1022,7 @@
                         <option value="">-- Select Sector --</option>
                     </select>
                     <button onclick="exportSectorCSV(document.getElementById('sectorDataSelect').value)" class="secondary" style="font-size:11px;">Export Sector CSV</button>
-                    <button onclick="exportAllSectorsCSV()" class="secondary" style="font-size:11px;">Export All CSV<span class="pro-badge">PRO</span></button>
+                    <button onclick="exportAllSectorsCSV()" class="secondary" style="font-size:11px;">Export All CSV</button>
                 </div>
             </div>
             <!-- Category legend -->
@@ -2547,7 +2553,7 @@
             
             <h4 style="margin-top:20px;">Publication Export</h4>
             <div class="control-row" style="margin:12px 0;">
-                <button onclick="exportLatexFigures()">LaTeX Figures<span class="pro-badge">PRO</span></button>
+                <button onclick="exportLatexFigures()">LaTeX Figures</button>
                 <button onclick="exportCSVAll()">Full CSV</button>
                 <button onclick="exportJSON()">JSON Data</button>
             </div>
@@ -3828,7 +3834,7 @@ async function computeAll() {
         if(state.nMin > state.nMax) state.nMin = 1;
         
         // Get bounded P/C settings
-        state.useBoundedPC = document.getElementById('computeBoundedPC')?.checked ?? true;
+        state.useBoundedPC = document.getElementById('computeBoundedPC')?.checked ?? false;
         state.boundedN = +(document.getElementById('boundedWindowN')?.value || 2000);
         
         document.getElementById('progressBar').style.display = 'block';
@@ -5604,17 +5610,14 @@ function playSectorDetailFractions(type, direction) {
     // Sort by value
     fracs = [...fracs].sort((a, b) => direction === 'forward' ? a.r/a.m - b.r/b.m : b.r/b.m - a.r/a.m);
     
-    // Limit to 150 for performance
-    const limited = fracs.slice(0, 150);
-    
-    playbackState.queue = limited.map(f => ({ r: f.r, m: f.m }));
+    // Play all fractions (no limit)
+    playbackState.queue = fracs.map(f => ({ r: f.r, m: f.m }));
     playbackState.direction = direction;
     playbackState.mode = 'sector-detail';
     playbackState.currentIndex = 0;
     playbackState.isPlaying = true;
     
-    const countInfo = limited.length < fracs.length ? limited.length + '/' + fracs.length : limited.length;
-    showPlaybackStatus(`Playing ${typeLabel} from sector ${n} (${countInfo} fractions)`);
+    showPlaybackStatus(`Playing ${typeLabel} from sector ${n} (${fracs.length} fractions)`);
     startPlaybackLoop();
 }
 
@@ -6492,17 +6495,73 @@ function updateRotationDisplay() {
     document.getElementById('rotationAmountV').textContent = val + '°';
 }
 
-function updatePhaseDisplay() {
-    const val = document.getElementById('ringGlobalPhase').value;
-    document.getElementById('globalPhaseV').textContent = val + '°';
+// Update rotation from slider - syncs a/b display
+function updateRotationFromSlider() {
+    const degrees = parseFloat(document.getElementById('ringRotationAmount').value);
+    document.getElementById('rotationAmountV').textContent = degrees.toFixed(1) + '°';
+    
+    // Convert degrees to fraction of 360
+    const frac = degrees / 360;
+    const approxFrac = approximateFraction(frac, 100);
+    document.getElementById('ringRotationFrac').value = approxFrac.a + '/' + approxFrac.b;
+    
+    drawMainRing();
 }
 
-function setRotationPreset(degrees) {
+// Update rotation from a/b input
+function updateRotationFromFrac() {
+    const fracStr = document.getElementById('ringRotationFrac').value.trim();
+    const match = fracStr.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
+    
+    if (match) {
+        const a = parseFloat(match[1]);
+        const b = parseFloat(match[2]);
+        if (b !== 0) {
+            const degrees = (a / b) * 360;
+            const clampedDegrees = ((degrees % 360) + 360) % 360;
+            document.getElementById('ringRotationAmount').value = clampedDegrees;
+            document.getElementById('rotationAmountV').textContent = clampedDegrees.toFixed(1) + '°';
+            document.getElementById('enableRingRotation').checked = true;
+            drawMainRing();
+        }
+    }
+}
+
+// Approximate a decimal as a/b fraction
+function approximateFraction(x, maxDenom) {
+    if (x === 0) return { a: 0, b: 1 };
+    
+    let bestA = 0, bestB = 1, bestErr = Math.abs(x);
+    
+    for (let b = 1; b <= maxDenom; b++) {
+        const a = Math.round(x * b);
+        const err = Math.abs(x - a / b);
+        if (err < bestErr) {
+            bestErr = err;
+            bestA = a;
+            bestB = b;
+        }
+        if (err < 1e-10) break;
+    }
+    
+    // Reduce fraction
+    const g = gcd(Math.abs(bestA), bestB);
+    return { a: bestA / g, b: bestB / g };
+}
+
+// Set rotation preset with fraction label
+function setRotationPreset(degrees, fracLabel) {
     document.getElementById('ringRotationAmount').value = degrees;
-    document.getElementById('rotationAmountV').textContent = degrees + '°';
+    document.getElementById('rotationAmountV').textContent = degrees.toFixed(1) + '°';
+    document.getElementById('ringRotationFrac').value = fracLabel || approximateFraction(degrees/360, 100).a + '/' + approximateFraction(degrees/360, 100).b;
     document.getElementById('enableRingRotation').checked = true;
     toggleRingSection('secRotation', true);
     drawMainRing();
+}
+
+function updatePhaseDisplay() {
+    const val = document.getElementById('ringGlobalPhase').value;
+    document.getElementById('globalPhaseV').textContent = val + '°';
 }
 
 // Advanced controls helper functions
@@ -6914,11 +6973,97 @@ function openPointModal(p) {
     document.getElementById('pointModal').classList.add('active');
 }
 function closePointModal() { document.getElementById('pointModal').classList.remove('active'); }
+
+// Select point by a/b input
+function selectPointByFraction() {
+    const input = document.getElementById('pointSelectInput').value.trim();
+    const match = input.match(/^(\d+)\s*\/\s*(\d+)$/);
+    
+    if (!match) {
+        alert('Enter fraction as a/b (e.g., 3/7)');
+        return;
+    }
+    
+    const r = parseInt(match[1]);
+    const m = parseInt(match[2]);
+    
+    if (m === 0 || r >= m || r <= 0) {
+        alert('Invalid fraction: need 0 < a < b');
+        return;
+    }
+    
+    if (gcd(r, m) !== 1) {
+        alert(`${r}/${m} is not in lowest terms. Use ${r/gcd(r,m)}/${m/gcd(r,m)}`);
+        return;
+    }
+    
+    // Find the point in ringPoints or create it
+    let point = state.ringPoints?.find(p => p.r === r && p.m === m);
+    
+    if (!point) {
+        // Point not currently visible - create a virtual one and switch to its sector
+        const sector = Math.floor(m / r);
+        point = {
+            r, m,
+            sector: sector,
+            value: r / m,
+            isPrime: NumberTheory.isPrime(m),
+            isPrimeNum: NumberTheory.isPrime(r),
+            category: (NumberTheory.isPrime(r) && NumberTheory.isPrime(m)) ? 'PP' :
+                      (NumberTheory.isPrime(r) && !NumberTheory.isPrime(m)) ? 'PC' :
+                      (!NumberTheory.isPrime(r) && NumberTheory.isPrime(m)) ? 'CP' : 'CC'
+        };
+        
+        // Switch to the correct sector
+        document.getElementById('viewSector').value = sector;
+        document.getElementById('showAllSectors').checked = false;
+        drawMainRing();
+        
+        // Try to find it again after redraw
+        setTimeout(() => {
+            point = state.ringPoints?.find(p => p.r === r && p.m === m);
+            if (point) {
+                highlightedRingPoint = point;
+                drawMainRing();
+                openPointModal(point);
+                selectPointForTree(point);
+                selectFractionForHarmonic(r, m);
+            } else {
+                // Still not visible - m might be larger than nMax
+                alert(`Fraction ${r}/${m} not in current data (m=${m} may exceed N=${state.nMax}). Increase N and recompute.`);
+            }
+        }, 100);
+        return;
+    }
+    
+    // Point found - highlight and show modal
+    highlightedRingPoint = point;
+    drawMainRing();
+    openPointModal(point);
+    selectPointForTree(point);
+    selectFractionForHarmonic(point.r, point.m);
+}
+
 function openSectorModal(n) { document.getElementById('viewSector').value=n; document.getElementById('showAllSectors').checked=false; drawMainRing(); }
 function scrollToSectorTree() { document.getElementById('sectorTreeCanvas').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+
+// Solver panel toggle
+function toggleSolverPanel() {
+    const panel = document.getElementById('solverPanel');
+    const arrow = document.getElementById('solverArrow');
+    const isHidden = panel.style.display === 'none';
+    panel.style.display = isHidden ? 'block' : 'none';
+    arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
 function addToSolver(value) {
+    // Open solver panel if closed
+    const panel = document.getElementById('solverPanel');
+    if (panel.style.display === 'none') {
+        toggleSolverPanel();
+    }
     document.getElementById('solverInput').value = value;
-    document.getElementById('solverPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
     solverSearch(value.toString());
 }
 
@@ -14069,16 +14214,14 @@ function playSectorAudio(sectorNum, direction = 'forward') {
     let sorted = [...residues].sort((a, b) => a.r/a.m - b.r/b.m);
     if (direction === 'backward') sorted.reverse();
     
-    // Increased limit from 40 to 100
-    playbackState.queue = sorted.slice(0, 100);
+    // Play all fractions in sector (no limit)
+    playbackState.queue = sorted;
     playbackState.direction = direction;
     playbackState.mode = 'sector';
     playbackState.currentIndex = 0;
     playbackState.isPlaying = true;
     
-    const totalInSector = residues.length;
-    const playing = playbackState.queue.length;
-    showPlaybackStatus(`Playing Sector ${sectorNum} ${direction === 'forward' ? '→' : '←'} (${playing}${playing < totalInSector ? '/' + totalInSector : ''} fractions)`);
+    showPlaybackStatus(`Playing Sector ${sectorNum} ${direction === 'forward' ? '→' : '←'} (${sorted.length} fractions)`);
     startPlaybackLoop();
 }
 
@@ -15627,6 +15770,7 @@ function solverSearch(inputVal) {
     const target = parseFloat(inputVal);
     if (isNaN(target) || target <= 0 || target >= 1) {
         document.getElementById('solverResults').style.display = 'none';
+        document.getElementById('solverMatchPreview').textContent = '';
         return;
     }
     
@@ -15740,6 +15884,9 @@ function displaySolverResults(best, target, alternatives) {
     document.getElementById('solverSector').textContent = 'S' + best.sector + ' (1/' + (best.sector+1) + ', 1/' + best.sector + ']';
     document.getElementById('solverCF').textContent = '[' + best.cf.join('; ') + ']';
     document.getElementById('solverGear').textContent = best.m + ':' + best.r + ' (teeth ratio)';
+    
+    // Update preview in collapsed header
+    document.getElementById('solverMatchPreview').textContent = best.r + '/' + best.m + ' = ' + best.value.toFixed(6);
     
     // Build alternatives table
     if (alternatives.length > 1) {
