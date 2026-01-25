@@ -698,7 +698,7 @@
         <div style="display:flex;gap:15px;margin-bottom:15px;flex-wrap:wrap;">
             <div class="panel" style="flex:1;min-width:300px;padding:12px;">
                 <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-                    <label style="font-size:12px;">Sector: <select id="viewSector" onchange="state.highlightSectorOnly=null;drawMainRing();updateSectorStats(+this.value,state.residuesBySector[+this.value]||[])">
+                    <label style="font-size:12px;">Sector: <select id="viewSector" onchange="state.highlightSectorOnly=null;drawMainRing();updateSectorStats(+this.value,state.residuesBySector[+this.value]||[]);updateSectorPointCount()">
                         <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>
                     </select></label>
                     <label style="font-size:12px;">Color: <select id="colorMode" onchange="drawMainRing()" style="padding:4px;">
@@ -898,6 +898,32 @@
                 <button class="secondary" onclick="stopAllPlayback()" style="padding:6px 12px;">■ Stop</button>
                 <button class="secondary" onclick="openSectorModal(+document.getElementById('viewSector').value)" style="padding:6px 12px;">View Details</button>
                 <button class="secondary" onclick="exportRingHiRes()" style="padding:6px 12px;">Export Ring</button>
+            </div>
+            
+            <!-- Sector Range Playback Controls -->
+            <div style="margin-top:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;background:#0d3320;border-radius:6px;border:1px solid #22c55e;">
+                <span style="color:#86efac;font-size:11px;font-weight:600;">Play Range:</span>
+                <select id="sectorRangeMode" onchange="updateSectorRangeInputs()" style="padding:3px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#e2e8f0;">
+                    <option value="all">All Points</option>
+                    <option value="first">First N</option>
+                    <option value="last">Last N</option>
+                    <option value="range">Custom Range</option>
+                </select>
+                <div id="sectorRangeInputs" style="display:none;align-items:center;gap:6px;">
+                    <input type="number" id="sectorRangeStart" placeholder="Start" min="1" value="1" style="width:65px;padding:3px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#e2e8f0;">
+                    <span style="color:#86efac;font-size:10px;">to</span>
+                    <input type="number" id="sectorRangeEnd" placeholder="End" min="1" value="100" style="width:65px;padding:3px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#e2e8f0;">
+                </div>
+                <select id="sectorRangeN" style="display:none;padding:3px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#e2e8f0;">
+                    <option value="10">10 points</option>
+                    <option value="50">50 points</option>
+                    <option value="100" selected>100 points</option>
+                    <option value="250">250 points</option>
+                    <option value="500">500 points</option>
+                    <option value="1000">1000 points</option>
+                    <option value="5000">5000 points</option>
+                </select>
+                <span style="color:#86efac;font-size:10px;">Total: <span id="sectorPointCount" style="color:#fbbf24;font-family:monospace;">-</span></span>
             </div>
             
             <!-- Ring Loop Playback Controls -->
@@ -5102,6 +5128,10 @@ function updateViewSectorDropdown() {
         if (i === parseInt(currentVal)) opt.selected = true;
         select.appendChild(opt);
     }
+    // Update point count for range controls
+    if (typeof updateSectorPointCount === 'function') {
+        updateSectorPointCount();
+    }
 }
 
 // THEORY VIZ FUNCTIONS
@@ -7783,6 +7813,9 @@ document.getElementById('mainRing').addEventListener('click', function(e) {
         // Update tree path
         selectPointForTree(closest);
         selectFractionForHarmonic(closest.r, closest.m);
+        
+        // Update solver display with clicked point
+        updateSolverLive(closest.r, closest.m);
     } else {
         // Clicked empty space - clear highlight
         if (highlightedRingPoint) {
@@ -15454,26 +15487,136 @@ function stopSectorPlayback() {
     stopAudio();
 }
 
+// Blinking highlight state
+let blinkHighlightState = {
+    active: false,
+    intervalId: null,
+    currentFraction: null
+};
+
 function highlightPointOnRing(fraction) {
     const canvas = document.getElementById('mainRing');
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2;
     const maxR = Math.min(W, H) / 2 - 35;
     
-    const angle = (fraction.r / fraction.m) * 2 * Math.PI;
-    const rad = ((fraction.m - state.nMin) / (state.nMax - state.nMin + 1)) * maxR;
+    // Get rotation and spacing settings
+    const rotationOn = document.getElementById('enableRingRotation')?.checked || false;
+    const rotationAmt = parseFloat(document.getElementById('ringRotationAmount')?.value || 0) * Math.PI / 180;
+    const rotationCumulative = document.getElementById('rotationCumulative')?.checked || true;
+    const globalPhase = parseFloat(document.getElementById('ringGlobalPhase')?.value || 0) * Math.PI / 180;
+    const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
+    const ringSpacing = parseFloat(document.getElementById('ringSpacing')?.value || 1);
+    
+    // Calculate angle
+    let angle = (fraction.r / fraction.m) * 2 * Math.PI;
+    
+    // Apply rotation
+    if (rotationOn) {
+        const ringIdx = fraction.m;
+        const ringRotation = rotationCumulative ? rotationAmt * ringIdx : rotationAmt;
+        angle += ringRotation + globalPhase;
+    }
+    
+    // Calculate radius (same formula as drawMainRing)
+    let radNorm = invertOrder 
+        ? (1 - (fraction.m - state.nMin) / (state.nMax - state.nMin + 1)) 
+        : ((fraction.m - state.nMin) / (state.nMax - state.nMin + 1));
+    
+    if (ringSpacing !== 1) {
+        radNorm = Math.pow(radNorm, 1 / ringSpacing);
+    }
+    const rad = Math.max(radNorm, 0.05) * maxR;
+    
+    // Calculate position
     const x = cx + rad * Math.cos(angle);
     const y = cy - rad * Math.sin(angle);
     
+    // Store current highlight
+    blinkHighlightState.currentFraction = fraction;
+    blinkHighlightState.x = x;
+    blinkHighlightState.y = y;
+    
+    // Draw highlight with glow effect
+    drawBlinkHighlight(ctx, x, y, true);
+}
+
+function drawBlinkHighlight(ctx, x, y, withGlow) {
+    ctx.save();
+    
+    if (withGlow) {
+        // Outer glow
+        ctx.shadowBlur = 25;
+        ctx.shadowColor = '#22c55e';
+        ctx.fillStyle = 'rgba(34, 197, 94, 0.3)';
+        ctx.beginPath();
+        ctx.arc(x, y, 18, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Middle ring
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = 'rgba(34, 197, 94, 0.5)';
+        ctx.beginPath();
+        ctx.arc(x, y, 12, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+    
+    // Core bright dot
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = '#fff';
     ctx.fillStyle = '#22c55e';
     ctx.beginPath();
     ctx.arc(x, y, 8, 0, 2 * Math.PI);
     ctx.fill();
+    
+    // White center
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Border ring
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, 10, 0, 2 * Math.PI);
     ctx.stroke();
     
-    setTimeout(() => drawMainRing(), 150);
+    ctx.restore();
+}
+
+function clearBlinkHighlight() {
+    if (blinkHighlightState.intervalId) {
+        clearInterval(blinkHighlightState.intervalId);
+        blinkHighlightState.intervalId = null;
+    }
+    blinkHighlightState.active = false;
+    blinkHighlightState.currentFraction = null;
+}
+
+// Highlight fraction in horizon display if visible
+function highlightHorizonFraction(f) {
+    // Clear previous horizon highlights
+    document.querySelectorAll('.horizon-frac-playing').forEach(el => {
+        el.classList.remove('horizon-frac-playing');
+        el.style.background = '';
+        el.style.transform = '';
+        el.style.boxShadow = '';
+    });
+    
+    // Try to find matching horizon fraction element
+    const horizonElements = document.querySelectorAll('.horizon-frac');
+    horizonElements.forEach(el => {
+        const onclick = el.getAttribute('onclick');
+        if (onclick && onclick.includes(`playHorizonFrac(${f.r},${f.m})`)) {
+            el.classList.add('horizon-frac-playing');
+            el.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+            el.style.transform = 'scale(1.15)';
+            el.style.boxShadow = '0 0 10px #22c55e';
+        }
+    });
 }
 
 // =============================================
@@ -15502,17 +15645,75 @@ function playSectorAudio(sectorNum, direction = 'forward') {
     
     // Sort by value
     let sorted = [...residues].sort((a, b) => a.r/a.m - b.r/b.m);
-    if (direction === 'backward') sorted.reverse();
     
-    // Play all fractions in sector (no limit)
-    playbackState.queue = sorted;
+    // Apply range selection
+    const rangeMode = document.getElementById('sectorRangeMode')?.value || 'all';
+    let playList = sorted;
+    
+    if (rangeMode === 'first') {
+        const n = parseInt(document.getElementById('sectorRangeN')?.value || 100);
+        playList = sorted.slice(0, Math.min(n, sorted.length));
+    } else if (rangeMode === 'last') {
+        const n = parseInt(document.getElementById('sectorRangeN')?.value || 100);
+        playList = sorted.slice(-Math.min(n, sorted.length));
+    } else if (rangeMode === 'range') {
+        const start = Math.max(1, parseInt(document.getElementById('sectorRangeStart')?.value || 1)) - 1;
+        const end = parseInt(document.getElementById('sectorRangeEnd')?.value || sorted.length);
+        playList = sorted.slice(start, Math.min(end, sorted.length));
+    }
+    
+    if (direction === 'backward') playList = [...playList].reverse();
+    
+    // Play selected fractions
+    playbackState.queue = playList;
     playbackState.direction = direction;
     playbackState.mode = 'sector';
     playbackState.currentIndex = 0;
     playbackState.isPlaying = true;
+    playbackState.sectorNum = sectorNum;
     
-    showPlaybackStatus(`Playing Sector ${sectorNum} ${direction === 'forward' ? '→' : '←'} (${sorted.length} fractions)`);
+    const rangeDesc = rangeMode === 'all' ? '' : ` [${rangeMode}: ${playList.length}]`;
+    showPlaybackStatus(`Playing Sector ${sectorNum} ${direction === 'forward' ? '→' : '←'} (${playList.length}/${sorted.length} fractions)${rangeDesc}`);
     startPlaybackLoop();
+}
+
+// Update range inputs visibility
+function updateSectorRangeInputs() {
+    const mode = document.getElementById('sectorRangeMode')?.value || 'all';
+    const rangeInputs = document.getElementById('sectorRangeInputs');
+    const nSelect = document.getElementById('sectorRangeN');
+    
+    if (rangeInputs && nSelect) {
+        if (mode === 'range') {
+            rangeInputs.style.display = 'flex';
+            nSelect.style.display = 'none';
+        } else if (mode === 'first' || mode === 'last') {
+            rangeInputs.style.display = 'none';
+            nSelect.style.display = 'block';
+        } else {
+            rangeInputs.style.display = 'none';
+            nSelect.style.display = 'none';
+        }
+    }
+    
+    // Update total count display
+    updateSectorPointCount();
+}
+
+// Update sector point count display
+function updateSectorPointCount() {
+    const sectorNum = parseInt(document.getElementById('viewSector')?.value || 1);
+    const residues = state.residuesBySector[sectorNum] || [];
+    const countEl = document.getElementById('sectorPointCount');
+    if (countEl) {
+        countEl.textContent = residues.length.toLocaleString();
+    }
+    
+    // Update range end default
+    const rangeEnd = document.getElementById('sectorRangeEnd');
+    if (rangeEnd && !rangeEnd.value) {
+        rangeEnd.placeholder = residues.length;
+    }
 }
 
 // Play Stern-Brocot path as melody
@@ -15662,6 +15863,11 @@ function stopAllPlayback() {
         playbackState.intervalId = null;
     }
     stopAudio();
+    
+    // Clear blink highlight
+    if (typeof clearBlinkHighlight === 'function') {
+        clearBlinkHighlight();
+    }
     
     // Stop ring loop
     stopRingLoop();
@@ -15876,10 +16082,14 @@ function highlightCurrentFraction(f) {
         updateWaveProperties(freq);
     }
     
-    // Highlight on ring if visible
-    if (document.getElementById('tab-mainview').classList.contains('active')) {
+    // Always highlight on main ring canvas (blinks the point)
+    const mainRingCanvas = document.getElementById('mainRing');
+    if (mainRingCanvas) {
         highlightPointOnRing(f);
     }
+    
+    // Also highlight in horizon display if visible
+    highlightHorizonFraction(f);
 }
 
 function updatePlaybackDisplay(f, current, total) {
