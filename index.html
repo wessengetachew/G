@@ -634,6 +634,10 @@
     </div>
     
     <!-- SUB-TABS (shown based on active main tab) -->
+    <div id="subtabs-main" class="subtabs" style="display:none;">
+        <span class="subtab active" onclick="switchSubTab('mainview')">Main View</span>
+        <span class="subtab" onclick="switchSubTab('erroranalysis')">Error Analysis</span>
+    </div>
     <div id="subtabs-analysis" class="subtabs" style="display:none;">
         <span class="subtab active" onclick="switchSubTab('stats')">Statistics</span>
         <span class="subtab" onclick="switchSubTab('primes')">Primes</span>
@@ -665,8 +669,8 @@
         <span class="subtab" onclick="switchSubTab('research')">Research</span>
     </div>
     
-    <!-- MAIN TAB -->
-    <div id="tab-main" class="tab-content active">
+    <!-- MAIN TAB - MAIN VIEW -->
+    <div id="tab-mainview" class="tab-content active">
         <!-- Hero Formula Banner -->
         <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);padding:12px 20px;border-radius:8px;margin-bottom:15px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
             <div>
@@ -711,7 +715,7 @@
                     <button onclick="setPointSize(3)" class="secondary" style="font-size:10px;padding:3px 6px;">3</button>
                     <button onclick="setPointSize(5)" class="secondary" style="font-size:10px;padding:3px 6px;">5</button>
                     <button onclick="setPointSize(8)" class="secondary" style="font-size:10px;padding:3px 6px;">8</button>
-                    <label style="font-size:12px;margin-left:8px;">Spacing: <input type="number" id="ringSpacing" min="1" max="10" value="1" step="0.1" style="width:50px;font-size:11px;" onchange="drawMainRing()" title="Ring spacing multiplier"></label>
+                    <label style="font-size:12px;margin-left:8px;">Spacing: <input type="number" id="ringSpacing" min="1" max="10" value="2" step="0.1" style="width:50px;font-size:11px;" onchange="drawMainRing()" title="Ring spacing multiplier"></label>
                     <label style="font-size:12px;margin-left:10px;">Canvas: <select id="ringCanvasSize" onchange="resizeRingCanvas()" style="padding:3px 6px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;font-size:11px;">
                         <option value="800">800x800</option>
                         <option value="1024">1K (1024x1024)</option>
@@ -722,7 +726,7 @@
             </div>
             <div style="display:flex;gap:8px;">
                 <button onclick="toggleAdvancedControls()" class="secondary" style="padding:8px 12px;">Advanced ▼</button>
-                <button onclick="screenshotFullTab('main')" class="secondary" style="padding:8px 12px;">Screenshot</button>
+                <button onclick="screenshotMainCanvas()" class="secondary" style="padding:8px 12px;">Screenshot</button>
             </div>
         </div>
         
@@ -745,6 +749,22 @@
                             <button onclick="setRotationPreset(60,'1/6')" class="secondary" style="font-size:9px;padding:2px 6px;">60°</button>
                             <button onclick="setRotationPreset(90,'1/4')" class="secondary" style="font-size:9px;padding:2px 6px;">90°</button>
                             <button onclick="setRotationPreset(120,'1/3')" class="secondary" style="font-size:9px;padding:2px 6px;">120°</button>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,215,0,0.2);">
+                            <button onclick="startRingRotation('cw')" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:4px 8px;cursor:pointer;font-size:10px;">▶ CW</button>
+                            <button onclick="startRingRotation('ccw')" style="background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:4px;color:white;padding:4px 8px;cursor:pointer;font-size:10px;">▶ CCW</button>
+                            <button onclick="stopRingRotation()" style="background:#ef4444;border:none;border-radius:4px;color:white;padding:4px 8px;cursor:pointer;font-size:10px;">■</button>
+                            <select id="ringRotationSpeed" style="padding:2px 4px;font-size:9px;background:#0f172a;border:1px solid #ffd700;border-radius:3px;color:#e2e8f0;">
+                                <option value="0.5">Slow</option>
+                                <option value="1" selected>Med</option>
+                                <option value="2">Fast</option>
+                            </select>
+                            <select id="ringRotationMode" style="padding:2px 4px;font-size:9px;background:#0f172a;border:1px solid #ffd700;border-radius:3px;color:#e2e8f0;">
+                                <option value="cumulative" selected>Cumul</option>
+                                <option value="uniform">Uniform</option>
+                                <option value="alternate">Alt</option>
+                            </select>
+                            <span id="ringRotationPhase" style="color:#ffd700;font-family:monospace;font-size:10px;">0°</span>
                         </div>
                     </div>
                     
@@ -897,30 +917,6 @@
                 <span style="color:#a5b4fc;font-size:10px;">Ring: <span id="ringLoopCurrent" style="color:#fbbf24;font-family:monospace;">-</span></span>
             </div>
             
-            <!-- Ring Rotation Animation Controls -->
-            <div style="margin-top:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;background:#1a2e1a;border-radius:6px;border:1px solid #22c55e;">
-                <span style="color:#86efac;font-size:11px;font-weight:600;">Ring Spin:</span>
-                <button onclick="startRingRotation('cw')" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:5px 10px;cursor:pointer;font-size:11px;">↻ CW</button>
-                <button onclick="startRingRotation('ccw')" style="background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:4px;color:white;padding:5px 10px;cursor:pointer;font-size:11px;">↺ CCW</button>
-                <button onclick="stopRingRotation()" style="background:#ef4444;border:none;border-radius:4px;color:white;padding:5px 10px;cursor:pointer;font-size:11px;">■ Stop</button>
-                <label style="color:#86efac;font-size:10px;">Speed:
-                    <select id="ringRotationSpeed" style="padding:3px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#e2e8f0;">
-                        <option value="0.5">Slow</option>
-                        <option value="1" selected>Medium</option>
-                        <option value="2">Fast</option>
-                        <option value="4">Very Fast</option>
-                    </select>
-                </label>
-                <label style="color:#86efac;font-size:10px;">Mode:
-                    <select id="ringRotationMode" style="padding:3px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#e2e8f0;">
-                        <option value="cumulative" selected>Cumulative</option>
-                        <option value="uniform">Uniform</option>
-                        <option value="alternate">Alternate</option>
-                    </select>
-                </label>
-                <span style="color:#86efac;font-size:10px;">Phase: <span id="ringRotationPhase" style="color:#fbbf24;font-family:monospace;">0°</span></span>
-            </div>
-            
             <!-- Color Legend -->
             <div class="color-legend" id="colorLegend" style="margin-top:12px;justify-content:center;"></div>
             
@@ -950,6 +946,10 @@
                             <div>
                                 <label style="color:#6ee7b7;font-size:10px;">Tolerance</label>
                                 <select id="solverTolerance" style="display:block;margin-top:4px;padding:6px 10px;background:#0f172a;border:1px solid #10b981;border-radius:4px;color:#e2e8f0;font-size:12px;">
+                                    <option value="0.00000001">±0.00000001</option>
+                                    <option value="0.0000001">±0.0000001</option>
+                                    <option value="0.000001">±0.000001</option>
+                                    <option value="0.00001">±0.00001</option>
                                     <option value="0.0001">±0.0001</option>
                                     <option value="0.001">±0.001</option>
                                     <option value="0.01" selected>±0.01</option>
@@ -965,8 +965,11 @@
                                 <select id="solverMaxDenom" style="display:block;margin-top:4px;padding:6px 10px;background:#0f172a;border:1px solid #10b981;border-radius:4px;color:#e2e8f0;font-size:12px;">
                                     <option value="100">100</option>
                                     <option value="500" selected>500</option>
-                                    <option value="1000">1000</option>
-                                    <option value="5000">5000</option>
+                                    <option value="1000">1,000</option>
+                                    <option value="5000">5,000</option>
+                                    <option value="10000">10,000</option>
+                                    <option value="50000">50,000</option>
+                                    <option value="100000">100,000</option>
                                 </select>
                             </div>
                             <div>
@@ -1024,7 +1027,7 @@
                             <button onclick="solverSaveToProject()" style="background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:4px;color:white;padding:8px 16px;cursor:pointer;font-size:12px;">Save to Project</button>
                         </div>
                         <!-- Alternatives Table -->
-                        <div id="solverAlternatives" style="margin-top:15px;max-height:200px;overflow-y:auto;"></div>
+                        <div id="solverAlternatives" style="margin-top:15px;max-height:450px;overflow-y:auto;"></div>
                     </div>
                 </div>
             </div>
@@ -1091,6 +1094,7 @@
             <div class="chart-box chart-wrapper">
                 <h4>Exact vs Predicted 
                     <button class="secondary" onclick="playErrorBySector('count')" style="font-size:10px;padding:3px 8px;margin-left:10px;">▶ Play</button>
+                    <button class="secondary" onclick="exportCountChart()" style="font-size:10px;padding:3px 8px;">Export</button>
                     <button class="secondary" onclick="resetCountChartZoom()" style="font-size:10px;padding:3px 8px;" title="Reset zoom">Reset Zoom</button>
                     <button class="secondary" onclick="zoomCountChart('in')" style="font-size:10px;padding:3px 6px;" title="Zoom in">+</button>
                     <button class="secondary" onclick="zoomCountChart('out')" style="font-size:10px;padding:3px 6px;" title="Zoom out">-</button>
@@ -1101,6 +1105,7 @@
             <div class="chart-box chart-wrapper">
                 <h4>Relative Error % 
                     <button class="secondary" onclick="playErrorBySector('error')" style="font-size:10px;padding:3px 8px;margin-left:10px;">▶ Play All</button>
+                    <button class="secondary" onclick="exportErrorChart()" style="font-size:10px;padding:3px 8px;">Export</button>
                     <button id="playSelectedRangeBtn" class="secondary" onclick="playSelectedErrorRange()" style="font-size:10px;padding:3px 8px;display:none;">▶ Play Selection</button>
                     <button class="secondary" onclick="clearErrorSelection()" style="font-size:10px;padding:3px 8px;">Clear</button>
                     <button class="secondary" onclick="stopAllPlayback()" style="font-size:10px;padding:3px 8px;">■</button>
@@ -1120,67 +1125,6 @@
                     <span style="color:#64748b;font-size:10px;" id="errorModeHint">Higher error → higher pitch</span>
                 </div>
                 <canvas id="mainErrorChart"></canvas>
-            </div>
-        </div>
-        
-        <!-- ERROR ANALYSIS PANEL -->
-        <div class="panel" style="margin-top:15px;" id="errorAnalysisPanel">
-            <h4 style="margin-bottom:12px;">Error Analysis 
-                <button onclick="runErrorAnalysis()" class="secondary" style="margin-left:10px;">Analyze</button>
-                <button onclick="exportErrorAnalysis()" class="secondary">Export</button>
-            </h4>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;">
-                <!-- Statistics -->
-                <div style="background:#0f172a;border-radius:8px;padding:12px;border:1px solid #334155;">
-                    <h5 style="color:#a78bfa;margin:0 0 10px 0;font-size:12px;">Error Statistics</h5>
-                    <div id="errorStats" style="font-family:monospace;font-size:11px;color:#94a3b8;">
-                        <div>Mean: <span id="errMean">-</span></div>
-                        <div>Std Dev: <span id="errStd">-</span></div>
-                        <div>Skewness: <span id="errSkew">-</span></div>
-                        <div>Kurtosis: <span id="errKurt">-</span></div>
-                        <div style="margin-top:6px;border-top:1px solid #334155;padding-top:6px;">
-                            <div>Prime sectors mean: <span id="errPrimeMean">-</span></div>
-                            <div>Composite sectors mean: <span id="errCompMean">-</span></div>
-                            <div style="color:#22c55e;">Mobius correlation: <span id="errMobiusCorr">-</span></div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Autocorrelation -->
-                <div style="background:#0f172a;border-radius:8px;padding:12px;border:1px solid #334155;">
-                    <h5 style="color:#a78bfa;margin:0 0 10px 0;font-size:12px;">Autocorrelation (lag 1-20)</h5>
-                    <canvas id="autocorrChart" height="100"></canvas>
-                </div>
-                <!-- Power Spectrum -->
-                <div style="background:#0f172a;border-radius:8px;padding:12px;border:1px solid #334155;">
-                    <h5 style="color:#a78bfa;margin:0 0 10px 0;font-size:12px;">Power Spectrum (FFT)
-                        <span style="font-weight:normal;color:#64748b;font-size:10px;margin-left:5px;">peaks may relate to zeta zeros</span>
-                    </h5>
-                    <canvas id="fftChart" height="100"></canvas>
-                </div>
-                <!-- Error Distribution -->
-                <div style="background:#0f172a;border-radius:8px;padding:12px;border:1px solid #334155;">
-                    <h5 style="color:#a78bfa;margin:0 0 10px 0;font-size:12px;">Error Distribution</h5>
-                    <canvas id="errorHistChart" height="100"></canvas>
-                </div>
-                <!-- Prime vs Composite Sectors -->
-                <div style="background:#0f172a;border-radius:8px;padding:12px;border:1px solid #334155;">
-                    <h5 style="color:#a78bfa;margin:0 0 10px 0;font-size:12px;">Prime vs Composite Sector Errors</h5>
-                    <canvas id="primeCompErrorChart" height="100"></canvas>
-                </div>
-                <!-- Cumulative Error -->
-                <div style="background:#0f172a;border-radius:8px;padding:12px;border:1px solid #334155;">
-                    <h5 style="color:#a78bfa;margin:0 0 10px 0;font-size:12px;">Cumulative Abs Error
-                        <span style="font-weight:normal;color:#64748b;font-size:10px;margin-left:5px;">growth rate → RH bound</span>
-                    </h5>
-                    <canvas id="cumulativeErrorChart" height="100"></canvas>
-                </div>
-            </div>
-            <!-- Spectral Peaks Table -->
-            <div style="margin-top:12px;background:#0f172a;border-radius:8px;padding:12px;border:1px solid #334155;">
-                <h5 style="color:#a78bfa;margin:0 0 10px 0;font-size:12px;">Dominant Spectral Peaks
-                    <span style="font-weight:normal;color:#64748b;font-size:10px;margin-left:5px;">Compare with Im(rho_k) from zeta zeros: 14.13, 21.02, 25.01, 30.42, 32.94...</span>
-                </h5>
-                <div id="spectralPeaksTable" style="font-family:monospace;font-size:11px;color:#94a3b8;"></div>
             </div>
         </div>
         
@@ -1204,6 +1148,7 @@
                     </select>
                     <button onclick="exportSectorCSV(document.getElementById('sectorDataSelect').value)" class="secondary" style="font-size:11px;">Export Sector CSV</button>
                     <button onclick="exportAllSectorsCSV()" class="secondary" style="font-size:11px;">Export All CSV</button>
+                    <button onclick="showSectorExportDialog()" style="padding:5px 10px;font-size:11px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;border-radius:4px;color:white;cursor:pointer;">Export 4K PNG</button>
                 </div>
             </div>
             <!-- Category legend -->
@@ -1369,10 +1314,115 @@
         </div>
         
         <div style="margin-top:15px; padding:15px; background:#1e293b; border-radius:8px; border:1px solid #334155; text-align:center;">
-            <button onclick="screenshotFullTab('main')" style="padding:12px 24px; font-size:14px;">Screenshot Full Main Tab</button>
+            <button onclick="screenshotFullTab('mainview')" style="padding:12px 24px; font-size:14px;">Screenshot Full Main Tab</button>
             <button class="secondary" onclick="exportMainTabData()" style="margin-left:10px; padding:12px 24px; font-size:14px;">Export Main Tab Data</button>
         </div>
     </div>
+    </div>
+    
+    <!-- ERROR ANALYSIS TAB -->
+    <div id="tab-erroranalysis" class="tab-content">
+        <div class="panel">
+            <h2 style="color:#a78bfa;margin-bottom:5px;">Error Analysis</h2>
+            <p style="color:#94a3b8;font-size:0.9em;margin-bottom:20px;">Analyze the deviation between exact Farey counts and the asymptotic formula C(n,N) = 3N²/(π²n(n+1)). Understanding error structure may reveal connections to the Riemann Hypothesis through the Franel-Landau theorem.</p>
+            
+            <!-- Range Controls -->
+            <div style="background:#1e1b4b;border-radius:8px;padding:15px;margin-bottom:20px;border:1px solid #6366f1;">
+                <h4 style="color:#a5b4fc;margin:0 0 12px 0;">Analysis Range</h4>
+                <div style="display:flex;flex-wrap:wrap;gap:15px;align-items:center;">
+                    <label style="color:#94a3b8;font-size:12px;">Sector Start: 
+                        <input type="number" id="errorAnalysisStart" value="1" min="1" style="width:80px;padding:6px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:#e2e8f0;margin-left:5px;">
+                    </label>
+                    <label style="color:#94a3b8;font-size:12px;">Sector End: 
+                        <input type="number" id="errorAnalysisEnd" value="275" min="1" style="width:80px;padding:6px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:#e2e8f0;margin-left:5px;">
+                    </label>
+                    <button onclick="runErrorAnalysis()" style="padding:8px 20px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;border-radius:6px;color:white;cursor:pointer;font-weight:600;">Analyze</button>
+                    <button onclick="exportErrorAnalysis()" class="secondary" style="padding:8px 15px;">Export CSV</button>
+                    <button onclick="screenshotFullTab('erroranalysis')" class="secondary" style="padding:8px 15px;">Screenshot</button>
+                </div>
+            </div>
+            
+            <!-- Description Cards -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:15px;margin-bottom:20px;">
+                <div style="background:#0f172a;border-radius:8px;padding:15px;border-left:4px solid #22c55e;">
+                    <h5 style="color:#22c55e;margin:0 0 8px 0;">RH Connection</h5>
+                    <p style="color:#94a3b8;font-size:0.85em;margin:0;">The Franel-Landau theorem states that RH is equivalent to: Σ|F_N - k/N| = O(N^(1/2+ε)). Our sector decomposition may reveal which sectors contribute most to this sum.</p>
+                </div>
+                <div style="background:#0f172a;border-radius:8px;padding:15px;border-left:4px solid #8b5cf6;">
+                    <h5 style="color:#8b5cf6;margin:0 0 8px 0;">Spectral Analysis</h5>
+                    <p style="color:#94a3b8;font-size:0.85em;margin:0;">FFT of error sequence may show peaks at frequencies related to imaginary parts of zeta zeros (14.13, 21.02, 25.01...). This would indicate explicit formula structure.</p>
+                </div>
+                <div style="background:#0f172a;border-radius:8px;padding:15px;border-left:4px solid #f59e0b;">
+                    <h5 style="color:#f59e0b;margin:0 0 8px 0;">Möbius Function</h5>
+                    <p style="color:#94a3b8;font-size:0.85em;margin:0;">Correlation between errors and μ(n) tests for arithmetic structure. Non-zero correlation suggests prime factorization affects error distribution.</p>
+                </div>
+            </div>
+            
+            <!-- Statistics & Charts -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:15px;">
+                <!-- Statistics -->
+                <div style="background:#0f172a;border-radius:8px;padding:15px;border:1px solid #334155;">
+                    <h5 style="color:#a78bfa;margin:0 0 12px 0;font-size:13px;">Error Statistics</h5>
+                    <div id="errorStats" style="font-family:monospace;font-size:12px;color:#94a3b8;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                            <div>Mean: <span id="errMean" style="color:#e2e8f0;">-</span></div>
+                            <div>Std Dev: <span id="errStd" style="color:#e2e8f0;">-</span></div>
+                            <div>Skewness: <span id="errSkew" style="color:#e2e8f0;">-</span></div>
+                            <div>Kurtosis: <span id="errKurt" style="color:#e2e8f0;">-</span></div>
+                        </div>
+                        <div style="margin-top:10px;padding-top:10px;border-top:1px solid #334155;">
+                            <div>Prime sectors mean: <span id="errPrimeMean" style="color:#22c55e;">-</span></div>
+                            <div>Composite sectors mean: <span id="errCompMean" style="color:#6366f1;">-</span></div>
+                            <div style="margin-top:6px;font-weight:600;">Möbius correlation: <span id="errMobiusCorr" style="color:#f59e0b;">-</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Autocorrelation -->
+                <div style="background:#0f172a;border-radius:8px;padding:15px;border:1px solid #334155;">
+                    <h5 style="color:#a78bfa;margin:0 0 12px 0;font-size:13px;">Autocorrelation (lag 1-20)
+                        <span style="font-weight:normal;color:#64748b;font-size:10px;margin-left:5px;">Red = significant</span>
+                    </h5>
+                    <canvas id="autocorrChart" height="120"></canvas>
+                </div>
+                
+                <!-- Power Spectrum -->
+                <div style="background:#0f172a;border-radius:8px;padding:15px;border:1px solid #334155;">
+                    <h5 style="color:#a78bfa;margin:0 0 12px 0;font-size:13px;">Power Spectrum (FFT)
+                        <span style="font-weight:normal;color:#64748b;font-size:10px;margin-left:5px;">peaks → zeta zeros?</span>
+                    </h5>
+                    <canvas id="fftChart" height="120"></canvas>
+                </div>
+                
+                <!-- Error Distribution -->
+                <div style="background:#0f172a;border-radius:8px;padding:15px;border:1px solid #334155;">
+                    <h5 style="color:#a78bfa;margin:0 0 12px 0;font-size:13px;">Error Distribution</h5>
+                    <canvas id="errorHistChart" height="120"></canvas>
+                </div>
+                
+                <!-- Prime vs Composite Sectors -->
+                <div style="background:#0f172a;border-radius:8px;padding:15px;border:1px solid #334155;">
+                    <h5 style="color:#a78bfa;margin:0 0 12px 0;font-size:13px;">Prime vs Composite Sector Errors</h5>
+                    <canvas id="primeCompErrorChart" height="120"></canvas>
+                </div>
+                
+                <!-- Cumulative Error -->
+                <div style="background:#0f172a;border-radius:8px;padding:15px;border:1px solid #334155;">
+                    <h5 style="color:#a78bfa;margin:0 0 12px 0;font-size:13px;">Cumulative |Error|
+                        <span style="font-weight:normal;color:#64748b;font-size:10px;margin-left:5px;">growth rate → RH bound</span>
+                    </h5>
+                    <canvas id="cumulativeErrorChart" height="120"></canvas>
+                </div>
+            </div>
+            
+            <!-- Spectral Peaks Table -->
+            <div style="margin-top:15px;background:#0f172a;border-radius:8px;padding:15px;border:1px solid #334155;">
+                <h5 style="color:#a78bfa;margin:0 0 12px 0;font-size:13px;">Dominant Spectral Peaks
+                    <span style="font-weight:normal;color:#64748b;font-size:11px;margin-left:10px;">Compare with Im(ρ_k): 14.135, 21.022, 25.011, 30.425, 32.935, 37.586, 40.919, 43.327</span>
+                </h5>
+                <div id="spectralPeaksTable" style="font-family:monospace;font-size:12px;color:#94a3b8;"></div>
+            </div>
+        </div>
     </div>
     
     <!-- THEORY TAB -->
@@ -3081,6 +3131,359 @@ function screenshotCanvas(canvasId) {
     link.click();
 }
 
+function screenshotMainCanvas() {
+    const canvas = document.getElementById('mainRing');
+    if (!canvas) { alert('Canvas not found'); return; }
+    
+    const padding = 20;
+    const solverResultsEl = document.getElementById('solverResults');
+    const hasSolver = solverResultsEl && solverResultsEl.style.display !== 'none' && solverCurrentMatch !== null;
+    
+    // Get error chart
+    const errorChart = document.getElementById('mainErrorChart');
+    const hasErrorChart = errorChart && state.sectors.some(s => s.relError !== null);
+    
+    // Get alternatives data directly from DOM table
+    const altEl = document.getElementById('solverAlternatives');
+    let alternativesData = [];
+    if (altEl) {
+        const table = altEl.querySelector('table');
+        if (table) {
+            const rows = table.querySelectorAll('tr');
+            for (let i = 1; i < rows.length; i++) { // skip header
+                const cells = rows[i].querySelectorAll('td');
+                if (cells.length >= 5) {
+                    alternativesData.push({
+                        frac: cells[0]?.textContent?.trim() || '',
+                        dec: cells[1]?.textContent?.trim() || '',
+                        err: cells[2]?.textContent?.trim() || '',
+                        sec: cells[3]?.textContent?.trim() || '',
+                        typ: cells[4]?.textContent?.trim() || '',
+                        typColor: cells[4]?.style?.color || '#94a3b8',
+                        isBest: (rows[i].getAttribute('style') || '').includes('background')
+                    });
+                }
+            }
+        }
+    }
+    
+    // Layout dimensions
+    const legendHeight = 100;
+    const errorChartHeight = hasErrorChart ? 200 : 0;
+    const leftContentWidth = canvas.width;
+    const leftContentHeight = canvas.height + legendHeight + errorChartHeight + 40;
+    
+    // Calculate solver panel dimensions
+    const solverPanelWidth = hasSolver ? 480 : 0;
+    const baseFieldsHeight = 380;
+    const altHeaderHeight = alternativesData.length > 0 ? 50 : 0;
+    const altRowsHeight = Math.min(alternativesData.length, 25) * 18;
+    const solverPanelHeight = hasSolver ? Math.max(leftContentHeight, baseFieldsHeight + altHeaderHeight + altRowsHeight + 50) : 0;
+    
+    // Create a temporary canvas with dark background
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = leftContentWidth + padding * 2 + solverPanelWidth;
+    tempCanvas.height = Math.max(leftContentHeight + padding * 2, solverPanelHeight + padding * 2);
+    const ctx = tempCanvas.getContext('2d');
+    
+    // Dark background matching the app theme
+    ctx.fillStyle = '#0a0f1a';
+    ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+    
+    // Draw the main ring canvas
+    ctx.drawImage(canvas, padding, padding);
+    
+    // Draw Legend below ring
+    let legendY = padding + canvas.height + 15;
+    
+    // Legend panel background
+    ctx.fillStyle = '#1e1b4b';
+    ctx.fillRect(padding, legendY, leftContentWidth, legendHeight - 10);
+    ctx.strokeStyle = '#6366f1';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(padding, legendY, leftContentWidth, legendHeight - 10);
+    
+    // Sector colors legend (S1-S10)
+    ctx.fillStyle = '#a5b4fc';
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillText('SECTORS', padding + 10, legendY + 18);
+    
+    const sectorStartX = padding + 70;
+    for (let i = 1; i <= 10; i++) {
+        const hue = ((i - 1) * 36) % 360;
+        const color = `hsl(${hue}, 70%, 50%)`;
+        const x = sectorStartX + (i - 1) * 55;
+        
+        // Color swatch
+        ctx.fillStyle = color;
+        ctx.fillRect(x, legendY + 8, 14, 14);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, legendY + 8, 14, 14);
+        
+        // Label
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = '10px monospace';
+        ctx.fillText(`S${i}`, x + 18, legendY + 18);
+    }
+    
+    // Categories legend
+    ctx.fillStyle = '#a5b4fc';
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillText('CATEGORIES', padding + 10, legendY + 45);
+    
+    const categories = [
+        { code: 'PP', label: 'Both Prime', color: '#22c55e' },
+        { code: 'PC', label: 'Prime/Comp', color: '#f59e0b' },
+        { code: 'CP', label: 'Comp/Prime', color: '#6366f1' },
+        { code: 'CC', label: 'Both Comp', color: '#94a3b8' }
+    ];
+    
+    const catStartX = padding + 90;
+    categories.forEach((cat, i) => {
+        const x = catStartX + i * 130;
+        
+        // Color swatch
+        ctx.fillStyle = cat.color;
+        ctx.fillRect(x, legendY + 35, 14, 14);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, legendY + 35, 14, 14);
+        
+        // Label
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText(cat.code, x + 18, legendY + 45);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '9px system-ui';
+        ctx.fillText(cat.label, x + 38, legendY + 45);
+    });
+    
+    // Denom type legend
+    ctx.fillStyle = '#a5b4fc';
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillText('DENOM', padding + 10, legendY + 72);
+    
+    const denomTypes = [
+        { label: 'Prime (m)', color: '#f59e0b' },
+        { label: 'Composite (m)', color: '#6366f1' }
+    ];
+    
+    const denomStartX = padding + 70;
+    denomTypes.forEach((dt, i) => {
+        const x = denomStartX + i * 130;
+        
+        ctx.fillStyle = dt.color;
+        ctx.fillRect(x, legendY + 62, 14, 14);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, legendY + 62, 14, 14);
+        
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = '10px system-ui';
+        ctx.fillText(dt.label, x + 18, legendY + 72);
+    });
+    
+    // Draw Error Chart below legend
+    if (hasErrorChart) {
+        const chartY = legendY + legendHeight + 5;
+        
+        // Chart title
+        ctx.fillStyle = '#a78bfa';
+        ctx.font = 'bold 12px system-ui';
+        ctx.fillText('RELATIVE ERROR %', padding + 10, chartY + 15);
+        
+        // Draw the error chart
+        ctx.drawImage(errorChart, padding, chartY + 20, leftContentWidth, errorChartHeight - 30);
+    }
+    
+    // Add solver data on the right if visible
+    if (hasSolver) {
+        const solverX = leftContentWidth + padding * 2;
+        const solverY = padding;
+        const panelWidth = solverPanelWidth - padding;
+        const panelHeight = solverPanelHeight;
+        
+        // Read all values from DOM
+        const bestFrac = document.getElementById('solverBestFrac')?.textContent || '-';
+        const decimal = document.getElementById('solverBestDecimal')?.textContent || '-';
+        const error = document.getElementById('solverError')?.textContent || '-';
+        const sector = document.getElementById('solverSector')?.textContent || '-';
+        const category = document.getElementById('solverCategory')?.textContent || '-';
+        const categoryColor = document.getElementById('solverCategory')?.style.color || '#94a3b8';
+        const denomType = document.getElementById('solverDenomType')?.textContent || '-';
+        const denomTypeColor = document.getElementById('solverDenomType')?.style.color || '#94a3b8';
+        const cf = document.getElementById('solverCF')?.textContent || '-';
+        const gear = document.getElementById('solverGear')?.textContent || '-';
+        const path = document.getElementById('solverPath')?.textContent || '-';
+        
+        // Solver panel background
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(solverX, solverY, panelWidth, panelHeight);
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(solverX, solverY, panelWidth, panelHeight);
+        
+        // Header bar
+        ctx.fillStyle = '#064e3b';
+        ctx.fillRect(solverX + 2, solverY + 2, panelWidth - 4, 32);
+        
+        // Title
+        ctx.fillStyle = '#6ee7b7';
+        ctx.font = 'bold 13px system-ui';
+        ctx.fillText('TARGET RATIO SOLVER', solverX + 12, solverY + 22);
+        
+        let y = solverY + 50;
+        const x = solverX + 12;
+        const lineHeight = 22;
+        
+        // Helper to draw a labeled value
+        const drawField = (label, value, valueColor = '#e2e8f0', fontSize = 14) => {
+            ctx.fillStyle = '#6ee7b7';
+            ctx.font = '10px system-ui';
+            ctx.fillText(label, x, y);
+            ctx.fillStyle = valueColor;
+            ctx.font = `${fontSize}px monospace`;
+            const maxLen = Math.floor((panelWidth - 24) / (fontSize * 0.6));
+            const displayVal = value.length > maxLen ? value.substring(0, maxLen - 3) + '...' : value;
+            ctx.fillText(displayVal, x, y + 14);
+            y += lineHeight + 10;
+        };
+        
+        // Best Match (large)
+        ctx.fillStyle = '#6ee7b7';
+        ctx.font = '10px system-ui';
+        ctx.fillText('BEST MATCH', x, y);
+        ctx.fillStyle = '#f0fdf4';
+        ctx.font = 'bold 28px monospace';
+        ctx.fillText(bestFrac, x, y + 28);
+        y += 42;
+        
+        // Decimal Value
+        drawField('DECIMAL VALUE', decimal, '#a7f3d0', 15);
+        
+        // Error
+        drawField('ERROR', error, '#fbbf24', 14);
+        
+        // Sector
+        drawField('SECTOR', sector, '#a78bfa', 14);
+        
+        // Category
+        drawField('CATEGORY', category, categoryColor, 14);
+        
+        // Denom Type
+        drawField('DENOM TYPE', denomType, denomTypeColor, 14);
+        
+        // Gear Ratio
+        drawField('GEAR RATIO', gear, '#f472b6', 14);
+        
+        // Continued Fraction (compact)
+        ctx.fillStyle = '#6ee7b7';
+        ctx.font = '10px system-ui';
+        ctx.fillText('CONTINUED FRACTION', x, y);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '11px monospace';
+        const cfDisplay = cf.length > 55 ? cf.substring(0, 52) + '...' : cf;
+        ctx.fillText(cfDisplay, x, y + 12);
+        y += 26;
+        
+        // Path (compact)
+        ctx.fillStyle = '#6ee7b7';
+        ctx.font = '10px system-ui';
+        ctx.fillText('STERN-BROCOT PATH', x, y);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px monospace';
+        const pathDisplay = path.length > 65 ? path.substring(0, 62) + '...' : path;
+        ctx.fillText(pathDisplay, x, y + 12);
+        y += 30;
+        
+        // Alternatives Table - using pre-extracted data
+        if (alternativesData.length > 0) {
+            // Header bar for alternatives
+            ctx.fillStyle = '#064e3b';
+            ctx.fillRect(solverX + 2, y - 2, panelWidth - 4, 22);
+            ctx.fillStyle = '#6ee7b7';
+            ctx.font = 'bold 11px system-ui';
+            ctx.fillText(`ALTERNATIVES WITHIN TOLERANCE (${alternativesData.length})`, x, y + 12);
+            y += 28;
+            
+            // Table header
+            ctx.fillStyle = '#6ee7b7';
+            ctx.font = 'bold 9px system-ui';
+            ctx.fillText('Fraction', x, y);
+            ctx.fillText('Decimal', x + 70, y);
+            ctx.fillText('Error', x + 150, y);
+            ctx.fillText('Sector', x + 220, y);
+            ctx.fillText('Type', x + 290, y);
+            y += 12;
+            
+            // Draw separator line
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(solverX + panelWidth - 12, y);
+            ctx.stroke();
+            y += 8;
+            
+            // Table rows
+            const maxRowsToShow = 25;
+            const rowsToShow = Math.min(alternativesData.length, maxRowsToShow);
+            
+            for (let i = 0; i < rowsToShow; i++) {
+                const alt = alternativesData[i];
+                
+                // Highlight best match row
+                if (alt.isBest) {
+                    ctx.fillStyle = 'rgba(16,185,129,0.25)';
+                    ctx.fillRect(x - 4, y - 10, panelWidth - 16, 16);
+                }
+                
+                ctx.font = '10px monospace';
+                ctx.fillStyle = alt.isBest ? '#f0fdf4' : '#e2e8f0';
+                ctx.fillText(alt.frac, x, y);
+                ctx.fillStyle = '#a7f3d0';
+                ctx.fillText(alt.dec, x + 70, y);
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillText(alt.err, x + 150, y);
+                ctx.fillStyle = '#a78bfa';
+                ctx.fillText(alt.sec, x + 220, y);
+                ctx.fillStyle = alt.typColor;
+                ctx.fillText(alt.typ, x + 290, y);
+                
+                y += 18;
+            }
+            
+            // Show "and X more" if truncated
+            if (alternativesData.length > maxRowsToShow) {
+                ctx.fillStyle = '#64748b';
+                ctx.font = 'italic 9px system-ui';
+                ctx.fillText(`... and ${alternativesData.length - maxRowsToShow} more alternatives`, x, y + 5);
+            }
+        }
+    }
+    
+    // Add metadata text at bottom
+    ctx.fillStyle = '#64748b';
+    ctx.font = '12px monospace';
+    const info = `N=${state.nMax} | Sectors ${state.sectorMin}-${state.sectorMax} | ${new Date().toISOString().slice(0,10)} | @7dview`;
+    ctx.fillText(info, padding, tempCanvas.height - 8);
+    
+    // Show in overlay for preview/download
+    currentScreenshotData = tempCanvas.toDataURL('image/png');
+    const preview = document.getElementById('screenshotPreview');
+    if (preview) {
+        preview.src = currentScreenshotData;
+        document.getElementById('screenshotOverlay').classList.add('active');
+    } else {
+        // Direct download if overlay not available
+        const link = document.createElement('a');
+        link.download = `farey_ring_N${state.nMax}_${Date.now()}.png`;
+        link.href = currentScreenshotData;
+        link.click();
+    }
+}
+
 function screenshotFullTab(tabName) {
     const tabElement = document.getElementById('tab-' + tabName);
     if (!tabElement) { alert('Tab not found'); return; }
@@ -3130,7 +3533,7 @@ function screenshotFullTab(tabName) {
     const formulaPanelHeight = 220;
     
     // Solver section height (if active)
-    const solverHeight = solverCurrentMatch && tabName === 'main' ? 90 : 0;
+    const solverHeight = solverCurrentMatch && tabName === 'mainview' ? 90 : 0;
     
     const totalWidth = 1000;
     const totalHeight = titleHeight + statsHeight + canvasSectionHeight + solverHeight + tableHeight + formulaPanelHeight + padding * 2;
@@ -3149,7 +3552,7 @@ function screenshotFullTab(tabName) {
     
     // Tab info for formulas
     const tabInfo = {
-        'main': {
+        'mainview': {
             title: 'Main Sector Analysis',
             formula: 'C(n, N) = 3N² / (π² n(n+1))',
             description: 'Asymptotic count of coprime pairs (r, m) with r/m in sector Sn',
@@ -3163,6 +3566,17 @@ function screenshotFullTab(tabName) {
                 'PC = Prime num, Composite denom',
                 'CP = Composite num, Prime denom',
                 'CC = Both composite'
+            ]
+        },
+        'erroranalysis': {
+            title: 'Error Analysis',
+            formula: 'Σ|Exact - Predicted| growth rate',
+            description: 'Statistical analysis of formula deviation - connection to RH',
+            params: [
+                'Franel-Landau: RH ⟺ O(N^(1/2+ε))',
+                'FFT → zeta zero frequencies',
+                'Möbius correlation',
+                'Prime vs composite sector behavior'
             ]
         },
         'theory': {
@@ -3291,7 +3705,7 @@ function screenshotFullTab(tabName) {
     }
     
     // Solver section (if active on main tab)
-    if (solverCurrentMatch && tabName === 'main') {
+    if (solverCurrentMatch && tabName === 'mainview') {
         ctx.fillStyle = '#064e3b';
         ctx.fillRect(padding, currentY + 10, totalWidth - padding * 2, 70);
         ctx.strokeStyle = '#10b981';
@@ -11477,7 +11891,7 @@ function exportMainTabData() {
 
 // Tab group mappings
 const tabGroups = {
-    main: { subtabs: null, default: 'main' },
+    main: { subtabs: 'subtabs-main', default: 'mainview', tabs: ['mainview', 'erroranalysis'] },
     analysis: { subtabs: 'subtabs-analysis', default: 'stats', tabs: ['stats', 'primes', 'gaps'] },
     theory: { subtabs: 'subtabs-theory', default: 'theory', tabs: ['theory', 'theoryviz'] },
     geometry: { subtabs: 'subtabs-geometry', default: '3d', tabs: ['3d', 'hyperbolic', 'smith'] },
@@ -11487,7 +11901,7 @@ const tabGroups = {
 };
 
 let currentGroup = 'main';
-let currentSubtab = 'main';
+let currentSubtab = 'mainview';
 
 function switchTab(groupName) {
     // Update main tabs
@@ -15463,7 +15877,7 @@ function highlightCurrentFraction(f) {
     }
     
     // Highlight on ring if visible
-    if (document.getElementById('tab-main').classList.contains('active')) {
+    if (document.getElementById('tab-mainview').classList.contains('active')) {
         highlightPointOnRing(f);
     }
 }
@@ -16823,7 +17237,7 @@ function solverSearch(inputVal) {
     const best = findBestRationalApprox(target, maxDenom);
     
     // Also find alternatives within tolerance
-    const alternatives = findAlternativesWithinTolerance(target, tolerance, maxDenom, 10);
+    const alternatives = findAlternativesWithinTolerance(target, tolerance, maxDenom, 25);
     
     if (best) {
         solverCurrentMatch = best;
@@ -16984,7 +17398,7 @@ function solverSelectAlternative(r, m) {
     displaySolverResults(solverCurrentMatch, parseFloat(document.getElementById('solverInput').value), 
         findAlternativesWithinTolerance(parseFloat(document.getElementById('solverInput').value), 
         parseFloat(document.getElementById('solverTolerance').value), 
-        parseInt(document.getElementById('solverMaxDenom').value), 10));
+        parseInt(document.getElementById('solverMaxDenom').value), 25));
 }
 
 // Live update solver display during playback
@@ -17539,12 +17953,18 @@ document.addEventListener('DOMContentLoaded', function() {
 let errorAnalysisCharts = {};
 
 function runErrorAnalysis() {
-    const errors = state.sectors.filter(s => s.relError !== null).map(s => s.relError);
-    const absErrors = state.sectors.filter(s => s.exact !== null).map(s => Math.abs(s.exact - s.predicted));
-    const sectorNs = state.sectors.filter(s => s.relError !== null).map(s => s.n);
+    // Get range from inputs
+    const startSector = parseInt(document.getElementById('errorAnalysisStart')?.value) || 1;
+    const endSector = parseInt(document.getElementById('errorAnalysisEnd')?.value) || state.sectors.length;
+    
+    // Filter sectors by range
+    const filteredSectors = state.sectors.filter(s => s.n >= startSector && s.n <= endSector && s.relError !== null);
+    const errors = filteredSectors.map(s => s.relError);
+    const absErrors = filteredSectors.filter(s => s.exact !== null).map(s => Math.abs(s.exact - s.predicted));
+    const sectorNs = filteredSectors.map(s => s.n);
     
     if (errors.length < 5) {
-        alert('Need at least 5 sectors with exact data for analysis');
+        alert('Need at least 5 sectors with exact data for analysis. Check your range or compute sectors first.');
         return;
     }
     
@@ -17879,6 +18299,309 @@ function exportErrorAnalysis() {
     a.href = URL.createObjectURL(blob);
     a.download = `error_analysis_N${state.nMax}_${Date.now()}.csv`;
     a.click();
+}
+
+// Export Error Chart with Sector Data
+function exportErrorChart() {
+    exportChartWithSectorData('mainErrorChart', 'Relative Error %', 'error');
+}
+
+// Export Count Chart with Sector Data  
+function exportCountChart() {
+    exportChartWithSectorData('mainCountChart', 'Exact vs Predicted', 'count');
+}
+
+function exportChartWithSectorData(chartId, title, type) {
+    const chartCanvas = document.getElementById(chartId);
+    if (!chartCanvas) return;
+    
+    const sectors = state.sectors.filter(s => s.relError !== null).slice(0, 20);
+    if (sectors.length === 0) {
+        alert('No sector data available');
+        return;
+    }
+    
+    // 4K dimensions
+    const width = 3840;
+    const height = 2160;
+    const padding = 60;
+    const chartHeight = height * 0.55;
+    const tableStartY = chartHeight + padding + 80;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    
+    // Background
+    ctx.fillStyle = '#0a0f1a';
+    ctx.fillRect(0, 0, width, height);
+    
+    // Title
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = 'bold 48px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${title} - N=${state.nMax}`, width/2, 60);
+    
+    // Draw chart (scaled up)
+    const chartWidth = width - padding * 2;
+    ctx.drawImage(chartCanvas, padding, 100, chartWidth, chartHeight - 100);
+    
+    // Relative Error summary (top center above table)
+    const totalError = sectors.reduce((sum, s) => sum + Math.abs(s.relError || 0), 0);
+    const avgError = totalError / sectors.length;
+    const maxError = Math.max(...sectors.map(s => Math.abs(s.relError || 0)));
+    
+    ctx.fillStyle = '#a78bfa';
+    ctx.font = 'bold 36px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Avg Error: ${avgError.toFixed(4)}%  |  Max Error: ${maxError.toFixed(4)}%  |  Sectors: ${state.sectors.length}`, width/2, tableStartY - 40);
+    
+    // Draw sector data table
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = 'bold 28px monospace';
+    ctx.textAlign = 'left';
+    
+    const colWidths = [80, 200, 180, 200, 180];
+    const headers = ['n', 'Interval', 'Exact', 'Predicted', 'Error%'];
+    let x = padding;
+    
+    // Table header
+    ctx.fillStyle = '#6366f1';
+    headers.forEach((h, i) => {
+        ctx.fillText(h, x, tableStartY);
+        x += colWidths[i];
+    });
+    
+    // Table rows (2 columns of 10)
+    ctx.font = '24px monospace';
+    const rowHeight = 36;
+    const col2Start = width / 2 + 50;
+    
+    sectors.forEach((s, i) => {
+        const col = i < 10 ? 0 : 1;
+        const row = i < 10 ? i : i - 10;
+        const baseX = col === 0 ? padding : col2Start;
+        const y = tableStartY + 50 + row * rowHeight;
+        
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillText(s.n.toString(), baseX, y);
+        ctx.fillText(`(1/${s.n+1}, 1/${s.n}]`, baseX + colWidths[0], y);
+        ctx.fillText(s.exact !== null ? s.exact.toString() : '-', baseX + colWidths[0] + colWidths[1], y);
+        ctx.fillText(s.predicted.toFixed(2), baseX + colWidths[0] + colWidths[1] + colWidths[2], y);
+        
+        const errColor = Math.abs(s.relError) < 1 ? '#22c55e' : Math.abs(s.relError) < 5 ? '#f59e0b' : '#ef4444';
+        ctx.fillStyle = errColor;
+        ctx.fillText((s.relError !== null ? s.relError.toFixed(4) + '%' : '-'), baseX + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3], y);
+    });
+    
+    // Footer
+    ctx.fillStyle = '#475569';
+    ctx.font = '20px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Farey Sector Research Platform | @7dview | wessengetachew.github.io | ' + new Date().toISOString().slice(0,10), width/2, height - 30);
+    
+    // Download
+    const link = document.createElement('a');
+    link.download = `farey_${type}_chart_N${state.nMax}_4K_${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
+
+// Sector Data Export with Range Options (4K)
+function showSectorExportDialog() {
+    let dialog = document.getElementById('sectorExportDialog');
+    if (!dialog) {
+        dialog = document.createElement('div');
+        dialog.id = 'sectorExportDialog';
+        dialog.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 10000;
+            display: flex; justify-content: center; align-items: center;
+        `;
+        dialog.innerHTML = `
+            <div style="background:#1e293b;border-radius:12px;padding:24px;max-width:400px;border:2px solid #6366f1;">
+                <h3 style="margin:0 0 20px 0;color:#a78bfa;">Export Sector Data (4K)</h3>
+                <div style="margin-bottom:15px;">
+                    <label style="color:#94a3b8;font-size:13px;">Sector Range:</label>
+                    <div style="display:flex;gap:10px;margin-top:8px;">
+                        <input type="number" id="exportSectorStart" value="1" min="1" style="width:80px;padding:8px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:#e2e8f0;">
+                        <span style="color:#64748b;line-height:36px;">to</span>
+                        <input type="number" id="exportSectorEnd" value="20" min="1" style="width:80px;padding:8px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:#e2e8f0;">
+                    </div>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label style="color:#94a3b8;font-size:13px;">Include:</label>
+                    <div style="margin-top:8px;">
+                        <label style="color:#e2e8f0;font-size:12px;display:block;margin-bottom:5px;">
+                            <input type="checkbox" id="exportIncludeChart" checked> Chart visualization
+                        </label>
+                        <label style="color:#e2e8f0;font-size:12px;display:block;margin-bottom:5px;">
+                            <input type="checkbox" id="exportIncludeStats" checked> Statistics summary
+                        </label>
+                        <label style="color:#e2e8f0;font-size:12px;display:block;">
+                            <input type="checkbox" id="exportIncludeCategories"> Category columns (PP,PC,CP,CC)
+                        </label>
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:20px;">
+                    <button onclick="executeSectorExport()" style="flex:1;padding:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:6px;color:white;cursor:pointer;font-weight:600;">Export 4K PNG</button>
+                    <button onclick="closeSectorExportDialog()" style="padding:12px 20px;background:#475569;border:none;border-radius:6px;color:white;cursor:pointer;">Cancel</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(dialog);
+    }
+    
+    // Set max range based on available sectors
+    const maxSector = state.sectors.length;
+    document.getElementById('exportSectorEnd').value = Math.min(20, maxSector);
+    document.getElementById('exportSectorEnd').max = maxSector;
+    document.getElementById('exportSectorStart').max = maxSector;
+    
+    dialog.style.display = 'flex';
+}
+
+function closeSectorExportDialog() {
+    const dialog = document.getElementById('sectorExportDialog');
+    if (dialog) dialog.style.display = 'none';
+}
+
+function executeSectorExport() {
+    const startSector = parseInt(document.getElementById('exportSectorStart').value) || 1;
+    const endSector = parseInt(document.getElementById('exportSectorEnd').value) || 20;
+    const includeChart = document.getElementById('exportIncludeChart').checked;
+    const includeStats = document.getElementById('exportIncludeStats').checked;
+    const includeCategories = document.getElementById('exportIncludeCategories').checked;
+    
+    const sectors = state.sectors.filter(s => s.n >= startSector && s.n <= endSector && s.relError !== null);
+    if (sectors.length === 0) {
+        alert('No sector data in selected range');
+        return;
+    }
+    
+    // 4K canvas
+    const width = 3840;
+    const rowsPerColumn = 25;
+    const numColumns = Math.ceil(sectors.length / rowsPerColumn);
+    const columnWidth = includeCategories ? 900 : 700;
+    const tableWidth = numColumns * columnWidth;
+    const chartHeight = includeChart ? 800 : 0;
+    const statsHeight = includeStats ? 100 : 0;
+    const tableHeight = Math.min(sectors.length, rowsPerColumn) * 32 + 60;
+    const height = Math.max(2160, chartHeight + statsHeight + tableHeight + 200);
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    
+    // Background
+    ctx.fillStyle = '#0a0f1a';
+    ctx.fillRect(0, 0, width, height);
+    
+    // Title
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = 'bold 48px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Farey Sector Data - N=${state.nMax} - Sectors ${startSector}-${endSector}`, width/2, 60);
+    
+    let yOffset = 100;
+    
+    // Chart
+    if (includeChart) {
+        const chartCanvas = document.getElementById('mainErrorChart');
+        if (chartCanvas) {
+            ctx.drawImage(chartCanvas, 100, yOffset, width - 200, chartHeight - 50);
+        }
+        yOffset += chartHeight;
+    }
+    
+    // Statistics
+    if (includeStats) {
+        const totalError = sectors.reduce((sum, s) => sum + Math.abs(s.relError || 0), 0);
+        const avgError = totalError / sectors.length;
+        const maxError = Math.max(...sectors.map(s => Math.abs(s.relError || 0)));
+        const totalExact = sectors.reduce((sum, s) => sum + (s.exact || 0), 0);
+        
+        ctx.fillStyle = '#a78bfa';
+        ctx.font = 'bold 32px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Total Fractions: ${totalExact.toLocaleString()}  |  Avg Error: ${avgError.toFixed(4)}%  |  Max Error: ${maxError.toFixed(4)}%`, width/2, yOffset + 50);
+        yOffset += statsHeight;
+    }
+    
+    // Table headers
+    yOffset += 40;
+    ctx.fillStyle = '#6366f1';
+    ctx.font = 'bold 24px monospace';
+    ctx.textAlign = 'left';
+    
+    const baseHeaders = ['n', 'Interval', 'Exact', 'Pred', 'Err%'];
+    const categoryHeaders = ['P(m)', 'C(m)', 'PP', 'PC', 'CP', 'CC'];
+    const headers = includeCategories ? [...baseHeaders, ...categoryHeaders] : baseHeaders;
+    const colWidths = includeCategories ? [60, 150, 100, 100, 100, 80, 80, 60, 60, 60, 60] : [60, 150, 100, 100, 100];
+    
+    // Draw headers for each column
+    for (let col = 0; col < numColumns; col++) {
+        let x = 60 + col * columnWidth;
+        headers.forEach((h, i) => {
+            ctx.fillText(h, x, yOffset);
+            x += colWidths[i];
+        });
+    }
+    
+    // Table rows
+    ctx.font = '20px monospace';
+    const rowHeight = 32;
+    
+    sectors.forEach((s, i) => {
+        const col = Math.floor(i / rowsPerColumn);
+        const row = i % rowsPerColumn;
+        const baseX = 60 + col * columnWidth;
+        const y = yOffset + 40 + row * rowHeight;
+        
+        let x = baseX;
+        
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillText(s.n.toString(), x, y); x += colWidths[0];
+        ctx.fillText(`(1/${s.n+1},1/${s.n}]`, x, y); x += colWidths[1];
+        ctx.fillText(s.exact !== null ? s.exact.toString() : '-', x, y); x += colWidths[2];
+        ctx.fillText(s.predicted.toFixed(1), x, y); x += colWidths[3];
+        
+        const errColor = Math.abs(s.relError) < 1 ? '#22c55e' : Math.abs(s.relError) < 5 ? '#f59e0b' : '#ef4444';
+        ctx.fillStyle = errColor;
+        ctx.fillText((s.relError !== null ? s.relError.toFixed(2) + '%' : '-'), x, y); x += colWidths[4];
+        
+        if (includeCategories) {
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillText((s.primeCount || '-').toString(), x, y); x += colWidths[5];
+            ctx.fillStyle = '#6366f1';
+            ctx.fillText((s.compositeCount || '-').toString(), x, y); x += colWidths[6];
+            ctx.fillStyle = '#22c55e';
+            ctx.fillText((s.ppCount || '-').toString(), x, y); x += colWidths[7];
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillText((s.pcCount || '-').toString(), x, y); x += colWidths[8];
+            ctx.fillStyle = '#6366f1';
+            ctx.fillText((s.cpCount || '-').toString(), x, y); x += colWidths[9];
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText((s.ccCount || '-').toString(), x, y);
+        }
+    });
+    
+    // Footer
+    ctx.fillStyle = '#475569';
+    ctx.font = '20px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Farey Sector Research Platform | @7dview | wessengetachew.github.io | ' + new Date().toISOString().slice(0,10), width/2, height - 30);
+    
+    // Download
+    const link = document.createElement('a');
+    link.download = `farey_sectors_${startSector}-${endSector}_N${state.nMax}_4K_${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    
+    closeSectorExportDialog();
 }
 
 </script>
