@@ -1122,6 +1122,68 @@
                 <canvas id="mainErrorChart"></canvas>
             </div>
         </div>
+        
+        <!-- ERROR ANALYSIS PANEL -->
+        <div class="panel" style="margin-top:15px;" id="errorAnalysisPanel">
+            <h4 style="margin-bottom:12px;">Error Analysis 
+                <button onclick="runErrorAnalysis()" class="secondary" style="margin-left:10px;">Analyze</button>
+                <button onclick="exportErrorAnalysis()" class="secondary">Export</button>
+            </h4>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;">
+                <!-- Statistics -->
+                <div style="background:#0f172a;border-radius:8px;padding:12px;border:1px solid #334155;">
+                    <h5 style="color:#a78bfa;margin:0 0 10px 0;font-size:12px;">Error Statistics</h5>
+                    <div id="errorStats" style="font-family:monospace;font-size:11px;color:#94a3b8;">
+                        <div>Mean: <span id="errMean">-</span></div>
+                        <div>Std Dev: <span id="errStd">-</span></div>
+                        <div>Skewness: <span id="errSkew">-</span></div>
+                        <div>Kurtosis: <span id="errKurt">-</span></div>
+                        <div style="margin-top:6px;border-top:1px solid #334155;padding-top:6px;">
+                            <div>Prime sectors mean: <span id="errPrimeMean">-</span></div>
+                            <div>Composite sectors mean: <span id="errCompMean">-</span></div>
+                            <div style="color:#22c55e;">Mobius correlation: <span id="errMobiusCorr">-</span></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Autocorrelation -->
+                <div style="background:#0f172a;border-radius:8px;padding:12px;border:1px solid #334155;">
+                    <h5 style="color:#a78bfa;margin:0 0 10px 0;font-size:12px;">Autocorrelation (lag 1-20)</h5>
+                    <canvas id="autocorrChart" height="100"></canvas>
+                </div>
+                <!-- Power Spectrum -->
+                <div style="background:#0f172a;border-radius:8px;padding:12px;border:1px solid #334155;">
+                    <h5 style="color:#a78bfa;margin:0 0 10px 0;font-size:12px;">Power Spectrum (FFT)
+                        <span style="font-weight:normal;color:#64748b;font-size:10px;margin-left:5px;">peaks may relate to zeta zeros</span>
+                    </h5>
+                    <canvas id="fftChart" height="100"></canvas>
+                </div>
+                <!-- Error Distribution -->
+                <div style="background:#0f172a;border-radius:8px;padding:12px;border:1px solid #334155;">
+                    <h5 style="color:#a78bfa;margin:0 0 10px 0;font-size:12px;">Error Distribution</h5>
+                    <canvas id="errorHistChart" height="100"></canvas>
+                </div>
+                <!-- Prime vs Composite Sectors -->
+                <div style="background:#0f172a;border-radius:8px;padding:12px;border:1px solid #334155;">
+                    <h5 style="color:#a78bfa;margin:0 0 10px 0;font-size:12px;">Prime vs Composite Sector Errors</h5>
+                    <canvas id="primeCompErrorChart" height="100"></canvas>
+                </div>
+                <!-- Cumulative Error -->
+                <div style="background:#0f172a;border-radius:8px;padding:12px;border:1px solid #334155;">
+                    <h5 style="color:#a78bfa;margin:0 0 10px 0;font-size:12px;">Cumulative Abs Error
+                        <span style="font-weight:normal;color:#64748b;font-size:10px;margin-left:5px;">growth rate → RH bound</span>
+                    </h5>
+                    <canvas id="cumulativeErrorChart" height="100"></canvas>
+                </div>
+            </div>
+            <!-- Spectral Peaks Table -->
+            <div style="margin-top:12px;background:#0f172a;border-radius:8px;padding:12px;border:1px solid #334155;">
+                <h5 style="color:#a78bfa;margin:0 0 10px 0;font-size:12px;">Dominant Spectral Peaks
+                    <span style="font-weight:normal;color:#64748b;font-size:10px;margin-left:5px;">Compare with Im(rho_k) from zeta zeros: 14.13, 21.02, 25.01, 30.42, 32.94...</span>
+                </h5>
+                <div id="spectralPeaksTable" style="font-family:monospace;font-size:11px;color:#94a3b8;"></div>
+            </div>
+        </div>
+        
         <div class="panel" style="margin-top:15px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
                 <h4 style="margin:0;">Sector Data <span style="font-weight:normal; color:#64748b;">(click row to see details)</span></h4>
@@ -2893,6 +2955,9 @@ const state = {
     // Highlight specific sector when showing all (dim others)
     highlightSectorOnly: null
 };
+
+// Tree view state for Stern-Brocot visualization
+let treeViewState = { zoom: 100, offsetX: 0, offsetY: 0 };
 
 const sectorColors = ['#6366f1','#8b5cf6','#a855f7','#d946ef','#ec4899','#f43f5e','#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e','#10b981','#14b8a6','#06b6d4','#0ea5e9','#3b82f6'];
 function getSectorColor(n) { return sectorColors[(n) % sectorColors.length]; }
@@ -17467,6 +17532,354 @@ function exportAllProjects() {
 document.addEventListener('DOMContentLoaded', function() {
     updateProjectCount();
 });
+
+// ============================================
+// ERROR ANALYSIS MODULE
+// ============================================
+let errorAnalysisCharts = {};
+
+function runErrorAnalysis() {
+    const errors = state.sectors.filter(s => s.relError !== null).map(s => s.relError);
+    const absErrors = state.sectors.filter(s => s.exact !== null).map(s => Math.abs(s.exact - s.predicted));
+    const sectorNs = state.sectors.filter(s => s.relError !== null).map(s => s.n);
+    
+    if (errors.length < 5) {
+        alert('Need at least 5 sectors with exact data for analysis');
+        return;
+    }
+    
+    // Basic statistics
+    const mean = errors.reduce((a,b) => a+b, 0) / errors.length;
+    const variance = errors.reduce((a,b) => a + (b-mean)**2, 0) / errors.length;
+    const std = Math.sqrt(variance);
+    const skewness = errors.reduce((a,b) => a + ((b-mean)/std)**3, 0) / errors.length;
+    const kurtosis = errors.reduce((a,b) => a + ((b-mean)/std)**4, 0) / errors.length - 3;
+    
+    document.getElementById('errMean').textContent = mean.toFixed(4) + '%';
+    document.getElementById('errStd').textContent = std.toFixed(4) + '%';
+    document.getElementById('errSkew').textContent = skewness.toFixed(4);
+    document.getElementById('errKurt').textContent = kurtosis.toFixed(4);
+    
+    // Prime vs Composite sector analysis
+    const primeErrors = [], compErrors = [];
+    const mobiusValues = [];
+    sectorNs.forEach((n, i) => {
+        if (NumberTheory.isPrime(n)) {
+            primeErrors.push(errors[i]);
+        } else {
+            compErrors.push(errors[i]);
+        }
+        mobiusValues.push(NumberTheory.mobius(n));
+    });
+    
+    const primeMean = primeErrors.length > 0 ? primeErrors.reduce((a,b) => a+b, 0) / primeErrors.length : 0;
+    const compMean = compErrors.length > 0 ? compErrors.reduce((a,b) => a+b, 0) / compErrors.length : 0;
+    
+    document.getElementById('errPrimeMean').textContent = primeMean.toFixed(4) + '%';
+    document.getElementById('errCompMean').textContent = compMean.toFixed(4) + '%';
+    
+    // Mobius correlation
+    const mobiusCorr = computeCorrelation(errors, mobiusValues);
+    document.getElementById('errMobiusCorr').textContent = mobiusCorr.toFixed(4);
+    document.getElementById('errMobiusCorr').style.color = Math.abs(mobiusCorr) > 0.1 ? '#22c55e' : '#94a3b8';
+    
+    // Autocorrelation
+    const maxLag = Math.min(20, Math.floor(errors.length / 4));
+    const autocorr = computeAutocorrelation(errors, maxLag);
+    drawAutocorrChart(autocorr);
+    
+    // FFT Power Spectrum
+    const spectrum = computeFFT(errors);
+    drawFFTChart(spectrum, errors.length);
+    
+    // Find spectral peaks
+    findSpectralPeaks(spectrum, errors.length);
+    
+    // Error distribution histogram
+    drawErrorHistogram(errors);
+    
+    // Prime vs Composite comparison
+    drawPrimeCompChart(sectorNs, errors);
+    
+    // Cumulative absolute error
+    drawCumulativeErrorChart(absErrors, sectorNs);
+}
+
+function computeCorrelation(x, y) {
+    const n = x.length;
+    const mx = x.reduce((a,b) => a+b, 0) / n;
+    const my = y.reduce((a,b) => a+b, 0) / n;
+    let num = 0, dx = 0, dy = 0;
+    for (let i = 0; i < n; i++) {
+        num += (x[i] - mx) * (y[i] - my);
+        dx += (x[i] - mx) ** 2;
+        dy += (y[i] - my) ** 2;
+    }
+    return dx > 0 && dy > 0 ? num / Math.sqrt(dx * dy) : 0;
+}
+
+function computeAutocorrelation(data, maxLag) {
+    const n = data.length;
+    const mean = data.reduce((a,b) => a+b, 0) / n;
+    const variance = data.reduce((a,b) => a + (b-mean)**2, 0) / n;
+    const result = [];
+    for (let lag = 1; lag <= maxLag; lag++) {
+        let sum = 0;
+        for (let i = 0; i < n - lag; i++) {
+            sum += (data[i] - mean) * (data[i + lag] - mean);
+        }
+        result.push(variance > 0 ? sum / ((n - lag) * variance) : 0);
+    }
+    return result;
+}
+
+function computeFFT(data) {
+    // Pad to power of 2
+    let n = 1;
+    while (n < data.length) n *= 2;
+    const padded = new Array(n).fill(0);
+    const mean = data.reduce((a,b) => a+b, 0) / data.length;
+    for (let i = 0; i < data.length; i++) padded[i] = data[i] - mean;
+    
+    // Simple DFT (for moderate N, sufficient)
+    const spectrum = [];
+    const halfN = Math.floor(n / 2);
+    for (let k = 1; k <= halfN; k++) {
+        let re = 0, im = 0;
+        for (let t = 0; t < n; t++) {
+            const angle = -2 * Math.PI * k * t / n;
+            re += padded[t] * Math.cos(angle);
+            im += padded[t] * Math.sin(angle);
+        }
+        spectrum.push(Math.sqrt(re*re + im*im) / n);
+    }
+    return spectrum;
+}
+
+function drawAutocorrChart(autocorr) {
+    const ctx = document.getElementById('autocorrChart').getContext('2d');
+    if (errorAnalysisCharts.autocorr) errorAnalysisCharts.autocorr.destroy();
+    
+    const labels = autocorr.map((_, i) => i + 1);
+    const confBound = 1.96 / Math.sqrt(state.sectors.length);
+    
+    errorAnalysisCharts.autocorr = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                data: autocorr,
+                backgroundColor: autocorr.map(v => Math.abs(v) > confBound ? '#ef4444' : '#6366f1')
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: '#64748b', font: { size: 9 } } },
+                y: { ticks: { color: '#64748b' }, min: -1, max: 1 }
+            }
+        }
+    });
+}
+
+function drawFFTChart(spectrum, dataLen) {
+    const ctx = document.getElementById('fftChart').getContext('2d');
+    if (errorAnalysisCharts.fft) errorAnalysisCharts.fft.destroy();
+    
+    // Convert index to frequency (cycles per sector)
+    const freqs = spectrum.map((_, i) => ((i + 1) / dataLen).toFixed(3));
+    
+    errorAnalysisCharts.fft = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: freqs.slice(0, Math.min(50, spectrum.length)),
+            datasets: [{
+                data: spectrum.slice(0, Math.min(50, spectrum.length)),
+                borderColor: '#8b5cf6',
+                backgroundColor: 'rgba(139,92,246,0.2)',
+                fill: true,
+                tension: 0.1,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { title: { display: true, text: 'Frequency', color: '#64748b' }, ticks: { color: '#64748b', maxTicksLimit: 10 } },
+                y: { title: { display: true, text: 'Power', color: '#64748b' }, ticks: { color: '#64748b' } }
+            }
+        }
+    });
+}
+
+function findSpectralPeaks(spectrum, dataLen) {
+    // Find local maxima
+    const peaks = [];
+    for (let i = 1; i < spectrum.length - 1; i++) {
+        if (spectrum[i] > spectrum[i-1] && spectrum[i] > spectrum[i+1]) {
+            const freq = (i + 1) / dataLen;
+            const period = 1 / freq;
+            peaks.push({ index: i, power: spectrum[i], freq, period });
+        }
+    }
+    
+    // Sort by power and take top 8
+    peaks.sort((a, b) => b.power - a.power);
+    const topPeaks = peaks.slice(0, 8);
+    
+    // Known zeta zeros (imaginary parts)
+    const zetaZeros = [14.135, 21.022, 25.011, 30.425, 32.935, 37.586, 40.919, 43.327];
+    
+    let html = '<table style="width:100%;"><tr><th style="text-align:left;">Rank</th><th>Freq</th><th>Period</th><th>Power</th><th>Near zeta zero?</th></tr>';
+    topPeaks.forEach((p, i) => {
+        // Check if period is near any zeta zero (within 10%)
+        let nearZeta = '-';
+        for (const z of zetaZeros) {
+            if (Math.abs(p.period - z) / z < 0.1) {
+                nearZeta = `~${z.toFixed(2)}`;
+                break;
+            }
+            if (Math.abs(p.period * 2 * Math.PI - z) / z < 0.1) {
+                nearZeta = `~${z.toFixed(2)} (2pi scaled)`;
+                break;
+            }
+        }
+        const highlight = nearZeta !== '-' ? 'color:#22c55e;' : '';
+        html += `<tr style="${highlight}"><td>${i+1}</td><td>${p.freq.toFixed(4)}</td><td>${p.period.toFixed(2)}</td><td>${p.power.toFixed(4)}</td><td>${nearZeta}</td></tr>`;
+    });
+    html += '</table>';
+    document.getElementById('spectralPeaksTable').innerHTML = html;
+}
+
+function drawErrorHistogram(errors) {
+    const ctx = document.getElementById('errorHistChart').getContext('2d');
+    if (errorAnalysisCharts.hist) errorAnalysisCharts.hist.destroy();
+    
+    // Create bins
+    const min = Math.min(...errors);
+    const max = Math.max(...errors);
+    const binCount = Math.min(20, Math.ceil(Math.sqrt(errors.length)));
+    const binWidth = (max - min) / binCount;
+    const bins = new Array(binCount).fill(0);
+    const binLabels = [];
+    
+    for (let i = 0; i < binCount; i++) {
+        binLabels.push((min + i * binWidth + binWidth/2).toFixed(1));
+    }
+    
+    errors.forEach(e => {
+        const idx = Math.min(binCount - 1, Math.floor((e - min) / binWidth));
+        bins[idx]++;
+    });
+    
+    errorAnalysisCharts.hist = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: binLabels,
+            datasets: [{
+                data: bins,
+                backgroundColor: '#22c55e'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: '#64748b', maxRotation: 45 } },
+                y: { ticks: { color: '#64748b' } }
+            }
+        }
+    });
+}
+
+function drawPrimeCompChart(sectorNs, errors) {
+    const ctx = document.getElementById('primeCompErrorChart').getContext('2d');
+    if (errorAnalysisCharts.primeComp) errorAnalysisCharts.primeComp.destroy();
+    
+    const primeData = [], compData = [];
+    sectorNs.forEach((n, i) => {
+        if (NumberTheory.isPrime(n)) {
+            primeData.push({ x: n, y: errors[i] });
+        } else {
+            compData.push({ x: n, y: errors[i] });
+        }
+    });
+    
+    errorAnalysisCharts.primeComp = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                { label: 'Prime n', data: primeData, backgroundColor: '#22c55e', pointRadius: 3 },
+                { label: 'Composite n', data: compData, backgroundColor: '#6366f1', pointRadius: 2 }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } },
+            scales: {
+                x: { title: { display: true, text: 'Sector n', color: '#64748b' }, ticks: { color: '#64748b' } },
+                y: { title: { display: true, text: 'Error %', color: '#64748b' }, ticks: { color: '#64748b' } }
+            }
+        }
+    });
+}
+
+function drawCumulativeErrorChart(absErrors, sectorNs) {
+    const ctx = document.getElementById('cumulativeErrorChart').getContext('2d');
+    if (errorAnalysisCharts.cumulative) errorAnalysisCharts.cumulative.destroy();
+    
+    // Cumulative sum
+    const cumulative = [];
+    let sum = 0;
+    absErrors.forEach(e => {
+        sum += e;
+        cumulative.push(sum);
+    });
+    
+    // RH bound comparison: O(sqrt(n) * log(n))
+    const rhBound = sectorNs.map((_, i) => {
+        const n = i + 1;
+        return Math.sqrt(n) * Math.log(n + 1) * (cumulative[cumulative.length-1] / (Math.sqrt(sectorNs.length) * Math.log(sectorNs.length + 1)));
+    });
+    
+    errorAnalysisCharts.cumulative = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: sectorNs,
+            datasets: [
+                { label: 'Cumulative |Error|', data: cumulative, borderColor: '#f59e0b', fill: false, pointRadius: 0 },
+                { label: 'sqrt(n)log(n) bound', data: rhBound, borderColor: '#ef4444', borderDash: [5,5], fill: false, pointRadius: 0 }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } },
+            scales: {
+                x: { ticks: { color: '#64748b', maxTicksLimit: 10 } },
+                y: { ticks: { color: '#64748b' } }
+            }
+        }
+    });
+}
+
+function exportErrorAnalysis() {
+    const errors = state.sectors.filter(s => s.relError !== null);
+    let csv = 'n,exact,predicted,relError,absError,isPrimeN,mobius\n';
+    errors.forEach(s => {
+        const absErr = Math.abs(s.exact - s.predicted);
+        const isPrime = NumberTheory.isPrime(s.n) ? 1 : 0;
+        const mu = NumberTheory.mobius(s.n);
+        csv += `${s.n},${s.exact},${s.predicted.toFixed(4)},${s.relError.toFixed(6)},${absErr.toFixed(4)},${isPrime},${mu}\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `error_analysis_N${state.nMax}_${Date.now()}.csv`;
+    a.click();
+}
 
 </script>
 </body>
