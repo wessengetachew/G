@@ -429,7 +429,7 @@
             <!-- MUSICAL INTERVALS -->
             <div class="harmonic-card">
                 <h5>Musical Intervals</h5>
-                <div class="interval-grid-compact">
+                <div class="interval-grid-compact" id="intervalGrid">
                     <button class="interval-btn-sm" onclick="setHarmonicInterval(1,1)" title="Unison">1:1</button>
                     <button class="interval-btn-sm" onclick="setHarmonicInterval(16,15)" title="m2">16:15</button>
                     <button class="interval-btn-sm" onclick="setHarmonicInterval(9,8)" title="M2">9:8</button>
@@ -446,6 +446,12 @@
                     <button class="interval-btn-sm" onclick="setHarmonicInterval(5,2)" title="10th">5:2</button>
                     <button class="interval-btn-sm" onclick="setHarmonicInterval(3,1)" title="12th">3:1</button>
                     <button class="interval-btn-sm" onclick="setHarmonicInterval(4,1)" title="2Oct">4:1</button>
+                </div>
+                <div id="customIntervalsGrid" class="interval-grid-compact" style="margin-top:4px;"></div>
+                <div style="margin-top:6px;display:flex;gap:4px;align-items:center;">
+                    <input type="text" id="customIntervalInput" placeholder="a:b (e.g. 7:4)" style="width:70px;padding:4px 6px;font-size:10px;font-family:monospace;background:#0f172a;border:1px solid #475569;border-radius:3px;color:#e2e8f0;text-align:center;">
+                    <button onclick="addCustomInterval()" style="padding:4px 8px;font-size:10px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:3px;color:white;cursor:pointer;">+ Add</button>
+                    <button onclick="clearCustomIntervals()" style="padding:4px 8px;font-size:10px;background:#475569;border:none;border-radius:3px;color:white;cursor:pointer;" title="Clear custom intervals">Clear</button>
                 </div>
                 <div style="margin-top:8px;display:flex;gap:4px;justify-content:center;flex-wrap:wrap;">
                     <button class="harmonic-quick-btn play" onclick="playSelectedFraction()">▶ Play</button>
@@ -503,7 +509,6 @@
                 <div style="font-size:10px;display:flex;flex-direction:column;gap:4px;">
                     <label><input type="checkbox" id="applyHarmonicColor" onchange="applyHarmonicColoring()"> Color by consonance</label>
                     <label><input type="checkbox" id="showArnoldOnTree" onchange="drawSectorTree()"> Arnold on tree</label>
-                    <label><input type="checkbox" id="autoPlayOnClick" checked> Auto-play on click</label>
                     <label><input type="checkbox" id="showFreqOnHover"> Show freq on hover</label>
                 </div>
             </div>
@@ -563,8 +568,11 @@
             </div>
             <button onclick="computeAll()">Compute</button>
             <button class="secondary" onclick="cancelComputation()">Cancel</button>
-            <button class="secondary" onclick="exportAllData()">Export All</button>
-            <button class="composite-export-btn" onclick="exportCompositeTab()" title="Export all visible charts to single 4K image">4K Composite Export</button>
+            <button class="secondary" onclick="exportAllWithCharts()" title="Export CSV + 4K charts">Export All + 4K</button>
+            <label style="display:inline-flex;align-items:center;gap:4px;margin-left:12px;font-size:11px;color:#94a3b8;cursor:pointer;">
+                <input type="checkbox" id="autoPlayOnClick" style="cursor:pointer;">
+                <span>Auto-play audio on click</span>
+            </label>
         </div>
         
         <!-- Sector Bound Controls -->
@@ -924,6 +932,9 @@
                     <option value="5000">5000 points</option>
                 </select>
                 <span style="color:#86efac;font-size:10px;">Total: <span id="sectorPointCount" style="color:#fbbf24;font-family:monospace;">-</span></span>
+                <span style="color:#86efac;font-size:10px;margin-left:8px;">Speed:</span>
+                <input type="number" id="playbackSpeed" min="50" max="2000" value="250" step="50" style="width:60px;padding:3px 6px;font-size:10px;background:#0f172a;border:1px solid #22c55e;border-radius:3px;color:#e2e8f0;text-align:center;" title="ms per note">
+                <span style="color:#64748b;font-size:9px;">ms</span>
             </div>
             
             <!-- Ring Loop Playback Controls -->
@@ -7812,7 +7823,9 @@ document.getElementById('mainRing').addEventListener('click', function(e) {
         
         // Update tree path
         selectPointForTree(closest);
-        selectFractionForHarmonic(closest.r, closest.m);
+        
+        // Trigger global harmonic system (handles display + optional audio)
+        triggerGlobalHarmonic(closest.r, closest.m);
         
         // Update solver display with clicked point
         updateSolverLive(closest.r, closest.m);
@@ -11882,16 +11895,332 @@ For the Farey sequence $F_N$:
 }
 
 function exportCSVAll() {
-    let csv = 'n,exact,predicted,error,relError,primeCount\n';
-    state.sectors.forEach(s => { csv += `${s.n},${s.exact??''},${s.predicted},${s.error??''},${s.relError??''},${s.primeCount??''}\n`; });
+    // Header with formula, legend, and description
+    let csv = '# Farey Sector Analysis Export\n';
+    csv += '# Generated: ' + new Date().toISOString() + '\n';
+    csv += '#\n';
+    csv += '# PARAMETERS\n';
+    csv += '# N (max denominator): ' + state.nMax + '\n';
+    csv += '# Sectors: ' + state.sectorMin + ' to ' + state.sectorMax + '\n';
+    csv += '# Total Farey fractions |F_N|: ' + state.farey.length + '\n';
+    csv += '#\n';
+    csv += '# SECTOR FORMULA\n';
+    csv += '# C(n,N) = 3N^2 / (pi^2 * n * (n+1)) predicts count of fractions in sector n\n';
+    csv += '# Sector n contains fractions r/m where 1/(n+1) < r/m <= 1/n\n';
+    csv += '#\n';
+    csv += '# IDENTITY FORMULA (P/C Decomposition)\n';
+    csv += '# For each sector: PP + PC + CP + CC = Exact Count\n';
+    csv += '# This identity partitions fractions by prime/composite status of numerator and denominator\n';
+    csv += '#\n';
+    csv += '# COLUMN LEGEND\n';
+    csv += '# n: Sector number\n';
+    csv += '# exact: Actual count of fractions in sector\n';
+    csv += '# predicted: Formula prediction C(n,N)\n';
+    csv += '# error: Absolute error (exact - predicted)\n';
+    csv += '# relError: Relative error percentage\n';
+    csv += '# primeCount: P(m) - fractions with prime denominator\n';
+    csv += '# compositeCount: C(m) - fractions with composite denominator\n';
+    csv += '# PP: Prime numerator + Prime denominator\n';
+    csv += '# PC: Prime numerator + Composite denominator\n';
+    csv += '# CP: Composite numerator + Prime denominator\n';
+    csv += '# CC: Composite numerator + Composite denominator\n';
+    csv += '# identitySum: PP + PC + CP + CC (should equal exact)\n';
+    csv += '# identityMatch: TRUE if identitySum = exact, FALSE otherwise\n';
+    csv += '#\n';
+    csv += 'n,exact,predicted,error,relError,primeCount,compositeCount,PP,PC,CP,CC,identitySum,identityMatch\n';
+    
+    state.sectors.forEach(s => {
+        const pp = s.ppCount ?? 0;
+        const pc = s.pcCount ?? 0;
+        const cp = s.cpCount ?? 0;
+        const cc = s.ccCount ?? 0;
+        const identitySum = pp + pc + cp + cc;
+        const exact = s.exact ?? 0;
+        const identityMatch = (identitySum === exact) ? 'TRUE' : 'FALSE';
+        
+        csv += `${s.n},${s.exact??''},${s.predicted},${s.error??''},${s.relError??''},${s.primeCount??''},${s.compositeCount??''},${pp},${pc},${cp},${cc},${identitySum},${identityMatch}\n`; 
+    });
+    
+    // Summary stats at bottom
+    csv += '#\n';
+    csv += '# SUMMARY\n';
+    const totalExact = state.sectors.reduce((sum, s) => sum + (s.exact || 0), 0);
+    const totalPredicted = state.sectors.reduce((sum, s) => sum + s.predicted, 0);
+    const avgError = state.sectors.reduce((sum, s) => sum + Math.abs(s.relError || 0), 0) / state.sectors.length;
+    const identityMatches = state.sectors.filter(s => {
+        const sum = (s.ppCount || 0) + (s.pcCount || 0) + (s.cpCount || 0) + (s.ccCount || 0);
+        return sum === (s.exact || 0);
+    }).length;
+    csv += '# Total exact count: ' + totalExact + '\n';
+    csv += '# Total predicted: ' + totalPredicted.toFixed(2) + '\n';
+    csv += '# Average relative error: ' + avgError.toFixed(4) + '%\n';
+    csv += '# Identity matches: ' + identityMatches + '/' + state.sectors.length + ' sectors\n';
+    
     const blob = new Blob([csv], {type:'text/csv'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'farey_complete.csv'; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `farey_sectors_N${state.nMax}_${new Date().toISOString().slice(0,10)}.csv`; a.click();
 }
 
 function exportJSON() {
     const data = { params:{nMax:state.nMax,sectorMin:state.sectorMin,sectorMax:state.sectorMax}, sectors:state.sectors, gapCount:state.gaps.length, fareyCount:state.farey.length };
     const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'farey_data.json'; a.click();
+}
+
+// Combined export: CSV + focused 4K image (main ring, error chart, count chart only)
+async function exportAllWithCharts() {
+    // Export CSV first
+    exportCSVAll();
+    
+    // Then export focused 4K composite
+    await exportFocused4K();
+}
+
+// Export only: Main Ring + Relative Error Chart + Expected vs Predicted Chart + Sector Data Table
+async function exportFocused4K() {
+    const baseWidth = 3840;
+    const baseHeight = 3200; // Taller to fit table
+    const compositeCanvas = document.createElement('canvas');
+    compositeCanvas.width = baseWidth;
+    compositeCanvas.height = baseHeight;
+    const ctx = compositeCanvas.getContext('2d');
+    
+    // Background
+    ctx.fillStyle = '#0a0f1a';
+    ctx.fillRect(0, 0, baseWidth, baseHeight);
+    
+    // Title
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = 'bold 60px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Farey Sector Analysis - N=${state.nMax.toLocaleString()}`, baseWidth / 2, 70);
+    
+    ctx.font = '30px Arial';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText(`Sectors ${state.sectorMin}-${state.sectorMax} | ${new Date().toLocaleString()}`, baseWidth / 2, 120);
+    
+    // Layout: Ring on left, two charts stacked on right
+    const ringCanvas = document.getElementById('mainRing');
+    const errorChart = document.getElementById('mainErrorChart');
+    const countChart = document.getElementById('mainCountChart');
+    
+    // Draw main ring (left side)
+    if (ringCanvas) {
+        const ringSize = 1200;
+        const ringX = 100;
+        const ringY = 160;
+        
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(ringX - 15, ringY - 15, ringSize + 30, ringSize + 30);
+        
+        const img = new Image();
+        img.src = ringCanvas.toDataURL('image/png');
+        await new Promise(resolve => {
+            img.onload = () => {
+                ctx.drawImage(img, ringX, ringY, ringSize, ringSize);
+                resolve();
+            };
+            img.onerror = resolve;
+        });
+        
+        ctx.fillStyle = '#a5b4fc';
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Modular Ring Visualization', ringX + ringSize/2, ringY + ringSize + 40);
+    }
+    
+    // Draw charts (right side, stacked)
+    const chartX = 1400;
+    const chartWidth = 2300;
+    const chartHeight = 580;
+    
+    // Relative Error Chart (top right)
+    if (errorChart) {
+        const chartY = 160;
+        const img = new Image();
+        img.src = errorChart.toDataURL('image/png');
+        await new Promise(resolve => {
+            img.onload = () => {
+                ctx.drawImage(img, chartX, chartY, chartWidth, chartHeight);
+                resolve();
+            };
+            img.onerror = resolve;
+        });
+        
+        ctx.fillStyle = '#a5b4fc';
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Relative Error by Sector', chartX + chartWidth/2, chartY + chartHeight + 35);
+    }
+    
+    // Expected vs Predicted Chart (bottom right)
+    if (countChart) {
+        const chartY = 820;
+        const img = new Image();
+        img.src = countChart.toDataURL('image/png');
+        await new Promise(resolve => {
+            img.onload = () => {
+                ctx.drawImage(img, chartX, chartY, chartWidth, chartHeight);
+                resolve();
+            };
+            img.onerror = resolve;
+        });
+        
+        ctx.fillStyle = '#a5b4fc';
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Expected vs Predicted Count', chartX + chartWidth/2, chartY + chartHeight + 35);
+    }
+    
+    // ========== SECTOR DATA TABLE ==========
+    const tableY = 1520;
+    const tableX = 100;
+    const tableWidth = baseWidth - 200;
+    
+    // Table header background
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(tableX, tableY, tableWidth, 60);
+    
+    // Table title
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = 'bold 32px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('Sector Data with P/C Identity Decomposition', tableX + 20, tableY + 42);
+    
+    // Formula box
+    const formulaY = tableY + 80;
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(tableX, formulaY, tableWidth, 100);
+    ctx.strokeStyle = '#6366f1';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(tableX, formulaY, tableWidth, 100);
+    
+    ctx.fillStyle = '#a5b4fc';
+    ctx.font = '24px Arial';
+    ctx.fillText('Sector Formula: C(n,N) = 3N² / (π² · n · (n+1))', tableX + 30, formulaY + 35);
+    ctx.fillStyle = '#22c55e';
+    ctx.fillText('Identity: PP + PC + CP + CC = Exact Count   (P = Prime, C = Composite for numerator/denominator)', tableX + 30, formulaY + 75);
+    
+    // Column headers
+    const colY = formulaY + 130;
+    const cols = ['n', 'Interval', 'Exact', 'Predicted', 'Error%', 'PP', 'PC', 'CP', 'CC', 'Sum', 'Match'];
+    const colWidths = [80, 200, 140, 160, 140, 120, 120, 120, 120, 120, 120];
+    let colX = tableX + 20;
+    
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(tableX, colY - 10, tableWidth, 50);
+    
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = 'bold 22px Arial';
+    cols.forEach((col, i) => {
+        ctx.fillText(col, colX, colY + 25);
+        colX += colWidths[i];
+    });
+    
+    // Data rows - always show at least 15 sectors
+    const rowHeight = 38;
+    const maxRows = Math.max(15, Math.min(state.sectors.length, 30));
+    const sectorsToShow = state.sectors.slice(0, maxRows);
+    
+    ctx.font = '20px monospace';
+    
+    sectorsToShow.forEach((s, rowIdx) => {
+        const rowY = colY + 55 + rowIdx * rowHeight;
+        
+        // Alternating row background
+        ctx.fillStyle = rowIdx % 2 === 0 ? '#0f172a' : '#1e293b';
+        ctx.fillRect(tableX, rowY - 25, tableWidth, rowHeight);
+        
+        colX = tableX + 20;
+        
+        // n
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillText(s.n.toString(), colX, rowY);
+        colX += colWidths[0];
+        
+        // Interval
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText(`(1/${s.n+1}, 1/${s.n}]`, colX, rowY);
+        colX += colWidths[1];
+        
+        // Exact
+        ctx.fillStyle = '#22c55e';
+        ctx.fillText((s.exact ?? '-').toString(), colX, rowY);
+        colX += colWidths[2];
+        
+        // Predicted
+        ctx.fillStyle = '#6366f1';
+        ctx.fillText(s.predicted.toFixed(1), colX, rowY);
+        colX += colWidths[3];
+        
+        // Error%
+        const errVal = s.relError ?? 0;
+        ctx.fillStyle = Math.abs(errVal) < 1 ? '#22c55e' : Math.abs(errVal) < 5 ? '#f59e0b' : '#ef4444';
+        ctx.fillText((s.relError?.toFixed(2) ?? '-') + '%', colX, rowY);
+        colX += colWidths[4];
+        
+        // PP
+        ctx.fillStyle = '#22c55e';
+        ctx.fillText((s.ppCount ?? 0).toString(), colX, rowY);
+        colX += colWidths[5];
+        
+        // PC
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillText((s.pcCount ?? 0).toString(), colX, rowY);
+        colX += colWidths[6];
+        
+        // CP
+        ctx.fillStyle = '#6366f1';
+        ctx.fillText((s.cpCount ?? 0).toString(), colX, rowY);
+        colX += colWidths[7];
+        
+        // CC
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText((s.ccCount ?? 0).toString(), colX, rowY);
+        colX += colWidths[8];
+        
+        // Sum
+        const sum = (s.ppCount ?? 0) + (s.pcCount ?? 0) + (s.cpCount ?? 0) + (s.ccCount ?? 0);
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillText(sum.toString(), colX, rowY);
+        colX += colWidths[9];
+        
+        // Match
+        const match = sum === (s.exact ?? 0);
+        ctx.fillStyle = match ? '#22c55e' : '#ef4444';
+        ctx.fillText(match ? '✓' : '✗', colX, rowY);
+    });
+    
+    // Summary row
+    const summaryY = colY + 55 + sectorsToShow.length * rowHeight + 20;
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(tableX, summaryY - 15, tableWidth, 50);
+    
+    const totalExact = state.sectors.reduce((sum, s) => sum + (s.exact || 0), 0);
+    const totalPP = state.sectors.reduce((sum, s) => sum + (s.ppCount || 0), 0);
+    const totalPC = state.sectors.reduce((sum, s) => sum + (s.pcCount || 0), 0);
+    const totalCP = state.sectors.reduce((sum, s) => sum + (s.cpCount || 0), 0);
+    const totalCC = state.sectors.reduce((sum, s) => sum + (s.ccCount || 0), 0);
+    const totalSum = totalPP + totalPC + totalCP + totalCC;
+    const identityMatches = state.sectors.filter(s => {
+        const sum = (s.ppCount || 0) + (s.pcCount || 0) + (s.cpCount || 0) + (s.ccCount || 0);
+        return sum === (s.exact || 0);
+    }).length;
+    
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = 'bold 22px Arial';
+    ctx.fillText(`TOTALS: Exact=${totalExact.toLocaleString()}  |  PP=${totalPP}  PC=${totalPC}  CP=${totalCP}  CC=${totalCC}  |  Sum=${totalSum}  |  Identity Match: ${identityMatches}/${state.sectors.length} sectors`, tableX + 30, summaryY + 20);
+    
+    // Footer
+    ctx.fillStyle = '#475569';
+    ctx.font = '24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Farey Sector Research Platform | @7dview | wessengetachew.github.io', baseWidth / 2, baseHeight - 30);
+    
+    // Download
+    const link = document.createElement('a');
+    link.download = `farey_analysis_N${state.nMax}_4K_${Date.now()}.png`;
+    link.href = compositeCanvas.toDataURL('image/png');
+    link.click();
 }
 
 function exportAllData() { exportCSVAll(); }
@@ -13350,9 +13679,82 @@ function setHarmonicInterval(r, m) {
     updateHarmonicDisplays();
     playFraction(r, m, 0.8);
     
-    document.querySelectorAll('.interval-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+    document.querySelectorAll('.interval-btn-sm').forEach(btn => btn.classList.remove('active'));
+    if (event && event.target) event.target.classList.add('active');
 }
+
+// Custom intervals storage
+let customIntervals = [];
+
+function addCustomInterval() {
+    const input = document.getElementById('customIntervalInput');
+    const val = input.value.trim();
+    
+    // Parse a:b or a/b format
+    const match = val.match(/^(\d+)\s*[:\/]\s*(\d+)$/);
+    if (!match) {
+        alert('Enter interval as a:b (e.g. 7:4)');
+        return;
+    }
+    
+    const a = parseInt(match[1]);
+    const b = parseInt(match[2]);
+    
+    if (a <= 0 || b <= 0) {
+        alert('Both numbers must be positive');
+        return;
+    }
+    
+    // Check if already exists
+    const exists = customIntervals.some(i => i.a === a && i.b === b);
+    if (exists) {
+        alert(`${a}:${b} already exists`);
+        return;
+    }
+    
+    customIntervals.push({ a, b });
+    input.value = '';
+    renderCustomIntervals();
+    
+    // Auto-play the new interval
+    setHarmonicInterval(a, b);
+}
+
+function removeCustomInterval(a, b) {
+    customIntervals = customIntervals.filter(i => !(i.a === a && i.b === b));
+    renderCustomIntervals();
+}
+
+function clearCustomIntervals() {
+    customIntervals = [];
+    renderCustomIntervals();
+}
+
+function renderCustomIntervals() {
+    const grid = document.getElementById('customIntervalsGrid');
+    if (!grid) return;
+    
+    if (customIntervals.length === 0) {
+        grid.innerHTML = '';
+        return;
+    }
+    
+    grid.innerHTML = customIntervals.map(i => 
+        `<button class="interval-btn-sm" onclick="setHarmonicInterval(${i.a},${i.b})" oncontextmenu="event.preventDefault();removeCustomInterval(${i.a},${i.b})" title="${i.a}:${i.b} (right-click to remove)" style="background:#1e3a5f;border-color:#3b82f6;">${i.a}:${i.b}</button>`
+    ).join('');
+}
+
+// Handle Enter key in custom interval input
+document.addEventListener('DOMContentLoaded', function() {
+    const customInput = document.getElementById('customIntervalInput');
+    if (customInput) {
+        customInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                addCustomInterval();
+            }
+        });
+    }
+});
 
 function selectFractionForHarmonic(r, m) {
     // Validate inputs
@@ -16165,18 +16567,28 @@ function playTreePathAudio(direction = 'forward') {
 
 // Make table rows clickable for audio
 function setupTableAudioHandlers() {
-    // Main sector table
+    // Main sector table - click to select, only plays if autoPlayOnClick is enabled
     document.querySelectorAll('#mainTable tbody tr').forEach(row => {
         row.style.cursor = 'pointer';
         row.onclick = function() {
             const n = parseInt(this.cells[0].textContent);
             if (n) {
-                playSectorAudio(n, 'forward');
+                // Update sector dropdown and view
+                document.getElementById('viewSector').value = n;
+                state.highlightSectorOnly = null;
+                drawMainRing();
+                updateSectorStats(n, state.residuesBySector[n] || []);
+                updateSectorPointCount();
+                
+                // Only play if autoPlayOnClick is enabled
+                if (document.getElementById('autoPlayOnClick')?.checked) {
+                    playSectorAudio(n, 'forward');
+                }
             }
         };
     });
     
-    // Gap table
+    // Gap table - click to select, only plays if autoPlayOnClick is enabled
     document.querySelectorAll('#gapTable tbody tr').forEach(row => {
         row.style.cursor = 'pointer';
         row.onclick = function() {
@@ -16186,15 +16598,21 @@ function setupTableAudioHandlers() {
                 const [lr, lm] = leftText.split('/').map(Number);
                 const [rr, rm] = rightText.split('/').map(Number);
                 if (lr && lm) {
-                    initAudioContext();
-                    playFraction(lr, lm, 0.4);
-                    setTimeout(() => playFraction(rr, rm, 0.4), 300);
+                    // Update displays
+                    triggerGlobalHarmonic(lr, lm);
+                    
+                    // Only play both fractions if autoPlayOnClick is enabled
+                    if (document.getElementById('autoPlayOnClick')?.checked) {
+                        initAudioContext();
+                        playFraction(lr, lm, 0.4);
+                        setTimeout(() => playFraction(rr, rm, 0.4), 300);
+                    }
                 }
             }
         };
     });
     
-    // Dedekind table
+    // Dedekind table - uses triggerGlobalHarmonic which respects autoPlayOnClick
     document.querySelectorAll('#dedekindTable tbody tr').forEach(row => {
         row.style.cursor = 'pointer';
         row.onclick = function() {
