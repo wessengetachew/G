@@ -852,6 +852,7 @@
                                 <option value="mod6_1">m≡1 (mod 6)</option>
                             </select></label>
                             <button onclick="clearTracker()" class="secondary" style="font-size:9px;padding:3px 8px;">Clear</button>
+                            <button onclick="animateTrackedResidues()" style="font-size:9px;padding:3px 8px;background:#ef4444;border:none;border-radius:3px;color:white;cursor:pointer;">▶ Animate</button>
                         </div>
                         <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;padding:6px;background:rgba(0,255,255,0.08);border-radius:4px;">
                             <span style="font-size:10px;color:#00ffff;">Prime Search:</span>
@@ -859,6 +860,15 @@
                             <span style="font-size:10px;">to</span>
                             <input type="number" id="primeSearchEnd" placeholder="N" min="1" style="width:45px;font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#e2e8f0;">
                             <button onclick="trackPrimesInRange()" style="font-size:9px;padding:3px 8px;background:#22c55e;border:none;border-radius:3px;color:white;cursor:pointer;">Find Primes</button>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;padding:6px;background:rgba(139,92,246,0.08);border-radius:4px;">
+                            <span style="font-size:10px;color:#a78bfa;font-weight:600;">Track r Residues:</span>
+                            <input type="text" id="trackRResidues" placeholder="r: 1,2,3,5" style="width:85px;font-size:10px;padding:3px;background:#1e293b;border:1px solid #8b5cf6;border-radius:3px;color:#e2e8f0;">
+                            <span style="font-size:10px;color:#a78bfa;">mod</span>
+                            <input type="number" id="trackModStart" placeholder="start" min="2" value="2" style="width:50px;font-size:10px;padding:2px;background:#1e293b;border:1px solid #8b5cf6;color:#e2e8f0;">
+                            <span style="font-size:10px;color:#a78bfa;">to</span>
+                            <input type="number" id="trackModEnd" placeholder="end" min="2" value="20" style="width:50px;font-size:10px;padding:2px;background:#1e293b;border:1px solid #8b5cf6;color:#e2e8f0;">
+                            <button onclick="trackResiduesByMod()" style="font-size:9px;padding:3px 8px;background:#8b5cf6;border:none;border-radius:3px;color:white;cursor:pointer;">Track</button>
                         </div>
                         <input type="hidden" id="trackerMode" value="manual">
                         <input type="hidden" id="trackerSliderR" value="1">
@@ -1131,6 +1141,44 @@
                         <!-- Alternatives Table -->
                         <div id="solverAlternatives" style="margin-top:15px;max-height:450px;overflow-y:auto;"></div>
                     </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PRIME RESIDUE TRACKER PANEL - Collapsible -->
+        <div style="margin-top:12px;">
+            <div onclick="toggleResidueTrackerPanel()" style="background:linear-gradient(135deg,#831843,#9f1239);border:2px solid #f43f5e;border-radius:8px 8px 0 0;padding:10px 15px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="color:#fda4af;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">🔢 Prime Residue Tracker</span>
+                    <span id="residueTrackerPreview" style="color:#f0fdf4;font-family:monospace;font-size:13px;"></span>
+                </div>
+                <span id="residueTrackerArrow" style="color:#fda4af;font-size:14px;transition:transform 0.3s;">▼</span>
+            </div>
+            <div id="residueTrackerPanel" style="display:none;background:linear-gradient(135deg,#831843,#9f1239);border:2px solid #f43f5e;border-top:none;border-radius:0 0 8px 8px;padding:15px;">
+                <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;">
+                    <div>
+                        <label style="color:#fda4af;font-size:10px;">Modulus (Prime)</label>
+                        <input type="number" id="residuePrime" min="2" max="997" value="5" 
+                            style="display:block;margin-top:4px;width:80px;padding:6px 10px;background:#0f172a;border:1px solid #f43f5e;border-radius:4px;color:#e2e8f0;font-size:12px;">
+                    </div>
+                    <div>
+                        <label style="color:#fda4af;font-size:10px;">Start</label>
+                        <input type="number" id="residueStart" min="1" value="1" 
+                            style="display:block;margin-top:4px;width:80px;padding:6px 10px;background:#0f172a;border:1px solid #f43f5e;border-radius:4px;color:#e2e8f0;font-size:12px;">
+                    </div>
+                    <div>
+                        <label style="color:#fda4af;font-size:10px;">End</label>
+                        <input type="number" id="residueEnd" min="1" value="25" 
+                            style="display:block;margin-top:4px;width:80px;padding:6px 10px;background:#0f172a;border:1px solid#f43f5e;border-radius:4px;color:#e2e8f0;font-size:12px;">
+                    </div>
+                    <button onclick="trackPrimeResidues()" 
+                        style="background:linear-gradient(135deg,#f43f5e,#e11d48);border:none;border-radius:6px;color:white;padding:10px 20px;cursor:pointer;font-weight:600;margin-top:18px;">
+                        Track Residues
+                    </button>
+                </div>
+                <!-- Residue Results -->
+                <div id="residueResults" style="margin-top:15px;padding:15px;background:#0f172a;border-radius:8px;border:1px solid #f43f5e;color:#e2e8f0;font-size:12px;max-height:400px;overflow-y:auto;">
+                    <div style="color:#fda4af;">Enter a prime and range to track prime residues...</div>
                 </div>
             </div>
         </div>
@@ -5127,13 +5175,29 @@ function updateMainChartsFormulaOnly() {
     }
 }
 
+// Add initialization flag to prevent flickering
+let isInitializing = true;
+
 function updateAllDisplays() {
     updateViewSectorDropdown();
-    updateMainStats(); updateMainCharts(); updateMainTable(); drawMainRing(); drawSectorTree();
-    drawTheoryViz();
+    updateMainStats(); updateMainCharts(); updateMainTable();
+    
+    // Only draw ONE canvas at a time during initial load to prevent flickering
+    if (isInitializing) {
+        drawMainRing(); // Default view
+        // Set flag to false after first complete render
+        setTimeout(() => { isInitializing = false; }, 100);
+    } else {
+        // Normal operation - draw all visualizations
+        drawMainRing(); drawSectorTree();
+        drawTheoryViz();
+        draw3D();
+        drawHyperbolic(); drawSmithChart();
+    }
+    
     updateGapAnalysis(); computeFranel(); computeDedekind(); updateCFDisplay();
-    computePSL(); computeEulerProduct(); updateModularAnalysis(); draw3D();
-    drawHyperbolic(); drawSmithChart(); updateStatistics(); updatePrimeAnalysis();
+    computePSL(); computeEulerProduct(); updateModularAnalysis();
+    updateStatistics(); updatePrimeAnalysis();
 }
 
 function updateViewSectorDropdown() {
@@ -6861,9 +6925,24 @@ function drawMainRing() {
     // Draw all 1/n sector lines if enabled
     if (showAllLines) {
         ctx.strokeStyle = 'rgba(150,100,255,0.3)'; ctx.lineWidth = 1;
-        for(let n=1; n<=Math.min(20,state.sectorMax); n++) {
+        const maxSectorLines = Math.max(state.sectorMax, 20); // Draw at least 20 or up to sectorMax
+        for(let n=1; n<=maxSectorLines; n++) {
             const angle = (1/n)*2*Math.PI;
             ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(angle)*maxR, cy-Math.sin(angle)*maxR); ctx.stroke();
+            // Add labels for sector lines
+            if (n <= 30) { // Only label first 30 to avoid clutter
+                ctx.fillStyle='rgba(150,100,255,0.6)'; ctx.font='9px system-ui';
+                ctx.fillText(`1/${n}`, cx+Math.cos(angle)*(maxR+12)-8, cy-Math.sin(angle)*(maxR+12));
+            }
+        }
+    } else {
+        // Default sector lines (when All 1/n Lines is not checked)
+        ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+        for(let n=1; n<=Math.min(15,state.sectorMax); n++) {
+            const angle = (1/n)*2*Math.PI;
+            ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(angle)*maxR, cy-Math.sin(angle)*maxR); ctx.stroke();
+            ctx.fillStyle='#64748b'; ctx.font='9px system-ui';
+            ctx.fillText(`1/${n}`, cx+Math.cos(angle)*(maxR+12)-8, cy-Math.sin(angle)*(maxR+12));
         }
     }
     
@@ -6886,14 +6965,6 @@ function drawMainRing() {
         const medP = 1 + 1, medQ = (sector+1) + sector;
         ctx.fillStyle = '#22c55e'; ctx.font = '10px system-ui';
         ctx.fillText(`${medP}/${medQ}`, cx+Math.cos(medAngle)*(maxR+18)-8, cy-Math.sin(medAngle)*(maxR+18));
-    }
-    
-    ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
-    for(let n=1; n<=Math.min(15,state.sectorMax); n++) {
-        const angle = (1/n)*2*Math.PI;
-        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(angle)*maxR, cy-Math.sin(angle)*maxR); ctx.stroke();
-        ctx.fillStyle='#64748b'; ctx.font='9px system-ui';
-        ctx.fillText(`1/${n}`, cx+Math.cos(angle)*(maxR+12)-8, cy-Math.sin(angle)*(maxR+12));
     }
     
     if(!showAll) {
@@ -7576,6 +7647,155 @@ function trackPrimesInRange() {
     alert(`Highlighting ${primesInRange.length} primes in range [${start}, ${end}]:\n${primesInRange.slice(0, 20).join(', ')}${primesInRange.length > 20 ? '...' : ''}`);
 }
 
+function trackResiduesByMod() {
+    const rInput = document.getElementById('trackRResidues')?.value || '';
+    const modStart = parseInt(document.getElementById('trackModStart')?.value) || 2;
+    const modEnd = parseInt(document.getElementById('trackModEnd')?.value) || 20;
+    
+    if (!rInput.trim()) {
+        alert('Please enter r residues (e.g., 1,2,3,5)');
+        return;
+    }
+    
+    if (modStart < 2 || modEnd < modStart) {
+        alert('Invalid modulus range');
+        return;
+    }
+    
+    // Parse r values
+    const rValues = [];
+    const parts = rInput.split(',').map(s => s.trim());
+    for (const part of parts) {
+        const num = parseInt(part);
+        if (!isNaN(num) && num >= 0) {
+            rValues.push(num);
+        }
+    }
+    
+    if (rValues.length === 0) {
+        alert('No valid r values found');
+        return;
+    }
+    
+    // Find all fractions r/m where r is in rValues and m is in [modStart, modEnd]
+    const trackedResidues = [];
+    for (const r of rValues) {
+        for (let m = modStart; m <= modEnd; m++) {
+            if (gcd(r, m) === 1) { // Only coprime pairs
+                trackedResidues.push(r < m ? `${r}/${m}` : null);
+            }
+        }
+    }
+    
+    // Filter out nulls and create set
+    const uniqueResidues = [...new Set(trackedResidues.filter(Boolean))];
+    
+    if (uniqueResidues.length === 0) {
+        alert(`No valid fractions found for r ∈ {${rValues.join(',')}} and m ∈ [${modStart}, ${modEnd}]`);
+        return;
+    }
+    
+    // Enable tracker
+    document.getElementById('enableResidueTracker').checked = true;
+    
+    // Set the track residues input
+    document.getElementById('trackResidues').value = uniqueResidues.slice(0, 50).join(',') + 
+        (uniqueResidues.length > 50 ? ',...' : '');
+    
+    drawMainRing();
+    
+    alert(`Tracking ${uniqueResidues.length} fractions:\n` +
+          `r ∈ {${rValues.join(',')}} mod m ∈ [${modStart}, ${modEnd}]\n` +
+          `First few: ${uniqueResidues.slice(0, 10).join(', ')}${uniqueResidues.length > 10 ? '...' : ''}`);
+}
+
+function animateTrackedResidues() {
+    if (!document.getElementById('enableResidueTracker')?.checked) {
+        alert('Please enable residue tracker first');
+        return;
+    }
+    
+    const trackInput = document.getElementById('trackResidues')?.value || '';
+    if (!trackInput.trim()) {
+        alert('No residues to animate');
+        return;
+    }
+    
+    // Parse tracked residues
+    const trackedPoints = [];
+    const parts = trackInput.split(',').map(s => s.trim());
+    
+    for (const part of parts) {
+        if (part.includes('/')) {
+            const [r, m] = part.split('/').map(Number);
+            if (!isNaN(r) && !isNaN(m)) {
+                trackedPoints.push({ r, m });
+            }
+        } else if (part.includes('-')) {
+            // Range like "1-10"
+            const [start, end] = part.split('-').map(Number);
+            if (!isNaN(start) && !isNaN(end)) {
+                for (let i = start; i <= Math.min(end, state.nMax); i++) {
+                    // Add all fractions with denominator i
+                    for (let r = 1; r < i; r++) {
+                        if (gcd(r, i) === 1) {
+                            trackedPoints.push({ r, m: i });
+                        }
+                    }
+                }
+            }
+        } else {
+            const m = parseInt(part);
+            if (!isNaN(m)) {
+                // Add all fractions with this denominator
+                for (let r = 1; r < m; r++) {
+                    if (gcd(r, m) === 1) {
+                        trackedPoints.push({ r, m });
+                    }
+                }
+            }
+        }
+    }
+    
+    if (trackedPoints.length === 0) {
+        alert('No valid points to animate');
+        return;
+    }
+    
+    // Animate by highlighting each point sequentially
+    let currentIndex = 0;
+    const animInterval = setInterval(() => {
+        if (currentIndex >= trackedPoints.length) {
+            clearInterval(animInterval);
+            drawMainRing(); // Final redraw
+            return;
+        }
+        
+        const point = trackedPoints[currentIndex];
+        
+        // Find this point in ringPoints and highlight it
+        const ringPoint = state.ringPoints.find(p => p.r === point.r && p.m === point.m);
+        if (ringPoint) {
+            // Temporarily modify the point for animation
+            ringPoint.animated = true;
+            drawMainRing();
+            
+            // Play sound if audio enabled
+            if (document.getElementById('globalAudioToggle')?.checked) {
+                playFraction(point.r, point.m, 0.2);
+            }
+            
+            // Remove animation flag after a short delay
+            setTimeout(() => {
+                if (ringPoint) ringPoint.animated = false;
+            }, 300);
+        }
+        
+        currentIndex++;
+    }, 150); // 150ms between points
+}
+
+
 
 function resetFilters() {
     document.getElementById('pointFilter').value = 'all';
@@ -8078,6 +8298,105 @@ function toggleWordArtPanel() {
     arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
 }
 
+function toggleResidueTrackerPanel() {
+    const panel = document.getElementById('residueTrackerPanel');
+    const arrow = document.getElementById('residueTrackerArrow');
+    const isHidden = panel.style.display === 'none';
+    panel.style.display = isHidden ? 'block' : 'none';
+    arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
+function trackPrimeResidues() {
+    const p = parseInt(document.getElementById('residuePrime').value);
+    const start = parseInt(document.getElementById('residueStart').value);
+    const end = parseInt(document.getElementById('residueEnd').value);
+    
+    // Validate inputs
+    if (!NumberTheory.isPrime(p)) {
+        document.getElementById('residueResults').innerHTML = '<div style="color:#f87171;">⚠️ Please enter a prime number for the modulus</div>';
+        return;
+    }
+    
+    if (start > end || start < 1) {
+        document.getElementById('residueResults').innerHTML = '<div style="color:#f87171;">⚠️ Invalid range (start must be ≤ end and ≥ 1)</div>';
+        return;
+    }
+    
+    const resultsDiv = document.getElementById('residueResults');
+    let html = `<div style="color:#fda4af;font-weight:bold;margin-bottom:12px;font-size:14px;">Tracking primes in range ${start} to ${end} (mod ${p})</div>`;
+    
+    // Find all primes in the given range
+    const primesInRange = [];
+    for (let n = start; n <= end; n++) {
+        if (NumberTheory.isPrime(n)) {
+            primesInRange.push(n);
+        }
+    }
+    
+    if (primesInRange.length === 0) {
+        html += `<div style="color:#fbbf24;padding:10px;background:rgba(251,191,36,0.1);border-radius:4px;">No primes found in range ${start}-${end}</div>`;
+    } else {
+        // Group by residue class
+        const residueGroups = {};
+        for (let i = 0; i < p; i++) {
+            residueGroups[i] = [];
+        }
+        
+        primesInRange.forEach(prime => {
+            const residue = prime % p;
+            residueGroups[residue].push(prime);
+        });
+        
+        // Display results
+        html += `<div style="margin-bottom:12px;padding:10px;background:rgba(34,197,94,0.1);border-left:3px solid #22c55e;border-radius:4px;">`;
+        html += `<strong style="color:#22c55e;">Found ${primesInRange.length} prime(s)</strong>`;
+        html += `</div>`;
+        
+        // Show distribution by residue class
+        html += `<div style="font-weight:bold;color:#fda4af;margin:12px 0 8px;">Distribution by Residue Class:</div>`;
+        
+        for (let r = 0; r < p; r++) {
+            if (residueGroups[r].length > 0) {
+                const color = r === 0 ? '#ef4444' : '#06b6d4';
+                const bgColor = r === 0 ? 'rgba(239,68,68,0.1)' : 'rgba(6,182,212,0.1)';
+                html += `<div style="padding:8px 12px;margin:6px 0;background:${bgColor};border-left:3px solid ${color};border-radius:4px;">`;
+                html += `<div style="margin-bottom:4px;"><strong style="color:${color};font-size:13px;">Residue ${r} (mod ${p})</strong> `;
+                html += `<span style="color:#94a3b8;font-size:11px;">(${residueGroups[r].length} prime${residueGroups[r].length > 1 ? 's' : ''})</span></div>`;
+                
+                // Show primes in this residue class
+                const primesStr = residueGroups[r].map(pr => {
+                    // Check if this prime is in our current dataset
+                    const inData = state.allResidues.some(res => res.m === pr || res.r === pr);
+                    return inData ? `<span style="color:#22c55e;font-weight:bold;">${pr}</span>` : `${pr}`;
+                }).join(', ');
+                
+                html += `<div style="color:#e2e8f0;font-family:monospace;font-size:11px;">${primesStr}</div>`;
+                html += `</div>`;
+            }
+        }
+        
+        // Show any empty residue classes
+        const emptyClasses = [];
+        for (let r = 0; r < p; r++) {
+            if (residueGroups[r].length === 0) {
+                emptyClasses.push(r);
+            }
+        }
+        
+        if (emptyClasses.length > 0 && emptyClasses.length < p) {
+            html += `<div style="margin-top:12px;padding:8px 12px;background:rgba(100,116,139,0.1);border-radius:4px;color:#94a3b8;font-size:11px;">`;
+            html += `<strong>Empty residue classes:</strong> ${emptyClasses.join(', ')}`;
+            html += `</div>`;
+        }
+    }
+    
+    // Update preview
+    document.getElementById('residueTrackerPreview').textContent = `${primesInRange.length} primes (mod ${p})`;
+    
+    resultsDiv.innerHTML = html;
+}
+
+
 function clearWordArt() {
     wordArtPoints = [];
     stopWordArtPlayback();
@@ -8102,7 +8421,7 @@ function addPointToWordArt(p) {
 
 // Generate word art from text - writes within specified sector from left to right
 function generateWordArt() {
-    const text = document.getElementById('wordArtText').value.toUpperCase();
+    const text = document.getElementById('wordArtText').value; // Don't force uppercase
     if (!text) return;
     
     clearWordArt();
@@ -8124,31 +8443,59 @@ function generateWordArt() {
     // Each letter is array of [xOffset, yOffset] where x is 0-1 (left-right), y is 0-1 (inner-outer)
     const letterPatterns = {
         'W': [[0,0.9],[0.25,0.2],[0.5,0.6],[0.75,0.2],[1,0.9]],
-        'E': [[0,0.9],[0,0.5],[0,0.1],[0.7,0.1],[0,0.5],[0.5,0.5],[0,0.9],[0.7,0.9]],
-        'S': [[0.8,0.1],[0.2,0.2],[0.2,0.45],[0.8,0.55],[0.8,0.8],[0.2,0.9]],
+        'E': [[0,0.1],[0.7,0.1],[0,0.1],[0,0.5],[0.5,0.5],[0,0.5],[0,0.9],[0.7,0.9]], // Fixed E
+        'S': [[0.8,0.1],[0.3,0.15],[0.2,0.35],[0.7,0.5],[0.8,0.65],[0.3,0.85],[0.2,0.9]],
         'N': [[0,0.9],[0,0.1],[0.9,0.9],[0.9,0.1]],
-        'A': [[0,0.9],[0.5,0.1],[1,0.9],[0.25,0.5],[0.75,0.5]],
-        'B': [[0,0.9],[0,0.1],[0.7,0.2],[0,0.5],[0.7,0.7],[0,0.9]],
-        'C': [[0.8,0.2],[0.2,0.1],[0.2,0.9],[0.8,0.8]],
-        'D': [[0,0.1],[0,0.9],[0.7,0.5],[0,0.1]],
-        'F': [[0,0.9],[0,0.1],[0.8,0.1],[0,0.5],[0.6,0.5]],
-        'G': [[0.8,0.2],[0.2,0.1],[0.2,0.9],[0.8,0.8],[0.8,0.5],[0.5,0.5]],
+        'A': [[0,0.9],[0.5,0.1],[1,0.9],[0.25,0.55],[0.75,0.55]],
+        'B': [[0,0.9],[0,0.1],[0.65,0.2],[0.7,0.35],[0,0.5],[0.7,0.65],[0.65,0.8],[0,0.9]],
+        'C': [[0.9,0.2],[0.6,0.1],[0.2,0.2],[0.1,0.5],[0.2,0.8],[0.6,0.9],[0.9,0.8]],
+        'D': [[0,0.1],[0,0.9],[0.6,0.8],[0.8,0.5],[0.6,0.2],[0,0.1]],
+        'F': [[0,0.9],[0,0.1],[0.75,0.1],[0,0.5],[0.6,0.5]],
+        'G': [[0.85,0.2],[0.55,0.1],[0.2,0.2],[0.1,0.5],[0.2,0.8],[0.55,0.9],[0.85,0.8],[0.85,0.55],[0.5,0.55]],
         'H': [[0,0.1],[0,0.9],[0,0.5],[1,0.5],[1,0.1],[1,0.9]],
-        'I': [[0.5,0.1],[0.5,0.9]],
-        'J': [[0.2,0.8],[0.5,0.9],[0.8,0.8],[0.8,0.1]],
+        'I': [[0.3,0.1],[0.7,0.1],[0.5,0.1],[0.5,0.9],[0.3,0.9],[0.7,0.9]],
+        'J': [[0.2,0.8],[0.4,0.9],[0.6,0.85],[0.7,0.7],[0.7,0.1],[0.3,0.1],[0.9,0.1]],
         'K': [[0,0.1],[0,0.9],[0,0.5],[0.9,0.1],[0,0.5],[0.9,0.9]],
         'L': [[0,0.1],[0,0.9],[0.8,0.9]],
         'M': [[0,0.9],[0,0.1],[0.5,0.5],[1,0.1],[1,0.9]],
-        'O': [[0.5,0.1],[0,0.5],[0.5,0.9],[1,0.5],[0.5,0.1]],
-        'P': [[0,0.9],[0,0.1],[0.8,0.2],[0,0.5]],
-        'Q': [[0.5,0.1],[0,0.5],[0.5,0.9],[1,0.5],[0.5,0.1],[0.8,0.8]],
-        'R': [[0,0.9],[0,0.1],[0.8,0.2],[0,0.5],[0.9,0.9]],
+        'O': [[0.5,0.1],[0.2,0.2],[0.1,0.5],[0.2,0.8],[0.5,0.9],[0.8,0.8],[0.9,0.5],[0.8,0.2],[0.5,0.1]],
+        'P': [[0,0.9],[0,0.1],[0.7,0.2],[0.8,0.35],[0.7,0.5],[0,0.5]],
+        'Q': [[0.5,0.1],[0.2,0.2],[0.1,0.5],[0.2,0.8],[0.5,0.9],[0.8,0.8],[0.9,0.5],[0.8,0.2],[0.5,0.1],[0.7,0.7],[0.95,0.95]],
+        'R': [[0,0.9],[0,0.1],[0.7,0.2],[0.75,0.35],[0.7,0.5],[0,0.5],[0.9,0.9]],
         'T': [[0,0.1],[1,0.1],[0.5,0.1],[0.5,0.9]],
-        'U': [[0,0.1],[0,0.9],[1,0.9],[1,0.1]],
+        'U': [[0,0.1],[0,0.85],[0.2,0.9],[0.5,0.9],[0.8,0.9],[1,0.85],[1,0.1]],
         'V': [[0,0.1],[0.5,0.9],[1,0.1]],
         'X': [[0,0.1],[1,0.9],[0.5,0.5],[1,0.1],[0,0.9]],
         'Y': [[0,0.1],[0.5,0.5],[1,0.1],[0.5,0.5],[0.5,0.9]],
         'Z': [[0,0.1],[1,0.1],[0,0.9],[1,0.9]],
+        // Numbers
+        '0': [[0.5,0.1],[0.2,0.2],[0.1,0.5],[0.2,0.8],[0.5,0.9],[0.8,0.8],[0.9,0.5],[0.8,0.2],[0.5,0.1]],
+        '1': [[0.4,0.2],[0.5,0.1],[0.5,0.9],[0.2,0.9],[0.8,0.9]],
+        '2': [[0.2,0.2],[0.5,0.1],[0.8,0.2],[0.7,0.4],[0.3,0.7],[0.1,0.9],[0.9,0.9]],
+        '3': [[0.2,0.2],[0.5,0.1],[0.8,0.3],[0.5,0.5],[0.8,0.7],[0.5,0.9],[0.2,0.8]],
+        '4': [[0.7,0.1],[0.7,0.9],[0.2,0.6],[0.9,0.6]],
+        '5': [[0.8,0.1],[0.2,0.1],[0.2,0.45],[0.7,0.5],[0.8,0.7],[0.5,0.9],[0.2,0.8]],
+        '6': [[0.7,0.2],[0.4,0.1],[0.2,0.3],[0.2,0.8],[0.5,0.9],[0.8,0.7],[0.7,0.5],[0.3,0.5]],
+        '7': [[0.1,0.1],[0.9,0.1],[0.6,0.5],[0.4,0.9]],
+        '8': [[0.5,0.1],[0.7,0.2],[0.5,0.35],[0.2,0.2],[0.5,0.1],[0.5,0.5],[0.8,0.65],[0.5,0.9],[0.2,0.65],[0.5,0.5]],
+        '9': [[0.3,0.8],[0.6,0.9],[0.8,0.7],[0.8,0.2],[0.5,0.1],[0.2,0.3],[0.3,0.5],[0.7,0.5]],
+        // Special characters
+        '!': [[0.5,0.1],[0.5,0.6],[0.5,0.8],[0.5,0.9]],
+        '?': [[0.3,0.2],[0.5,0.1],[0.7,0.3],[0.6,0.5],[0.5,0.65],[0.5,0.8],[0.5,0.9]],
+        '.': [[0.5,0.9]],
+        ',': [[0.5,0.9],[0.4,0.95]],
+        '-': [[0.2,0.5],[0.8,0.5]],
+        '_': [[0.1,0.9],[0.9,0.9]],
+        '+': [[0.5,0.3],[0.5,0.7],[0.3,0.5],[0.7,0.5]],
+        '=': [[0.2,0.4],[0.8,0.4],[0.2,0.6],[0.8,0.6]],
+        '/': [[0.2,0.9],[0.8,0.1]],
+        '\\': [[0.2,0.1],[0.8,0.9]],
+        '(': [[0.7,0.2],[0.5,0.3],[0.4,0.5],[0.5,0.7],[0.7,0.8]],
+        ')': [[0.3,0.2],[0.5,0.3],[0.6,0.5],[0.5,0.7],[0.3,0.8]],
+        '[': [[0.6,0.1],[0.4,0.1],[0.4,0.9],[0.6,0.9]],
+        ']': [[0.4,0.1],[0.6,0.1],[0.6,0.9],[0.4,0.9]],
+        ':': [[0.5,0.3],[0.5,0.7]],
+        ';': [[0.5,0.3],[0.5,0.7],[0.4,0.85]],
         ' ': []
     };
     
@@ -8164,10 +8511,10 @@ function generateWordArt() {
     
     let charIndex = 0;
     for (let i = 0; i < text.length; i++) {
-        const char = text[i];
+        const char = text[i].toUpperCase(); // Convert to uppercase for pattern matching
         if (char === ' ') continue;
         
-        const pattern = letterPatterns[char] || [];
+        const pattern = letterPatterns[char] || letterPatterns['?'] || []; // Use ? as fallback
         
         // Mirror: write from right to left (rightBound going left)
         const charStart = rightBound - (charIndex + 1) * charWidth + padding;
