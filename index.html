@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farey Sector Formula - Complete Research Platform</title>
+    <title>Farey Sequence Summatory Function - Research Platform</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
@@ -568,13 +568,13 @@
     </div>
 </div>
 <div class="container">
-    <h1>Farey Sector Formula - Complete Research Platform</h1>
-    <p class="subtitle">Comprehensive analysis with RH connections, modular arithmetic, and advanced visualizations</p>
+    <h1>Farey Sequence Interval Analysis - Exploration Platform</h1>
+    <p class="subtitle">Computational exploration of coprime pair distributions using classical summatory totient estimates</p>
     
     <div class="formula-box">
         <div class="formula-main" id="formulaDisplay">C(n, N) = 3N² / (π² n(n+1))</div>
         <div id="formulaComputed" style="text-align:center; font-size:0.9em; color:#22c55e; margin-top:8px; display:none;"></div>
-        <p style="text-align:center; font-size:0.85em; opacity:0.9;">Asymptotic count of coprime pairs (r, m) with r/m in sector S_n = (1/(n+1), 1/n]</p>
+        <p style="text-align:center; font-size:0.85em; opacity:0.9;">Mertens' totient formula applied to interval S_n = (1/(n+1), 1/n]</p>
     </div>
     
     <div class="control-panel">
@@ -666,6 +666,7 @@
     <div class="tabs">
         <div class="tab active" onclick="switchTab('main')">Explorer</div>
         <div class="tab" onclick="switchTab('analysis')">Analysis</div>
+        <div class="tab" onclick="switchTab('calculator')">Calculator</div>
         <div class="tab" onclick="switchTab('theory')">Theory</div>
         <div class="tab" onclick="switchTab('geometry')">Geometry</div>
         <div class="tab" onclick="switchTab('connections')">Connections</div>
@@ -714,7 +715,7 @@
         <!-- Hero Formula Banner -->
         <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);padding:12px 20px;border-radius:8px;margin-bottom:15px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
             <div>
-                <span style="color:#a78bfa;font-size:0.9em;font-weight:500;">Farey Sector Formula</span>
+                <span style="color:#a78bfa;font-size:0.9em;font-weight:500;">Farey Summatory Function</span>
                 <div style="font-family:'Courier New',monospace;font-size:1.4em;color:#f1f5f9;margin-top:4px;">C(n,N) = 3N² / (π² n(n+1))</div>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
@@ -817,6 +818,15 @@
                             <label style="font-size:11px;"><input type="checkbox" id="dimOutsideSector" onchange="drawMainRing()"> Dim Outside</label>
                             <label style="font-size:11px;"><input type="checkbox" id="highlightPrimeRings" onchange="drawMainRing()"> Prime Rings</label>
                         </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                            <label style="font-size:11px;">Sector Color: <select id="sectorColorMode" onchange="drawMainRing()" style="font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#e2e8f0;">
+                                <option value="preserve">Preserve</option>
+                                <option value="gold">Gold Highlight</option>
+                                <option value="inout">In/Out</option>
+                                <option value="enhance">Enhance</option>
+                                <option value="dim">Dim</option>
+                            </select></label>
+                        </div>
                     </div>
                     
                     <!-- Residue Tracker -->
@@ -832,7 +842,7 @@
                             <label style="font-size:11px;"><input type="checkbox" id="trackerConnect" onchange="drawMainRing()"> Connect</label>
                             <label style="font-size:11px;">Size: <input type="number" id="trackerSize" value="8" min="1" max="30" step="0.5" style="width:45px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
                         </div>
-                        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;">
                             <label style="font-size:11px;">Filter: <select id="trackerModFilter" onchange="applyTrackerFilter()" style="font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#e2e8f0;">
                                 <option value="">None</option>
                                 <option value="prime">Primes only</option>
@@ -842,6 +852,13 @@
                                 <option value="mod6_1">m≡1 (mod 6)</option>
                             </select></label>
                             <button onclick="clearTracker()" class="secondary" style="font-size:9px;padding:3px 8px;">Clear</button>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;padding:6px;background:rgba(0,255,255,0.08);border-radius:4px;">
+                            <span style="font-size:10px;color:#00ffff;">Prime Search:</span>
+                            <input type="number" id="primeSearchStart" placeholder="n" min="1" value="1" style="width:45px;font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#e2e8f0;">
+                            <span style="font-size:10px;">to</span>
+                            <input type="number" id="primeSearchEnd" placeholder="N" min="1" style="width:45px;font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#e2e8f0;">
+                            <button onclick="trackPrimesInRange()" style="font-size:9px;padding:3px 8px;background:#22c55e;border:none;border-radius:3px;color:white;cursor:pointer;">Find Primes</button>
                         </div>
                         <input type="hidden" id="trackerMode" value="manual">
                         <input type="hidden" id="trackerSliderR" value="1">
@@ -855,8 +872,25 @@
                             <label style="font-size:11px;"><input type="checkbox" id="showRingLabels" onchange="drawMainRing()"> Ring Labels</label>
                             <label style="font-size:11px;"><input type="checkbox" id="showAllSectorLines" onchange="drawMainRing()"> All 1/n Lines</label>
                         </div>
-                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
                             <label style="font-size:11px;"><input type="checkbox" id="showFractionLabels" onchange="drawMainRing()"> Point Labels</label>
+                            <label style="font-size:11px;">Type: <select id="labelType" onchange="drawMainRing()" style="font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#e2e8f0;">
+                                <option value="fraction">r/m</option>
+                                <option value="r">r only</option>
+                                <option value="m">m only</option>
+                                <option value="degree">degrees</option>
+                            </select></label>
+                            <label style="font-size:11px;">Size: <input type="number" id="labelSize" value="10" min="6" max="24" step="1" style="width:40px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
+                            <label style="font-size:11px;">Limit: <input type="number" id="maxLabels" value="50" min="1" max="500" step="10" style="width:50px;font-size:10px;padding:2px;" onchange="drawMainRing()"> labels</label>
+                            <label style="font-size:11px;">Min m: <input type="number" id="labelMinDenom" value="1" min="1" style="width:45px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px;background:rgba(99,102,241,0.08);border-radius:4px;">
+                            <span style="font-size:10px;color:#6366f1;">Label specific:</span>
+                            <input type="text" id="specificLabels" placeholder="1/2,3/5,2/7" style="width:100px;font-size:10px;padding:3px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;" onchange="drawMainRing()">
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
                             <label style="font-size:11px;"><input type="checkbox" id="antialiasRing" checked onchange="drawMainRing()"> Antialias</label>
                             <label style="font-size:11px;">BG: <input type="color" id="ringBgColor" value="#0f172a" style="width:28px;height:20px;border:none;cursor:pointer;" onchange="drawMainRing()"></label>
                         </div>
@@ -901,7 +935,6 @@
                         </div>
                     </div>
                 </div>
-                <input type="hidden" id="sectorColorMode" value="preserve">
             </div>
         </div>
         
@@ -1393,7 +1426,7 @@
     <div id="tab-erroranalysis" class="tab-content">
         <div class="panel">
             <h2 style="color:#a78bfa;margin-bottom:5px;">Error Analysis</h2>
-            <p style="color:#94a3b8;font-size:0.9em;margin-bottom:20px;">Analyze the deviation between exact Farey counts and the asymptotic formula C(n,N) = 3N²/(π²n(n+1)). Understanding error structure may reveal connections to the Riemann Hypothesis through the Franel-Landau theorem.</p>
+            <p style="color:#94a3b8;font-size:0.9em;margin-bottom:20px;">Computational analysis of deviations between exact enumeration and Mertens' asymptotic formula C(n,N) = 3N²/(π²n(n+1)) applied to intervals. Error patterns may provide computational insight into classical results like the Franel-Landau connection to RH.</p>
             
             <!-- Range Controls -->
             <div style="background:#1e1b4b;border-radius:8px;padding:15px;margin-bottom:20px;border:1px solid #6366f1;">
@@ -1414,8 +1447,8 @@
             <!-- Description Cards -->
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:15px;margin-bottom:20px;">
                 <div style="background:#0f172a;border-radius:8px;padding:15px;border-left:4px solid #22c55e;">
-                    <h5 style="color:#22c55e;margin:0 0 8px 0;">RH Connection</h5>
-                    <p style="color:#94a3b8;font-size:0.85em;margin:0;">The Franel-Landau theorem states that RH is equivalent to: Σ|F_N - k/N| = O(N^(1/2+ε)). Our sector decomposition may reveal which sectors contribute most to this sum.</p>
+                    <h5 style="color:#22c55e;margin:0 0 8px 0;">RH Connection (Exploratory)</h5>
+                    <p style="color:#94a3b8;font-size:0.85em;margin:0;">The Franel-Landau theorem (1924) established that RH ⟺ Σ|F_N - k/|F_N|| = O(N^(1/2+ε)). Interval decomposition may offer computational perspective on which ranges contribute to this classical sum.</p>
                 </div>
                 <div style="background:#0f172a;border-radius:8px;padding:15px;border-left:4px solid #8b5cf6;">
                     <h5 style="color:#8b5cf6;margin:0 0 8px 0;">Spectral Analysis</h5>
@@ -1495,14 +1528,108 @@
     </div>
     
     <!-- THEORY TAB -->
+    
+    <!-- CALCULATOR TAB -->
+    <div id="tab-calculator" class="tab-content">
+        <div class="panel">
+            <h2 style="color:#22c55e;margin-bottom:5px;">Summatory Totient Formula Calculator</h2>
+            <p style="color:#94a3b8;font-size:0.9em;margin-bottom:20px;">Calculate Σφ(k) for k=1 to N with detailed step-by-step breakdown and comprehensive data export</p>
+            
+            <!-- Input Section -->
+            <div style="background:#1e1b4b;border-radius:8px;padding:20px;margin-bottom:20px;border:2px solid #22c55e;">
+                <h3 style="color:#22c55e;margin:0 0 15px 0;">Input Parameters</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;">
+                    <div>
+                        <label style="color:#94a3b8;font-size:13px;display:block;margin-bottom:5px;">N (upper limit):</label>
+                        <input type="number" id="calcN" value="20" min="1" max="10000" style="width:100%;padding:10px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:#e2e8f0;font-size:14px;">
+                    </div>
+                    <div>
+                        <label style="color:#94a3b8;font-size:13px;display:block;margin-bottom:5px;">Show steps up to:</label>
+                        <input type="number" id="calcShowSteps" value="10" min="1" max="100" style="width:100%;padding:10px;background:#0f172a;border:1px solid#475569;border-radius:4px;color:#e2e8f0;font-size:14px;">
+                    </div>
+                </div>
+                <div style="margin-top:15px;">
+                    <button onclick="calculateSummatoryTotient()" style="padding:12px 30px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:6px;color:white;cursor:pointer;font-weight:600;font-size:14px;">Calculate</button>
+                    <button onclick="exportCalcData()" class="secondary" style="padding:12px 25px;margin-left:10px;">Export All Data (CSV)</button>
+                    <button onclick="exportCalcDataJSON()" class="secondary" style="padding:12px 25px;margin-left:10px;">Export JSON</button>
+                </div>
+            </div>
+            
+            <!-- Results Display -->
+            <div id="calcResults" style="display:none;">
+                <!-- Formula Display -->
+                <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:8px;padding:20px;margin-bottom:20px;border:2px solid #8b5cf6;">
+                    <h3 style="color:#a78bfa;margin:0 0 15px 0;">Formula</h3>
+                    <div style="background:#0f172a;padding:15px;border-radius:6px;text-align:center;">
+                        <div style="font-family:monospace;font-size:20px;color:#e2e8f0;margin-bottom:10px;">
+                            Σφ(k) = (3/π²) × N² + O(N log N)
+                        </div>
+                        <div style="font-size:14px;color:#94a3b8;">
+                            where φ(k) is Euler's totient function
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Summary Results -->
+                <div style="background:#1e1b4b;border-radius:8px;padding:20px;margin-bottom:20px;border:1px solid #6366f1;">
+                    <h3 style="color:#6366f1;margin:0 0 15px 0;">Summary Results</h3>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;">
+                        <div style="background:#0f172a;padding:15px;border-radius:6px;border-left:4px solid #22c55e;">
+                            <div style="color:#94a3b8;font-size:12px;margin-bottom:5px;">N (upper limit)</div>
+                            <div id="calcResultN" style="color:#22c55e;font-size:24px;font-weight:bold;font-family:monospace;"></div>
+                        </div>
+                        <div style="background:#0f172a;padding:15px;border-radius:6px;border-left:4px solid #8b5cf6;">
+                            <div style="color:#94a3b8;font-size:12px;margin-bottom:5px;">Exact Sum Σφ(k)</div>
+                            <div id="calcResultExact" style="color:#8b5cf6;font-size:24px;font-weight:bold;font-family:monospace;"></div>
+                        </div>
+                        <div style="background:#0f172a;padding:15px;border-radius:6px;border-left:4px solid#f59e0b;">
+                            <div style="color:#94a3b8;font-size:12px;margin-bottom:5px;">Formula Estimate</div>
+                            <div id="calcResultFormula" style="color:#f59e0b;font-size:24px;font-weight:bold;font-family:monospace;"></div>
+                        </div>
+                        <div style="background:#0f172a;padding:15px;border-radius:6px;border-left:4px solid #ef4444;">
+                            <div style="color:#94a3b8;font-size:12px;margin-bottom:5px;">Relative Error</div>
+                            <div id="calcResultError" style="color:#ef4444;font-size:24px;font-weight:bold;font-family:monospace;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step-by-Step Calculation -->
+                <div style="background:#1e1b4b;border-radius:8px;padding:20px;margin-bottom:20px;border:1px solid #06b6d4;">
+                    <h3 style="color:#06b6d4;margin:0 0 15px 0;">Step-by-Step Calculation</h3>
+                    <div id="calcSteps" style="max-height:400px;overflow-y:auto;background:#0f172a;padding:15px;border-radius:6px;"></div>
+                </div>
+                
+                <!-- Full Data Table -->
+                <div style="background:#1e1b4b;border-radius:8px;padding:20px;border:1px solid #ec4899;">
+                    <h3 style="color:#ec4899;margin:0 0 15px 0;">Complete Data Table</h3>
+                    <div style="max-height:500px;overflow-y:auto;">
+                        <table id="calcTable" style="width:100%;border-collapse:collapse;font-size:13px;">
+                            <thead style="position:sticky;top:0;background:#0f172a;z-index:10;">
+                                <tr style="border-bottom:2px solid #ec4899;">
+                                    <th style="padding:10px;text-align:left;color:#ec4899;">k</th>
+                                    <th style="padding:10px;text-align:left;color:#ec4899;">φ(k)</th>
+                                    <th style="padding:10px;text-align:left;color:#ec4899;">Cumulative Σφ(i)</th>
+                                    <th style="padding:10px;text-align:left;color:#ec4899;">Formula Est.</th>
+                                    <th style="padding:10px;text-align:left;color:#ec4899;">Error %</th>
+                                    <th style="padding:10px;text-align:left;color:#ec4899;">Factorization</th>
+                                </tr>
+                            </thead>
+                            <tbody id="calcTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div id="tab-theory" class="tab-content">
         <div class="panel">
-            <h2 style="text-align:center; font-size:1.3em; margin-bottom:8px;">Directional Density of Coprime Lattice Points in Farey Sectors</h2>
+            <h2 style="text-align:center; font-size:1.3em; margin-bottom:8px;">Summatory Function of Coprime Pairs in Farey Sequence Intervals</h2>
             <p style="text-align:center; color:#94a3b8; font-style:italic; margin-bottom:20px;">Wessen Getachew</p>
             
             <div class="theorem-box" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border-left-color: #8b5cf6;">
-                <h4 style="color:#e0e7ff; margin-top:0;">Abstract</h4>
-                <p style="margin:0; font-size:0.95em;">We study the distribution of coprime integer pairs (a,b) with bounded height whose rational slope lies in a fixed Farey sector S_n = (1/(n+1), 1/n]. Using classical summatory totient estimates together with a geometric decomposition of rational directions, we derive an explicit asymptotic formula for the number of primitive lattice points in each sector. This result provides a localized refinement of the global coprime density 1/zeta(2), revealing directional structure in the distribution of visible lattice points.</p>
+<h4 style="color:#e0e7ff; margin-top:0;">Abstract</h4>
+                <p style="margin:0; font-size:0.95em;">This work applies classical summatory totient estimates (Mertens, 1874) to Farey sequence intervals. We examine the distribution of coprime integer pairs (a,b) whose rational slope a/b lies in specific intervals S_n = (1/(n+1), 1/n]. The asymptotic count C(n,N) ~ (3/π²)N²/(n(n+1)) follows directly from applying Mertens' totient summation formula to the geometric constraint. This provides a computational framework for exploring interval-specific coprime density, complementing the well-known global density 6/π². We identify computational regimes where asymptotic estimates transition to discrete counting behavior.</p>
             </div>
             
             <h3 style="margin-top:20px;">1. Introduction and Motivation</h3>
@@ -1531,20 +1658,20 @@
             
             <h3>3. Main Result</h3>
             <div class="derivation-box" style="background: linear-gradient(135deg, #422006 0%, #5a3a1a 100%); border-left-color: #fbbf24;">
-                <strong style="color:#fcd34d; font-size:1.1em;">Farey Sector Density Theorem</strong>
-                <p style="margin:12px 0 0 0;">Let n be fixed. As N approaches infinity, the number of coprime integer pairs with slope in the Farey sector S_n satisfies:</p>
+                <strong style="color:#fcd34d; font-size:1.1em;">Interval-Specific Application</strong>
+                <p style="margin:12px 0 0 0;">Applying Mertens' summatory totient formula to Farey interval S_n = (1/(n+1), 1/n], we obtain:</p>
                 <div style="background:#0f172a; padding:12px; border-radius:5px; font-family:monospace; font-size:1em; margin:10px 0; text-align:center;">
-                    <strong>C(n,N) ~ (3/pi^2) * N^2 / (n(n+1))</strong>
+                    <strong>C(n,N) ~ (3/π²) × N² / (n(n+1))</strong>
                 </div>
-                <p style="margin:10px 0 0 0; font-size:0.9em;">Where C(n,N) counts pairs (a,b) with 1 <= b <= N, gcd(a,b)=1, and a/b in S_n.</p>
+                <p style="margin:10px 0 0 0; font-size:0.9em;">Where C(n,N) counts coprime pairs (a,b) with 1 ≤ b ≤ N, gcd(a,b)=1, and a/b in S_n. This follows from classical totient summation.</p>
             </div>
             
-            <h3 style="margin-top:20px;">4. Proof Sketch</h3>
+            <h3 style="margin-top:20px;">4. Derivation from Classical Results</h3>
             <div style="background:#0f172a; padding:12px; border-radius:6px; border-left:3px solid #22c55e; margin:10px 0;">
-                <p><strong>Step 1:</strong> The condition a/b in S_n = (1/(n+1), 1/n] is equivalent to b/(n+1) < a <= b/n.</p>
-                <p style="margin:8px 0;"><strong>Step 2:</strong> For each b, the number of integers a in this range is b/(n(n+1)) + O(1).</p>
-                <p style="margin:8px 0;"><strong>Step 3:</strong> Restricting to coprime pairs: Sum over b<=N of phi(b)/(n(n+1)) + O(N)</p>
-                <p style="margin:8px 0;"><strong>Step 4:</strong> Apply the classical summatory totient estimate:</p>
+                <p><strong>Step 1:</strong> The geometric constraint a/b ∈ S_n = (1/(n+1), 1/n] translates to b/(n+1) < a ≤ b/n.</p>
+                <p style="margin:8px 0;"><strong>Step 2:</strong> For each denominator b, there are approximately b/(n(n+1)) integers a in this range.</p>
+                <p style="margin:8px 0;"><strong>Step 3:</strong> Restricting to coprime pairs: Σ_{b≤N} φ(b)/(n(n+1)) + O(N)</p>
+                <p style="margin:8px 0;"><strong>Step 4:</strong> Apply <strong>Mertens' classical summatory totient formula</strong> (1874):</p>
                 <div style="background:#0a0f1a; padding:8px; margin:8px 0; border-radius:4px; font-family:monospace;">
                     Sum of phi(b) = (3/pi^2)N^2 + O(N log N)
                 </div>
@@ -1578,7 +1705,7 @@
             <h3 style="margin-top:20px;">7. The Sector Boundary: A Phase Transition in Number Theory</h3>
             <div class="derivation-box" style="background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%); border-left-color: #38bdf8;">
                 <strong style="color:#7dd3fc; font-size:1.1em;">The Nyquist Limit of the Farey Sequence</strong>
-                <p style="margin:12px 0 0 0;">For any order N, there exists a critical sector n* where the asymptotic formula transitions from continuous density estimation to discrete arithmetic counting. This boundary represents a fundamental phase transition in number-theoretic behavior.</p>
+                <p style="margin:12px 0 0 0;">Computational analysis shows that for any fixed N, there exists a transition point n* ≈ (√3/π)N ≈ 0.5513N where the asymptotic formula transitions from useful density estimation to sparse discrete counting. This computational boundary represents where expected counts drop below 1, entering a regime where relative error becomes unstable.</p>
                 <div style="background:#0f172a; padding:12px; border-radius:5px; font-family:monospace; font-size:1em; margin:10px 0; text-align:center;">
                     <strong>n* ≈ (√3/π) · N ≈ 0.5513 · N</strong>
                 </div>
@@ -1640,9 +1767,9 @@
                 <p style="margin:10px 0 0 0; font-size:0.9em;">The Prime/Composite identities (PP + PC + CP + CC = Total) hold <em>exactly</em> in all regimes, including at and beyond the boundary. This persistence demonstrates that while density estimates fail, the underlying arithmetic structure remains inviolate. The boundary thus separates where we can <em>predict</em> counts from where we can only <em>verify</em> identities.</p>
             </div>
             
-            <h3 style="margin-top:20px;">8. Conclusion</h3>
+            <h3 style="margin-top:20px;">8. Summary</h3>
             <div style="background:#0f172a; padding:12px; border-radius:6px; border-left:3px solid #3b82f6; margin:10px 0;">
-                <p style="margin:0;">Farey sectors provide a natural geometric decomposition of rational directions. By combining this structure with classical coprime density results, we obtain an explicit directional refinement of visible lattice point counts. The discovery of the sector boundary at n ≈ 0.55N reveals a fundamental phase transition between analytic and discrete number-theoretic regimes. This framework enables anisotropic analysis of arithmetic distributions and provides foundation for modular constraints, higher-dimensional generalizations, and computational exploration of the density-discreteness interface.</p>
+                <p style="margin:0;">This work provides a computational framework for exploring coprime pair distributions across Farey sequence intervals. By applying Mertens' classical summatory totient formula to specific rational slope ranges, we obtain explicit asymptotic counts for each interval. Computational analysis reveals a transition point near n ≈ 0.55N where asymptotic density estimates give way to discrete arithmetic behavior. The framework enables systematic study of prime/composite categorization, modular constraints, and the interplay between continuous approximation and discrete counting in number-theoretic distributions.</p>
             </div>
             
             <p style="margin-top:20px; text-align:center; color:#64748b; font-size:0.85em;">See References tab for foundational works and acknowledgments.</p>
@@ -1654,7 +1781,7 @@
     <div id="tab-theoryviz" class="tab-content">
         <div class="panel" style="background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid #4338ca;margin-bottom:20px;">
             <h3 style="color:#c7d2fe;margin-top:0;">Interactive Theory Visualization</h3>
-            <p style="color:#a5b4fc;font-size:0.9em;">Visual exploration of the Farey Sector Density Theorem with interactive elements</p>
+            <p style="color:#a5b4fc;font-size:0.9em;">Visual exploration of classical totient estimates applied to Farey sequence intervals</p>
         </div>
         
         <div class="control-panel">
@@ -1762,7 +1889,7 @@
         </div>
         
         <div class="derivation-box" style="margin-top:15px;">
-            <strong>Theorem Summary:</strong> For fixed sector n, as N approaches infinity: C(n,N) = (3/π²) × N² / (n(n+1)) + O(N log N). This follows from summing φ(b)/(n(n+1)) over denominators b ≤ N and applying the classical totient summation formula.
+            <strong>Summary:</strong> For fixed interval n, as N → ∞: C(n,N) = (3/π²) × N²/(n(n+1)) + O(N log N). This follows directly from applying Mertens' summatory totient formula Σφ(b) = (3/π²)N² + O(N log N) to the geometric constraint a/b ∈ (1/(n+1), 1/n].
         </div>
         <div style="margin-top:15px;"><button onclick="screenshotFullTab('theoryviz')">Screenshot Full Theory Viz Tab</button></div>
     </div>
@@ -2954,12 +3081,12 @@
             
             <div class="theorem-box" style="background:#1e1b4b; margin:15px 0;">
                 <strong style="color:#c4b5fd;">Mertens, Franz (1874)</strong>
-                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">"Ein Beitrag zur analytischen Zahlentheorie" - Asymptotic formula for the summatory totient function: Σφ(n) = (3/π²)N² + O(N log N). This result is central to our sector density theorem.</p>
+                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">"Ein Beitrag zur analytischen Zahlentheorie" - Asymptotic formula for the summatory totient function: Σφ(n) = (3/π²)N² + O(N log N). This classical result underlies the interval counting analyzed here.</p>
             </div>
             
             <div class="theorem-box" style="background:#1e1b4b; margin:15px 0;">
                 <strong style="color:#c4b5fd;">Farey, John (1816)</strong>
-                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">Letter to Philosophical Magazine describing the mediant property of Farey sequences. The sequence F_N of fractions p/q with 0 ≤ p ≤ q ≤ N and gcd(p,q) = 1 forms the basis of our sector decomposition.</p>
+                <p style="margin:8px 0 0 0; font-size:0.9em; color:#e2e8f0;">Letter to Philosophical Magazine describing the mediant property of Farey sequences. The sequence F_N of fractions p/q with 0 ≤ p ≤ q ≤ N and gcd(p,q) = 1 forms the basis of interval analysis.</p>
             </div>
             
             <div class="theorem-box" style="background:#1e1b4b; margin:15px 0;">
@@ -3019,13 +3146,13 @@
             
             <div class="derivation-box" style="background: linear-gradient(135deg, #312e81 0%, #4c1d95 100%); border-left-color: #a78bfa; margin:15px 0;">
                 <strong style="color:#e0e7ff; font-size:1.1em;">Getachew, Wessen (2024-2025)</strong>
-                <p style="margin:12px 0 0 0; font-size:0.95em; color:#e2e8f0;"><strong>Novel contributions presented in this work:</strong></p>
+                <p style="margin:12px 0 0 0; font-size:0.95em; color:#e2e8f0;"><strong>Exploratory work and visualizations:</strong></p>
                 <ul style="margin:10px 0 0 15px; font-size:0.9em; color:#c7d2fe;">
-                    <li><strong>Farey Sector Density Theorem:</strong> Explicit asymptotic formula C(n,N) ~ (3/π²)N²/(n(n+1)) for coprime pairs in directional sectors.</li>
-                    <li><strong>Sector Boundary Constant:</strong> Identification of n* ≈ (√3/π)N ≈ 0.5513N as the phase transition between analytic and discrete regimes.</li>
-                    <li><strong>Prime/Composite Identity System:</strong> Four-way decomposition (PP, PC, CP, CC) with exact sector-level counting identities.</li>
-                    <li><strong>Interactive Visualization Framework:</strong> Comprehensive tools for exploring sector structure, including ring visualization, tree paths, and harmonic sonification.</li>
-                    <li><strong>Boundary Phase Transition Analysis:</strong> Documentation of the transition from density-based prediction to discrete counting at the sector boundary.</li>
+                    <li><strong>Interval-Based Analysis:</strong> Application of classical summatory function results C(n,N) ~ (3/π²)N²/(n(n+1)) to Farey sequence intervals, building on Mertens' totient summation.</li>
+                    <li><strong>Boundary Transition Point:</strong> Observation of n* ≈ (√3/π)N ≈ 0.5513N as transition between analytic approximation and discrete counting regimes.</li>
+                    <li><strong>Prime/Composite Categorization:</strong> Four-way decomposition (PP, PC, CP, CC) with computational analysis of distributions across intervals.</li>
+                    <li><strong>Interactive Visualization Framework:</strong> Comprehensive tools for exploring interval structure, including ring visualization, tree paths, and harmonic sonification.</li>
+                    <li><strong>Computational Verification:</strong> Direct enumeration and comparison with classical asymptotic predictions across multiple interval ranges.</li>
                 </ul>
             </div>
             
@@ -3212,345 +3339,196 @@ function screenshotMainCanvas() {
     const errorChart = document.getElementById('mainErrorChart');
     const hasErrorChart = errorChart && state.sectors.some(s => s.relError !== null);
     
-    // Get alternatives data directly from DOM table
-    const altEl = document.getElementById('solverAlternatives');
-    let alternativesData = [];
-    if (altEl) {
-        const table = altEl.querySelector('table');
-        if (table) {
-            const rows = table.querySelectorAll('tr');
-            for (let i = 1; i < rows.length; i++) { // skip header
-                const cells = rows[i].querySelectorAll('td');
-                if (cells.length >= 5) {
-                    alternativesData.push({
-                        frac: cells[0]?.textContent?.trim() || '',
-                        dec: cells[1]?.textContent?.trim() || '',
-                        err: cells[2]?.textContent?.trim() || '',
-                        sec: cells[3]?.textContent?.trim() || '',
-                        typ: cells[4]?.textContent?.trim() || '',
-                        typColor: cells[4]?.style?.color || '#94a3b8',
-                        isBest: (rows[i].getAttribute('style') || '').includes('background')
-                    });
-                }
-            }
-        }
-    }
+    // NEW LAYOUT: Canvas 90% on left, Legend on right, Title top-left
+    const canvasScale = 0.9;
+    const scaledCanvasWidth = canvas.width * canvasScale;
+    const scaledCanvasHeight = canvas.height * canvasScale;
     
-    // Layout dimensions
-    const legendHeight = 100;
-    const errorChartHeight = hasErrorChart ? 200 : 0;
-    const leftContentWidth = canvas.width;
-    const leftContentHeight = canvas.height + legendHeight + errorChartHeight + 40;
+    const legendWidth = 350;
+    const titleHeight = 120;
     
-    // Calculate solver panel dimensions
-    const solverPanelWidth = hasSolver ? 480 : 0;
-    const baseFieldsHeight = 380;
-    const altHeaderHeight = alternativesData.length > 0 ? 50 : 0;
-    const altRowsHeight = Math.min(alternativesData.length, 25) * 18;
-    const solverPanelHeight = hasSolver ? Math.max(leftContentHeight, baseFieldsHeight + altHeaderHeight + altRowsHeight + 50) : 0;
+    // Calculate totals for identities
+    const currentSector = +document.getElementById('viewSector').value;
+    const showAll = document.getElementById('showAllSectors')?.checked || false;
+    const residues = showAll ? Object.values(state.residuesBySector).flat() : (state.residuesBySector[currentSector] || []);
     
-    // Create a temporary canvas with dark background
+    let totalCount = residues.length;
+    let ppCount = residues.filter(r => r.isPrime && isPrime(r.r)).length;
+    let pcCount = residues.filter(r => r.isPrime && !isPrime(r.r)).length;
+    let cpCount = residues.filter(r => !r.isPrime && isPrime(r.r)).length;
+    let ccCount = residues.filter(r => !r.isPrime && !isPrime(r.r)).length;
+    let primeM = residues.filter(r => r.isPrime).length;
+    let compM = residues.filter(r => !r.isPrime).length;
+    
+    // Create a temporary canvas
     const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = leftContentWidth + padding * 2 + solverPanelWidth;
-    tempCanvas.height = Math.max(leftContentHeight + padding * 2, solverPanelHeight + padding * 2);
+    tempCanvas.width = scaledCanvasWidth + legendWidth + padding * 3;
+    tempCanvas.height = Math.max(titleHeight + scaledCanvasHeight, 
+                                  hasErrorChart ? titleHeight + scaledCanvasHeight + 300 : titleHeight + scaledCanvasHeight) + padding * 2;
     const ctx = tempCanvas.getContext('2d');
     
-    // Dark background matching the app theme
+    // Dark background
     ctx.fillStyle = '#0a0f1a';
     ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
     
-    // Draw the main ring canvas
-    ctx.drawImage(canvas, padding, padding);
-    
-    // Draw Legend below ring
-    let legendY = padding + canvas.height + 15;
-    
-    // Legend panel background
+    // ===== TITLE & PARAMETERS (Top Left) =====
     ctx.fillStyle = '#1e1b4b';
-    ctx.fillRect(padding, legendY, leftContentWidth, legendHeight - 10);
+    ctx.fillRect(padding, padding, scaledCanvasWidth, titleHeight);
     ctx.strokeStyle = '#6366f1';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(padding, legendY, leftContentWidth, legendHeight - 10);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(padding, padding, scaledCanvasWidth, titleHeight);
     
-    // Sector colors legend (S1-S10)
+    // Title
+    ctx.fillStyle = '#c7d2fe';
+    ctx.font = 'bold 22px system-ui';
+    ctx.fillText('Farey Sequence Interval Analysis', padding + 15, padding + 30);
+    
+    // Subtitle with parameters
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '14px system-ui';
+    const sectorText = showAll ? 'All Sectors' : `Sector ${currentSector}`;
+    ctx.fillText(`${sectorText} | N: ${state.nMin} to ${state.nMax} | Points: ${totalCount.toLocaleString()}`, 
+                 padding + 15, padding + 55);
+    
+    // Identity equation
     ctx.fillStyle = '#a5b4fc';
-    ctx.font = 'bold 11px system-ui';
-    ctx.fillText('SECTORS', padding + 10, legendY + 18);
+    ctx.font = '13px monospace';
+    ctx.fillText(`PP + PC + CP + CC = ${ppCount} + ${pcCount} + ${cpCount} + ${ccCount} = ${totalCount}`, 
+                 padding + 15, padding + 80);
+    ctx.fillText(`P(m) + C(m) = ${primeM} + ${compM} = ${totalCount}`, 
+                 padding + 15, padding + 100);
     
-    const sectorStartX = padding + 70;
+    // ===== CANVAS (Below title, left side) =====
+    ctx.drawImage(canvas, padding, padding + titleHeight + 10, scaledCanvasWidth, scaledCanvasHeight);
+    
+    // ===== LEGEND (Right side) =====
+    const legendX = padding * 2 + scaledCanvasWidth;
+    const legendY = padding;
+    
+    ctx.fillStyle = '#1e1b4b';
+    ctx.fillRect(legendX, legendY, legendWidth, scaledCanvasHeight + titleHeight + 10);
+    ctx.strokeStyle = '#8b5cf6';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(legendX, legendY, legendWidth, scaledCanvasHeight + titleHeight + 10);
+    
+    let ly = legendY + 20;
+    
+    // Sectors
+    ctx.fillStyle = '#a5b4fc';
+    ctx.font = 'bold 16px system-ui';
+    ctx.fillText('SECTORS', legendX + 15, ly);
+    ly += 25;
+    
     for (let i = 1; i <= 10; i++) {
         const hue = ((i - 1) * 36) % 360;
         const color = `hsl(${hue}, 70%, 50%)`;
-        const x = sectorStartX + (i - 1) * 55;
         
-        // Color swatch
         ctx.fillStyle = color;
-        ctx.fillRect(x, legendY + 8, 14, 14);
+        ctx.fillRect(legendX + 15, ly - 12, 20, 20);
         ctx.strokeStyle = '#475569';
         ctx.lineWidth = 1;
-        ctx.strokeRect(x, legendY + 8, 14, 14);
+        ctx.strokeRect(legendX + 15, ly - 12, 20, 20);
         
-        // Label
         ctx.fillStyle = '#e2e8f0';
-        ctx.font = '10px monospace';
-        ctx.fillText(`S${i}`, x + 18, legendY + 18);
+        ctx.font = '14px monospace';
+        ctx.fillText(`S${i}`, legendX + 42, ly + 2);
+        
+        ly += 28;
     }
     
-    // Categories legend
+    ly += 15;
+    
+    // Categories
     ctx.fillStyle = '#a5b4fc';
-    ctx.font = 'bold 11px system-ui';
-    ctx.fillText('CATEGORIES', padding + 10, legendY + 45);
+    ctx.font = 'bold 16px system-ui';
+    ctx.fillText('CATEGORIES', legendX + 15, ly);
+    ly += 25;
     
     const categories = [
-        { code: 'PP', label: 'Both Prime', color: '#22c55e' },
-        { code: 'PC', label: 'Prime/Comp', color: '#f59e0b' },
-        { code: 'CP', label: 'Comp/Prime', color: '#6366f1' },
-        { code: 'CC', label: 'Both Comp', color: '#94a3b8' }
+        { code: 'PP', label: 'Both Prime', color: '#22c55e', count: ppCount },
+        { code: 'PC', label: 'Prime/Comp', color: '#f59e0b', count: pcCount },
+        { code: 'CP', label: 'Comp/Prime', color: '#6366f1', count: cpCount },
+        { code: 'CC', label: 'Both Comp', color: '#94a3b8', count: ccCount }
     ];
     
-    const catStartX = padding + 90;
-    categories.forEach((cat, i) => {
-        const x = catStartX + i * 130;
-        
-        // Color swatch
+    categories.forEach(cat => {
         ctx.fillStyle = cat.color;
-        ctx.fillRect(x, legendY + 35, 14, 14);
+        ctx.fillRect(legendX + 15, ly - 12, 20, 20);
         ctx.strokeStyle = '#475569';
         ctx.lineWidth = 1;
-        ctx.strokeRect(x, legendY + 35, 14, 14);
+        ctx.strokeRect(legendX + 15, ly - 12, 20, 20);
         
-        // Label
         ctx.fillStyle = '#e2e8f0';
-        ctx.font = 'bold 10px monospace';
-        ctx.fillText(cat.code, x + 18, legendY + 45);
+        ctx.font = 'bold 14px monospace';
+        ctx.fillText(cat.code, legendX + 42, ly + 2);
+        
         ctx.fillStyle = '#94a3b8';
-        ctx.font = '9px system-ui';
-        ctx.fillText(cat.label, x + 38, legendY + 45);
+        ctx.font = '12px system-ui';
+        ctx.fillText(cat.label, legendX + 75, ly + 2);
+        
+        ctx.fillStyle = '#64748b';
+        ctx.font = '12px monospace';
+        ctx.fillText(`(${cat.count})`, legendX + 180, ly + 2);
+        
+        ly += 28;
     });
     
-    // Denom type legend
+    ly += 15;
+    
+    // Denominator Types
     ctx.fillStyle = '#a5b4fc';
-    ctx.font = 'bold 11px system-ui';
-    ctx.fillText('DENOM', padding + 10, legendY + 72);
+    ctx.font = 'bold 16px system-ui';
+    ctx.fillText('DENOMINATOR', legendX + 15, ly);
+    ly += 25;
     
     const denomTypes = [
-        { label: 'Prime (m)', color: '#f59e0b' },
-        { label: 'Composite (m)', color: '#6366f1' }
+        { label: 'Prime (m)', color: '#f59e0b', count: primeM },
+        { label: 'Composite (m)', color: '#6366f1', count: compM }
     ];
     
-    const denomStartX = padding + 70;
-    denomTypes.forEach((dt, i) => {
-        const x = denomStartX + i * 130;
-        
+    denomTypes.forEach(dt => {
         ctx.fillStyle = dt.color;
-        ctx.fillRect(x, legendY + 62, 14, 14);
+        ctx.fillRect(legendX + 15, ly - 12, 20, 20);
         ctx.strokeStyle = '#475569';
         ctx.lineWidth = 1;
-        ctx.strokeRect(x, legendY + 62, 14, 14);
+        ctx.strokeRect(legendX + 15, ly - 12, 20, 20);
         
         ctx.fillStyle = '#e2e8f0';
-        ctx.font = '10px system-ui';
-        ctx.fillText(dt.label, x + 18, legendY + 72);
+        ctx.font = '13px system-ui';
+        ctx.fillText(dt.label, legendX + 42, ly + 2);
+        
+        ctx.fillStyle = '#64748b';
+        ctx.font = '12px monospace';
+        ctx.fillText(`(${dt.count})`, legendX + 180, ly + 2);
+        
+        ly += 28;
     });
     
-    // Draw Error Chart below legend
+    // ===== ERROR CHART (Below canvas if exists) =====
     if (hasErrorChart) {
-        const chartY = legendY + legendHeight + 5;
+        const chartY = padding + titleHeight + scaledCanvasHeight + 30;
+        const chartHeight = 250;
+        const chartWidth = scaledCanvasWidth;
         
-        // Chart title
-        ctx.fillStyle = '#a78bfa';
-        ctx.font = 'bold 12px system-ui';
-        ctx.fillText('RELATIVE ERROR %', padding + 10, chartY + 15);
-        
-        // Draw the error chart
-        ctx.drawImage(errorChart, padding, chartY + 20, leftContentWidth, errorChartHeight - 30);
-    }
-    
-    // Add solver data on the right if visible
-    if (hasSolver) {
-        const solverX = leftContentWidth + padding * 2;
-        const solverY = padding;
-        const panelWidth = solverPanelWidth - padding;
-        const panelHeight = solverPanelHeight;
-        
-        // Read all values from DOM
-        const bestFrac = document.getElementById('solverBestFrac')?.textContent || '-';
-        const decimal = document.getElementById('solverBestDecimal')?.textContent || '-';
-        const error = document.getElementById('solverError')?.textContent || '-';
-        const sector = document.getElementById('solverSector')?.textContent || '-';
-        const category = document.getElementById('solverCategory')?.textContent || '-';
-        const categoryColor = document.getElementById('solverCategory')?.style.color || '#94a3b8';
-        const denomType = document.getElementById('solverDenomType')?.textContent || '-';
-        const denomTypeColor = document.getElementById('solverDenomType')?.style.color || '#94a3b8';
-        const cf = document.getElementById('solverCF')?.textContent || '-';
-        const gear = document.getElementById('solverGear')?.textContent || '-';
-        const path = document.getElementById('solverPath')?.textContent || '-';
-        
-        // Solver panel background
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(solverX, solverY, panelWidth, panelHeight);
-        ctx.strokeStyle = '#10b981';
+        ctx.fillStyle = '#1e1b4b';
+        ctx.fillRect(padding, chartY, chartWidth, chartHeight);
+        ctx.strokeStyle = '#a78bfa';
         ctx.lineWidth = 2;
-        ctx.strokeRect(solverX, solverY, panelWidth, panelHeight);
+        ctx.strokeRect(padding, chartY, chartWidth, chartHeight);
         
-        // Header bar
-        ctx.fillStyle = '#064e3b';
-        ctx.fillRect(solverX + 2, solverY + 2, panelWidth - 4, 32);
+        ctx.fillStyle = '#a78bfa';
+        ctx.font = 'bold 16px system-ui';
+        ctx.fillText('RELATIVE ERROR %', padding + 15, chartY + 25);
         
-        // Title
-        ctx.fillStyle = '#6ee7b7';
-        ctx.font = 'bold 13px system-ui';
-        ctx.fillText('TARGET RATIO SOLVER', solverX + 12, solverY + 22);
-        
-        let y = solverY + 50;
-        const x = solverX + 12;
-        const lineHeight = 22;
-        
-        // Helper to draw a labeled value
-        const drawField = (label, value, valueColor = '#e2e8f0', fontSize = 14) => {
-            ctx.fillStyle = '#6ee7b7';
-            ctx.font = '10px system-ui';
-            ctx.fillText(label, x, y);
-            ctx.fillStyle = valueColor;
-            ctx.font = `${fontSize}px monospace`;
-            const maxLen = Math.floor((panelWidth - 24) / (fontSize * 0.6));
-            const displayVal = value.length > maxLen ? value.substring(0, maxLen - 3) + '...' : value;
-            ctx.fillText(displayVal, x, y + 14);
-            y += lineHeight + 10;
-        };
-        
-        // Best Match (large)
-        ctx.fillStyle = '#6ee7b7';
-        ctx.font = '10px system-ui';
-        ctx.fillText('BEST MATCH', x, y);
-        ctx.fillStyle = '#f0fdf4';
-        ctx.font = 'bold 28px monospace';
-        ctx.fillText(bestFrac, x, y + 28);
-        y += 42;
-        
-        // Decimal Value
-        drawField('DECIMAL VALUE', decimal, '#a7f3d0', 15);
-        
-        // Error
-        drawField('ERROR', error, '#fbbf24', 14);
-        
-        // Sector
-        drawField('SECTOR', sector, '#a78bfa', 14);
-        
-        // Category
-        drawField('CATEGORY', category, categoryColor, 14);
-        
-        // Denom Type
-        drawField('DENOM TYPE', denomType, denomTypeColor, 14);
-        
-        // Gear Ratio
-        drawField('GEAR RATIO', gear, '#f472b6', 14);
-        
-        // Continued Fraction (compact)
-        ctx.fillStyle = '#6ee7b7';
-        ctx.font = '10px system-ui';
-        ctx.fillText('CONTINUED FRACTION', x, y);
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '11px monospace';
-        const cfDisplay = cf.length > 55 ? cf.substring(0, 52) + '...' : cf;
-        ctx.fillText(cfDisplay, x, y + 12);
-        y += 26;
-        
-        // Path (compact)
-        ctx.fillStyle = '#6ee7b7';
-        ctx.font = '10px system-ui';
-        ctx.fillText('STERN-BROCOT PATH', x, y);
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '10px monospace';
-        const pathDisplay = path.length > 65 ? path.substring(0, 62) + '...' : path;
-        ctx.fillText(pathDisplay, x, y + 12);
-        y += 30;
-        
-        // Alternatives Table - using pre-extracted data
-        if (alternativesData.length > 0) {
-            // Header bar for alternatives
-            ctx.fillStyle = '#064e3b';
-            ctx.fillRect(solverX + 2, y - 2, panelWidth - 4, 22);
-            ctx.fillStyle = '#6ee7b7';
-            ctx.font = 'bold 11px system-ui';
-            ctx.fillText(`ALTERNATIVES WITHIN TOLERANCE (${alternativesData.length})`, x, y + 12);
-            y += 28;
-            
-            // Table header
-            ctx.fillStyle = '#6ee7b7';
-            ctx.font = 'bold 9px system-ui';
-            ctx.fillText('Fraction', x, y);
-            ctx.fillText('Decimal', x + 70, y);
-            ctx.fillText('Error', x + 150, y);
-            ctx.fillText('Sector', x + 220, y);
-            ctx.fillText('Type', x + 290, y);
-            y += 12;
-            
-            // Draw separator line
-            ctx.strokeStyle = '#334155';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(solverX + panelWidth - 12, y);
-            ctx.stroke();
-            y += 8;
-            
-            // Table rows
-            const maxRowsToShow = 25;
-            const rowsToShow = Math.min(alternativesData.length, maxRowsToShow);
-            
-            for (let i = 0; i < rowsToShow; i++) {
-                const alt = alternativesData[i];
-                
-                // Highlight best match row
-                if (alt.isBest) {
-                    ctx.fillStyle = 'rgba(16,185,129,0.25)';
-                    ctx.fillRect(x - 4, y - 10, panelWidth - 16, 16);
-                }
-                
-                ctx.font = '10px monospace';
-                ctx.fillStyle = alt.isBest ? '#f0fdf4' : '#e2e8f0';
-                ctx.fillText(alt.frac, x, y);
-                ctx.fillStyle = '#a7f3d0';
-                ctx.fillText(alt.dec, x + 70, y);
-                ctx.fillStyle = '#fbbf24';
-                ctx.fillText(alt.err, x + 150, y);
-                ctx.fillStyle = '#a78bfa';
-                ctx.fillText(alt.sec, x + 220, y);
-                ctx.fillStyle = alt.typColor;
-                ctx.fillText(alt.typ, x + 290, y);
-                
-                y += 18;
-            }
-            
-            // Show "and X more" if truncated
-            if (alternativesData.length > maxRowsToShow) {
-                ctx.fillStyle = '#64748b';
-                ctx.font = 'italic 9px system-ui';
-                ctx.fillText(`... and ${alternativesData.length - maxRowsToShow} more alternatives`, x, y + 5);
-            }
-        }
+        ctx.drawImage(errorChart, padding + 10, chartY + 35, chartWidth - 20, chartHeight - 45);
     }
     
-    // Add metadata text at bottom
-    ctx.fillStyle = '#64748b';
-    ctx.font = '12px monospace';
-    const info = `N=${state.nMax} | Sectors ${state.sectorMin}-${state.sectorMax} | ${new Date().toISOString().slice(0,10)} | @7dview`;
-    ctx.fillText(info, padding, tempCanvas.height - 8);
-    
-    // Show in overlay for preview/download
-    currentScreenshotData = tempCanvas.toDataURL('image/png');
-    const preview = document.getElementById('screenshotPreview');
-    if (preview) {
-        preview.src = currentScreenshotData;
-        document.getElementById('screenshotOverlay').classList.add('active');
-    } else {
-        // Direct download if overlay not available
-        const link = document.createElement('a');
-        link.download = `farey_ring_N${state.nMax}_${Date.now()}.png`;
-        link.href = currentScreenshotData;
-        link.click();
-    }
+    // Download
+    const link = document.createElement('a');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    link.download = `farey_analysis_${showAll ? 'all' : 'S'+currentSector}_N${state.nMax}_${timestamp}.png`;
+    link.href = tempCanvas.toDataURL('image/png');
+    link.click();
 }
 
 function screenshotFullTab(tabName) {
@@ -3649,7 +3627,7 @@ function screenshotFullTab(tabName) {
             ]
         },
         'theory': {
-            title: 'Farey Sector Density Theory',
+            title: 'Farey Summatory Function Theory',
             formula: 'C(n, N) ~ (3/π²) · N² / n(n+1)',
             description: 'Distribution of coprime integer pairs with bounded height',
             params: ['Summatory totient ~ 3N²/π²', 'Global density: 1/ζ(2) = 6/π²', 'Visible lattice points']
@@ -3657,7 +3635,7 @@ function screenshotFullTab(tabName) {
         'theoryviz': {
             title: 'Theory Visualization',
             formula: 'C(n, N) = 3N² / (π² n(n+1))',
-            description: 'Visual exploration of the Farey Sector Density Theorem',
+            description: 'Visual exploration of the Farey Summatory Function Theorem',
             params: ['Summatory totient: Σφ(b) ~ 3N²/π²', 'Sector partition of (0,1]', 'Convergence analysis']
         },
         'gaps': {
@@ -3723,7 +3701,7 @@ function screenshotFullTab(tabName) {
     ctx.fillStyle = '#f8fafc';
     ctx.font = 'bold 24px system-ui';
     ctx.textAlign = 'left';
-    ctx.fillText('Farey Sector Formula - ' + info.title, padding, currentY + 30);
+    ctx.fillText('Farey Summatory Function - ' + info.title, padding, currentY + 30);
     
     ctx.font = '12px system-ui';
     ctx.fillStyle = '#a5b4fc';
@@ -4066,7 +4044,7 @@ function screenshotFullTab(tabName) {
     ctx.fillStyle = '#475569';
     ctx.font = '10px system-ui';
     ctx.textAlign = 'center';
-    ctx.fillText('Farey Sector Research Platform | @7dview | wessengetachew.github.io', totalWidth / 2, totalHeight - 15);
+    ctx.fillText('Farey Summatory Function Platform | @7dview | wessengetachew.github.io', totalWidth / 2, totalHeight - 15);
     
     currentScreenshotData = composite.toDataURL('image/png');
     document.getElementById('screenshotPreview').src = currentScreenshotData;
@@ -4166,7 +4144,7 @@ async function screenshotHorizonTab() {
         ctx.fillStyle = '#64748b';
         ctx.font = '14px system-ui';
         ctx.textAlign = 'center';
-        ctx.fillText('Farey Sector Research Platform | @7dview | wessengetachew.github.io', finalCanvas.width / 2, finalCanvas.height - 15);
+        ctx.fillText('Farey Summatory Function Platform | @7dview | wessengetachew.github.io', finalCanvas.width / 2, finalCanvas.height - 15);
         
         currentScreenshotData = finalCanvas.toDataURL('image/png');
         document.getElementById('screenshotPreview').src = currentScreenshotData;
@@ -7149,14 +7127,56 @@ function drawMainRing() {
         });
     }
     
-    // Simple fraction labels for all points when enabled (limited to avoid clutter)
-    if (showFractionLabels && state.ringPoints.length <= 500) {
-        ctx.font = '8px system-ui';
+    // Simple fraction labels for all points when enabled (with new controls)
+    if (showFractionLabels) {
+        const labelType = document.getElementById('labelType')?.value || 'fraction';
+        const labelSize = parseInt(document.getElementById('labelSize')?.value) || 10;
+        const maxLabels = parseInt(document.getElementById('maxLabels')?.value) || 50;
+        const labelMinDenom = parseInt(document.getElementById('labelMinDenom')?.value) || 1;
+        const specificLabelsInput = document.getElementById('specificLabels')?.value || '';
+        
+        ctx.font = `${labelSize}px system-ui`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
-        state.ringPoints.forEach(p => {
-            ctx.fillStyle = 'rgba(226, 232, 240, 0.8)';
-            ctx.fillText(`${p.r}/${p.m}`, p.x, p.y - finalPointSize - 1);
+        
+        // Parse specific labels (format: "1/2,3/5,2/7")
+        const specificFractions = new Set();
+        if (specificLabelsInput.trim()) {
+            specificLabelsInput.split(',').forEach(frac => {
+                const match = frac.trim().match(/^(\d+)\s*\/\s*(\d+)$/);
+                if (match) {
+                    specificFractions.add(`${match[1]}/${match[2]}`);
+                }
+            });
+        }
+        
+        // Filter and limit points to label
+        let pointsToLabel;
+        if (specificFractions.size > 0) {
+            // Only label specific fractions
+            pointsToLabel = state.ringPoints.filter(p => specificFractions.has(`${p.r}/${p.m}`));
+        } else {
+            // Use general filtering
+            pointsToLabel = state.ringPoints
+                .filter(p => p.m >= labelMinDenom)
+                .slice(0, maxLabels);
+        }
+        
+        pointsToLabel.forEach(p => {
+            let labelText;
+            if (labelType === 'r') {
+                labelText = `${p.r}`;
+            } else if (labelType === 'm') {
+                labelText = `${p.m}`;
+            } else if (labelType === 'degree') {
+                const degrees = ((p.r / p.m) * 360).toFixed(1);
+                labelText = `${degrees}°`;
+            } else { // fraction
+                labelText = `${p.r}/${p.m}`;
+            }
+            
+            ctx.fillStyle = 'rgba(226, 232, 240, 0.9)';
+            ctx.fillText(labelText, p.x, p.y - finalPointSize - 2);
         });
     }
     
@@ -7514,6 +7534,48 @@ function clearTracker() {
     document.getElementById('trackerModFilter').value = '';
     drawMainRing();
 }
+
+function trackPrimesInRange() {
+    const start = parseInt(document.getElementById('primeSearchStart')?.value) || 1;
+    const end = parseInt(document.getElementById('primeSearchEnd')?.value) || state.nMax;
+    
+    if (start < 1 || end < start || end > state.nMax) {
+        alert(`Invalid range. Please enter values between 1 and ${state.nMax}`);
+        return;
+    }
+    
+    // Find all primes in range [start, end]
+    const primesInRange = [];
+    for (let n = start; n <= end; n++) {
+        if (isPrime(n)) {
+            primesInRange.push(n);
+        }
+    }
+    
+    if (primesInRange.length === 0) {
+        alert(`No primes found in range [${start}, ${end}]`);
+        return;
+    }
+    
+    // Enable tracker
+    document.getElementById('enableResidueTracker').checked = true;
+    
+    // Track all residues in the range
+    document.getElementById('trackResidues').value = `1-${end}`;
+    
+    // Use the point filter to show only prime denominators in the range
+    document.getElementById('pointFilter').value = 'prime_denom';
+    document.getElementById('minDenomFilter').value = start.toString();
+    document.getElementById('maxDenomFilter').value = end.toString();
+    
+    // Reset the mod filter dropdown to empty
+    document.getElementById('trackerModFilter').value = '';
+    
+    drawMainRing();
+    
+    alert(`Highlighting ${primesInRange.length} primes in range [${start}, ${end}]:\n${primesInRange.slice(0, 20).join(', ')}${primesInRange.length > 20 ? '...' : ''}`);
+}
+
 
 function resetFilters() {
     document.getElementById('pointFilter').value = 'all';
@@ -7914,6 +7976,11 @@ function viewPointOnAll(r, m, sector) {
     document.getElementById('trackerColor').value = '#10b981';
     document.getElementById('trackerGlow').checked = true;
     document.getElementById('trackerSize').value = solverPtSize;
+    
+    // Update solver input with the clicked fraction's decimal value
+    const decimalValue = (r / m).toFixed(6);
+    document.getElementById('solverInput').value = decimalValue;
+    solverSearch(decimalValue);
     
     drawMainRing();
 }
@@ -11894,7 +11961,7 @@ function runBatchSweep() {
 }
 
 function exportLatexFigures() {
-    const latex = `% Farey Sector Analysis - LaTeX Export
+    const latex = `% Farey Summatory Analysis - LaTeX Export
 % Generated: ${new Date().toISOString()}
 % Parameters: N=${state.nMax}, Sectors=${state.sectorMin}-${state.sectorMax}
 
@@ -11928,7 +11995,7 @@ For the Farey sequence $F_N$:
 
 function exportCSVAll() {
     // Header with formula, legend, and description
-    let csv = '# Farey Sector Analysis Export\n';
+    let csv = '# Farey Summatory Analysis Export\n';
     csv += '# Generated: ' + new Date().toISOString() + '\n';
     csv += '#\n';
     csv += '# PARAMETERS\n';
@@ -12024,7 +12091,7 @@ async function exportFocused4K() {
     ctx.fillStyle = '#f8fafc';
     ctx.font = 'bold 60px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(`Farey Sector Analysis - N=${state.nMax.toLocaleString()}`, baseWidth / 2, 70);
+    ctx.fillText(`Farey Summatory Analysis - N=${state.nMax.toLocaleString()}`, baseWidth / 2, 70);
     
     ctx.font = '30px Arial';
     ctx.fillStyle = '#94a3b8';
@@ -12246,7 +12313,7 @@ async function exportFocused4K() {
     ctx.fillStyle = '#475569';
     ctx.font = '24px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('Farey Sector Research Platform | @7dview | wessengetachew.github.io', baseWidth / 2, baseHeight - 30);
+    ctx.fillText('Farey Summatory Function Platform | @7dview | wessengetachew.github.io', baseWidth / 2, baseHeight - 30);
     
     // Download
     const link = document.createElement('a');
@@ -19059,7 +19126,7 @@ function exportChartWithSectorData(chartId, title, type) {
     ctx.fillStyle = '#475569';
     ctx.font = '20px system-ui';
     ctx.textAlign = 'center';
-    ctx.fillText('Farey Sector Research Platform | @7dview | wessengetachew.github.io | ' + new Date().toISOString().slice(0,10), width/2, height - 30);
+    ctx.fillText('Farey Summatory Function Platform | @7dview | wessengetachew.github.io | ' + new Date().toISOString().slice(0,10), width/2, height - 30);
     
     // Download
     const link = document.createElement('a');
@@ -19164,7 +19231,7 @@ function executeSectorExport() {
     ctx.fillStyle = '#e2e8f0';
     ctx.font = 'bold 48px system-ui';
     ctx.textAlign = 'center';
-    ctx.fillText(`Farey Sector Data - N=${state.nMax} - Sectors ${startSector}-${endSector}`, width/2, 60);
+    ctx.fillText(`Farey Summatory Function Data - N=${state.nMax} - Sectors ${startSector}-${endSector}`, width/2, 60);
     
     let yOffset = 100;
     
@@ -19253,7 +19320,7 @@ function executeSectorExport() {
     ctx.fillStyle = '#475569';
     ctx.font = '20px system-ui';
     ctx.textAlign = 'center';
-    ctx.fillText('Farey Sector Research Platform | @7dview | wessengetachew.github.io | ' + new Date().toISOString().slice(0,10), width/2, height - 30);
+    ctx.fillText('Farey Summatory Function Platform | @7dview | wessengetachew.github.io | ' + new Date().toISOString().slice(0,10), width/2, height - 30);
     
     // Download
     const link = document.createElement('a');
@@ -19262,6 +19329,187 @@ function executeSectorExport() {
     link.click();
     
     closeSectorExportDialog();
+}
+
+
+// ==================== CALCULATOR TAB FUNCTIONS ====================
+
+let calcData = [];
+
+function calculateSummatoryTotient() {
+    const N = parseInt(document.getElementById('calcN').value);
+    const showSteps = parseInt(document.getElementById('calcShowSteps').value);
+    
+    if (N < 1 || N > 10000) {
+        alert('Please enter N between 1 and 10000');
+        return;
+    }
+    
+    calcData = [];
+    let cumulativeSum = 0;
+    
+    // Calculate for each k from 1 to N
+    for (let k = 1; k <= N; k++) {
+        const phiK = eulerPhi(k);
+        cumulativeSum += phiK;
+        
+        const formulaEst = (3 / (Math.PI * Math.PI)) * k * k;
+        const error = ((cumulativeSum - formulaEst) / cumulativeSum) * 100;
+        
+        calcData.push({
+            k: k,
+            phi: phiK,
+            cumulative: cumulativeSum,
+            formula: formulaEst,
+            error: error,
+            factors: primeFactorization(k)
+        });
+    }
+    
+    // Display results
+    displayCalcResults(N, showSteps);
+}
+
+function displayCalcResults(N, showSteps) {
+    document.getElementById('calcResults').style.display = 'block';
+    
+    const finalData = calcData[calcData.length - 1];
+    
+    // Summary
+    document.getElementById('calcResultN').textContent = N.toLocaleString();
+    document.getElementById('calcResultExact').textContent = finalData.cumulative.toLocaleString();
+    document.getElementById('calcResultFormula').textContent = finalData.formula.toFixed(2);
+    document.getElementById('calcResultError').textContent = finalData.error.toFixed(4) + '%';
+    
+    // Step-by-step (limited)
+    let stepsHTML = '<div style="font-family:monospace;color:#e2e8f0;">';
+    const limit = Math.min(showSteps, calcData.length);
+    
+    for (let i = 0; i < limit; i++) {
+        const d = calcData[i];
+        stepsHTML += `
+            <div style="padding:10px;margin-bottom:10px;background:#1e1b4b;border-radius:4px;border-left:3px solid #06b6d4;">
+                <div style="color:#06b6d4;font-weight:bold;margin-bottom:5px;">Step ${d.k}: k = ${d.k}</div>
+                <div style="margin-left:15px;line-height:1.8;">
+                    <div>φ(${d.k}) = ${d.phi} <span style="color:#94a3b8;font-size:11px;">(${d.factors})</span></div>
+                    <div>Σφ(i) for i=1 to ${d.k} = ${d.cumulative}</div>
+                    <div>Formula estimate = (3/π²) × ${d.k}² = ${d.formula.toFixed(2)}</div>
+                    <div style="color:${Math.abs(d.error) < 1 ? '#22c55e' : Math.abs(d.error) < 5 ? '#f59e0b' : '#ef4444'};">
+                        Error = ${d.error.toFixed(4)}%
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (calcData.length > showSteps) {
+        stepsHTML += `<div style="text-align:center;color:#94a3b8;padding:10px;">... ${calcData.length - showSteps} more steps (see table below)</div>`;
+    }
+    
+    stepsHTML += '</div>';
+    document.getElementById('calcSteps').innerHTML = stepsHTML;
+    
+    // Full table
+    let tableHTML = '';
+    for (let i = 0; i < calcData.length; i++) {
+        const d = calcData[i];
+        const rowColor = i % 2 === 0 ? '#0f172a' : '#1e1b4b';
+        const errorColor = Math.abs(d.error) < 1 ? '#22c55e' : Math.abs(d.error) < 5 ? '#f59e0b' : '#ef4444';
+        
+        tableHTML += `
+            <tr style="background:${rowColor};border-bottom:1px solid #334155;">
+                <td style="padding:8px;color:#e2e8f0;">${d.k}</td>
+                <td style="padding:8px;color:#8b5cf6;font-weight:bold;">${d.phi}</td>
+                <td style="padding:8px;color:#06b6d4;font-weight:bold;">${d.cumulative.toLocaleString()}</td>
+                <td style="padding:8px;color:#f59e0b;">${d.formula.toFixed(2)}</td>
+                <td style="padding:8px;color:${errorColor};font-weight:bold;">${d.error.toFixed(4)}%</td>
+                <td style="padding:8px;color:#94a3b8;font-size:11px;">${d.factors}</td>
+            </tr>
+        `;
+    }
+    
+    document.getElementById('calcTableBody').innerHTML = tableHTML;
+    
+    // Scroll to results
+    document.getElementById('calcResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function primeFactorization(n) {
+    if (n === 1) return '1';
+    
+    const factors = [];
+    let temp = n;
+    
+    for (let i = 2; i <= temp; i++) {
+        let count = 0;
+        while (temp % i === 0) {
+            count++;
+            temp /= i;
+        }
+        if (count > 0) {
+            factors.push(count > 1 ? `${i}^${count}` : `${i}`);
+        }
+    }
+    
+    return factors.length > 0 ? factors.join(' × ') : String(n);
+}
+
+function exportCalcData() {
+    if (calcData.length === 0) {
+        alert('Please calculate first');
+        return;
+    }
+    
+    let csv = 'k,phi(k),Cumulative_Sum,Formula_Estimate,Relative_Error_%,Factorization\n';
+    
+    for (const d of calcData) {
+        csv += `${d.k},${d.phi},${d.cumulative},${d.formula.toFixed(6)},${d.error.toFixed(6)},"${d.factors}"\n`;
+    }
+    
+    // Add summary at bottom
+    csv += '\n# Summary\n';
+    csv += `# N = ${calcData[calcData.length - 1].k}\n`;
+    csv += `# Exact Sum = ${calcData[calcData.length - 1].cumulative}\n`;
+    csv += `# Formula = ${calcData[calcData.length - 1].formula.toFixed(6)}\n`;
+    csv += `# Error = ${calcData[calcData.length - 1].error.toFixed(6)}%\n`;
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `summatory_totient_N${calcData[calcData.length - 1].k}_${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function exportCalcDataJSON() {
+    if (calcData.length === 0) {
+        alert('Please calculate first');
+        return;
+    }
+    
+    const exportData = {
+        metadata: {
+            N: calcData[calcData.length - 1].k,
+            formula: 'Σφ(k) = (3/π²) × N² + O(N log N)',
+            timestamp: new Date().toISOString()
+        },
+        summary: {
+            exactSum: calcData[calcData.length - 1].cumulative,
+            formulaEstimate: calcData[calcData.length - 1].formula,
+            relativeError: calcData[calcData.length - 1].error
+        },
+        data: calcData
+    };
+    
+    const json = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `summatory_totient_N${calcData[calcData.length - 1].k}_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 </script>
