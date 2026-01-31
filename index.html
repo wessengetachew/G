@@ -3387,8 +3387,8 @@ function screenshotMainCanvas() {
     const errorChart = document.getElementById('mainErrorChart');
     const hasErrorChart = errorChart && state.sectors.some(s => s.relError !== null);
     
-    // Adjusted layout: Smaller canvas on left, much larger legend on right with all info
-    const canvasScale = 0.65;  // Reduced further to make room for larger legend
+    // Full-size canvas on left, legend on right
+    const canvasScale = 1.0;
     const scaledCanvasWidth = canvas.width * canvasScale;
     const scaledCanvasHeight = canvas.height * canvasScale;
     
@@ -3413,10 +3413,10 @@ function screenshotMainCanvas() {
     const formulaHeight = 165;
     const totalCanvasHeight = scaledCanvasHeight + errorChartHeight + solverHeight + formulaHeight;
     
-    // Create a temporary canvas
+    // Create a temporary canvas - use scaledCanvasHeight for the actual output
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = scaledCanvasWidth + legendWidth + padding * 3;
-    tempCanvas.height = Math.max(scaledCanvasHeight, totalCanvasHeight) + padding * 2;
+    tempCanvas.height = scaledCanvasHeight + padding * 2;
     const ctx = tempCanvas.getContext('2d');
     
     // Dark background
@@ -3445,7 +3445,8 @@ function screenshotMainCanvas() {
     // ===== COMPREHENSIVE LEGEND (Right side with ALL information) =====
     const legendX = padding * 2 + scaledCanvasWidth;
     const legendY = padding;
-    const legendHeight = totalCanvasHeight;
+    // Make sure legend height matches the canvas height (not totalCanvasHeight)
+    const legendHeight = scaledCanvasHeight;
     
     // Legend background with gradient
     const gradient = ctx.createLinearGradient(legendX, legendY, legendX, legendY + legendHeight);
@@ -3828,53 +3829,31 @@ function screenshotMainCanvas() {
     
     // Formula background
     ctx.fillStyle = '#0f172a';
-    ctx.fillRect(legendX + 20, ly, legendWidth - 40, 110);
+    ctx.fillRect(legendX + 20, ly, legendWidth - 40, 130);
     ctx.strokeStyle = '#22c55e';
     ctx.lineWidth = 2;
-    ctx.strokeRect(legendX + 20, ly, legendWidth - 40, 110);
+    ctx.strokeRect(legendX + 20, ly, legendWidth - 40, 130);
     
-    // General formula
-    ctx.fillStyle = '#c7d2fe';
-    ctx.font = 'bold 14px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('C(n,N) ~ (3/π²) × N² / (n(n+1))', legendX + legendWidth / 2, ly + 25);
+    // Title: Farey Summatory Function
+    ctx.fillStyle = '#a78bfa';
+    ctx.font = 'bold 15px system-ui';
     ctx.textAlign = 'left';
+    ctx.fillText('Farey Summatory Function', legendX + 30, ly + 24);
     
-    // Divider
-    ctx.strokeStyle = '#334155';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(legendX + 30, ly + 40);
-    ctx.lineTo(legendX + legendWidth - 50, ly + 40);
-    ctx.stroke();
+    // Main formula: C(n,N) = 3N² / (π² n(n+1))
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = 'bold 22px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('C(n,N)  =  3N²  /  (π²  n(n+1))', legendX + legendWidth / 2, ly + 68);
     
-    // With actual values
+    // Sector definition: Sₙ = (1/(n+1), 1/n]
     ctx.fillStyle = '#94a3b8';
-    ctx.font = '11px system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText('With Current Parameters:', legendX + legendWidth / 2, ly + 58);
+    ctx.font = '14px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('Sector Sₙ = (1/(n+1), 1/n]', legendX + 30, ly + 108);
     ctx.textAlign = 'left';
     
-    // Calculate with actual values
-    const currentN = state.nMax;
-    const coeff = 3 / (Math.PI * Math.PI);
-    
-    ctx.fillStyle = '#22c55e';
-    ctx.font = 'bold 12px monospace';
-    ctx.textAlign = 'center';
-    
-    if (showAll) {
-        ctx.fillText(`N = ${currentN}`, legendX + legendWidth / 2, ly + 78);
-        ctx.fillText(`(3/π²) ≈ ${coeff.toFixed(6)}`, legendX + legendWidth / 2, ly + 95);
-    } else {
-        const n = currentSector;
-        const estimate = (coeff * currentN * currentN) / (n * (n + 1));
-        ctx.fillText(`n = ${n}, N = ${currentN}`, legendX + legendWidth / 2, ly + 75);
-        ctx.fillText(`C(${n},${currentN}) ≈ ${estimate.toFixed(2)}`, legendX + legendWidth / 2, ly + 95);
-    }
-    ctx.textAlign = 'left';
-    
-    // Download
+    // Download - use the full canvas without trimming
     const link = document.createElement('a');
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     link.download = `farey_analysis_${showAll ? 'all' : 'S'+currentSector}_N${state.nMax}_${timestamp}.png`;
