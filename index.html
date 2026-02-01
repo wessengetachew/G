@@ -765,8 +765,13 @@
                     </select></label>
                 </div>
             </div>
-            <div style="display:flex;gap:8px;">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                 <button onclick="toggleAdvancedControls()" class="secondary" style="padding:8px 12px;">Advanced ▼</button>
+                <div style="display:flex;align-items:center;gap:8px;background:#0f172a;padding:6px 12px;border-radius:6px;border:1px solid #334155;">
+                    <label style="font-size:11px;color:#94a3b8;">Canvas Size:</label>
+                    <input type="range" id="screenshotCanvasScale" min="30" max="100" value="70" step="5" style="width:100px;" oninput="updateCanvasScaleDisplay(this.value)">
+                    <span id="canvasScaleDisplay" style="color:#8b5cf6;font-size:11px;font-weight:600;min-width:40px;">70%</span>
+                </div>
                 <button onclick="screenshotMainCanvas()" class="secondary" style="padding:8px 12px;">Screenshot</button>
             </div>
         </div>
@@ -1250,6 +1255,17 @@
                     <button class="secondary" onclick="zoomCountChart('out')" style="font-size:10px;padding:3px 6px;" title="Zoom out">-</button>
                     <span style="font-size:9px;color:#64748b;margin-left:8px;">Scroll to zoom, drag to pan</span>
                 </h4>
+                <div style="margin-bottom:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <label style="color:#94a3b8;font-size:11px;">Crossover Points:</label>
+                    <button class="secondary" onclick="goToPreviousCountFlip()" style="font-size:10px;padding:3px 8px;" title="Previous crossover">◀ Prev</button>
+                    <button id="countFlipAnimateBtn" onclick="toggleCountFlipAnimation()" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:3px 8px;cursor:pointer;font-size:10px;">▶ Animate</button>
+                    <button class="secondary" onclick="goToNextCountFlip()" style="font-size:10px;padding:3px 8px;" title="Next crossover">Next ▶</button>
+                    <label style="color:#94a3b8;font-size:10px;margin-left:8px;">Speed:
+                        <input type="number" id="countFlipAnimSpeed" min="500" max="5000" value="2000" step="100" style="width:60px;padding:2px 4px;font-size:10px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;text-align:center;" title="ms between flips">
+                        <span style="color:#64748b;font-size:9px;">ms</span>
+                    </label>
+                    <span id="countFlipInfo" style="color:#22c55e;font-size:10px;font-family:monospace;margin-left:8px;"></span>
+                </div>
                 <canvas id="mainCountChart"></canvas>
             </div>
             <div class="chart-box chart-wrapper">
@@ -1273,6 +1289,16 @@
                         <option value="representative">Representative Fraction</option>
                     </select>
                     <span style="color:#64748b;font-size:10px;" id="errorModeHint">Higher error → higher pitch</span>
+                    <span style="border-left:1px solid #475569;margin:0 8px;height:20px;"></span>
+                    <label style="color:#94a3b8;font-size:11px;">Zero Crossings:</label>
+                    <button class="secondary" onclick="goToPreviousFlip()" style="font-size:10px;padding:3px 8px;" title="Previous sign flip">◀ Prev</button>
+                    <button id="flipAnimateBtn" onclick="toggleFlipAnimation()" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:4px;color:white;padding:3px 8px;cursor:pointer;font-size:10px;">▶ Animate</button>
+                    <button class="secondary" onclick="goToNextFlip()" style="font-size:10px;padding:3px 8px;" title="Next sign flip">Next ▶</button>
+                    <label style="color:#94a3b8;font-size:10px;margin-left:8px;">Speed:
+                        <input type="number" id="flipAnimSpeed" min="500" max="5000" value="2000" step="100" style="width:60px;padding:2px 4px;font-size:10px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;text-align:center;" title="ms between flips">
+                        <span style="color:#64748b;font-size:9px;">ms</span>
+                    </label>
+                    <span id="flipInfo" style="color:#fbbf24;font-size:10px;font-family:monospace;margin-left:8px;"></span>
                 </div>
                 <canvas id="mainErrorChart"></canvas>
             </div>
@@ -3364,6 +3390,11 @@ function viewSectorOnRing(n) {
     drawMainRing();
 }
 
+// Update canvas scale display
+function updateCanvasScaleDisplay(value) {
+    document.getElementById('canvasScaleDisplay').textContent = value + '%';
+}
+
 // Simple canvas-only screenshot
 function screenshotCanvas(canvasId) {
     const canvas = document.getElementById(canvasId);
@@ -3387,12 +3418,14 @@ function screenshotMainCanvas() {
     const errorChart = document.getElementById('mainErrorChart');
     const hasErrorChart = errorChart && state.sectors.some(s => s.relError !== null);
     
-    // Full-size canvas on left, legend on right
-    const canvasScale = 1.0;
+    // Get canvas scale from slider (default 70%)
+    const scalePercent = parseFloat(document.getElementById('screenshotCanvasScale')?.value || 70);
+    const canvasScale = scalePercent / 100;
     const scaledCanvasWidth = canvas.width * canvasScale;
     const scaledCanvasHeight = canvas.height * canvasScale;
     
-    const legendWidth = 580;  // Increased significantly to show 25+ sectors and all details
+    // Legend width increases as canvas decreases (inversely proportional)
+    const legendWidth = Math.max(580, 580 + (100 - scalePercent) * 8);  // More legend space as canvas shrinks
     
     // Calculate totals for identities
     const currentSector = +document.getElementById('viewSector').value;
@@ -3786,7 +3819,9 @@ function screenshotMainCanvas() {
         ctx.fillText('RELATIVE ERROR', legendX + 20, ly + 13);
         ly += 38;
         
-        const chartHeight = 220;
+        // Scale chart height with canvas scale
+        const baseChartHeight = 220;
+        const chartHeight = baseChartHeight * canvasScale;
         const chartWidth = legendWidth - 40;
         
         // Chart background
@@ -3851,6 +3886,100 @@ function screenshotMainCanvas() {
     ctx.font = '14px monospace';
     ctx.textAlign = 'left';
     ctx.fillText('Sector Sₙ = (1/(n+1), 1/n]', legendX + 30, ly + 108);
+    ctx.textAlign = 'left';
+    
+    ly += 145;
+    
+    // ===== ADDITIONAL STATISTICS SECTION =====
+    // Calculate remaining space and fill with useful info
+    const remainingSpace = legendHeight - (ly - legendY);
+    
+    if (remainingSpace > 100) {
+        // Add statistics section
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.2)';
+        ctx.fillRect(legendX + 10, ly - 5, legendWidth - 20, 28);
+        
+        ctx.fillStyle = '#06b6d4';
+        ctx.font = 'bold 15px system-ui';
+        ctx.fillText('STATISTICS', legendX + 20, ly + 13);
+        ly += 38;
+        
+        // Calculate some interesting statistics
+        const totalSectors = showAll ? Math.max(...residues.map(r => r.sector)) : 1;
+        const avgPerSector = (totalCount / totalSectors).toFixed(2);
+        const primeRatio = ((primeM / totalCount) * 100).toFixed(1);
+        const ppRatio = ((ppCount / totalCount) * 100).toFixed(1);
+        
+        // Statistics items
+        const stats = [
+            { label: 'Total Points', value: totalCount.toLocaleString(), color: '#e2e8f0' },
+            { label: 'Sectors Shown', value: showAll ? `1-${totalSectors}` : currentSector, color: '#a78bfa' },
+            { label: 'Avg per Sector', value: avgPerSector, color: '#22c55e' },
+            { label: 'Prime Denom %', value: primeRatio + '%', color: '#f59e0b' },
+            { label: 'Both Prime %', value: ppRatio + '%', color: '#22c55e' }
+        ];
+        
+        stats.forEach(stat => {
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '13px system-ui';
+            ctx.fillText(stat.label + ':', legendX + 20, ly);
+            
+            ctx.fillStyle = stat.color;
+            ctx.font = 'bold 14px monospace';
+            ctx.textAlign = 'right';
+            ctx.fillText(stat.value, legendX + legendWidth - 30, ly);
+            ctx.textAlign = 'left';
+            
+            ly += 26;
+        });
+        
+        ly += 15;
+    }
+    
+    // ===== MERTENS CONTEXT (if space remains) =====
+    const remainingSpace2 = legendHeight - (ly - legendY);
+    if (remainingSpace2 > 120) {
+        ctx.fillStyle = 'rgba(251, 191, 36, 0.2)';
+        ctx.fillRect(legendX + 10, ly - 5, legendWidth - 20, 28);
+        
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 14px system-ui';
+        ctx.fillText('THEORETICAL CONTEXT', legendX + 20, ly + 13);
+        ly += 38;
+        
+        // Add context text
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '11px system-ui';
+        const contextLines = [
+            'Mertens (1874): Asymptotic formula',
+            'for Farey sequence enumeration',
+            '',
+            'Franel-Landau (1924): Error term',
+            'connected to Riemann Hypothesis',
+            '',
+            'This analysis explores interval',
+            'structure of Farey rationals'
+        ];
+        
+        contextLines.forEach(line => {
+            ctx.fillText(line, legendX + 30, ly);
+            ly += 16;
+        });
+        
+        ly += 10;
+    }
+    
+    // ===== TIMESTAMP (at bottom) =====
+    const bottomY = legendY + legendHeight - 25;
+    ctx.fillStyle = 'rgba(99, 102, 241, 0.3)';
+    ctx.fillRect(legendX + 10, bottomY - 20, legendWidth - 20, 35);
+    
+    ctx.fillStyle = '#64748b';
+    ctx.font = '10px system-ui';
+    ctx.textAlign = 'center';
+    const now = new Date();
+    ctx.fillText('Generated: ' + now.toLocaleString(), legendX + legendWidth / 2, bottomY - 5);
+    ctx.fillText('Canvas Scale: ' + Math.round(canvasScale * 100) + '%', legendX + legendWidth / 2, bottomY + 8);
     ctx.textAlign = 'left';
     
     // Download - use the full canvas without trimming
@@ -6300,6 +6429,19 @@ function updateMainCharts() {
     if(hasExact) ds.unshift({label:'Exact',data:state.sectors.map(s=>s.exact),borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,0.1)',fill:true});
     state.charts.mainCount = new Chart(document.getElementById('mainCountChart'),{type:'line',data:{labels,datasets:ds},options:{responsive:true,plugins:{legend:{labels:{color:'#94a3b8'}},zoom:{zoom:{wheel:{enabled:true},pinch:{enabled:true},mode:'xy'},pan:{enabled:true,mode:'xy'}}},scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}}});
     
+    // Store chart instance globally for flip navigation
+    window.mainCountChartInstance = state.charts.mainCount;
+    
+    // Find count flips for navigation
+    if (hasExact) {
+        findCountFlips();
+        currentCountFlipIndex = -1; // Reset flip index
+        const flipInfoEl = document.getElementById('countFlipInfo');
+        if (flipInfoEl) {
+            flipInfoEl.textContent = countFlips.length > 0 ? `${countFlips.length} crossovers found` : 'No crossovers';
+        }
+    }
+    
     if(state.charts.mainError) state.charts.mainError.destroy();
     if(hasExact) {
         state.charts.mainError = new Chart(document.getElementById('mainErrorChart'),{
@@ -6352,6 +6494,14 @@ function updateMainCharts() {
                 }
             }
         });
+        
+        // Store chart instance globally for flip navigation
+        window.mainErrorChartInstance = state.charts.mainError;
+        
+        // Find error flips for navigation
+        findErrorFlips();
+        currentFlipIndex = -1; // Reset flip index
+        document.getElementById('flipInfo').textContent = errorFlips.length > 0 ? `${errorFlips.length} flips found` : 'No flips';
         
         // Add drag selection for region
         setupErrorChartSelection();
@@ -19660,6 +19810,332 @@ function exportErrorAnalysis() {
 // Export Error Chart with Sector Data
 function exportErrorChart() {
     exportChartWithSectorData('mainErrorChart', 'Relative Error %', 'error');
+}
+
+// Navigate to sign flips (zero crossings) in error chart
+let currentFlipIndex = -1;
+let errorFlips = [];
+
+function findErrorFlips() {
+    errorFlips = [];
+    const sectors = state.sectors.filter(s => s.relError !== null);
+    
+    for (let i = 0; i < sectors.length - 1; i++) {
+        const currentError = sectors[i].relError;
+        const nextError = sectors[i + 1].relError;
+        
+        // Check for sign change (crossing zero)
+        if ((currentError > 0 && nextError < 0) || (currentError < 0 && nextError > 0)) {
+            errorFlips.push({
+                index: i,
+                sector: sectors[i].n,
+                nextSector: sectors[i + 1].n,
+                fromError: currentError,
+                toError: nextError,
+                type: currentError > 0 ? 'pos→neg' : 'neg→pos'
+            });
+        }
+    }
+    
+    return errorFlips;
+}
+
+function goToNextFlip() {
+    if (errorFlips.length === 0) {
+        findErrorFlips();
+    }
+    
+    if (errorFlips.length === 0) {
+        alert('No sign flips found in current error data');
+        return;
+    }
+    
+    currentFlipIndex = (currentFlipIndex + 1) % errorFlips.length;
+    const flip = errorFlips[currentFlipIndex];
+    
+    // Highlight the flip region on the chart
+    highlightFlipRegion(flip);
+    updateFlipInfo(flip);
+}
+
+function goToPreviousFlip() {
+    // Stop animation if running (manual navigation)
+    if (isFlipAnimating) {
+        stopFlipAnimation();
+    }
+    
+    if (errorFlips.length === 0) {
+        findErrorFlips();
+    }
+    
+    if (errorFlips.length === 0) {
+        alert('No sign flips found in current error data');
+        return;
+    }
+    
+    currentFlipIndex = currentFlipIndex <= 0 ? errorFlips.length - 1 : currentFlipIndex - 1;
+    const flip = errorFlips[currentFlipIndex];
+    
+    // Highlight the flip region on the chart
+    highlightFlipRegion(flip);
+    updateFlipInfo(flip);
+}
+
+function highlightFlipRegion(flip) {
+    const chart = window.mainErrorChartInstance;
+    if (!chart) return;
+    
+    // Pan and zoom to show the flip
+    const sectors = state.sectors.filter(s => s.relError !== null);
+    const dataIndex = flip.index;
+    
+    // Calculate the position to center on
+    const meta = chart.getDatasetMeta(0);
+    if (!meta || !meta.data[dataIndex]) return;
+    
+    const element = meta.data[dataIndex];
+    const x = element.x;
+    
+    // Zoom in on this region
+    const minIndex = Math.max(0, dataIndex - 5);
+    const maxIndex = Math.min(sectors.length - 1, dataIndex + 6);
+    
+    chart.options.scales.x.min = sectors[minIndex].n;
+    chart.options.scales.x.max = sectors[maxIndex].n;
+    
+    chart.update('none');
+    
+    // Highlight on the ring
+    state.highlightSectorOnly = flip.sector;
+    drawMainRing();
+    
+    // Play the transition sound
+    setTimeout(() => {
+        const residues = state.residuesBySector[flip.sector] || [];
+        if (residues.length > 0) {
+            playFraction(residues[0].r, residues[0].m);
+        }
+    }, 100);
+}
+
+function updateFlipInfo(flip) {
+    const flipInfo = document.getElementById('flipInfo');
+    if (flipInfo) {
+        flipInfo.textContent = `Flip ${currentFlipIndex + 1}/${errorFlips.length}: S${flip.sector}→S${flip.nextSector} (${flip.type})`;
+    }
+}
+
+// Animation for error flips
+let flipAnimationInterval = null;
+let isFlipAnimating = false;
+
+function toggleFlipAnimation() {
+    const btn = document.getElementById('flipAnimateBtn');
+    
+    if (isFlipAnimating) {
+        stopFlipAnimation();
+    } else {
+        startFlipAnimation();
+    }
+}
+
+function startFlipAnimation() {
+    if (errorFlips.length === 0) {
+        findErrorFlips();
+    }
+    
+    if (errorFlips.length === 0) {
+        alert('No sign flips found to animate');
+        return;
+    }
+    
+    isFlipAnimating = true;
+    const btn = document.getElementById('flipAnimateBtn');
+    btn.textContent = '■ Stop';
+    btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
+    
+    const speed = parseInt(document.getElementById('flipAnimSpeed')?.value || 2000);
+    
+    // Start animation
+    flipAnimationInterval = setInterval(() => {
+        goToNextFlip();
+    }, speed);
+}
+
+function stopFlipAnimation() {
+    if (flipAnimationInterval) {
+        clearInterval(flipAnimationInterval);
+        flipAnimationInterval = null;
+    }
+    
+    isFlipAnimating = false;
+    const btn = document.getElementById('flipAnimateBtn');
+    if (btn) {
+        btn.textContent = '▶ Animate';
+        btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+    }
+}
+
+// Navigate to crossovers in count chart (where exact crosses predicted)
+let currentCountFlipIndex = -1;
+let countFlips = [];
+
+function findCountFlips() {
+    countFlips = [];
+    const sectors = state.sectors.filter(s => s.exact !== null && s.predicted !== null);
+    
+    for (let i = 0; i < sectors.length - 1; i++) {
+        const currentDiff = sectors[i].exact - sectors[i].predicted;
+        const nextDiff = sectors[i + 1].exact - sectors[i + 1].predicted;
+        
+        // Check for sign change (exact crossing predicted)
+        if ((currentDiff > 0 && nextDiff < 0) || (currentDiff < 0 && nextDiff > 0)) {
+            countFlips.push({
+                index: i,
+                sector: sectors[i].n,
+                nextSector: sectors[i + 1].n,
+                fromDiff: currentDiff,
+                toDiff: nextDiff,
+                type: currentDiff > 0 ? 'exact>pred→exact<pred' : 'exact<pred→exact>pred'
+            });
+        }
+    }
+    
+    return countFlips;
+}
+
+function goToNextCountFlip() {
+    if (countFlips.length === 0) {
+        findCountFlips();
+    }
+    
+    if (countFlips.length === 0) {
+        alert('No crossovers found in current count data');
+        return;
+    }
+    
+    currentCountFlipIndex = (currentCountFlipIndex + 1) % countFlips.length;
+    const flip = countFlips[currentCountFlipIndex];
+    
+    // Highlight the flip region on the chart
+    highlightCountFlipRegion(flip);
+    updateCountFlipInfo(flip);
+}
+
+function goToPreviousCountFlip() {
+    // Stop animation if running (manual navigation)
+    if (isCountFlipAnimating) {
+        stopCountFlipAnimation();
+    }
+    
+    if (countFlips.length === 0) {
+        findCountFlips();
+    }
+    
+    if (countFlips.length === 0) {
+        alert('No crossovers found in current count data');
+        return;
+    }
+    
+    currentCountFlipIndex = currentCountFlipIndex <= 0 ? countFlips.length - 1 : currentCountFlipIndex - 1;
+    const flip = countFlips[currentCountFlipIndex];
+    
+    // Highlight the flip region on the chart
+    highlightCountFlipRegion(flip);
+    updateCountFlipInfo(flip);
+}
+
+function highlightCountFlipRegion(flip) {
+    const chart = window.mainCountChartInstance;
+    if (!chart) return;
+    
+    // Pan and zoom to show the flip
+    const sectors = state.sectors.filter(s => s.exact !== null && s.predicted !== null);
+    const dataIndex = flip.index;
+    
+    // Calculate the position to center on
+    const meta = chart.getDatasetMeta(0);
+    if (!meta || !meta.data[dataIndex]) return;
+    
+    // Zoom in on this region
+    const minIndex = Math.max(0, dataIndex - 5);
+    const maxIndex = Math.min(sectors.length - 1, dataIndex + 6);
+    
+    chart.options.scales.x.min = sectors[minIndex].n;
+    chart.options.scales.x.max = sectors[maxIndex].n;
+    
+    chart.update('none');
+    
+    // Highlight on the ring
+    state.highlightSectorOnly = flip.sector;
+    drawMainRing();
+    
+    // Play the transition sound
+    setTimeout(() => {
+        const residues = state.residuesBySector[flip.sector] || [];
+        if (residues.length > 0) {
+            playFraction(residues[0].r, residues[0].m);
+        }
+    }, 100);
+}
+
+function updateCountFlipInfo(flip) {
+    const flipInfo = document.getElementById('countFlipInfo');
+    if (flipInfo) {
+        const shortType = flip.type.includes('exact>pred') ? 'E>P→E<P' : 'E<P→E>P';
+        flipInfo.textContent = `Crossover ${currentCountFlipIndex + 1}/${countFlips.length}: S${flip.sector}→S${flip.nextSector} (${shortType})`;
+    }
+}
+
+// Animation for count crossovers
+let countFlipAnimationInterval = null;
+let isCountFlipAnimating = false;
+
+function toggleCountFlipAnimation() {
+    const btn = document.getElementById('countFlipAnimateBtn');
+    
+    if (isCountFlipAnimating) {
+        stopCountFlipAnimation();
+    } else {
+        startCountFlipAnimation();
+    }
+}
+
+function startCountFlipAnimation() {
+    if (countFlips.length === 0) {
+        findCountFlips();
+    }
+    
+    if (countFlips.length === 0) {
+        alert('No crossovers found to animate');
+        return;
+    }
+    
+    isCountFlipAnimating = true;
+    const btn = document.getElementById('countFlipAnimateBtn');
+    btn.textContent = '■ Stop';
+    btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
+    
+    const speed = parseInt(document.getElementById('countFlipAnimSpeed')?.value || 2000);
+    
+    // Start animation
+    countFlipAnimationInterval = setInterval(() => {
+        goToNextCountFlip();
+    }, speed);
+}
+
+function stopCountFlipAnimation() {
+    if (countFlipAnimationInterval) {
+        clearInterval(countFlipAnimationInterval);
+        countFlipAnimationInterval = null;
+    }
+    
+    isCountFlipAnimating = false;
+    const btn = document.getElementById('countFlipAnimateBtn');
+    if (btn) {
+        btn.textContent = '▶ Animate';
+        btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+    }
 }
 
 // Export Count Chart with Sector Data  
