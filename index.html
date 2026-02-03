@@ -814,6 +814,23 @@
                         </div>
                     </div>
                     
+                    <!-- Involution Pairing -->
+                    <div style="padding:12px;background:rgba(212,160,87,0.08);border-radius:6px;border:1px solid rgba(212,160,87,0.25);">
+                        <strong style="color:#d4a057;font-size:11px;display:block;margin-bottom:8px;">Involution Pairing  <span style="color:#94a3b8;font-weight:normal;">(r/m &harr; (m-r)/m)</span></strong>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px;">
+                            <label style="font-size:11px;"><input type="checkbox" id="enableInvolution" onchange="drawMainRing()"> Show pair</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="involutionConnect" checked onchange="drawMainRing()"> Connect</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="involutionGlow" checked onchange="drawMainRing()"> Glow</label>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                            <label style="font-size:11px;">Pair color: <input type="color" id="involutionColor" value="#d4a057" style="width:28px;height:22px;border:none;cursor:pointer;" onchange="drawMainRing()"></label>
+                            <label style="font-size:11px;">Line: <input type="number" id="involutionLineWidth" value="2" min="1" max="6" step="0.5" style="width:40px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
+                        </div>
+                        <div id="involutionStatsPanel" style="margin-top:8px;padding:6px 8px;background:rgba(0,0,0,0.3);border-radius:4px;font-size:10px;color:#cbd5e1;display:none;font-family:monospace;">
+                            <!-- populated by JS -->
+                        </div>
+                    </div>
+
                     <!-- Sector Analysis -->
                     <div style="padding:12px;background:rgba(150,100,255,0.05);border-radius:6px;border:1px solid rgba(150,100,255,0.2);">
                         <strong style="color:#9664ff;font-size:11px;display:block;margin-bottom:10px;">Sector Analysis</strong>
@@ -886,6 +903,7 @@
                             <label style="font-size:11px;"><input type="checkbox" id="invertRingOrder" onchange="drawMainRing()"> Invert Order</label>
                             <label style="font-size:11px;"><input type="checkbox" id="showRingLabels" onchange="drawMainRing()"> Ring Labels</label>
                             <label style="font-size:11px;"><input type="checkbox" id="showAllSectorLines" onchange="drawMainRing()"> All 1/n Lines</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="showNnChain" checked onchange="drawMainRing()"> n/n Chain</label>
                         </div>
                         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
                             <label style="font-size:11px;"><input type="checkbox" id="showFractionLabels" onchange="drawMainRing()"> Point Labels</label>
@@ -3277,7 +3295,7 @@ const state = {
 };
 
 // Tree view state for Stern-Brocot visualization
-let treeViewState = { zoom: 100, offsetX: 0, offsetY: 0 };
+// (treeViewState removed — zoom/pan uses treeZoom / treePanX / treePanY globals)
 
 const sectorColors = ['#6366f1','#8b5cf6','#a855f7','#d946ef','#ec4899','#f43f5e','#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#22c55e','#10b981','#14b8a6','#06b6d4','#0ea5e9','#3b82f6'];
 function getSectorColor(n) { return sectorColors[(n) % sectorColors.length]; }
@@ -3544,6 +3562,65 @@ function screenshotMainCanvas() {
     
     ly += 80;
     
+    // ===== INVOLUTION PAIRING (if active and a point selected) =====
+    if (highlightedRingPoint && document.getElementById('enableInvolution')?.checked) {
+        const selR = highlightedRingPoint.r, selM = highlightedRingPoint.m;
+        const mirR = selM - selR;
+        const isFP = (selR === mirR);
+        
+        ctx.fillStyle = 'rgba(212, 160, 87, 0.2)';
+        ctx.fillRect(legendX + 10, ly - 5, legendWidth - 20, isFP ? 62 : 82);
+        
+        ctx.fillStyle = '#d4a057';
+        ctx.font = 'bold 12px system-ui';
+        ctx.fillText('INVOLUTION PAIRING', legendX + 20, ly + 12);
+        
+        ctx.font = '11px monospace';
+        if (isFP) {
+            ctx.fillStyle = '#fbbf24';
+            ctx.fillText(`${selR}/${selM} = 1/2  [FIXED POINT]`, legendX + 20, ly + 32);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '10px system-ui';
+            ctx.fillText('Unique fixed pt of \u03c6. Source of +1 (Thm 1)', legendX + 20, ly + 50);
+        } else {
+            ctx.fillStyle = '#e2e8f0';
+            ctx.fillText(`Selected : ${selR}/${selM} = ${(selR/selM).toFixed(6)}`, legendX + 20, ly + 32);
+            ctx.fillStyle = '#d4a057';
+            ctx.fillText(`Mirror   : ${mirR}/${selM} = ${(mirR/selM).toFixed(6)}`, legendX + 20, ly + 50);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '10px system-ui';
+            ctx.fillText(`Sum = 1.0  |  gcd(${mirR},${selM}) = ${gcd(mirR,selM)}`, legendX + 20, ly + 68);
+        }
+        ly += isFP ? 72 : 92;
+    }
+    
+    // ===== BISECTION IDENTITY (Theorem 1) =====
+    {
+        const s1c  = (state.residuesBySector[1] || []).length;
+        let   src  = 0;
+        for (let ss = 2; ss <= (state.sectorMax || 275); ss++) src += (state.residuesBySector[ss] || []).length;
+        const ok   = (s1c + 1 === src);
+
+        ctx.fillStyle = ok ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)';
+        ctx.fillRect(legendX + 10, ly - 5, legendWidth - 20, 58);
+        ctx.strokeStyle = ok ? 'rgba(34,197,94,0.5)' : 'rgba(239,68,68,0.5)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(legendX + 10, ly - 5, legendWidth - 20, 58);
+
+        ctx.fillStyle = '#a5b4fc';
+        ctx.font = 'bold 12px system-ui';
+        ctx.textAlign = 'left';
+        ctx.fillText('BISECTION IDENTITY  (Theorem 1)', legendX + 20, ly + 12);
+
+        ctx.font = '11px monospace';
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillText('|S\u2081| = ' + s1c + '    |S_rest| = ' + src, legendX + 20, ly + 32);
+        ctx.fillStyle = ok ? '#22c55e' : '#ef4444';
+        ctx.font = 'bold 11px monospace';
+        ctx.fillText('|S\u2081| + 1 = |S_rest|  ' + (ok ? '\u2713' : '\u2717'), legendX + 20, ly + 48);
+        ly += 72;
+    }
+
     // ===== SECTORS SECTION =====
     ctx.fillStyle = 'rgba(139, 92, 246, 0.2)';
     ctx.fillRect(legendX + 10, ly - 5, legendWidth - 20, 28);
@@ -5190,6 +5267,12 @@ async function computeExact(N) {
     // MEISSEL-LEHMER OPTIMIZATION: Pre-initialize sieve for O(1) primality
     NumberTheory.initSieve(N);
     
+    // --- Cusp 0/1: the mod-1 basepoint. All n/n ≡ 0 here. ---
+    // Not in any sector (getSector returns null for value=0).
+    // Included in allResidues and farey for correct gap / Franel computation.
+    state.allResidues.push({ r:0, m:1, sector:null, isPrime:false, isPrimeNum:false,
+        category:'CC', value:0, isCusp:true });
+    
     for(let m=startM; m<=N; m++) {
         const isPrimeM = NumberTheory.isPrime(m);  // O(1) lookup
         for(let r=1; r<m; r++) {
@@ -5216,8 +5299,12 @@ async function computeExact(N) {
         if(m%50===0) { document.getElementById('progressFill').style.width = ((m-startM)/(N-startM)*100)+'%'; await new Promise(r=>setTimeout(r,0)); }
         if(!state.computing) return;
     }
+    // --- Cusp 1/1: the other endpoint. 1 ≡ 0 mod 1, so 1/1 ≡ 0/1 on the circle. ---
+    state.allResidues.push({ r:1, m:1, sector:null, isPrime:false, isPrimeNum:false,
+        category:'CC', value:1, isCusp:true });
+    
     state.allResidues.sort((a,b) => a.value - b.value);
-    state.farey = state.allResidues.map(r => ({r:r.r, m:r.m, value:r.value}));
+    state.farey = state.allResidues.map(r => ({r:r.r, m:r.m, value:r.value, isCusp:r.isCusp||false}));
     
     for(let n=state.sectorMin; n<=state.sectorMax; n++) {
         const res = state.residuesBySector[n] || [];
@@ -6381,7 +6468,7 @@ function updateMainStats() {
     const hasExact = state.sectors.some(s=>s.exact!==null);
     const total = hasExact ? state.sectors.reduce((s,x)=>s+(x.exact||0),0) : null;
     const totalPred = state.sectors.reduce((s,x)=>s+x.predicted,0);
-    const primeCount = hasExact ? state.allResidues.filter(r => r.isPrime).length : null;
+    const primeCount = hasExact ? state.allResidues.filter(r => !r.isCusp && r.isPrime).length : null;
     const primeRate = total && primeCount ? (primeCount / total * 100).toFixed(1) : '-';
     const error = total ? ((total - totalPred) / totalPred * 100).toFixed(2) : '-';
     const avgPerSector = total ? (total / state.sectors.length).toFixed(0) : '-';
@@ -7338,7 +7425,7 @@ function drawMainRing() {
     // Rotation settings
     const rotationOn = document.getElementById('enableRingRotation')?.checked || false;
     const rotationAmt = +(document.getElementById('ringRotationAmount')?.value || 0) * Math.PI / 180;
-    const rotationCumulative = document.getElementById('rotationCumulative')?.checked || true;
+    const rotationCumulative = document.getElementById('rotationCumulative')?.checked ?? true;
     const globalPhase = +(document.getElementById('ringGlobalPhase')?.value || 0) * Math.PI / 180;
     const showRingLabels = document.getElementById('showRingLabels')?.checked || false;
     const ringSpacing = parseFloat(document.getElementById('ringSpacing')?.value || 1);
@@ -7389,12 +7476,12 @@ function drawMainRing() {
     
     // Draw median line
     if (showMedian && !showAll) {
-        const medAngle = ((1/(sector+1) + 1/sector)/2)*2*Math.PI;
+        // Mediant of sector boundaries 1/(sector+1) and 1/sector is 2/(2*sector+1)
+        const medP = 2, medQ = 2 * sector + 1;
+        const medAngle = (medP / medQ) * 2 * Math.PI;
         ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
         ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(medAngle)*maxR, cy-Math.sin(medAngle)*maxR); ctx.stroke();
         ctx.setLineDash([]);
-        // Draw mediant fraction label
-        const medP = 1 + 1, medQ = (sector+1) + sector;
         ctx.fillStyle = '#22c55e'; ctx.font = '10px system-ui';
         ctx.fillText(`${medP}/${medQ}`, cx+Math.cos(medAngle)*(maxR+18)-8, cy-Math.sin(medAngle)*(maxR+18));
     }
@@ -7497,6 +7584,7 @@ function drawMainRing() {
     // Draw points
     const labeledPoints = [];
     residues.forEach(res => {
+        if (res.isCusp) return;  // cusps drawn separately as the mod-1 marker
         const {r,m,sector:s,isPrime:ip} = res;
         
         // Apply filters
@@ -7609,6 +7697,109 @@ function drawMainRing() {
         }
     }
     
+    // === INVOLUTION PAIRING ===
+    const involutionOn = document.getElementById('enableInvolution')?.checked || false;
+    if (involutionOn && highlightedRingPoint) {
+        const selR = highlightedRingPoint.r;
+        const selM = highlightedRingPoint.m;
+        const mirR = selM - selR;  // φ(r/m) = (m-r)/m
+        const isFP = (selR === mirR); // fixed point: r = m-r iff m = 2r iff r/m = 1/2
+        
+        const selPt = state.ringPoints.find(p => p.r === selR && p.m === selM);
+        const mirPt = state.ringPoints.find(p => p.r === mirR && p.m === selM);
+        
+        const invColor = document.getElementById('involutionColor')?.value || '#d4a057';
+        const invConnect = document.getElementById('involutionConnect')?.checked ?? true;
+        const invGlow = document.getElementById('involutionGlow')?.checked ?? true;
+        const invLW = parseFloat(document.getElementById('involutionLineWidth')?.value || 2);
+        
+        if (mirPt && !isFP) {
+            // --- Draw connecting arc (great-circle style through center) ---
+            if (invConnect && selPt) {
+                if (invGlow) { ctx.shadowColor = invColor; ctx.shadowBlur = 10; }
+                ctx.strokeStyle = invColor;
+                ctx.lineWidth = invLW;
+                ctx.globalAlpha = 0.7;
+                ctx.setLineDash([6, 4]);
+                ctx.beginPath();
+                // Quadratic curve bowing outward from center
+                const midX = (selPt.x + mirPt.x) / 2;
+                const midY = (selPt.y + mirPt.y) / 2;
+                // Bow direction: perpendicular to midpoint→center, scaled by radius
+                const dx = midX - cx, dy = midY - cy;
+                const len = Math.sqrt(dx*dx + dy*dy) || 1;
+                const bowAmt = selPt.rad * 0.35;
+                const cpX = midX + (dx / len) * bowAmt;
+                const cpY = midY + (dy / len) * bowAmt;
+                ctx.moveTo(selPt.x, selPt.y);
+                ctx.quadraticCurveTo(cpX, cpY, mirPt.x, mirPt.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.globalAlpha = 1;
+                ctx.shadowBlur = 0;
+            }
+            
+            // --- Draw mirror point highlight ---
+            if (invGlow) { ctx.shadowColor = invColor; ctx.shadowBlur = 14; }
+            ctx.fillStyle = invColor;
+            ctx.beginPath();
+            ctx.arc(mirPt.x, mirPt.y, Math.max(finalPointSize * 1.8, 5), 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // Ring outline on mirror
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(mirPt.x, mirPt.y, Math.max(finalPointSize * 2, 6) + 4, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // --- Label on mirror point ---
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 11px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            const mirLabel = `${mirR}/${selM}`;
+            const lw = ctx.measureText(mirLabel).width;
+            ctx.fillStyle = 'rgba(15,23,42,0.82)';
+            ctx.fillRect(mirPt.x - lw/2 - 4, mirPt.y - Math.max(finalPointSize*1.8,5) - 16, lw + 8, 14);
+            ctx.fillStyle = invColor;
+            ctx.fillText(mirLabel, mirPt.x, mirPt.y - Math.max(finalPointSize*1.8,5) - 3);
+            ctx.textBaseline = 'middle';
+        }
+        
+        // --- Stats panel update ---
+        const statsEl = document.getElementById('involutionStatsPanel');
+        if (statsEl) {
+            statsEl.style.display = 'block';
+            if (isFP) {
+                // 1/2 is the unique fixed point
+                statsEl.innerHTML = 
+                    `<span style="color:#d4a057;font-weight:bold;">Fixed point</span> &mdash; ` +
+                    `r/m = ${selR}/${selM} = 1/2<br>` +
+                    `<span style="color:#94a3b8;">Unique fixed point of &phi;(r/m) = (m&minus;r)/m</span><br>` +
+                    `<span style="color:#94a3b8;">This is the +1 asymmetry source (Theorem 1)</span>`;
+            } else if (mirPt) {
+                const selSec = selPt ? selPt.sector : '?';
+                const mirSec = mirPt.sector;
+                const selDec = (selR/selM).toFixed(6);
+                const mirDec = (mirR/selM).toFixed(6);
+                const sum = (selR/selM + mirR/selM);
+                statsEl.innerHTML =
+                    `<span style="color:#d4a057;font-weight:bold;">Selected:</span> ${selR}/${selM} = ${selDec} &nbsp; S<sub>${selSec}</sub><br>` +
+                    `<span style="color:#d4a057;font-weight:bold;">Mirror &nbsp;:</span> ${mirR}/${selM} = ${mirDec} &nbsp; S<sub>${mirSec}</sub><br>` +
+                    `<span style="color:#94a3b8;">Sum = ${sum.toFixed(1)} &nbsp; | &nbsp; gcd(${mirR},${selM}) = ${gcd(mirR,selM)}</span>` +
+                    (selSec !== mirSec ? `<br><span style="color:#f59e0b;">Cross-sector pair: S${selSec} &harr; S${mirSec}</span>` : '');
+            } else {
+                statsEl.innerHTML = `<span style="color:#64748b;"><i>Mirror point ${mirR}/${selM} not in current view</i></span>`;
+            }
+        }
+    } else {
+        // Hide stats when involution off or nothing selected
+        const statsEl = document.getElementById('involutionStatsPanel');
+        if (statsEl) statsEl.style.display = 'none';
+    }
+    
     // Update tracker info panel
     updateTrackerInfo(trackerPoints, trackerOn);
     
@@ -7703,6 +7894,132 @@ function drawMainRing() {
         });
     }
     
+    // === MOD-1 CUSP MARKER: 0/1 ≡ 1/1 ===
+    // Every n/n has gcd(n,n)=n, so n/n reduces to 1/1 ≡ 0/1 (mod 1).
+    // This single point is the basepoint of the unit circle — the first and
+    // fundamental modular identification that makes coprime residues well-defined.
+    // Angle: base 0, rotated by globalPhase so it co-rotates with the ring system.
+    // (No cumulative per-ring term: the cusp is shared across ALL rings.)
+    {
+        const cuspAngle = 0 + globalPhase;
+        const cuspX = cx + maxR * Math.cos(cuspAngle);
+        const cuspY = cy - maxR * Math.sin(cuspAngle);
+
+        // --- n/n ghost chain ---
+        // For every m in [nMin..nMax], the fraction m/m collapses here.
+        // Draw a faint dot at the cusp angle on each ring m to make the
+        // GCD cancellation visible.  Uses the same radNorm+spacing formula
+        // as the main point loop so it stays consistent with invertOrder etc.
+        const showChain = document.getElementById('showNnChain')?.checked ?? true;
+        if (showChain) {
+            // Radial spoke (solid, thin)
+            ctx.strokeStyle = 'rgba(251,191,36,0.22)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cuspX, cuspY);
+            ctx.stroke();
+
+            const nMin  = state.nMin  || 2;
+            const nMax  = state.nMax  || 500;
+            ctx.fillStyle = 'rgba(251,191,36,0.30)';
+            for (let mm = nMin; mm <= nMax; mm++) {
+                let rn = invertOrder
+                    ? (1 - (mm - nMin) / (nMax - nMin + 1))
+                    : ((mm - nMin) / (nMax - nMin + 1));
+                if (ringSpacing !== 1) rn = Math.pow(rn, 1 / ringSpacing);
+                const rr = Math.max(rn, 0.05) * maxR;
+                // Per-ring rotation (same logic as main point loop)
+                let cA = cuspAngle;
+                if (rotationOn) {
+                    cA += rotationCumulative ? rotationAmt * mm : rotationAmt;
+                }
+                ctx.beginPath();
+                ctx.arc(cx + rr * Math.cos(cA), cy - rr * Math.sin(cA), 1.5, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        } else {
+            // Spoke only (no ghost dots)
+            ctx.strokeStyle = 'rgba(251,191,36,0.35)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 6]);
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cuspX, cuspY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // Cusp glow + dot
+        ctx.shadowColor = '#fbbf24';
+        ctx.shadowBlur = 12;
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(cuspX, cuspY, 8, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.arc(cuspX, cuspY, 4, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // Label — position flips to stay inside canvas when cusp rotates
+        const labelRight = Math.cos(cuspAngle) >= 0;
+        const lx = cuspX + (labelRight ? 14 : -14);
+        const ly = cuspY;
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 11px monospace';
+        ctx.textAlign = labelRight ? 'left' : 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('0/1 \u2261 1/1', lx, ly);
+        ctx.font = '9px system-ui';
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText('(mod 1)  \u2200 n/n \u2192 here', lx, ly + 13);
+    }
+
+    // --- Live bisection tally: |S₁| + 1 = |S_rest|  (Theorem 1) ---
+    // S₁  = {r/m : 1/2 < r/m < 1}      (sector-1 bucket)
+    // S_rest = {r/m : 0 < r/m ≤ 1/2}    (all other sector buckets)
+    // The +1 comes from the unique fixed point 1/2 of the involution φ.
+    {
+        const s1Count  = (state.residuesBySector[1] || []).length;
+        let   srestCount = 0;
+        for (let ss = 2; ss <= (state.sectorMax || 275); ss++) {
+            srestCount += (state.residuesBySector[ss] || []).length;
+        }
+        const holds = (s1Count + 1 === srestCount);
+
+        ctx.save();
+        // Semi-transparent bg
+        ctx.fillStyle = 'rgba(15,23,42,0.78)';
+        ctx.fillRect(10, H - 54, 318, 42);
+        ctx.strokeStyle = holds ? 'rgba(34,197,94,0.55)' : 'rgba(239,68,68,0.55)';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(10, H - 54, 318, 42);
+
+        // Header
+        ctx.font = 'bold 10px monospace';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = '#a5b4fc';
+        ctx.fillText('Bisection Identity  (Theorem 1)', 18, H - 51);
+
+        // Numbers
+        ctx.font = '11px monospace';
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillText('|S\u2081| = ' + s1Count, 18, H - 35);
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText('|S_rest| = ' + srestCount, 118, H - 35);
+        // Verdict
+        ctx.fillStyle = holds ? '#22c55e' : '#ef4444';
+        ctx.font = 'bold 11px monospace';
+        ctx.fillText('|S\u2081|+1 = |S_rest|  ' + (holds ? '\u2713' : '\u2717'), 228, H - 35);
+        ctx.restore();
+    }
+
+    // Center origin dot
     ctx.fillStyle='#e2e8f0'; ctx.beginPath(); ctx.arc(cx,cy,4,0,2*Math.PI); ctx.fill();
     
     // Draw highlighted ring circle during loop playback
@@ -7730,7 +8047,7 @@ function drawMainRing() {
     ctx.fillStyle = usingBounded ? '#f59e0b' : '#94a3b8'; 
     ctx.font = '11px monospace';
     const dataLabel = usingBounded ? `Bounded N≤${state.boundedN}` : `N: ${state.nMin}-${state.nMax}`;
-    ctx.fillText(`${dataLabel} | Points: ${debugDrawnCount} | Size: ${finalPointSize.toFixed(1)}px${usingBounded ? ' (Formula mode - limited data)' : ''}`, 10, H - 10);
+    ctx.fillText(`${dataLabel} | Points: ${debugDrawnCount} | Size: ${finalPointSize.toFixed(1)}px${usingBounded ? ' (Formula mode - limited data)' : ''}`, 10, H - 58);
     
     // Draw word art on top
     drawWordArt(ctx);
@@ -8592,17 +8909,36 @@ document.getElementById('mainRing').addEventListener('mousemove', function(e) {
 function openPointModal(p) {
     document.getElementById('pointModalTitle').textContent = `${p.r}/${p.m}`;
     const cf = toCF(p.r, p.m);
+    const mirR = p.m - p.r;
+    const isFP = (p.r === mirR);
+    const mirPt = state.ringPoints.find(pt => pt.r === mirR && pt.m === p.m);
+    
+    // Involution card
+    let invCard = '';
+    if (isFP) {
+        invCard = `<div class="detail-card" style="border-color:#d4a057;"><h5 style="color:#d4a057;">Involution</h5><div class="value" style="color:#fbbf24;">Fixed Point</div><div class="sub">r/m = 1/2 (unique)</div></div>`;
+    } else {
+        const mirSec = mirPt ? mirPt.sector : '?';
+        invCard = `<div class="detail-card" style="border-color:#d4a057;"><h5 style="color:#d4a057;">Mirror \u03c6</h5><div class="value" style="color:#d4a057;">${mirR}/${p.m}</div><div class="sub">S${mirSec} | ${(mirR/p.m).toFixed(6)}</div></div>`;
+    }
+    
+    // Mirror select button
+    const mirBtn = (!isFP && mirPt)
+        ? `<button onclick="closePointModal();highlightedRingPoint={r:${mirR},m:${p.m}};drawMainRing();openPointModal(state.ringPoints.find(function(q){return q.r===${mirR}&&q.m===${p.m}})||{r:${mirR},m:${p.m},sector:0,isPrime:false})" style="background:linear-gradient(135deg,#d4a057,#b8862f);">\u03c6 Mirror</button>`
+        : '';
+    
     document.getElementById('pointModalBody').innerHTML = `
         <div class="detail-grid">
             <div class="detail-card"><h5>Fraction</h5><div class="value">${p.r}/${p.m}</div><div class="sub">= ${(p.r/p.m).toFixed(8)}</div></div>
             <div class="detail-card"><h5>Sector</h5><div class="value">${p.sector}</div><div class="sub">(1/${p.sector+1}, 1/${p.sector}]</div></div>
             <div class="detail-card"><h5>Modulus</h5><div class="value" style="color:${p.isPrime?'#f59e0b':'#6366f1'}">${p.m}</div><div class="sub">${p.isPrime?'Prime':'Composite'}</div></div>
-            <div class="detail-card"><h5>Category</h5><div class="value" style="color:${p.category==='PP'?'#22c55e':p.category==='PC'?'#f59e0b':p.category==='CP'?'#6366f1':'#94a3b8'}">${p.category || 'N/A'}</div><div class="sub">${p.category==='PP'?'Both Prime':p.category==='PC'?'Prime/Comp':p.category==='CP'?'Comp/Prime':'Both Comp'}</div></div>
+            ${invCard}
         </div>
         <div class="theorem-box"><strong>CF:</strong> [${cf.join('; ')}]<br><strong>Path:</strong> ${cfPath(cf)}</div>
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
-            <button onclick="closePointModal();playFraction(${p.r},${p.m},1.0)" style="background:linear-gradient(135deg,#22c55e,#16a34a);">▶ Play</button>
-            <button onclick="closePointModal();playTreePathAudio('forward')" style="background:linear-gradient(135deg,#f59e0b,#d97706);">▶ Path</button>
+            <button onclick="closePointModal();playFraction(${p.r},${p.m},1.0)" style="background:linear-gradient(135deg,#22c55e,#16a34a);">&#9654; Play</button>
+            <button onclick="closePointModal();playTreePathAudio('forward')" style="background:linear-gradient(135deg,#f59e0b,#d97706);">&#9654; Path</button>
+            ${mirBtn}
             <button onclick="closePointModal();viewPointOnAll(${p.r},${p.m},${p.sector})" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">View on All</button>
             <button onclick="closePointModal();scrollToSectorTree()" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">See on Tree</button>
             <button onclick="closePointModal();addToSolver(${p.r}/${p.m})" style="background:linear-gradient(135deg,#10b981,#059669);">Add to Solver</button>
@@ -9656,6 +9992,84 @@ function clearTreePath() {
     document.getElementById('treePathInfo').innerHTML = '<span style="color:#64748b;">Click a point on the ring above to see its tree path</span>';
 }
 
+// Animate treeZoom/treePanX/treePanY so the path from 1/2 → target fills the canvas.
+function zoomTreeToPath(point) {
+    const canvas = document.getElementById('sectorTreeCanvas');
+    if (!canvas) return;
+    const W = canvas.width, H = canvas.height;
+    const depth = +document.getElementById('treeDepth').value;
+
+    // Build tree at zoom=1 pan=0 to read raw baseX/baseY
+    const savedZ = treeZoom, savedPx = treePanX, savedPy = treePanY;
+    treeZoom = 1; treePanX = 0; treePanY = 0;
+    const nodes = buildSternBrocotTree(depth);
+    treeZoom = savedZ; treePanX = savedPx; treePanY = savedPy;
+
+    // Walk the path string to collect nodes
+    const pathStr = getPathToFraction(point.r, point.m);
+    const root = nodes.find(n => n.r === 1 && n.m === 2);
+    if (!root) return;
+
+    const pathNodes = [root];
+    let cur = '';
+    for (let i = 0; i < pathStr.length; i++) {
+        cur += pathStr[i];
+        const nd = nodes.find(n => n.path === cur);
+        if (nd) pathNodes.push(nd);
+    }
+    if (pathNodes.length < 2) return;
+
+    // Bounding box in base coords
+    let xMin = Infinity, xMax = -Infinity, yMin = Infinity, yMax = -Infinity;
+    pathNodes.forEach(n => {
+        if (n.baseX < xMin) xMin = n.baseX;
+        if (n.baseX > xMax) xMax = n.baseX;
+        if (n.baseY < yMin) yMin = n.baseY;
+        if (n.baseY > yMax) yMax = n.baseY;
+    });
+
+    // Padding (px)
+    const padX = 60, padY = 40;
+    const availW = W - 2 * padX;
+    const availH = H - 2 * padY;
+
+    // Zoom: fit the taller constraint; guard against zero-width paths
+    const spanX = xMax - xMin || 1;   // straight vertical → tiny artificial span
+    const spanY = yMax - yMin || 1;
+    let targetZoom = Math.min(availW / spanX, availH / spanY);
+    targetZoom = Math.max(1, Math.min(targetZoom, 8)); // clamp 1× … 8×
+
+    // Pan: center the bounding box mid-point onto canvas center
+    // transform: screen = (base - W/2)*Z + W/2 + Px   →  Px = screenTarget - (baseMid - W/2)*Z - W/2
+    const midBaseX = (xMin + xMax) / 2;
+    const midBaseY = (yMin + yMax) / 2;
+    const targetPx = W / 2 - (midBaseX - W / 2) * targetZoom;   // want midBaseX → W/2
+    const targetPy = H / 2 - (midBaseY - H / 2) * targetZoom;   // want midBaseY → H/2
+    // Undo the +W/2 built into the formula: screen = (base-cX)*Z + cX + Pan
+    // at screen=cX: Pan = cX - (base-cX)*Z - cX  →  Pan = -(base-cX)*Z  →  already what we have minus cX offset
+    // Actually: screen = (base - W/2)*Z + W/2 + Pan.  Want screen of midBase = W/2.
+    //   W/2 = (midBase - W/2)*Z + W/2 + Pan  →  Pan = -(midBase - W/2)*Z
+    const finalPx = -(midBaseX - W / 2) * targetZoom;
+    const finalPy = -(midBaseY - H / 2) * targetZoom;
+
+    // Animate from current state to target over ~24 frames
+    const startZ = treeZoom, startPx = treePanX, startPy = treePanY;
+    const frames = 24;
+    let frame = 0;
+    function tick() {
+        frame++;
+        const t = frame / frames;
+        const e = 1 - Math.pow(1 - t, 3); // ease-out cubic
+        treeZoom  = startZ  + (targetZoom - startZ)  * e;
+        treePanX  = startPx + (finalPx    - startPx) * e;
+        treePanY  = startPy + (finalPy    - startPy) * e;
+        updateTreeZoomDisplay();
+        drawSectorTree();
+        if (frame < frames) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+}
+
 function playTreeFraction() {
     if (selectedTreePoint) {
         playFraction(selectedTreePoint.r, selectedTreePoint.m, 0.8);
@@ -9732,10 +10146,12 @@ function selectPointForTree(point) {
     updateTreePathInfo(point);
     
     const animate = document.getElementById('animatePath').checked;
+    const doZoom  = document.getElementById('zoomToPath')?.checked;
     if (animate) {
-        animateTreePath(point);
+        animateTreePath(point);   // zoomTreeToPath called at animation end if doZoom
     } else {
         drawSectorTree();
+        if (doZoom) zoomTreeToPath(point);
     }
 }
 
@@ -9805,12 +10221,7 @@ function animateTreePath(point) {
     
     const path = getPathToFraction(point.r, point.m);
     let currentStep = 0;
-    const zoomToPath = document.getElementById('zoomToPath')?.checked;
-    
-    // Store original zoom state to restore later
-    const originalZoom = treeViewState.zoom;
-    const originalOffsetX = treeViewState.offsetX;
-    const originalOffsetY = treeViewState.offsetY;
+    const doZoom = document.getElementById('zoomToPath')?.checked;
     
     function animateStep() {
         const canvas = document.getElementById('sectorTreeCanvas');
@@ -9818,18 +10229,6 @@ function animateTreePath(point) {
         const depth = +document.getElementById('treeDepth').value;
         const showLabels = document.getElementById('showTreeLabels').checked;
         const basePointSize = parseFloat(document.getElementById('treePointSize')?.value || 4);
-        
-        // Calculate zoom for current step if zoomToPath is enabled
-        if (zoomToPath && path.length > 0) {
-            const progress = currentStep / path.length;
-            if (currentStep < path.length) {
-                // Zoom in progressively as we traverse the path
-                const targetZoom = Math.min(300, 100 + progress * 150);
-                treeViewState.zoom = targetZoom;
-                document.getElementById('treeZoomDisplay').textContent = Math.round(targetZoom);
-                document.getElementById('treeZoomSlider').value = targetZoom;
-            }
-        }
         
         // Redraw base tree
         ctx.fillStyle = '#0f172a';
@@ -9906,59 +10305,19 @@ function animateTreePath(point) {
             ctx.strokeStyle = '#fff';
             ctx.lineWidth = 2;
             ctx.stroke();
-            
-            // Pan to keep current node in view if zooming
-            if (zoomToPath && currentNode) {
-                const centerX = canvas.width / 2;
-                const centerY = canvas.height / 2;
-                // Gradually shift view toward current node
-                treeViewState.offsetX += (centerX - currentNode.x) * 0.1;
-                treeViewState.offsetY += (centerY - currentNode.y) * 0.05;
-            }
         }
         
         currentStep++;
         
         if (currentStep <= path.length) {
             treeAnimationId = requestAnimationFrame(() => setTimeout(animateStep, 150));
-        } else if (zoomToPath) {
-            // Animation complete - zoom back out smoothly
-            setTimeout(() => zoomOutAfterPath(originalZoom, originalOffsetX, originalOffsetY), 500);
+        } else if (doZoom) {
+            // Step-by-step done — now zoom the view to fit the path
+            setTimeout(() => zoomTreeToPath(point), 300);
         }
     }
     
     animateStep();
-}
-
-// Smooth zoom out after path animation completes
-function zoomOutAfterPath(targetZoom, targetOffsetX, targetOffsetY) {
-    const steps = 30;
-    let step = 0;
-    
-    const startZoom = treeViewState.zoom;
-    const startOffsetX = treeViewState.offsetX;
-    const startOffsetY = treeViewState.offsetY;
-    
-    function animateZoomOut() {
-        step++;
-        const t = step / steps;
-        const eased = 1 - Math.pow(1 - t, 3); // ease out cubic
-        
-        treeViewState.zoom = startZoom + (targetZoom - startZoom) * eased;
-        treeViewState.offsetX = startOffsetX + (targetOffsetX - startOffsetX) * eased;
-        treeViewState.offsetY = startOffsetY + (targetOffsetY - startOffsetY) * eased;
-        
-        document.getElementById('treeZoomDisplay').textContent = Math.round(treeViewState.zoom);
-        document.getElementById('treeZoomSlider').value = treeViewState.zoom;
-        
-        drawSectorTree();
-        
-        if (step < steps) {
-            requestAnimationFrame(animateZoomOut);
-        }
-    }
-    
-    animateZoomOut();
 }
 
 // Add click handler for tree canvas to select and play nodes
@@ -10302,7 +10661,6 @@ function handleTreeCanvasClick(e) {
     });
     
     if (closest) {
-        // Create a point object similar to ring points
         const point = {
             r: closest.r,
             m: closest.m,
@@ -10310,19 +10668,11 @@ function handleTreeCanvasClick(e) {
             isPrime: isPrime(closest.m)
         };
         
-        selectedTreePoint = point;
-        updateTreePathInfo(point);
-        
         // Trigger harmonic
         triggerGlobalHarmonic(closest.r, closest.m, point);
         
-        // Redraw tree with this node highlighted
-        const animate = document.getElementById('animatePath').checked;
-        if (animate) {
-            animateTreePath(point);
-        } else {
-            drawSectorTree();
-        }
+        // Unified selection path (handles animate + zoomToPath)
+        selectPointForTree(point);
     }
 }
 
@@ -10600,7 +10950,7 @@ function updateGapAnalysis() {
 function computeFranel() {
     if(state.farey.length===0) { document.getElementById('franelStats').innerHTML='<div class="stat-card"><div class="stat-label">No data</div></div>'; return; }
     const n = state.farey.length;
-    const deviations = state.farey.map((f,k) => ({ k, delta: f.value - (k+1)/n }));
+    const deviations = state.farey.map((f,k) => ({ k, delta: f.value - k/(n-1) }));
     const sumAbsDelta = deviations.reduce((s,d)=>s+Math.abs(d.delta),0);
     const N = state.nMax;
     
@@ -10623,8 +10973,8 @@ function computeFranel() {
     const varianceDelta = sumDeltaSq / n;
     const stdDevDelta = Math.sqrt(varianceDelta);
     
-    // Expected |F_N| from asymptotic formula
-    const expectedFN = 3 * N * N / (Math.PI * Math.PI);
+    // Expected |F_N| from asymptotic formula (interior only: 3N²/π²; +2 for 0/1 and 1/1 endpoints)
+    const expectedFN = 3 * N * N / (Math.PI * Math.PI) + 2;
     const fnError = ((n - expectedFN) / expectedFN * 100).toFixed(2);
     
     // Effective exponent estimate
@@ -11747,6 +12097,34 @@ function draw3D() {
         ctx.beginPath(); ctx.arc(p.sx, p.sy, ptSize3d, 0, 2*Math.PI); ctx.fill();
     });
     
+    // --- Cusp 0/1 ≡ 1/1 on the base circle (z = bottom, angle = 0) ---
+    {
+        const cuspAngle = 0;
+        const radius3d = 150;
+        let cx3 = radius3d * Math.cos(cuspAngle);
+        let cy3 = radius3d * Math.sin(cuspAngle);
+        let cz3 = -100; // bottom of the cone (z range is -100..100)
+        // Apply same rotations as the point loop
+        let y1c = cy3 * Math.cos(rotX) - cz3 * Math.sin(rotX);
+        let z1c = cy3 * Math.sin(rotX) + cz3 * Math.cos(rotX);
+        let x2c = cx3 * Math.cos(rotY) + z1c * Math.sin(rotY);
+        let z2c = -cx3 * Math.sin(rotY) + z1c * Math.cos(rotY);
+        let x3c = x2c * Math.cos(rotZ) - y1c * Math.sin(rotZ);
+        let y3c = x2c * Math.sin(rotZ) + y1c * Math.cos(rotZ);
+        const sxc = cx + x3c * persp / (persp + z2c);
+        const syc = cy - y3c * persp / (persp + z2c);
+        
+        ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 10;
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(sxc, syc, 7, 0, 2*Math.PI); ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath(); ctx.arc(sxc, syc, 3, 0, 2*Math.PI); ctx.fill();
+        ctx.fillStyle = '#fbbf24'; ctx.font = '9px monospace';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillText('0/1\u22611/1', sxc + 11, syc);
+    }
+    
     // Axes
     ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(cx-100,cy); ctx.lineTo(cx+100,cy); ctx.stroke();
@@ -12723,14 +13101,15 @@ function runBatchSweep() {
     
     let html = '';
     for(let N=nMin; N<=nMax; N+=nStep) {
-        const farey = [];
+        const farey = [{r:0,m:1,value:0}];  // cusp 0/1
         for(let m=2; m<=N; m++) { for(let r=1; r<m; r++) { if(gcd(r,m)===1) farey.push({r,m,value:r/m}); } }
+        farey.push({r:1,m:1,value:1});       // cusp 1/1
         farey.sort((a,b)=>a.value-b.value);
         
-        const n = farey.length;
+        const n = farey.length;  // includes both endpoints
         let sumDelta = 0, maxGap = 0, sumGap = 0;
         for(let i=0; i<n; i++) {
-            sumDelta += Math.abs(farey[i].value - (i+1)/n);
+            sumDelta += Math.abs(farey[i].value - i/(n-1));  // classical: δ_k = f_k − k/(n-1)
             if(i < n-1) { const g = farey[i+1].value - farey[i].value; sumGap += g; if(g > maxGap) maxGap = g; }
         }
         
@@ -13120,6 +13499,41 @@ function exportMainTabData() {
         csv += 'Sector,' + selectedTreePoint.sector + '\n';
         csv += 'SB Path,"' + path + '"\n';
         csv += 'Path Length,' + path.length + '\n';
+    }
+    
+    // Involution pairing export
+    if (highlightedRingPoint && document.getElementById('enableInvolution')?.checked) {
+        const selR = highlightedRingPoint.r, selM = highlightedRingPoint.m;
+        const mirR = selM - selR;
+        const isFP = (selR === mirR);
+        csv += '\nInvolution Pairing\n';
+        csv += 'Selected,' + selR + '/' + selM + ',' + (selR/selM).toFixed(8) + '\n';
+        csv += 'Mirror,' + mirR + '/' + selM + ',' + (mirR/selM).toFixed(8) + '\n';
+        csv += 'Fixed Point,' + (isFP ? 'Yes (1/2 - unique)' : 'No') + '\n';
+        csv += 'Sum,' + ((selR + mirR) / selM) + '\n';
+        csv += 'gcd(mirror_r\\,m),' + gcd(mirR, selM) + '\n';
+        const selPt = state.ringPoints.find(function(p){ return p.r === selR && p.m === selM; });
+        const mirPt = state.ringPoints.find(function(p){ return p.r === mirR && p.m === selM; });
+        if (selPt) csv += 'Selected Sector,' + selPt.sector + '\n';
+        if (mirPt) csv += 'Mirror Sector,' + mirPt.sector + '\n';
+        if (selPt && mirPt && selPt.sector !== mirPt.sector) csv += 'Cross-Sector,S' + selPt.sector + '<->S' + mirPt.sector + '\n';
+    }
+
+    // Mod-1 cusp and bisection identity
+    {
+        const s1c = (state.residuesBySector[1] || []).length;
+        let src = 0;
+        for (let ss = 2; ss <= (state.sectorMax || 275); ss++) src += (state.residuesBySector[ss] || []).length;
+        csv += '\nMod-1 Cusp Structure\n';
+        csv += 'Basepoint,0/1 = 1/1 (mod 1)\n';
+        csv += 'Collapse,All n/n reduce to 0/1 via gcd(n n)=n\n';
+        csv += 'N range,' + (state.nMin||2) + '-' + state.nMax + '\n';
+        csv += '\nBisection Identity (Theorem 1)\n';
+        csv += '|S1|,' + s1c + '\n';
+        csv += '|S_rest|,' + src + '\n';
+        csv += '|S1|+1,' + (s1c + 1) + '\n';
+        csv += 'Identity holds,' + ((s1c + 1 === src) ? 'Yes' : 'No') + '\n';
+        csv += 'Fixed point,1/2 (unique fixed pt of involution)\n';
     }
     
     const blob = new Blob([csv], {type:'text/csv'});
@@ -16784,7 +17198,7 @@ function highlightPointOnRing(fraction) {
     // Get rotation and spacing settings
     const rotationOn = document.getElementById('enableRingRotation')?.checked || false;
     const rotationAmt = parseFloat(document.getElementById('ringRotationAmount')?.value || 0) * Math.PI / 180;
-    const rotationCumulative = document.getElementById('rotationCumulative')?.checked || true;
+    const rotationCumulative = document.getElementById('rotationCumulative')?.checked ?? true;
     const globalPhase = parseFloat(document.getElementById('ringGlobalPhase')?.value || 0) * Math.PI / 180;
     const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
     const ringSpacing = parseFloat(document.getElementById('ringSpacing')?.value || 1);
