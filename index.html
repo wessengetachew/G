@@ -186,6 +186,105 @@
         .arnold-canvas-sm { width: 100%; height: 70px; background: #0f172a; border-radius: 4px; border: 1px solid #334155; display: block; }
         .spectrum-canvas-sm { width: 100%; height: 40px; background: #0f172a; border-radius: 4px; border: 1px solid #334155; display: block; }
         
+        /* Stats Panel Styles */
+        .stats-panel {
+            position: fixed;
+            right: 20px;
+            top: 100px;
+            width: 300px;
+            max-height: 70vh;
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            border: 2px solid #8b5cf6;
+            border-radius: 8px;
+            padding: 15px;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #8b5cf6;
+        }
+        .stats-header h3 {
+            color: #a5b4fc;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .stats-close {
+            background: #ef4444;
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+        }
+        .stats-section {
+            margin-bottom: 12px;
+            padding: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 6px;
+            border-left: 3px solid #06b6d4;
+        }
+        .stats-section h4 {
+            color: #06b6d4;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 12px;
+        }
+        .stats-label {
+            color: #94a3b8;
+        }
+        .stats-value {
+            color: #8b5cf6;
+            font-weight: 600;
+            font-family: monospace;
+        }
+        .stats-value.gcd1 {
+            color: #22c55e;
+        }
+        .stats-value.gcdgt1 {
+            color: #f59e0b;
+        }
+        .point-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 8px;
+        }
+        .point-item {
+            padding: 6px;
+            margin-bottom: 4px;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 4px;
+            font-size: 10px;
+            font-family: monospace;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .point-item:hover {
+            background: rgba(139, 92, 246, 0.3);
+            transform: translateX(3px);
+        }
+        .point-item.gcd1 {
+            border-left: 3px solid #22c55e;
+        }
+        .point-item.gcdgt1 {
+            border-left: 3px solid #f59e0b;
+        }
+        
         .keyboard-row { display: flex; gap: 1px; height: 28px; }
         .key-white { flex: 1; background: linear-gradient(180deg, #f1f5f9, #cbd5e1); border-radius: 0 0 2px 2px; cursor: pointer; min-width: 14px; }
         .key-white:hover { background: #a5b4fc; }
@@ -365,6 +464,50 @@
     <a href="https://wessengetachew.github.io/Gemini/" target="_blank">Gemini</a>
     <a href="https://wessengetachew.github.io/Rebuild/" target="_blank">Rebuild</a>
     <a href="https://wessengetachew.github.io/Goldbach/" target="_blank">Goldbach</a>
+</div>
+
+<!-- Stats Panel (hidden by default) -->
+<div class="stats-panel" id="statsPanel" style="display: none;">
+    <div class="stats-header">
+        <h3>Point Statistics</h3>
+        <button class="stats-close" onclick="toggleStatsPanel()">X</button>
+    </div>
+    
+    <div class="stats-section">
+        <h4>Overall Stats</h4>
+        <div class="stats-row">
+            <span class="stats-label">Total Points:</span>
+            <span class="stats-value" id="statsTotalPoints">0</span>
+        </div>
+        <div class="stats-row">
+            <span class="stats-label">GCD = 1:</span>
+            <span class="stats-value gcd1" id="statsGcd1Count">0</span>
+        </div>
+        <div class="stats-row">
+            <span class="stats-label">GCD &gt; 1:</span>
+            <span class="stats-value gcdgt1" id="statsGcdGt1Count">0</span>
+        </div>
+        <div class="stats-row">
+            <span class="stats-label">Avg GCD:</span>
+            <span class="stats-value" id="statsAvgGcd">0</span>
+        </div>
+    </div>
+    
+    <div class="stats-section">
+        <h4>Point List (Scrollable)</h4>
+        <div class="point-list" id="pointList">
+            <div style="color: #94a3b8; font-size: 10px; font-style: italic;">
+                Click Compute to generate points
+            </div>
+        </div>
+    </div>
+    
+    <div class="stats-section">
+        <h4>Selected Point Info</h4>
+        <div id="selectedPointInfo" style="color: #94a3b8; font-size: 10px; font-style: italic;">
+            Click a point on canvas to see details
+        </div>
+    </div>
 </div>
 
 <!-- GLOBAL HARMONIC ANALYSIS PANEL - COMPLETE -->
@@ -746,6 +889,10 @@
                         <option value="sector">Sector</option>
                         <option value="prime">Prime/Composite</option>
                         <option value="denominator">Denominator</option>
+                        <option value="numerator">Numerator</option>
+                        <option value="gcd">GCD Value</option>
+                        <option value="lcm">LCM Value</option>
+                        <option value="modulo">Mod Value</option>
                         <option value="harmonic">Harmonic</option>
                         <option value="rainbow">Rainbow</option>
                     </select></label>
@@ -911,7 +1058,17 @@
                                 <option value="fraction">r/m</option>
                                 <option value="r">r only</option>
                                 <option value="m">m only</option>
+                                <option value="tuple">(r,m)</option>
+                                <option value="decimal">decimal</option>
+                                <option value="percent">percent</option>
                                 <option value="degree">degrees</option>
+                                <option value="radian">radians</option>
+                                <option value="angle">angle</option>
+                                <option value="path">SB path</option>
+                                <option value="lcm">LCM(r,m)</option>
+                                <option value="gcd">GCD(r,m)</option>
+                                <option value="harmonic">harmonic ratio</option>
+                                <option value="continued">cont. fraction</option>
                             </select></label>
                             <label style="font-size:11px;">Size: <input type="number" id="labelSize" value="10" min="6" max="24" step="1" style="width:40px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
                         </div>
@@ -926,6 +1083,7 @@
                         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
                             <label style="font-size:11px;"><input type="checkbox" id="antialiasRing" checked onchange="drawMainRing()"> Antialias</label>
                             <label style="font-size:11px;">BG: <input type="color" id="ringBgColor" value="#0f172a" style="width:28px;height:20px;border:none;cursor:pointer;" onchange="drawMainRing()"></label>
+                            <label style="font-size:11px;"><input type="checkbox" id="highlightGcd1" onchange="drawMainRing()"> <span style="color:#22c55e;">●</span> GCD=1</label>
                         </div>
                     </div>
                     
@@ -946,6 +1104,7 @@
                             <label style="font-size:11px;">Max m: <input type="number" id="maxDenomFilter" value="" placeholder="∞" min="2" style="width:55px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
                             <label style="font-size:11px;"><input type="checkbox" id="hideSmallDenom" onchange="drawMainRing()"> Hide m≤5</label>
                             <button onclick="resetFilters()" class="secondary" style="font-size:9px;padding:3px 8px;">Reset</button>
+                            <button onclick="toggleStatsPanel()" class="secondary" style="font-size:9px;padding:3px 8px;margin-left:auto;">Stats Panel</button>
                         </div>
                     </div>
                     
@@ -7623,6 +7782,18 @@ function drawMainRing() {
         let size = finalPointSize;
         if (colorMode === 'prime' && ip) size = finalPointSize * 1.25;
         
+        // GCD-based coloring (overlays on top of base color when enabled)
+        const highlightGcd1El = document.getElementById('highlightGcd1');
+        
+        if (highlightGcd1El && highlightGcd1El.checked) {
+            const g = gcd(r, m);
+            if (g === 1) {
+                color = '#22c55e'; // Green for GCD=1 (coprime)
+                size = finalPointSize * 1.1;
+            }
+            // Non-coprime points keep their original color
+        }
+        
         // Apply sector color mode
         const inSector = s === sector;
         if (!showAll && sectorColorMode !== 'preserve') {
@@ -7862,9 +8033,25 @@ function drawMainRing() {
                 labelText = `${p.r}`;
             } else if (labelType === 'm') {
                 labelText = `${p.m}`;
+            } else if (labelType === 'tuple') {
+                labelText = `(${p.r},${p.m})`;
+            } else if (labelType === 'decimal') {
+                labelText = (p.r / p.m).toFixed(4);
+            } else if (labelType === 'percent') {
+                labelText = ((p.r / p.m) * 100).toFixed(1) + '%';
             } else if (labelType === 'degree') {
                 const degrees = ((p.r / p.m) * 360).toFixed(1);
                 labelText = `${degrees}°`;
+            } else if (labelType === 'radian') {
+                const radians = ((p.r / p.m) * 2 * Math.PI).toFixed(3);
+                labelText = `${radians}`;
+            } else if (labelType === 'path') {
+                labelText = getSBPath(p.r, p.m).substring(0, 8);
+            } else if (labelType === 'lcm') {
+                const lcmVal = (p.r * p.m) / gcd(p.r, p.m);
+                labelText = `${lcmVal}`;
+            } else if (labelType === 'gcd') {
+                labelText = `${gcd(p.r, p.m)}`;
             } else { // fraction
                 labelText = `${p.r}/${p.m}`;
             }
@@ -8045,15 +8232,20 @@ function drawMainRing() {
     // Debug info on canvas - show point size and data source
     const usingBounded = fullData.length === 0 && boundedData.length > 0;
     ctx.fillStyle = usingBounded ? '#f59e0b' : '#94a3b8'; 
-    ctx.font = '11px monospace';
+    ctx.font = '13px monospace';
     const dataLabel = usingBounded ? `Bounded N≤${state.boundedN}` : `N: ${state.nMin}-${state.nMax}`;
-    ctx.fillText(`${dataLabel} | Points: ${debugDrawnCount} | Size: ${finalPointSize.toFixed(1)}px${usingBounded ? ' (Formula mode - limited data)' : ''}`, 10, H - 58);
+    ctx.fillText(`${dataLabel} | Points: ${debugDrawnCount} | Size: ${finalPointSize.toFixed(1)}px${usingBounded ? ' (Formula mode - limited data)' : ''}`, 10, H - 45);
     
     // Draw word art on top
     drawWordArt(ctx);
     
     updateColorLegend(colorMode, showAll, sector);
     updateSectorStats(sector, residues);
+    
+    // Update stats panel if visible
+    if (document.getElementById('statsPanel').style.display !== 'none') {
+        updateStatsPanel();
+    }
 }
 
 function updateTrackerInfo(trackerPoints, enabled) {
@@ -8680,7 +8872,18 @@ function getRingPointColor(colorMode, res, s, ip, m, r, maxGap, minGap) {
         case 'sector': return getSectorColor(s);
         case 'prime': return ip ? '#f59e0b' : '#6366f1';
         case 'denominator': return `hsl(${260-((m-state.nMin)/(state.nMax-state.nMin+1))*200},70%,60%)`;
-        case 'numerator': return `hsl(${(r/m)*360},70%,55%)`;
+        case 'numerator': 
+            // Color by numerator value with rainbow gradient
+            return `hsl(${(r % 12) * 30}, 75%, 55%)`;
+        case 'lcm':
+            // Color by LCM(r, m)
+            const lcmVal = (r * m) / gcd(r, m);
+            const lcmHue = (lcmVal % 20) * 18; // Cycle through spectrum
+            return `hsl(${lcmHue}, 70%, 55%)`;
+        case 'modulo':
+            // Color by r mod 12 (musical intervals)
+            const modVal = r % 12;
+            return `hsl(${modVal * 30}, 80%, 60%)`;
         case 'gap': 
             const g = res.gapRight || minGap;
             const gn = maxGap > minGap ? (g-minGap)/(maxGap-minGap) : 0.5;
@@ -8719,7 +8922,8 @@ function getRingPointColor(colorMode, res, s, ip, m, r, maxGap, minGap) {
         // Number theory modes
         case 'gcd':
             const gcdVal = gcd(r, m);
-            return gcdVal === 1 ? '#ffd700' : `hsl(${(gcdVal % 10) * 36}, 60%, 50%)`;
+            if (gcdVal === 1) return '#22c55e'; // Coprime in bright green
+            return `hsl(${(gcdVal * 40) % 360}, 70%, 55%)`; // Other GCD values in spectrum
         case 'quadRes':
             const isQR = isQuadraticResidue(r, m);
             return isQR ? '#22c55e' : '#6366f1';
@@ -21030,6 +21234,138 @@ function exportCalcDataJSON() {
     a.click();
     URL.revokeObjectURL(url);
 }
+
+
+// ==================== GCD & STATS FUNCTIONS ====================
+
+function getSBPath(a, b) {
+    // Get Stern-Brocot tree path
+    let path = '';
+    let left = [0, 1];
+    let right = [1, 0];
+    let count = 0;
+    
+    while (count < 15) {
+        let mid = [left[0] + right[0], left[1] + right[1]];
+        if (mid[0] === a && mid[1] === b) break;
+        
+        if (a * mid[1] < b * mid[0]) {
+            right = mid;
+            path += 'L';
+        } else {
+            left = mid;
+            path += 'R';
+        }
+        count++;
+    }
+    
+    return path || 'ROOT';
+}
+
+function toggleStatsPanel() {
+    const panel = document.getElementById('statsPanel');
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        updateStatsPanel();
+    } else {
+        panel.style.display = 'none';
+    }
+}
+
+function updateStatsPanel() {
+    const sector = +document.getElementById('viewSector').value;
+    const showAll = document.getElementById('showAllSectors').checked;
+    
+    let residues;
+    const fullData = showAll ? Object.values(state.residuesBySector).flat() : (state.residuesBySector[sector]||[]);
+    const boundedData = showAll ? Object.values(state.boundedResiduesBySector||{}).flat() : (state.boundedResiduesBySector?.[sector]||[]);
+    
+    if (fullData.length > 0) {
+        residues = fullData;
+    } else if (boundedData.length > 0) {
+        residues = boundedData;
+    } else {
+        residues = [];
+    }
+    
+    // Calculate stats
+    const totalPoints = residues.filter(r => !r.isCusp).length;
+    let gcd1Count = 0;
+    let gcdGt1Count = 0;
+    let gcdSum = 0;
+    
+    residues.forEach(res => {
+        if (res.isCusp) return;
+        const g = gcd(res.r, res.m);
+        if (g === 1) {
+            gcd1Count++;
+        } else {
+            gcdGt1Count++;
+        }
+        gcdSum += g;
+    });
+    
+    const avgGcd = totalPoints > 0 ? (gcdSum / totalPoints).toFixed(3) : 0;
+    
+    // Update stats display
+    document.getElementById('statsTotalPoints').textContent = totalPoints;
+    document.getElementById('statsGcd1Count').textContent = gcd1Count;
+    document.getElementById('statsGcdGt1Count').textContent = gcdGt1Count;
+    document.getElementById('statsAvgGcd').textContent = avgGcd;
+    
+    // Update point list (limit to first 100 for performance)
+    const pointListDiv = document.getElementById('pointList');
+    pointListDiv.innerHTML = '';
+    
+    const displayLimit = Math.min(100, totalPoints);
+    const validPoints = residues.filter(r => !r.isCusp).slice(0, displayLimit);
+    
+    validPoints.forEach((res, idx) => {
+        const { r, m } = res;
+        const g = gcd(r, m);
+        const isGcd1 = g === 1;
+        const value = r / m;
+        
+        const div = document.createElement('div');
+        div.className = `point-item ${isGcd1 ? 'gcd1' : 'gcdgt1'}`;
+        div.innerHTML = `${r}/${m} = ${value.toFixed(4)} | GCD=${g} | Path=${getSBPath(r, m).substring(0, 8)}`;
+        div.onclick = () => selectPointForInfo(r, m);
+        pointListDiv.appendChild(div);
+    });
+    
+    if (totalPoints > displayLimit) {
+        const moreDiv = document.createElement('div');
+        moreDiv.style.cssText = 'color:#64748b;font-size:9px;text-align:center;padding:6px;';
+        moreDiv.textContent = `... ${totalPoints - displayLimit} more points`;
+        pointListDiv.appendChild(moreDiv);
+    }
+}
+
+function selectPointForInfo(r, m) {
+    const g = gcd(r, m);
+    const value = r / m;
+    const angle = value * 360;
+    const path = getSBPath(r, m);
+    
+    const infoDiv = document.getElementById('selectedPointInfo');
+    infoDiv.innerHTML = `
+        <div style="color:#8b5cf6;font-weight:bold;margin-bottom:4px;">${r}/${m}</div>
+        <div style="line-height:1.6;">
+        Decimal: ${value.toFixed(6)}<br>
+        GCD(${r},${m}) = ${g}<br>
+        Tuple: (${r}, ${m})<br>
+        Angle: ${angle.toFixed(2)}°<br>
+        SB Path: ${path}<br>
+        Coprime: ${g === 1 ? 'Yes' : 'No'}
+        </div>
+    `;
+    
+    // Highlight point on canvas if possible
+    document.getElementById('pointSelectInput').value = `${r}/${m}`;
+    selectPointByFraction();
+}
+
+// ==================== END OF NEW FUNCTIONS ====================
 
 </script>
 </body>
