@@ -186,105 +186,6 @@
         .arnold-canvas-sm { width: 100%; height: 70px; background: #0f172a; border-radius: 4px; border: 1px solid #334155; display: block; }
         .spectrum-canvas-sm { width: 100%; height: 40px; background: #0f172a; border-radius: 4px; border: 1px solid #334155; display: block; }
         
-        /* Stats Panel Styles */
-        .stats-panel {
-            position: fixed;
-            right: 20px;
-            top: 100px;
-            width: 300px;
-            max-height: 70vh;
-            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
-            border: 2px solid #8b5cf6;
-            border-radius: 8px;
-            padding: 15px;
-            z-index: 1000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            overflow-y: auto;
-        }
-        .stats-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #8b5cf6;
-        }
-        .stats-header h3 {
-            color: #a5b4fc;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        .stats-close {
-            background: #ef4444;
-            border: none;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 16px;
-            line-height: 1;
-        }
-        .stats-section {
-            margin-bottom: 12px;
-            padding: 10px;
-            background: rgba(15, 23, 42, 0.6);
-            border-radius: 6px;
-            border-left: 3px solid #06b6d4;
-        }
-        .stats-section h4 {
-            color: #06b6d4;
-            font-size: 11px;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
-        }
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            font-size: 12px;
-        }
-        .stats-label {
-            color: #94a3b8;
-        }
-        .stats-value {
-            color: #8b5cf6;
-            font-weight: 600;
-            font-family: monospace;
-        }
-        .stats-value.gcd1 {
-            color: #22c55e;
-        }
-        .stats-value.gcdgt1 {
-            color: #f59e0b;
-        }
-        .point-list {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-top: 8px;
-        }
-        .point-item {
-            padding: 6px;
-            margin-bottom: 4px;
-            background: rgba(139, 92, 246, 0.1);
-            border-radius: 4px;
-            font-size: 10px;
-            font-family: monospace;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .point-item:hover {
-            background: rgba(139, 92, 246, 0.3);
-            transform: translateX(3px);
-        }
-        .point-item.gcd1 {
-            border-left: 3px solid #22c55e;
-        }
-        .point-item.gcdgt1 {
-            border-left: 3px solid #f59e0b;
-        }
-        
         .keyboard-row { display: flex; gap: 1px; height: 28px; }
         .key-white { flex: 1; background: linear-gradient(180deg, #f1f5f9, #cbd5e1); border-radius: 0 0 2px 2px; cursor: pointer; min-width: 14px; }
         .key-white:hover { background: #a5b4fc; }
@@ -464,50 +365,6 @@
     <a href="https://wessengetachew.github.io/Gemini/" target="_blank">Gemini</a>
     <a href="https://wessengetachew.github.io/Rebuild/" target="_blank">Rebuild</a>
     <a href="https://wessengetachew.github.io/Goldbach/" target="_blank">Goldbach</a>
-</div>
-
-<!-- Stats Panel (hidden by default) -->
-<div class="stats-panel" id="statsPanel" style="display: none;">
-    <div class="stats-header">
-        <h3>Point Statistics</h3>
-        <button class="stats-close" onclick="toggleStatsPanel()">X</button>
-    </div>
-    
-    <div class="stats-section">
-        <h4>Overall Stats</h4>
-        <div class="stats-row">
-            <span class="stats-label">Total Points:</span>
-            <span class="stats-value" id="statsTotalPoints">0</span>
-        </div>
-        <div class="stats-row">
-            <span class="stats-label">GCD = 1:</span>
-            <span class="stats-value gcd1" id="statsGcd1Count">0</span>
-        </div>
-        <div class="stats-row">
-            <span class="stats-label">GCD &gt; 1:</span>
-            <span class="stats-value gcdgt1" id="statsGcdGt1Count">0</span>
-        </div>
-        <div class="stats-row">
-            <span class="stats-label">Avg GCD:</span>
-            <span class="stats-value" id="statsAvgGcd">0</span>
-        </div>
-    </div>
-    
-    <div class="stats-section">
-        <h4>Point List (Scrollable)</h4>
-        <div class="point-list" id="pointList">
-            <div style="color: #94a3b8; font-size: 10px; font-style: italic;">
-                Click Compute to generate points
-            </div>
-        </div>
-    </div>
-    
-    <div class="stats-section">
-        <h4>Selected Point Info</h4>
-        <div id="selectedPointInfo" style="color: #94a3b8; font-size: 10px; font-style: italic;">
-            Click a point on canvas to see details
-        </div>
-    </div>
 </div>
 
 <!-- GLOBAL HARMONIC ANALYSIS PANEL - COMPLETE -->
@@ -810,7 +667,10 @@
         <div class="tab active" onclick="switchTab('main')">Explorer</div>
         <div class="tab" onclick="switchTab('analysis')">Analysis</div>
         <div class="tab" onclick="switchTab('calculator')">Calculator</div>
-        <div class="tab" onclick="switchTab('theory')">Theory</div>
+        <div class="tab" onclick="switchTab('theory')" style="background:linear-gradient(135deg,#1e1b4b,#4338ca);border:2px solid #8b5cf6;font-weight:700;box-shadow:0 0 15px rgba(139,92,246,0.4);position:relative;">
+            <span style="position:absolute;top:-8px;right:-8px;background:#8b5cf6;color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.3);">π</span>
+            Theory
+        </div>
         <div class="tab" onclick="switchTab('geometry')">Geometry</div>
         <div class="tab" onclick="switchTab('connections')">Connections</div>
         <div class="tab" onclick="switchTab('advanced')">Advanced</div>
@@ -886,15 +746,42 @@
                         <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>
                     </select></label>
                     <label style="font-size:12px;">Color: <select id="colorMode" onchange="drawMainRing()" style="padding:4px;">
-                        <option value="sector">Sector</option>
-                        <option value="prime">Prime/Composite</option>
-                        <option value="denominator">Denominator</option>
-                        <option value="numerator">Numerator</option>
-                        <option value="gcd">GCD Value</option>
-                        <option value="lcm">LCM Value</option>
-                        <option value="modulo">Mod Value</option>
-                        <option value="harmonic">Harmonic</option>
-                        <option value="rainbow">Rainbow</option>
+                        <optgroup label="Basic">
+                            <option value="sector">Sector</option>
+                            <option value="prime">Prime/Composite</option>
+                            <option value="numerator">Numerator (r)</option>
+                            <option value="denominator">Denominator (m)</option>
+                        </optgroup>
+                        <optgroup label="Arithmetic">
+                            <option value="gcd">GCD(r,m)</option>
+                            <option value="lcm">LCM(r,m)</option>
+                            <option value="rPlusM">r + m</option>
+                            <option value="rTimesM">r × m</option>
+                            <option value="rModM">r mod m</option>
+                        </optgroup>
+                        <optgroup label="Number Theory">
+                            <option value="totient">φ(m)/m Ratio</option>
+                            <option value="sbDepth">Stern-Brocot Depth</option>
+                            <option value="quadRes">Quadratic Residue</option>
+                            <option value="primeLimit">Prime Limit</option>
+                        </optgroup>
+                        <optgroup label="Music/Harmonic">
+                            <option value="harmonic">Harmonic Mode</option>
+                            <option value="consonance">Consonance</option>
+                            <option value="tenney">Tenney Height</option>
+                        </optgroup>
+                        <optgroup label="Gradients">
+                            <option value="rainbow">Rainbow</option>
+                            <option value="fire">Fire</option>
+                            <option value="plasma">Plasma</option>
+                            <option value="viridis">Viridis</option>
+                            <option value="ocean">Ocean</option>
+                        </optgroup>
+                        <optgroup label="Geometric">
+                            <option value="gap">Gap Size</option>
+                            <option value="angle">Angular Position</option>
+                            <option value="radius">Radial Position</option>
+                        </optgroup>
                     </select></label>
                     <label style="font-size:12px;"><input type="checkbox" id="showAllSectors" checked onchange="state.highlightSectorOnly=null;drawMainRing()"> All Sectors</label>
                     <label style="font-size:12px;">Size: <input type="number" id="ringPointSize" min="0" max="100" value="5" step="0.5" style="width:65px;font-size:11px;" onchange="drawMainRing();updatePtSizeDisplay()"><span id="ptSizeDisplay" style="color:#6366f1;margin-left:4px;font-size:11px;">5</span></label>
@@ -968,10 +855,12 @@
                             <label style="font-size:11px;"><input type="checkbox" id="enableInvolution" onchange="drawMainRing()"> Show pair</label>
                             <label style="font-size:11px;"><input type="checkbox" id="involutionConnect" checked onchange="drawMainRing()"> Connect</label>
                             <label style="font-size:11px;"><input type="checkbox" id="involutionGlow" checked onchange="drawMainRing()"> Glow</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="involutionLabelBoth" onchange="drawMainRing()"> Label both</label>
                         </div>
                         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
                             <label style="font-size:11px;">Pair color: <input type="color" id="involutionColor" value="#d4a057" style="width:28px;height:22px;border:none;cursor:pointer;" onchange="drawMainRing()"></label>
                             <label style="font-size:11px;">Line: <input type="number" id="involutionLineWidth" value="2" min="1" max="6" step="0.5" style="width:40px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
+                            <label style="font-size:11px;">Label: <input type="number" id="involutionLabelSize" value="11" min="6" max="20" step="1" style="width:40px;font-size:10px;padding:2px;" onchange="drawMainRing()">px</label>
                         </div>
                         <div id="involutionStatsPanel" style="margin-top:8px;padding:6px 8px;background:rgba(0,0,0,0.3);border-radius:4px;font-size:10px;color:#cbd5e1;display:none;font-family:monospace;">
                             <!-- populated by JS -->
@@ -1003,13 +892,14 @@
                         <strong style="color:#00ffff;font-size:11px;display:block;margin-bottom:10px;">Residue Tracker</strong>
                         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
                             <label style="font-size:11px;"><input type="checkbox" id="enableResidueTracker" onchange="drawMainRing()"> Enable</label>
-                            <input type="text" id="trackResidues" placeholder="1,5,7 or 1-10" style="width:90px;font-size:10px;padding:4px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;" onchange="drawMainRing()">
+                            <input type="text" id="trackResidues" placeholder="1,5,7 or 1-10" style="width:90px;font-size:10px;padding:4px;background:#1e293b;border:1px solid #475569;border-radius:3px;color:#e2e8f0;" oninput="document.getElementById('enableResidueTracker').checked=true;" onchange="drawMainRing()" onkeypress="if(event.key==='Enter'){drawMainRing();}">
                             <input type="color" id="trackerColor" value="#00ffff" style="width:28px;height:24px;border:none;cursor:pointer;" onchange="drawMainRing()">
                         </div>
                         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
                             <label style="font-size:11px;"><input type="checkbox" id="trackerGlow" onchange="drawMainRing()"> Glow</label>
                             <label style="font-size:11px;"><input type="checkbox" id="trackerConnect" onchange="drawMainRing()"> Connect</label>
                             <label style="font-size:11px;">Size: <input type="number" id="trackerSize" value="8" min="1" max="30" step="0.5" style="width:45px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
+                            <label style="font-size:11px;">Line: <input type="number" id="trackerLineWidth" value="1.5" min="0.5" max="10" step="0.5" style="width:45px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
                         </div>
                         <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;">
                             <label style="font-size:11px;">Filter: <select id="trackerModFilter" onchange="applyTrackerFilter()" style="font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#e2e8f0;">
@@ -1041,6 +931,10 @@
                         </div>
                         <input type="hidden" id="trackerMode" value="manual">
                         <input type="hidden" id="trackerSliderR" value="1">
+                        <!-- Tracker Connections Details Panel -->
+                        <div id="trackerConnectionsPanel" style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.3);border-radius:4px;font-size:10px;color:#cbd5e1;display:none;max-height:200px;overflow-y:auto;">
+                            <!-- populated by updateTrackerConnectionsPanel() -->
+                        </div>
                     </div>
                     
                     <!-- Display Options -->
@@ -1055,20 +949,33 @@
                         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
                             <label style="font-size:11px;"><input type="checkbox" id="showFractionLabels" onchange="drawMainRing()"> Point Labels</label>
                             <label style="font-size:11px;">Type: <select id="labelType" onchange="drawMainRing()" style="font-size:10px;padding:2px;background:#1e293b;border:1px solid #475569;color:#e2e8f0;">
-                                <option value="fraction">r/m</option>
-                                <option value="r">r only</option>
-                                <option value="m">m only</option>
-                                <option value="tuple">(r,m)</option>
-                                <option value="decimal">decimal</option>
-                                <option value="percent">percent</option>
-                                <option value="degree">degrees</option>
-                                <option value="radian">radians</option>
-                                <option value="angle">angle</option>
-                                <option value="path">SB path</option>
-                                <option value="lcm">LCM(r,m)</option>
-                                <option value="gcd">GCD(r,m)</option>
-                                <option value="harmonic">harmonic ratio</option>
-                                <option value="continued">cont. fraction</option>
+                                <optgroup label="Basic">
+                                    <option value="fraction">r/m</option>
+                                    <option value="r">r (numerator)</option>
+                                    <option value="m">m (denominator)</option>
+                                    <option value="decimal">decimal</option>
+                                </optgroup>
+                                <optgroup label="Angle/Position">
+                                    <option value="degree">degrees</option>
+                                    <option value="radian">radians</option>
+                                    <option value="percent">percent</option>
+                                </optgroup>
+                                <optgroup label="Arithmetic">
+                                    <option value="gcd">gcd(r,m)</option>
+                                    <option value="lcm">lcm(r,m)</option>
+                                    <option value="sum">r+m</option>
+                                    <option value="product">r×m</option>
+                                </optgroup>
+                                <optgroup label="Number Theory">
+                                    <option value="totient">φ(m)</option>
+                                    <option value="cf">CF depth</option>
+                                    <option value="sector">Sector Sₙ</option>
+                                </optgroup>
+                                <optgroup label="Music">
+                                    <option value="ratio">ratio (m:r)</option>
+                                    <option value="cents">cents</option>
+                                    <option value="interval">interval</option>
+                                </optgroup>
                             </select></label>
                             <label style="font-size:11px;">Size: <input type="number" id="labelSize" value="10" min="6" max="24" step="1" style="width:40px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
                         </div>
@@ -1083,7 +990,6 @@
                         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
                             <label style="font-size:11px;"><input type="checkbox" id="antialiasRing" checked onchange="drawMainRing()"> Antialias</label>
                             <label style="font-size:11px;">BG: <input type="color" id="ringBgColor" value="#0f172a" style="width:28px;height:20px;border:none;cursor:pointer;" onchange="drawMainRing()"></label>
-                            <label style="font-size:11px;"><input type="checkbox" id="highlightGcd1" onchange="drawMainRing()"> <span style="color:#22c55e;">●</span> GCD=1</label>
                         </div>
                     </div>
                     
@@ -1104,7 +1010,6 @@
                             <label style="font-size:11px;">Max m: <input type="number" id="maxDenomFilter" value="" placeholder="∞" min="2" style="width:55px;font-size:10px;padding:2px;" onchange="drawMainRing()"></label>
                             <label style="font-size:11px;"><input type="checkbox" id="hideSmallDenom" onchange="drawMainRing()"> Hide m≤5</label>
                             <button onclick="resetFilters()" class="secondary" style="font-size:9px;padding:3px 8px;">Reset</button>
-                            <button onclick="toggleStatsPanel()" class="secondary" style="font-size:9px;padding:3px 8px;margin-left:auto;">Stats Panel</button>
                         </div>
                     </div>
                     
@@ -1595,9 +1500,42 @@
                 <label>Color by: 
                     <select id="treeColorMode" onchange="drawSectorTree()">
                         <option value="default">Default</option>
-                        <option value="sector" selected>Sector</option>
-                        <option value="prime">Prime/Composite</option>
-                        <option value="arnold">Arnold Tongue</option>
+                        <optgroup label="Basic">
+                            <option value="sector" selected>Sector</option>
+                            <option value="prime">Prime/Composite</option>
+                            <option value="numerator">Numerator (r)</option>
+                            <option value="denominator">Denominator (m)</option>
+                        </optgroup>
+                        <optgroup label="Arithmetic">
+                            <option value="gcd">GCD(r,m)</option>
+                            <option value="lcm">LCM(r,m)</option>
+                            <option value="rPlusM">r + m</option>
+                            <option value="rTimesM">r × m</option>
+                            <option value="rModM">r mod m</option>
+                        </optgroup>
+                        <optgroup label="Number Theory">
+                            <option value="totient">φ(m)/m Ratio</option>
+                            <option value="sbDepth">Stern-Brocot Depth</option>
+                            <option value="quadRes">Quadratic Residue</option>
+                            <option value="primeLimit">Prime Limit</option>
+                        </optgroup>
+                        <optgroup label="Music/Harmonic">
+                            <option value="harmonic">Harmonic Mode</option>
+                            <option value="arnold">Arnold Tongue</option>
+                            <option value="consonance">Consonance</option>
+                            <option value="tenney">Tenney Height</option>
+                        </optgroup>
+                        <optgroup label="Gradients">
+                            <option value="rainbow">Rainbow</option>
+                            <option value="fire">Fire</option>
+                            <option value="plasma">Plasma</option>
+                            <option value="viridis">Viridis</option>
+                            <option value="ocean">Ocean</option>
+                        </optgroup>
+                        <optgroup label="Geometric">
+                            <option value="depth">Tree Depth</option>
+                            <option value="angle">Angular Position</option>
+                        </optgroup>
                     </select>
                 </label>
                 <label><input type="checkbox" id="treeHighlightOnly" onchange="drawSectorTree()"> Highlight Only</label>
@@ -1613,6 +1551,7 @@
                     <option value="3840x2160" selected>4K (3840x2160)</option>
                 </select></label>
                 <label><input type="checkbox" id="showTreeLabels" checked onchange="drawSectorTree()"> Labels</label>
+                <label><input type="checkbox" id="showTreeLegend" checked onchange="drawSectorTree()"> Legend</label>
                 <label><input type="checkbox" id="showTreeGrid" onchange="drawSectorTree()"> Grid</label>
                 <label><input type="checkbox" id="animatePath" checked> Animate</label>
                 <label><input type="checkbox" id="zoomToPath" checked> Zoom to Path</label>
@@ -1875,6 +1814,30 @@
     
     <div id="tab-theory" class="tab-content">
         <div class="panel">
+            <!-- Formula Clarification Box -->
+            <div style="background:linear-gradient(135deg,#422006,#5a3a1a);border:2px solid #fbbf24;border-radius:8px;padding:20px;margin-bottom:25px;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:15px;">
+                    <div style="background:#fbbf24;color:#0f172a;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;flex-shrink:0;">!</div>
+                    <h3 style="color:#fcd34d;margin:0;font-size:1.1em;">Formula Clarification</h3>
+                </div>
+                <div style="background:rgba(0,0,0,0.3);padding:15px;border-radius:6px;border-left:4px solid #fbbf24;">
+                    <p style="margin:0 0 12px 0;color:#fef08a;font-size:0.95em;">This framework uses <strong>two related but distinct formulas</strong>:</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:12px;">
+                        <div style="background:#1e1b4b;padding:12px;border-radius:4px;border-left:3px solid #22c55e;">
+                            <div style="color:#22c55e;font-size:11px;font-weight:600;margin-bottom:6px;">SECTOR FORMULA (Main Page)</div>
+                            <div style="font-family:monospace;font-size:14px;color:#e2e8f0;margin-bottom:8px;">C(n,N) = 3N² / (π²n(n+1))</div>
+                            <div style="color:#94a3b8;font-size:11px;">Counts fractions in <em>one sector</em> Sₙ</div>
+                        </div>
+                        <div style="background:#1e1b4b;padding:12px;border-radius:4px;border-left:3px solid #8b5cf6;">
+                            <div style="color:#8b5cf6;font-size:11px;font-weight:600;margin-bottom:6px;">GLOBAL FORMULA (Calculator)</div>
+                            <div style="font-family:monospace;font-size:14px;color:#e2e8f0;margin-bottom:8px;">Σφ(k) = (3/π²)N² + O(N log N)</div>
+                            <div style="color:#94a3b8;font-size:11px;">Sums totient over <em>all k</em> from 1 to N</div>
+                        </div>
+                    </div>
+                    <p style="margin:12px 0 0 0;color:#cbd5e1;font-size:0.9em;"><strong>Relationship:</strong> Summing C(n,N) over all sectors n ≈ Σφ(k) (total coprime count)</p>
+                </div>
+            </div>
+            
             <h2 style="text-align:center; font-size:1.3em; margin-bottom:8px;">Summatory Function of Coprime Pairs in Farey Sequence Intervals</h2>
             <p style="text-align:center; color:#94a3b8; font-style:italic; margin-bottom:20px;">Wessen Getachew</p>
             
@@ -2018,7 +1981,48 @@
                 <p style="margin:10px 0 0 0; font-size:0.9em;">The Prime/Composite identities (PP + PC + CP + CC = Total) hold <em>exactly</em> in all regimes, including at and beyond the boundary. This persistence demonstrates that while density estimates fail, the underlying arithmetic structure remains inviolate. The boundary thus separates where we can <em>predict</em> counts from where we can only <em>verify</em> identities.</p>
             </div>
             
-            <h3 style="margin-top:20px;">8. Summary</h3>
+            <h3 style="margin-top:20px;">8. Involution Pairing: φ(r/m) = (m−r)/m</h3>
+            <div class="theorem-box" style="background: linear-gradient(135deg, #422006 0%, #5a3a1a 100%); border-left-color: #d4a057; margin-top:15px;">
+                <strong style="color:#d4a057; font-size:1em;">Theorem (Involution)</strong>
+                <p style="margin:10px 0 0 0; font-size:0.9em;">The map φ: r/m ↦ (m−r)/m is an involution on the Farey fractions with the following properties:</p>
+                <ul style="margin:8px 0 0 15px; font-size:0.9em;">
+                    <li><strong>Self-inverse:</strong> φ(φ(r/m)) = r/m (applying twice returns the original)</li>
+                    <li><strong>Sum identity:</strong> r/m + (m−r)/m = m/m = 1 (exactly, not approximately)</li>
+                    <li><strong>Fixed point:</strong> φ(1/2) = 1/2 is the unique fixed point (r = m−r ⟺ m = 2r ⟺ r/m = 1/2)</li>
+                    <li><strong>Coprimality preserved:</strong> If gcd(r,m) = 1 then gcd(m−r,m) = 1</li>
+                </ul>
+            </div>
+            
+            <h4 style="margin-top:15px; color:#d4a057;">8.1 Why the Sum is Exactly 1.0</h4>
+            <div style="background:#0f172a; padding:12px; border-radius:6px; border-left:3px solid #d4a057; margin:10px 0;">
+                <p style="margin:0 0 10px 0;">The sum r/m + (m−r)/m = 1 is an <strong>exact algebraic identity</strong>, not an approximate numerical result:</p>
+                <div style="background:#0a0f1a; padding:8px; margin:8px 0; border-radius:4px; font-family:monospace;">
+                    r/m + (m−r)/m = (r + m − r)/m = m/m = 1
+                </div>
+                <p style="margin:8px 0 0 0; font-size:0.9em;">However, when computed in floating-point arithmetic, the sum may be displayed as 0.9999999... or 1.0000001... due to rounding errors in the binary representation. The tool displays 10 decimal digits and marks the sum with <span style="color:#22c55e;">✓</span> (green check) if within 10⁻¹⁰ of 1.0, or <span style="color:#ef4444;">✗</span> (red X) if the error exceeds this tolerance (indicating a computational issue, not a mathematical violation).</p>
+            </div>
+            
+            <h3 style="margin-top:20px;">9. Bisection Identity (Theorem 1)</h3>
+            <div class="theorem-box" style="background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%); border-left-color: #22c55e; margin-top:15px;">
+                <strong style="color:#22c55e; font-size:1em;">Theorem 1 (Bisection Identity)</strong>
+                <p style="margin:10px 0 0 0; font-size:0.9em;">The first Farey sector S₁ = (1/2, 1] has exactly one more coprime fraction than the union of all remaining sectors S₂ ∪ S₃ ∪ S₄ ∪ ⋯:</p>
+                <div style="background:#0a0f1a; padding:8px; margin:8px 0; border-radius:4px; font-family:monospace; text-align:center;">
+                    |S₁| + 1 = |S₂| + |S₃| + |S₄| + ⋯
+                </div>
+            </div>
+            
+            <h4 style="margin-top:15px; color:#22c55e;">9.1 Why the Identity Holds Exactly for gcd Pairs</h4>
+            <div style="background:#0f172a; padding:12px; border-radius:6px; border-left:3px solid #22c55e; margin:10px 0;">
+                <p style="margin:0 0 10px 0;">The +1 arises from the <strong>involution pairing</strong> between sectors:</p>
+                <ul style="margin:0 0 0 15px; font-size:0.9em;">
+                    <li>The map φ(r/m) = (m−r)/m pairs most fractions across the 1/2 boundary: fractions in S₁ map to fractions in S₂∪S₃∪⋯ and vice versa</li>
+                    <li>The unique exception is the fixed point <strong>1/2 ∈ S₁</strong>, which maps to itself (φ(1/2) = 1/2)</li>
+                    <li>This unpaired fraction in S₁ accounts for the +1: |S₁| = |pairs from S₁| + 1 = |S_rest| + 1</li>
+                </ul>
+                <p style="margin:10px 0 0 0; font-size:0.9em; color:#94a3b8;">Note: This identity is <strong>exact for coprime (gcd=1) fractions</strong> in the Farey sequence. If non-coprime fractions r/m with gcd(r,m)>1 are included, the count changes because reducible fractions like 2/4, 3/6, etc. collapse to simpler forms, altering the balance. The tool verifies the identity with <span style="color:#22c55e;">✓</span> when it holds for the current dataset.</p>
+            </div>
+            
+            <h3 style="margin-top:20px;">10. Summary</h3>
             <div style="background:#0f172a; padding:12px; border-radius:6px; border-left:3px solid #3b82f6; margin:10px 0;">
                 <p style="margin:0;">This work provides a computational framework for exploring coprime pair distributions across Farey sequence intervals. By applying Mertens' classical summatory totient formula to specific rational slope ranges, we obtain explicit asymptotic counts for each interval. Computational analysis reveals a transition point near n ≈ 0.55N where asymptotic density estimates give way to discrete arithmetic behavior. The framework enables systematic study of prime/composite categorization, modular constraints, and the interplay between continuous approximation and discrete counting in number-theoretic distributions.</p>
             </div>
@@ -3742,13 +3746,23 @@ function screenshotMainCanvas() {
             ctx.font = '10px system-ui';
             ctx.fillText('Unique fixed pt of \u03c6. Source of +1 (Thm 1)', legendX + 20, ly + 50);
         } else {
+            const sumVal = selR/selM + mirR/selM;
+            const sumOK = Math.abs(sumVal - 1.0) < 1e-10;
+            const sumSymbol = sumOK ? '\u2713' : '\u2717';  // ✓ or ✗
+            const sumColor = sumOK ? '#22c55e' : '#ef4444';
             ctx.fillStyle = '#e2e8f0';
             ctx.fillText(`Selected : ${selR}/${selM} = ${(selR/selM).toFixed(6)}`, legendX + 20, ly + 32);
             ctx.fillStyle = '#d4a057';
             ctx.fillText(`Mirror   : ${mirR}/${selM} = ${(mirR/selM).toFixed(6)}`, legendX + 20, ly + 50);
             ctx.fillStyle = '#94a3b8';
             ctx.font = '10px system-ui';
-            ctx.fillText(`Sum = 1.0  |  gcd(${mirR},${selM}) = ${gcd(mirR,selM)}`, legendX + 20, ly + 68);
+            ctx.fillText(`Sum = ${sumVal.toFixed(10)}`, legendX + 20, ly + 68);
+            ctx.fillStyle = sumColor;
+            ctx.font = 'bold 11px system-ui';
+            ctx.fillText(sumSymbol, legendX + 165, ly + 68);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '10px system-ui';
+            ctx.fillText(`gcd(${mirR},${selM}) = ${gcd(mirR,selM)}`, legendX + 180, ly + 68);
         }
         ly += isFP ? 72 : 92;
     }
@@ -3902,31 +3916,33 @@ function screenshotMainCanvas() {
         ctx.fillText('SOLVER MATCH', legendX + 20, ly + 13);
         ly += 38;
         
-        // Solver background
+        // Solver background - scale height with canvasScale
+        const baseSolverHeight = 130;
+        const solverBoxHeight = baseSolverHeight * canvasScale;
         ctx.fillStyle = '#0f172a';
-        ctx.fillRect(legendX + 20, ly, legendWidth - 40, 130);
+        ctx.fillRect(legendX + 20, ly, legendWidth - 40, solverBoxHeight);
         ctx.strokeStyle = '#10b981';
         ctx.lineWidth = 2;
-        ctx.strokeRect(legendX + 20, ly, legendWidth - 40, 130);
+        ctx.strokeRect(legendX + 20, ly, legendWidth - 40, solverBoxHeight);
         
         // Fraction
         ctx.fillStyle = '#fbbf24';
         ctx.font = 'bold 20px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(`${solverCurrentMatch.r}/${solverCurrentMatch.m}`, legendX + legendWidth / 2, ly + 25);
+        ctx.fillText(`${solverCurrentMatch.r}/${solverCurrentMatch.m}`, legendX + legendWidth / 2, ly + 25 * canvasScale);
         ctx.textAlign = 'left';
         
         // Decimal value
         ctx.fillStyle = '#a7f3d0';
         ctx.font = '13px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(`= ${solverCurrentMatch.value.toFixed(8)}`, legendX + legendWidth / 2, ly + 45);
+        ctx.fillText(`= ${solverCurrentMatch.value.toFixed(8)}`, legendX + legendWidth / 2, ly + 45 * canvasScale);
         ctx.textAlign = 'left';
         
         // Details in two columns
         const leftCol = legendX + 30;
         const rightCol = legendX + legendWidth / 2 + 10;
-        let detailY = ly + 65;
+        let detailY = ly + 65 * canvasScale;
         
         // Left column
         ctx.fillStyle = '#94a3b8';
@@ -3936,7 +3952,7 @@ function screenshotMainCanvas() {
         ctx.font = 'bold 11px monospace';
         ctx.fillText(solverCurrentMatch.error < 0.0001 ? solverCurrentMatch.error.toExponential(2) : solverCurrentMatch.error.toFixed(6), leftCol + 45, detailY);
         
-        detailY += 18;
+        detailY += 18 * canvasScale;
         ctx.fillStyle = '#94a3b8';
         ctx.font = '11px system-ui';
         ctx.fillText('Sector:', leftCol, detailY);
@@ -3944,7 +3960,7 @@ function screenshotMainCanvas() {
         ctx.font = 'bold 11px monospace';
         ctx.fillText(`S${solverCurrentMatch.sector}`, leftCol + 45, detailY);
         
-        detailY += 18;
+        detailY += 18 * canvasScale;
         const isPrimeR = isPrime(solverCurrentMatch.r);
         const isPrimeM = solverCurrentMatch.isPrime;
         const category = (isPrimeR && isPrimeM) ? 'PP' : (isPrimeR && !isPrimeM) ? 'PC' : (!isPrimeR && isPrimeM) ? 'CP' : 'CC';
@@ -3957,7 +3973,7 @@ function screenshotMainCanvas() {
         ctx.fillText(category, leftCol + 60, detailY);
         
         // Right column
-        detailY = ly + 65;
+        detailY = ly + 65 * canvasScale;
         ctx.fillStyle = '#94a3b8';
         ctx.font = '11px system-ui';
         ctx.fillText('Gear Ratio:', rightCol, detailY);
@@ -3965,7 +3981,7 @@ function screenshotMainCanvas() {
         ctx.font = 'bold 11px monospace';
         ctx.fillText(`${solverCurrentMatch.m}:${solverCurrentMatch.r}`, rightCol + 70, detailY);
         
-        detailY += 18;
+        detailY += 18 * canvasScale;
         ctx.fillStyle = '#94a3b8';
         ctx.font = '11px system-ui';
         ctx.fillText('Denom Type:', rightCol, detailY);
@@ -3973,7 +3989,7 @@ function screenshotMainCanvas() {
         ctx.font = 'bold 11px system-ui';
         ctx.fillText(solverCurrentMatch.isPrime ? 'Prime' : 'Composite', rightCol + 80, detailY);
         
-        detailY += 18;
+        detailY += 18 * canvasScale;
         ctx.fillStyle = '#94a3b8';
         ctx.font = '11px system-ui';
         ctx.fillText('CF:', rightCol, detailY);
@@ -3983,7 +3999,7 @@ function screenshotMainCanvas() {
         ctx.fillText(cfText, rightCol + 25, detailY);
         
         // Path at bottom
-        detailY = ly + 115;
+        detailY = ly + 115 * canvasScale;
         ctx.fillStyle = '#94a3b8';
         ctx.font = '11px system-ui';
         ctx.textAlign = 'center';
@@ -3995,7 +4011,7 @@ function screenshotMainCanvas() {
         ctx.fillText(displayPath, legendX + legendWidth / 2 + 10, detailY);
         ctx.textAlign = 'left';
         
-        ly += 145;
+        ly += 145 * canvasScale;
     }
     
     // ===== DENOMINATOR TYPES SECTION =====
@@ -4098,33 +4114,35 @@ function screenshotMainCanvas() {
     ctx.fillText('MAIN FORMULA', legendX + 20, ly + 13);
     ly += 38;
     
-    // Formula background
+    // Formula background - scale height with canvasScale
+    const baseFormulaHeight = 130;
+    const formulaBoxHeight = baseFormulaHeight * canvasScale;
     ctx.fillStyle = '#0f172a';
-    ctx.fillRect(legendX + 20, ly, legendWidth - 40, 130);
+    ctx.fillRect(legendX + 20, ly, legendWidth - 40, formulaBoxHeight);
     ctx.strokeStyle = '#22c55e';
     ctx.lineWidth = 2;
-    ctx.strokeRect(legendX + 20, ly, legendWidth - 40, 130);
+    ctx.strokeRect(legendX + 20, ly, legendWidth - 40, formulaBoxHeight);
     
     // Title: Farey Summatory Function
     ctx.fillStyle = '#a78bfa';
     ctx.font = 'bold 15px system-ui';
     ctx.textAlign = 'left';
-    ctx.fillText('Farey Summatory Function', legendX + 30, ly + 24);
+    ctx.fillText('Farey Summatory Function', legendX + 30, ly + 24 * canvasScale);
     
     // Main formula: C(n,N) = 3N² / (π² n(n+1))
     ctx.fillStyle = '#e2e8f0';
     ctx.font = 'bold 22px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('C(n,N)  =  3N²  /  (π²  n(n+1))', legendX + legendWidth / 2, ly + 68);
+    ctx.fillText('C(n,N)  =  3N²  /  (π²  n(n+1))', legendX + legendWidth / 2, ly + 68 * canvasScale);
     
     // Sector definition: Sₙ = (1/(n+1), 1/n]
     ctx.fillStyle = '#94a3b8';
     ctx.font = '14px monospace';
     ctx.textAlign = 'left';
-    ctx.fillText('Sector Sₙ = (1/(n+1), 1/n]', legendX + 30, ly + 108);
+    ctx.fillText('Sector Sₙ = (1/(n+1), 1/n]', legendX + 30, ly + 108 * canvasScale);
     ctx.textAlign = 'left';
     
-    ly += 145;
+    ly += 145 * canvasScale;
     
     // ===== ADDITIONAL STATISTICS SECTION =====
     // Calculate remaining space and fill with useful info
@@ -5422,6 +5440,7 @@ async function computeAll() {
 async function computeExact(N) {
     let ops = 0;
     const startM = Math.max(2, state.nMin);  // Respect nMin
+    state.startM = startM;  // Store for radius calculation
     
     // MEISSEL-LEHMER OPTIMIZATION: Pre-initialize sieve for O(1) primality
     NumberTheory.initSieve(N);
@@ -7577,6 +7596,7 @@ function drawMainRing() {
     const trackerSize = +(document.getElementById('trackerSize')?.value || 8);
     const trackerGlow = document.getElementById('trackerGlow')?.checked || false;
     const trackerConnect = document.getElementById('trackerConnect')?.checked || false;
+    const trackerLineWidth = parseFloat(document.getElementById('trackerLineWidth')?.value || 1.5);
     const trackerModFilterStr = document.getElementById('trackerModFilter')?.value || '';
     const trackerModFilter = trackerModFilterStr.trim() ? trackerModFilterStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n)) : null;
     const trackedResidues = parseTrackerResidues(trackStr);
@@ -7730,8 +7750,9 @@ function drawMainRing() {
         const primeMs = [...new Set(residues.filter(r => r.isPrime).map(r => r.m))].sort((a,b) => a-b);
         ctx.strokeStyle = 'rgba(245,158,11,0.3)';
         ctx.lineWidth = 2;
+        const startM = state.startM || 2;
         primeMs.forEach(pm => {
-            let radNorm = invertOrder ? (1 - (pm-state.nMin)/(state.nMax-state.nMin+1)) : ((pm-state.nMin)/(state.nMax-state.nMin+1));
+            let radNorm = invertOrder ? (1 - (pm-startM)/(state.nMax-startM)) : ((pm-startM)/(state.nMax-startM));
             if (ringSpacing !== 1) radNorm = Math.pow(radNorm, 1/ringSpacing);
             const rad = Math.max(radNorm, 0.05) * maxR;
             ctx.beginPath();
@@ -7763,7 +7784,9 @@ function drawMainRing() {
             angle += ringRotation + globalPhase;
         }
         
-        let radNorm = invertOrder ? (1 - (m-state.nMin)/(state.nMax-state.nMin+1)) : ((m-state.nMin)/(state.nMax-state.nMin+1));
+        // Correct radius normalization: use actual m range (startM to nMax)
+        const startM = state.startM || 2;
+        let radNorm = invertOrder ? (1 - (m-startM)/(state.nMax-startM)) : ((m-startM)/(state.nMax-startM));
         // Apply ring spacing - power function spreads outer rings more
         if (ringSpacing !== 1) {
             radNorm = Math.pow(radNorm, 1/ringSpacing);
@@ -7781,18 +7804,6 @@ function drawMainRing() {
         let color = getRingPointColor(colorMode, res, s, ip, m, r, maxGap, minGap);
         let size = finalPointSize;
         if (colorMode === 'prime' && ip) size = finalPointSize * 1.25;
-        
-        // GCD-based coloring (overlays on top of base color when enabled)
-        const highlightGcd1El = document.getElementById('highlightGcd1');
-        
-        if (highlightGcd1El && highlightGcd1El.checked) {
-            const g = gcd(r, m);
-            if (g === 1) {
-                color = '#22c55e'; // Green for GCD=1 (coprime)
-                size = finalPointSize * 1.1;
-            }
-            // Non-coprime points keep their original color
-        }
         
         // Apply sector color mode
         const inSector = s === sector;
@@ -7838,10 +7849,13 @@ function drawMainRing() {
     
     // Draw tracker connections
     if (trackerOn && trackerConnect && trackerPoints.length > 1) {
-        ctx.strokeStyle = trackerColor; ctx.lineWidth = 1; ctx.globalAlpha = 0.5;
+        ctx.strokeStyle = trackerColor; 
+        ctx.lineWidth = trackerLineWidth; 
+        ctx.globalAlpha = 0.5;
         ctx.beginPath();
         trackerPoints.forEach((p,i) => i === 0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
-        ctx.stroke(); ctx.globalAlpha = 1;
+        ctx.stroke(); 
+        ctx.globalAlpha = 1;
     }
     
     // Draw tracker highlights
@@ -7925,17 +7939,33 @@ function drawMainRing() {
             ctx.arc(mirPt.x, mirPt.y, Math.max(finalPointSize * 2, 6) + 4, 0, 2 * Math.PI);
             ctx.stroke();
             
-            // --- Label on mirror point ---
+            // --- Label on mirror point (and optionally on selected point) ---
+            const invLabelSize = parseInt(document.getElementById('involutionLabelSize')?.value || 11);
+            const labelBoth = document.getElementById('involutionLabelBoth')?.checked || false;
+            
             ctx.fillStyle = '#fff';
-            ctx.font = 'bold 11px monospace';
+            ctx.font = `bold ${invLabelSize}px monospace`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
+            
+            // Always label the mirror point
             const mirLabel = `${mirR}/${selM}`;
             const lw = ctx.measureText(mirLabel).width;
             ctx.fillStyle = 'rgba(15,23,42,0.82)';
-            ctx.fillRect(mirPt.x - lw/2 - 4, mirPt.y - Math.max(finalPointSize*1.8,5) - 16, lw + 8, 14);
+            ctx.fillRect(mirPt.x - lw/2 - 4, mirPt.y - Math.max(finalPointSize*1.8,5) - invLabelSize - 6, lw + 8, invLabelSize + 4);
             ctx.fillStyle = invColor;
             ctx.fillText(mirLabel, mirPt.x, mirPt.y - Math.max(finalPointSize*1.8,5) - 3);
+            
+            // Optionally label the selected point too
+            if (labelBoth && selPt) {
+                const selLabel = `${selR}/${selM}`;
+                const lw2 = ctx.measureText(selLabel).width;
+                ctx.fillStyle = 'rgba(15,23,42,0.82)';
+                ctx.fillRect(selPt.x - lw2/2 - 4, selPt.y - Math.max(finalPointSize*1.8,5) - invLabelSize - 6, lw2 + 8, invLabelSize + 4);
+                ctx.fillStyle = invColor;
+                ctx.fillText(selLabel, selPt.x, selPt.y - Math.max(finalPointSize*1.8,5) - 3);
+            }
+            
             ctx.textBaseline = 'middle';
         }
         
@@ -7956,10 +7986,12 @@ function drawMainRing() {
                 const selDec = (selR/selM).toFixed(6);
                 const mirDec = (mirR/selM).toFixed(6);
                 const sum = (selR/selM + mirR/selM);
+                const sumOK = Math.abs(sum - 1.0) < 1e-10;
+                const sumSymbol = sumOK ? '<span style="color:#22c55e;">✓</span>' : '<span style="color:#ef4444;">✗</span>';
                 statsEl.innerHTML =
                     `<span style="color:#d4a057;font-weight:bold;">Selected:</span> ${selR}/${selM} = ${selDec} &nbsp; S<sub>${selSec}</sub><br>` +
                     `<span style="color:#d4a057;font-weight:bold;">Mirror &nbsp;:</span> ${mirR}/${selM} = ${mirDec} &nbsp; S<sub>${mirSec}</sub><br>` +
-                    `<span style="color:#94a3b8;">Sum = ${sum.toFixed(1)} &nbsp; | &nbsp; gcd(${mirR},${selM}) = ${gcd(mirR,selM)}</span>` +
+                    `<span style="color:#94a3b8;">Sum = ${sum.toFixed(10)} ${sumSymbol} &nbsp; | &nbsp; gcd(${mirR},${selM}) = ${gcd(mirR,selM)}</span>` +
                     (selSec !== mirSec ? `<br><span style="color:#f59e0b;">Cross-sector pair: S${selSec} &harr; S${mirSec}</span>` : '');
             } else {
                 statsEl.innerHTML = `<span style="color:#64748b;"><i>Mirror point ${mirR}/${selM} not in current view</i></span>`;
@@ -8029,31 +8061,39 @@ function drawMainRing() {
         
         pointsToLabel.forEach(p => {
             let labelText;
-            if (labelType === 'r') {
-                labelText = `${p.r}`;
-            } else if (labelType === 'm') {
-                labelText = `${p.m}`;
-            } else if (labelType === 'tuple') {
-                labelText = `(${p.r},${p.m})`;
-            } else if (labelType === 'decimal') {
-                labelText = (p.r / p.m).toFixed(4);
-            } else if (labelType === 'percent') {
-                labelText = ((p.r / p.m) * 100).toFixed(1) + '%';
-            } else if (labelType === 'degree') {
-                const degrees = ((p.r / p.m) * 360).toFixed(1);
-                labelText = `${degrees}°`;
-            } else if (labelType === 'radian') {
-                const radians = ((p.r / p.m) * 2 * Math.PI).toFixed(3);
-                labelText = `${radians}`;
-            } else if (labelType === 'path') {
-                labelText = getSBPath(p.r, p.m).substring(0, 8);
-            } else if (labelType === 'lcm') {
-                const lcmVal = (p.r * p.m) / gcd(p.r, p.m);
-                labelText = `${lcmVal}`;
-            } else if (labelType === 'gcd') {
-                labelText = `${gcd(p.r, p.m)}`;
-            } else { // fraction
-                labelText = `${p.r}/${p.m}`;
+            const val = p.r / p.m;
+            const gcdVal = gcd(p.r, p.m);
+            const lcmVal = (p.r * p.m) / gcdVal;
+            const phiM = eulerPhi(p.m);
+            const cfDepth = toCF(p.r, p.m).length;
+            
+            switch(labelType) {
+                case 'r': labelText = `${p.r}`; break;
+                case 'm': labelText = `${p.m}`; break;
+                case 'decimal': labelText = val.toFixed(4); break;
+                case 'degree': labelText = `${(val * 360).toFixed(1)}°`; break;
+                case 'radian': labelText = `${(val * 2 * Math.PI).toFixed(3)}`; break;
+                case 'percent': labelText = `${(val * 100).toFixed(1)}%`; break;
+                case 'gcd': labelText = `gcd=${gcdVal}`; break;
+                case 'lcm': labelText = `lcm=${lcmVal}`; break;
+                case 'sum': labelText = `${p.r + p.m}`; break;
+                case 'product': labelText = `${p.r * p.m}`; break;
+                case 'totient': labelText = `φ=${phiM}`; break;
+                case 'cf': labelText = `d=${cfDepth}`; break;
+                case 'sector': labelText = `S${p.sector}`; break;
+                case 'ratio': labelText = `${p.m}:${p.r}`; break;
+                case 'cents': 
+                    const cents = 1200 * Math.log2(val);
+                    labelText = `${cents.toFixed(0)}¢`;
+                    break;
+                case 'interval':
+                    // Musical interval names (approximate)
+                    const semitones = Math.round(12 * Math.log2(val));
+                    const intervals = ['P1','m2','M2','m3','M3','P4','TT','P5','m6','M6','m7','M7','P8'];
+                    labelText = intervals[Math.abs(semitones % 12)] || 'P1';
+                    break;
+                default: // fraction
+                    labelText = `${p.r}/${p.m}`;
             }
             
             ctx.fillStyle = 'rgba(226, 232, 240, 0.9)';
@@ -8067,10 +8107,11 @@ function drawMainRing() {
         ctx.font = '10px system-ui';
         ctx.textAlign = 'left';
         const labeledRings = new Set();
+        const startM = state.startM || 2;
         residues.forEach(res => {
             if (labeledRings.has(res.m)) return;
             labeledRings.add(res.m);
-            let radNorm = invertOrder ? (1 - (res.m-state.nMin)/(state.nMax-state.nMin+1)) : ((res.m-state.nMin)/(state.nMax-state.nMin+1));
+            let radNorm = invertOrder ? (1 - (res.m-startM)/(state.nMax-startM)) : ((res.m-startM)/(state.nMax-startM));
             if (ringSpacing !== 1) radNorm = Math.pow(radNorm, 1/ringSpacing);
             const rad = Math.max(radNorm, 0.05) * maxR;
             const ringRotation = rotationCumulative ? rotationAmt * res.m : rotationAmt;
@@ -8107,13 +8148,13 @@ function drawMainRing() {
             ctx.lineTo(cuspX, cuspY);
             ctx.stroke();
 
-            const nMin  = state.nMin  || 2;
+            const startM = state.startM || 2;
             const nMax  = state.nMax  || 500;
             ctx.fillStyle = 'rgba(251,191,36,0.30)';
-            for (let mm = nMin; mm <= nMax; mm++) {
+            for (let mm = startM; mm <= nMax; mm++) {
                 let rn = invertOrder
-                    ? (1 - (mm - nMin) / (nMax - nMin + 1))
-                    : ((mm - nMin) / (nMax - nMin + 1));
+                    ? (1 - (mm - startM) / (nMax - startM))
+                    : ((mm - startM) / (nMax - startM));
                 if (ringSpacing !== 1) rn = Math.pow(rn, 1 / ringSpacing);
                 const rr = Math.max(rn, 0.05) * maxR;
                 // Per-ring rotation (same logic as main point loop)
@@ -8212,7 +8253,8 @@ function drawMainRing() {
     // Draw highlighted ring circle during loop playback
     if (typeof highlightedRingM !== 'undefined' && highlightedRingM !== null) {
         const invertOrder = document.getElementById('invertRingOrder')?.checked || false;
-        let radNorm = invertOrder ? (1 - (highlightedRingM-state.nMin)/(state.nMax-state.nMin+1)) : ((highlightedRingM-state.nMin)/(state.nMax-state.nMin+1));
+        const startM = state.startM || 2;
+        let radNorm = invertOrder ? (1 - (highlightedRingM-startM)/(state.nMax-startM)) : ((highlightedRingM-startM)/(state.nMax-startM));
         if (ringSpacing !== 1) radNorm = Math.pow(radNorm, 1/ringSpacing);
         const ringRad = Math.max(radNorm, 0.05) * maxR;
         ctx.strokeStyle = '#fbbf24';
@@ -8232,20 +8274,15 @@ function drawMainRing() {
     // Debug info on canvas - show point size and data source
     const usingBounded = fullData.length === 0 && boundedData.length > 0;
     ctx.fillStyle = usingBounded ? '#f59e0b' : '#94a3b8'; 
-    ctx.font = '13px monospace';
+    ctx.font = '11px monospace';
     const dataLabel = usingBounded ? `Bounded N≤${state.boundedN}` : `N: ${state.nMin}-${state.nMax}`;
-    ctx.fillText(`${dataLabel} | Points: ${debugDrawnCount} | Size: ${finalPointSize.toFixed(1)}px${usingBounded ? ' (Formula mode - limited data)' : ''}`, 10, H - 45);
+    ctx.fillText(`${dataLabel} | Points: ${debugDrawnCount} | Size: ${finalPointSize.toFixed(1)}px${usingBounded ? ' (Formula mode - limited data)' : ''}`, 10, H - 58);
     
     // Draw word art on top
     drawWordArt(ctx);
     
     updateColorLegend(colorMode, showAll, sector);
     updateSectorStats(sector, residues);
-    
-    // Update stats panel if visible
-    if (document.getElementById('statsPanel').style.display !== 'none') {
-        updateStatsPanel();
-    }
 }
 
 function updateTrackerInfo(trackerPoints, enabled) {
@@ -8261,6 +8298,74 @@ function updateTrackerInfo(trackerPoints, enabled) {
     });
     if (trackerPoints.length > 10) html += `<span style="color:#64748b;">... +${trackerPoints.length - 10} more</span>`;
     data.innerHTML = html;
+    
+    // Update connections panel
+    updateTrackerConnectionsPanel(trackerPoints, enabled);
+}
+
+function updateTrackerConnectionsPanel(trackerPoints, enabled) {
+    const panel = document.getElementById('trackerConnectionsPanel');
+    if (!panel) return;
+    
+    const connectEnabled = document.getElementById('trackerConnect')?.checked || false;
+    
+    if (!enabled || !connectEnabled || trackerPoints.length < 2) {
+        panel.style.display = 'none';
+        return;
+    }
+    
+    panel.style.display = 'block';
+    
+    // Calculate connection details
+    const connections = [];
+    for (let i = 0; i < trackerPoints.length - 1; i++) {
+        const p1 = trackerPoints[i];
+        const p2 = trackerPoints[i + 1];
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(-dy, dx) * 180 / Math.PI; // negative dy because canvas Y is inverted
+        const deltaR = p2.r - p1.r;
+        const deltaM = p2.m - p1.m;
+        const deltaAngle = ((p2.r/p2.m - p1.r/p1.m) * 360).toFixed(2);
+        
+        connections.push({
+            from: `${p1.r}/${p1.m}`,
+            to: `${p2.r}/${p2.m}`,
+            length: length.toFixed(1),
+            angle: angle.toFixed(1),
+            deltaR,
+            deltaM,
+            deltaAngle
+        });
+    }
+    
+    let html = `<div style="color:#00ffff;font-weight:600;margin-bottom:6px;border-bottom:1px solid rgba(0,255,255,0.2);padding-bottom:4px;">
+        Connection Lines (${connections.length})
+    </div>`;
+    
+    connections.forEach((conn, idx) => {
+        html += `
+        <div style="margin-bottom:6px;padding:4px;background:rgba(0,255,255,0.05);border-radius:3px;border-left:2px solid #00ffff;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:2px;">
+                <span style="color:#22c55e;font-weight:600;">#${idx + 1}</span>
+                <span style="color:#cbd5e1;">${conn.from} → ${conn.to}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:9px;">
+                <div><span style="color:#94a3b8;">Length:</span> <span style="color:#fbbf24;">${conn.length}px</span></div>
+                <div><span style="color:#94a3b8;">Angle:</span> <span style="color:#8b5cf6;">${conn.angle}°</span></div>
+                <div><span style="color:#94a3b8;">Δr:</span> <span style="color:#06b6d4;">${conn.deltaR > 0 ? '+' : ''}${conn.deltaR}</span></div>
+                <div><span style="color:#94a3b8;">Δm:</span> <span style="color:#06b6d4;">${conn.deltaM > 0 ? '+' : ''}${conn.deltaM}</span></div>
+                <div style="grid-column:1/3;"><span style="color:#94a3b8;">Arc:</span> <span style="color:#f59e0b;">${conn.deltaAngle}°</span></div>
+            </div>
+        </div>`;
+    });
+    
+    html += `<div style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(0,255,255,0.2);font-size:9px;color:#64748b;">
+        Total path length: <span style="color:#fbbf24;">${connections.reduce((sum, c) => sum + parseFloat(c.length), 0).toFixed(1)}px</span>
+    </div>`;
+    
+    panel.innerHTML = html;
 }
 
 function updateSectorStats(sector, residues) {
@@ -8872,22 +8977,40 @@ function getRingPointColor(colorMode, res, s, ip, m, r, maxGap, minGap) {
         case 'sector': return getSectorColor(s);
         case 'prime': return ip ? '#f59e0b' : '#6366f1';
         case 'denominator': return `hsl(${260-((m-state.nMin)/(state.nMax-state.nMin+1))*200},70%,60%)`;
-        case 'numerator': 
-            // Color by numerator value with rainbow gradient
-            return `hsl(${(r % 12) * 30}, 75%, 55%)`;
-        case 'lcm':
-            // Color by LCM(r, m)
-            const lcmVal = (r * m) / gcd(r, m);
-            const lcmHue = (lcmVal % 20) * 18; // Cycle through spectrum
-            return `hsl(${lcmHue}, 70%, 55%)`;
-        case 'modulo':
-            // Color by r mod 12 (musical intervals)
-            const modVal = r % 12;
-            return `hsl(${modVal * 30}, 80%, 60%)`;
+        case 'numerator': return `hsl(${(r/m)*360},70%,55%)`;
         case 'gap': 
             const g = res.gapRight || minGap;
             const gn = maxGap > minGap ? (g-minGap)/(maxGap-minGap) : 0.5;
             return `hsl(${120-gn*120},80%,50%)`;
+        
+        // Arithmetic modes
+        case 'gcd':
+            const gcdColor = gcd(r, m);
+            return gcdColor === 1 ? '#ffd700' : `hsl(${(gcdColor % 12) * 30}, 70%, 50%)`;
+        case 'lcm':
+            const lcmVal = (r * m) / gcd(r, m);
+            const lcmNorm = Math.min(Math.log2(lcmVal) / 10, 1);
+            return `hsl(${260 - lcmNorm * 200}, 70%, 55%)`;
+        case 'rPlusM':
+            const sumVal = r + m;
+            const sumNorm = Math.min(sumVal / (state.nMax * 2), 1);
+            return `hsl(${sumNorm * 280}, 70%, 55%)`;
+        case 'rTimesM':
+            const prodVal = r * m;
+            const prodNorm = Math.min(Math.log2(prodVal) / 16, 1);
+            return `hsl(${120 - prodNorm * 120}, 75%, 50%)`;
+        case 'rModM':
+            const modVal = r % m;
+            return `hsl(${(modVal / m) * 360}, 70%, 55%)`;
+        
+        // Geometric modes
+        case 'angle':
+            const angleVal = (r / m) * 360;
+            return `hsl(${angleVal}, 80%, 55%)`;
+        case 'radius':
+            const startM = state.startM || 2;
+            const radNorm = (m - startM) / (state.nMax - startM);
+            return `hsl(${260 - radNorm * 200}, 70%, 55%)`;
         
         // Harmonic color modes
         case 'harmonic':
@@ -8920,10 +9043,6 @@ function getRingPointColor(colorMode, res, s, ip, m, r, maxGap, minGap) {
             return '#ef4444';
         
         // Number theory modes
-        case 'gcd':
-            const gcdVal = gcd(r, m);
-            if (gcdVal === 1) return '#22c55e'; // Coprime in bright green
-            return `hsl(${(gcdVal * 40) % 360}, 70%, 55%)`; // Other GCD values in spectrum
         case 'quadRes':
             const isQR = isQuadraticResidue(r, m);
             return isQR ? '#22c55e' : '#6366f1';
@@ -9157,16 +9276,14 @@ function viewPointOnAll(r, m, sector) {
     document.getElementById('showAllSectors').checked = true;
     state.highlightSectorOnly = sector;
     
-    // Set point size from solver control if available
-    const solverPtSize = parseFloat(document.getElementById('solverPointSize')?.value || 5);
-    document.getElementById('ringPointSize').value = solverPtSize;
-    updatePtSizeDisplay();
+    // Don't change user's ring point size — tracker size will highlight the selected point
     
     // Enable tracker to highlight the specific fraction
     document.getElementById('enableResidueTracker').checked = true;
     document.getElementById('trackResidues').value = r;
     document.getElementById('trackerColor').value = '#10b981';
     document.getElementById('trackerGlow').checked = true;
+    const solverPtSize = parseFloat(document.getElementById('solverPointSize')?.value || 5);
     document.getElementById('trackerSize').value = solverPtSize;
     
     // Update solver input with the clicked fraction's decimal value
@@ -9806,28 +9923,27 @@ function drawSectorTree() {
         } else if (isOnPath) {
             ctx.fillStyle = '#f59e0b';
         } else {
-            // Apply color mode
-            switch (colorMode) {
-                case 'sector':
-                    ctx.fillStyle = getSectorColor(node.sector);
-                    break;
-                case 'prime':
-                    ctx.fillStyle = node.isPrime ? '#f59e0b' : '#6366f1';
-                    break;
-                case 'arnold':
-                    if (typeof getHarmonicMode === 'function') {
-                        const mode = getHarmonicMode(node.m);
-                        ctx.fillStyle = mode.color;
-                    } else {
-                        ctx.fillStyle = '#6366f1';
-                    }
-                    break;
-                default:
-                    if (sectorFilter !== 'all' && inSector) {
-                        ctx.fillStyle = getSectorColor(node.sector);
-                    } else {
-                        ctx.fillStyle = '#6366f1';
-                    }
+            // Apply color mode using the main ring color function
+            if (colorMode === 'default') {
+                ctx.fillStyle = (sectorFilter !== 'all' && inSector) ? getSectorColor(node.sector) : '#6366f1';
+            } else if (colorMode === 'depth') {
+                // Special tree-only mode: color by depth
+                const depthNorm = Math.min(node.depth / 15, 1);
+                ctx.fillStyle = `hsl(${260 - depthNorm * 200}, 70%, 55%)`;
+            } else if (colorMode === 'angle') {
+                // Special tree-only mode: color by angular position
+                const angleVal = (node.r / node.m) * 360;
+                ctx.fillStyle = `hsl(${angleVal}, 80%, 55%)`;
+            } else {
+                // Use main ring color function
+                const dummyRes = { 
+                    r: node.r, 
+                    m: node.m, 
+                    sector: node.sector, 
+                    isPrime: node.isPrime,
+                    gapRight: 0
+                };
+                ctx.fillStyle = getRingPointColor(colorMode, dummyRes, node.sector, node.isPrime, node.m, node.r, 1, 0);
             }
         }
         ctx.fill();
@@ -9847,18 +9963,21 @@ function drawSectorTree() {
         drawTreePath(ctx, treeNodes, selectedTreePoint);
     }
     
-    // Draw tree labels
-    ctx.fillStyle = '#64748b';
-    ctx.font = '10px system-ui';
-    ctx.textAlign = 'left';
-    ctx.fillText('0/1', 10, 30);
-    ctx.textAlign = 'right';
-    ctx.fillText('1/1', W - 10, 30);
-    ctx.textAlign = 'center';
-    ctx.fillText('1/2 (root)', W/2, 25);
+    // Draw tree legend (0/1, 1/1, 1/2 labels and sector info)
+    const showLegend = document.getElementById('showTreeLegend')?.checked ?? true;
+    if (showLegend) {
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px system-ui';
+        ctx.textAlign = 'left';
+        ctx.fillText('0/1', 10, 30);
+        ctx.textAlign = 'right';
+        ctx.fillText('1/1', W - 10, 30);
+        ctx.textAlign = 'center';
+        ctx.fillText('1/2 (root)', W/2, 25);
+    }
     
     // Sector info
-    if (sectorFilter !== 'all') {
+    if (showLegend && sectorFilter !== 'all') {
         const sectorNum = parseInt(sectorFilter);
         const nodesInSector = treeNodes.filter(n => n.sector === sectorNum);
         ctx.fillStyle = '#a5b4fc';
@@ -17418,9 +17537,10 @@ function highlightPointOnRing(fraction) {
     }
     
     // Calculate radius (same formula as drawMainRing)
+    const startM = state.startM || 2;
     let radNorm = invertOrder 
-        ? (1 - (fraction.m - state.nMin) / (state.nMax - state.nMin + 1)) 
-        : ((fraction.m - state.nMin) / (state.nMax - state.nMin + 1));
+        ? (1 - (fraction.m - startM) / (state.nMax - startM)) 
+        : ((fraction.m - startM) / (state.nMax - startM));
     
     if (ringSpacing !== 1) {
         radNorm = Math.pow(radNorm, 1 / ringSpacing);
@@ -19583,12 +19703,10 @@ function solverHighlightOnRing() {
     document.getElementById('showAllSectors').checked = true;
     state.highlightSectorOnly = solverCurrentMatch.sector;
     
-    // Set point size from solver control
-    const solverPtSize = parseFloat(document.getElementById('solverPointSize')?.value || 5);
-    document.getElementById('ringPointSize').value = solverPtSize;
-    updatePtSizeDisplay();
+    // Don't change user's ring point size — tracker size will highlight the point
     
     // Enable tracker to highlight the specific fraction
+    const solverPtSize = parseFloat(document.getElementById('solverPointSize')?.value || 5);
     document.getElementById('enableResidueTracker').checked = true;
     document.getElementById('trackResidues').value = solverCurrentMatch.r;
     document.getElementById('trackerColor').value = '#10b981';
@@ -21234,138 +21352,6 @@ function exportCalcDataJSON() {
     a.click();
     URL.revokeObjectURL(url);
 }
-
-
-// ==================== GCD & STATS FUNCTIONS ====================
-
-function getSBPath(a, b) {
-    // Get Stern-Brocot tree path
-    let path = '';
-    let left = [0, 1];
-    let right = [1, 0];
-    let count = 0;
-    
-    while (count < 15) {
-        let mid = [left[0] + right[0], left[1] + right[1]];
-        if (mid[0] === a && mid[1] === b) break;
-        
-        if (a * mid[1] < b * mid[0]) {
-            right = mid;
-            path += 'L';
-        } else {
-            left = mid;
-            path += 'R';
-        }
-        count++;
-    }
-    
-    return path || 'ROOT';
-}
-
-function toggleStatsPanel() {
-    const panel = document.getElementById('statsPanel');
-    if (panel.style.display === 'none') {
-        panel.style.display = 'block';
-        updateStatsPanel();
-    } else {
-        panel.style.display = 'none';
-    }
-}
-
-function updateStatsPanel() {
-    const sector = +document.getElementById('viewSector').value;
-    const showAll = document.getElementById('showAllSectors').checked;
-    
-    let residues;
-    const fullData = showAll ? Object.values(state.residuesBySector).flat() : (state.residuesBySector[sector]||[]);
-    const boundedData = showAll ? Object.values(state.boundedResiduesBySector||{}).flat() : (state.boundedResiduesBySector?.[sector]||[]);
-    
-    if (fullData.length > 0) {
-        residues = fullData;
-    } else if (boundedData.length > 0) {
-        residues = boundedData;
-    } else {
-        residues = [];
-    }
-    
-    // Calculate stats
-    const totalPoints = residues.filter(r => !r.isCusp).length;
-    let gcd1Count = 0;
-    let gcdGt1Count = 0;
-    let gcdSum = 0;
-    
-    residues.forEach(res => {
-        if (res.isCusp) return;
-        const g = gcd(res.r, res.m);
-        if (g === 1) {
-            gcd1Count++;
-        } else {
-            gcdGt1Count++;
-        }
-        gcdSum += g;
-    });
-    
-    const avgGcd = totalPoints > 0 ? (gcdSum / totalPoints).toFixed(3) : 0;
-    
-    // Update stats display
-    document.getElementById('statsTotalPoints').textContent = totalPoints;
-    document.getElementById('statsGcd1Count').textContent = gcd1Count;
-    document.getElementById('statsGcdGt1Count').textContent = gcdGt1Count;
-    document.getElementById('statsAvgGcd').textContent = avgGcd;
-    
-    // Update point list (limit to first 100 for performance)
-    const pointListDiv = document.getElementById('pointList');
-    pointListDiv.innerHTML = '';
-    
-    const displayLimit = Math.min(100, totalPoints);
-    const validPoints = residues.filter(r => !r.isCusp).slice(0, displayLimit);
-    
-    validPoints.forEach((res, idx) => {
-        const { r, m } = res;
-        const g = gcd(r, m);
-        const isGcd1 = g === 1;
-        const value = r / m;
-        
-        const div = document.createElement('div');
-        div.className = `point-item ${isGcd1 ? 'gcd1' : 'gcdgt1'}`;
-        div.innerHTML = `${r}/${m} = ${value.toFixed(4)} | GCD=${g} | Path=${getSBPath(r, m).substring(0, 8)}`;
-        div.onclick = () => selectPointForInfo(r, m);
-        pointListDiv.appendChild(div);
-    });
-    
-    if (totalPoints > displayLimit) {
-        const moreDiv = document.createElement('div');
-        moreDiv.style.cssText = 'color:#64748b;font-size:9px;text-align:center;padding:6px;';
-        moreDiv.textContent = `... ${totalPoints - displayLimit} more points`;
-        pointListDiv.appendChild(moreDiv);
-    }
-}
-
-function selectPointForInfo(r, m) {
-    const g = gcd(r, m);
-    const value = r / m;
-    const angle = value * 360;
-    const path = getSBPath(r, m);
-    
-    const infoDiv = document.getElementById('selectedPointInfo');
-    infoDiv.innerHTML = `
-        <div style="color:#8b5cf6;font-weight:bold;margin-bottom:4px;">${r}/${m}</div>
-        <div style="line-height:1.6;">
-        Decimal: ${value.toFixed(6)}<br>
-        GCD(${r},${m}) = ${g}<br>
-        Tuple: (${r}, ${m})<br>
-        Angle: ${angle.toFixed(2)}°<br>
-        SB Path: ${path}<br>
-        Coprime: ${g === 1 ? 'Yes' : 'No'}
-        </div>
-    `;
-    
-    // Highlight point on canvas if possible
-    document.getElementById('pointSelectInput').value = `${r}/${m}`;
-    selectPointByFraction();
-}
-
-// ==================== END OF NEW FUNCTIONS ====================
 
 </script>
 </body>
