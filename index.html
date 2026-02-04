@@ -702,6 +702,7 @@
         <span class="subtab" onclick="switchSubTab('cf')">Cont. Fractions</span>
         <span class="subtab" onclick="switchSubTab('euler')">Euler Product</span>
         <span class="subtab" onclick="switchSubTab('harmonic')">Harmonic</span>
+        <span class="subtab" onclick="switchSubTab('maxwell')">Maxwell Fields</span>
     </div>
     <div id="subtabs-advanced" class="subtabs" style="display:none;">
         <span class="subtab active" onclick="switchSubTab('modular')">Modular</span>
@@ -715,14 +716,26 @@
     
     <!-- MAIN TAB - MAIN VIEW -->
     <div id="tab-mainview" class="tab-content active">
-        <!-- Hero Formula Banner -->
-        <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);padding:12px 20px;border-radius:8px;margin-bottom:15px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <!-- Hero Formula Banner -->\n        <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);padding:12px 20px;border-radius:8px;margin-bottom:15px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
             <div>
                 <span style="color:#a78bfa;font-size:0.9em;font-weight:500;">Farey Summatory Function</span>
                 <div style="font-family:'Courier New',monospace;font-size:1.4em;color:#f1f5f9;margin-top:4px;">C(n,N) = 3N² / (π² n(n+1))</div>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
                 <span style="color:#64748b;font-size:0.8em;">Sector Sₙ = (1/(n+1), 1/n]</span>
+            </div>
+        </div>
+        
+        <!-- Introduction Panel -->
+        <div style="background:#0f172a;border-radius:8px;padding:15px;margin-bottom:15px;border-left:4px solid #8b5cf6;">
+            <h3 style="color:#8b5cf6;margin:0 0 10px 0;font-size:1.1em;">Interactive Farey Sequence Explorer</h3>
+            <p style="color:#94a3b8;font-size:0.9em;margin:0 0 8px 0;">
+                This visualization explores coprime fractions r/m within Farey sequence intervals (sectors). Each sector Sₙ = (1/(n+1), 1/n] contains fractions arranged in a circular ring, with colors indicating various mathematical properties.
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px;font-size:0.85em;">
+                <div style="color:#cbd5e1;"><strong style="color:#22c55e;">Ring Canvas:</strong> Points arranged by angle (r/m × 2π) and radius (denominator m)</div>
+                <div style="color:#cbd5e1;"><strong style="color:#f59e0b;">Sector Tree:</strong> Stern-Brocot tree showing hierarchical fraction structure</div>
+                <div style="color:#cbd5e1;"><strong style="color:#06b6d4;">Stats Panels:</strong> Real-time counts, formula predictions, and error analysis</div>
             </div>
         </div>
         
@@ -945,6 +958,13 @@
                             <label style="font-size:11px;"><input type="checkbox" id="showRingLabels" onchange="drawMainRing()"> Ring Labels</label>
                             <label style="font-size:11px;"><input type="checkbox" id="showAllSectorLines" onchange="drawMainRing()"> All 1/n Lines</label>
                             <label style="font-size:11px;"><input type="checkbox" id="showNnChain" checked onchange="drawMainRing()"> n/n Chain</label>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
+                            <label style="font-size:11px;"><input type="checkbox" id="showConcentricRings" onchange="drawMainRing()"> Concentric Rings</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="showRadialGrid" onchange="drawMainRing()"> Radial Grid</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="showSectorShading" onchange="drawMainRing()"> Sector Shading</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="showGapLines" onchange="drawMainRing()"> Gap Lines</label>
+                            <label style="font-size:11px;"><input type="checkbox" id="showMediantLines" onchange="drawMainRing()"> Mediant Lines</label>
                         </div>
                         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;">
                             <label style="font-size:11px;"><input type="checkbox" id="showFractionLabels" onchange="drawMainRing()"> Point Labels</label>
@@ -2380,6 +2400,9 @@
     <div id="tab-3d" class="tab-content">
         <div class="panel">
             <h3>3D Sector Cone</h3>
+            <p style="color:#94a3b8;font-size:0.9em;margin-bottom:15px;">
+                Visualizes the density distribution C(n,N) ~ (3/π²)N²/(n(n+1)) as a 3D cone surface. The vertical axis represents sector number n, the radial axis shows N, and the height indicates fraction count. The cone shape reveals how coprime density concentrates in lower sectors and decreases as 1/n².
+            </p>
             
             <!-- 3D Controls with input boxes -->
             <div style="background:#0f172a;padding:12px;border-radius:8px;margin-bottom:12px;">
@@ -3320,6 +3343,192 @@
 <div class="modal-overlay" id="pointModal"><div class="modal-content" style="max-width:450px;"><div class="modal-header"><h3 id="pointModalTitle">Point</h3><button class="modal-close" onclick="closePointModal()">x</button></div><div class="modal-body" id="pointModalBody"></div></div></div>
 
 <div class="modal-overlay" id="sectorModal"><div class="modal-content" style="max-width:700px;"><div class="modal-header"><h3 id="sectorModalTitle">Sector Details</h3><button class="modal-close" onclick="closeSectorModal()">x</button></div><div class="modal-body" id="sectorModalBody"></div></div></div>
+
+    <!-- MAXWELL FIELD THEORY TAB -->
+    <div id="tab-maxwell" class="tab-content">
+        <div class="panel">
+            <h2 style="text-align:center;color:#22c55e;margin-bottom:8px;">Electromagnetic Field Analogies in Number Theory</h2>
+            <p style="text-align:center;color:#94a3b8;font-style:italic;margin-bottom:20px;">Exploring Maxwell-like equations for arithmetic density fields</p>
+            
+            <div style="background:linear-gradient(135deg,#422006,#5a3a1a);border:2px solid #fbbf24;border-radius:8px;padding:20px;margin-bottom:25px;">
+                <h3 style="color:#fcd34d;margin:0 0 15px 0;">Conceptual Framework</h3>
+                <p style="color:#fef08a;font-size:0.95em;margin:0 0 12px 0;">
+                    Maxwell's equations describe how electric and magnetic fields propagate through space. Similarly, we can define <strong>arithmetic density fields</strong> that describe how coprime pairs distribute across the rational number plane, with "sources" at prime denominators and "flows" along Farey sequences.
+                </p>
+            </div>
+            
+            <h3 style="color:#8b5cf6;border-bottom:2px solid #8b5cf6;padding-bottom:8px;">1. The Arithmetic Vector Fields</h3>
+            
+            <div class="grid-2" style="gap:15px;margin-bottom:20px;">
+                <div style="background:#1e1b4b;padding:15px;border-radius:8px;border-left:4px solid #22c55e;">
+                    <h4 style="color:#22c55e;margin:0 0 10px 0;">Density Field D(r,m)</h4>
+                    <div style="background:#0f172a;padding:10px;border-radius:4px;font-family:monospace;font-size:0.9em;margin:10px 0;">
+                        D(r,m) = (3/π²) · φ(m)/m² · δ(gcd(r,m)-1)
+                    </div>
+                    <p style="color:#94a3b8;font-size:0.85em;margin:8px 0 0 0;">
+                        The "density field" at each point (r,m) in the integer lattice, weighted by Euler's totient function and enforcing coprimality via Kronecker delta.
+                    </p>
+                </div>
+                
+                <div style="background:#1e1b4b;padding:15px;border-radius:8px;border-left:4px solid #f59e0b;">
+                    <h4 style="color:#f59e0b;margin:0 0 10px 0;">Flow Field F(θ,m)</h4>
+                    <div style="background:#0f172a;padding:10px;border-radius:4px;font-family:monospace;font-size:0.9em;margin:10px 0;">
+                        F(θ,m) = ∇_θ[C(sector(θ),m)]
+                    </div>
+                    <p style="color:#94a3b8;font-size:0.85em;margin:8px 0 0 0;">
+                        Angular gradient of coprime count, showing how density "flows" between Farey sectors as we traverse the unit circle.
+                    </p>
+                </div>
+            </div>
+            
+            <h3 style="color:#8b5cf6;border-bottom:2px solid #8b5cf6;padding-bottom:8px;margin-top:25px;">2. Maxwell-Style Equations for Arithmetic Fields</h3>
+            
+            <div style="background:#0f172a;padding:20px;border-radius:8px;border:2px solid #6366f1;margin-bottom:20px;">
+                <h4 style="color:#a5b4fc;margin:0 0 15px 0;">Gauss's Law (Density Sources)</h4>
+                <div style="background:#1e1b4b;padding:12px;border-radius:4px;font-family:monospace;text-align:center;margin:10px 0;">
+                    ∇ · D = ρ_prime(m) = μ(m) · ln(m)
+                </div>
+                <p style="color:#cbd5e1;font-size:0.9em;margin:0;">
+                    The divergence of the density field equals the "prime charge density" given by the Möbius function weighted by log(m). Prime denominators act as <strong>sources</strong> (ρ > 0), composite denominators with repeated factors act as <strong>sinks</strong> (ρ < 0), and square-free composites are neutral (μ = -1 provides cancellation).
+                </p>
+            </div>
+            
+            <div style="background:#0f172a;padding:20px;border-radius:8px;border:2px solid #22c55e;margin-bottom:20px;">
+                <h4 style="color:#4ade80;margin:0 0 15px 0;">Faraday's Law (Rotation/Circulation)</h4>
+                <div style="background:#1e1b4b;padding:12px;border-radius:4px;font-family:monospace;text-align:center;margin:10px 0;">
+                    ∇ × F = -∂D/∂m
+                </div>
+                <p style="color:#cbd5e1;font-size:0.9em;margin:0;">
+                    The curl of the flow field equals the negative rate of change of density with respect to m. This captures the <strong>Stern-Brocot tree structure</strong>: as we increase denominators (∂/∂m), the angular distribution rotates, creating circulation patterns in the density field.
+                </p>
+            </div>
+            
+            <div style="background:#0f172a;padding:20px;border-radius:8px;border:2px solid #8b5cf6;margin-bottom:20px;">
+                <h4 style="color:#c4b5fd;margin:0 0 15px 0;">No Magnetic Monopoles (Totient Conservation)</h4>
+                <div style="background:#1e1b4b;padding:12px;border-radius:4px;font-family:monospace;text-align:center;margin:10px 0;">
+                    ∇ · F = 0
+                </div>
+                <p style="color:#cbd5e1;font-size:0.9em;margin:0;">
+                    The flow field is divergence-free, reflecting <strong>totient conservation</strong>: Σφ(d) = n for divisors d|n. Fractions can't appear or disappear—they're redistributed through the Stern-Brocot tree structure.
+                </p>
+            </div>
+            
+            <div style="background:#0f172a;padding:20px;border-radius:8px;border:2px solid #f59e0b;margin-bottom:20px;">
+                <h4 style="color:#fbbf24;margin:0 0 15px 0;">Ampère's Law (Induced Flows)</h4>
+                <div style="background:#1e1b4b;padding:12px;border-radius:4px;font-family:monospace;text-align:center;margin:10px 0;">
+                    ∇ × D = ∂F/∂m + J_mediant
+                </div>
+                <p style="color:#cbd5e1;font-size:0.9em;margin:0;">
+                    The curl of density equals the change in flow plus a "mediant current" J_mediant representing the continuous generation of new fractions via the mediant operation (r₁+r₂)/(m₁+m₂). This is the <strong>Farey construction principle</strong> cast as an electromagnetic induction law.
+                </p>
+            </div>
+            
+            <h3 style="color:#8b5cf6;border-bottom:2px solid #8b5cf6;padding-bottom:8px;margin-top:25px;">3. Wave Equations and Propagation</h3>
+            
+            <div style="background:#1e1b4b;padding:20px;border-radius:8px;border-left:4px solid #06b6d4;margin-bottom:20px;">
+                <h4 style="color:#22d3ee;margin:0 0 10px 0;">Arithmetic Wave Equation</h4>
+                <p style="color:#94a3b8;font-size:0.9em;margin:0 0 12px 0;">
+                    Combining the curl equations yields a wave equation for density propagation:
+                </p>
+                <div style="background:#0f172a;padding:12px;border-radius:4px;font-family:monospace;text-align:center;margin:10px 0;">
+                    ∂²D/∂m² - ∇²D = ρ_prime(m)
+                </div>
+                <p style="color:#cbd5e1;font-size:0.9em;margin:10px 0 0 0;">
+                    This describes how coprime density "propagates" as denominators increase, with prime sources generating outward-spreading "waves" of fractions. The Laplacian ∇²D represents diffusion across angular directions (Farey neighbors).
+                </p>
+            </div>
+            
+            <h3 style="color:#8b5cf6;border-bottom:2px solid #8b5cf6;padding-bottom:8px;margin-top:25px;">4. Poynting Vector: Energy Flow in the Farey Field</h3>
+            
+            <div style="background:#1e1b4b;padding:20px;border-radius:8px;border-left:4px solid #ef4444;margin-bottom:20px;">
+                <h4 style="color:#f87171;margin:0 0 10px 0;">Arithmetic Poynting Vector</h4>
+                <div style="background:#0f172a;padding:12px;border-radius:4px;font-family:monospace;text-align:center;margin:10px 0;">
+                    S = D × F = (density) × (flow)
+                </div>
+                <p style="color:#cbd5e1;font-size:0.9em;margin:10px 0 0 0;">
+                    The cross product of density and flow fields gives an "energy flux" representing the <strong>rate of fraction generation</strong> in the Stern-Brocot tree. High Poynting magnitude indicates regions where new fractions are being actively produced via mediants.
+                </p>
+                <p style="color:#fef08a;font-size:0.85em;margin:12px 0 0 0;padding:10px;background:rgba(251,191,36,0.1);border-radius:4px;">
+                    <strong>Interpretation:</strong> Just as electromagnetic energy flows from sources to sinks, "arithmetic energy" (fraction generation) flows from prime denominators through the mediant construction, filling the rational number line.
+                </p>
+            </div>
+            
+            <h3 style="color:#8b5cf6;border-bottom:2px solid #8b5cf6;padding-bottom:8px;margin-top:25px;">5. Computational Visualizations</h3>
+            
+            <div style="background:#0f172a;padding:15px;border-radius:8px;margin-bottom:15px;">
+                <h4 style="color:#a78bfa;margin:0 0 10px 0;">Field Visualizations (Coming Soon)</h4>
+                <ul style="color:#94a3b8;font-size:0.9em;margin:0 0 0 20px;">
+                    <li>Vector field plot showing D and F as arrows on the (r,m) lattice</li>
+                    <li>Streamlines of the flow field F along Farey sequences</li>
+                    <li>Heatmap of |S| (Poynting magnitude) showing generation hotspots</li>
+                    <li>Animation of density wave propagation as N increases</li>
+                    <li>3D surface plot: D(θ,m) as height over the (angle, denominator) plane</li>
+                </ul>
+            </div>
+            
+            <h3 style="color:#8b5cf6;border-bottom:2px solid #8b5cf6;padding-bottom:8px;margin-top:25px;">6. Physical Analogies and Interpretations</h3>
+            
+            <div class="grid-2" style="gap:15px;margin-bottom:20px;">
+                <div style="background:#0f172a;padding:15px;border-radius:8px;border-left:3px solid #22c55e;">
+                    <strong style="color:#22c55e;">Quantum Field Theory</strong>
+                    <p style="color:#94a3b8;font-size:0.85em;margin:8px 0 0 0;">
+                        Prime "particles" create coprime "field quanta" (fractions). The totient function φ(m) acts as a coupling constant determining interaction strength.
+                    </p>
+                </div>
+                <div style="background:#0f172a;padding:15px;border-radius:8px;border-left:3px solid #f59e0b;">
+                    <strong style="color:#f59e0b;">Fluid Dynamics</strong>
+                    <p style="color:#94a3b8;font-size:0.85em;margin:8px 0 0 0;">
+                        Coprime density behaves like an incompressible fluid (∇·F = 0) flowing through the Stern-Brocot tree "pipe network" with prime sources.
+                    </p>
+                </div>
+                <div style="background:#0f172a;padding:15px;border-radius:8px;border-left:3px solid #8b5cf6;">
+                    <strong style="color:#8b5cf6;">Gravitational Lensing</strong>
+                    <p style="color:#94a3b8;font-size:0.85em;margin:8px 0 0 0;">
+                        Large primes create "potential wells" that concentrate nearby fractions, analogous to mass curving spacetime and bending light paths.
+                    </p>
+                </div>
+                <div style="background:#0f172a;padding:15px;border-radius:8px;border-left:3px solid #06b6d4;">
+                    <strong style="color:#06b6d4;">Diffraction Patterns</strong>
+                    <p style="color:#94a3b8;font-size:0.85em;margin:8px 0 0 0;">
+                        The circular ring visualization resembles diffraction from a circular aperture, with Farey gaps analogous to dark fringes in the interference pattern.
+                    </p>
+                </div>
+            </div>
+            
+            <h3 style="color:#8b5cf6;border-bottom:2px solid #8b5cf6;padding-bottom:8px;margin-top:25px;">7. Connection to Riemann Hypothesis</h3>
+            
+            <div style="background:linear-gradient(135deg,#1e3a5f,#2d4a6f);padding:20px;border-radius:8px;border:2px solid #38bdf8;margin-bottom:20px;">
+                <h4 style="color:#7dd3fc;margin:0 0 12px 0;">Spectral Interpretation</h4>
+                <p style="color:#cbd5e1;font-size:0.9em;margin:0 0 12px 0;">
+                    The zeros of the Riemann zeta function can be interpreted as "resonant frequencies" of the prime distribution field. The critical line Re(s) = 1/2 corresponds to the condition where the density wave equation has standing wave solutions.
+                </p>
+                <div style="background:#0f172a;padding:12px;border-radius:4px;font-family:monospace;font-size:0.85em;margin:10px 0;">
+                    RH ⟺ All eigenvalues of the density Laplacian have real part 1/2
+                </div>
+                <p style="color:#7dd3fc;font-size:0.85em;margin:10px 0 0 0;">
+                    This is analogous to how electromagnetic cavity modes have discrete frequencies—the prime distribution creates a "quantum cavity" in number space.
+                </p>
+            </div>
+            
+            <h3 style="color:#8b5cf6;border-bottom:2px solid #8b5cf6;padding-bottom:8px;margin-top:25px;">8. Future Directions</h3>
+            
+            <div style="background:#0f172a;padding:15px;border-radius:8px;margin-bottom:20px;">
+                <ul style="color:#94a3b8;font-size:0.9em;margin:0 0 0 20px;line-height:1.8;">
+                    <li><strong style="color:#22c55e;">Gauge Theory:</strong> Develop a gauge-invariant formulation where local "phase" transformations correspond to Möbius transformations on fractions</li>
+                    <li><strong style="color:#f59e0b;">Path Integrals:</strong> Express totient summation as a Feynman path integral over Stern-Brocot tree paths</li>
+                    <li><strong style="color:#8b5cf6;">Symmetry Groups:</strong> Explore PSL(2,Z) action on the Farey field as an arithmetic gauge symmetry</li>
+                    <li><strong style="color:#06b6d4;">Holographic Principle:</strong> Investigate whether the 1D Farey sequence encodes the full 2D coprime distribution (boundary-bulk correspondence)</li>
+                    <li><strong style="color:#ec4899;">Entropy Measures:</strong> Define Shannon entropy of coprime distributions and study information flow through Farey intervals</li>
+                </ul>
+            </div>
+            
+            <div style="background:linear-gradient(135deg,#422006,#5a3a1a);border:2px solid #fbbf24;border-radius:8px;padding:15px;margin-top:25px;">
+                <p style="color:#fef08a;font-size:0.9em;margin:0;text-align:center;">
+                    <strong>Note:</strong> This framework is exploratory and metaphorical. While the mathematical structures are rigorous, the "field theory" interpretation provides intuition rather than formal equivalence to electromagnetism.
+                </p>
+            </div>
+        </div>
+    </div>
 
     <!-- REFERENCES TAB -->
     <div id="tab-references" class="tab-content">
@@ -7761,6 +7970,58 @@ function drawMainRing() {
         });
     }
     
+    // Draw concentric rings (show all denominator rings)
+    const showConcentricRings = document.getElementById('showConcentricRings')?.checked || false;
+    if (showConcentricRings) {
+        const startM = state.startM || 2;
+        const step = Math.max(1, Math.floor((state.nMax - startM) / 20)); // max 20 rings
+        ctx.strokeStyle = 'rgba(100,116,139,0.15)';
+        ctx.lineWidth = 0.5;
+        for (let m = startM; m <= state.nMax; m += step) {
+            let radNorm = invertOrder ? (1 - (m-startM)/(state.nMax-startM)) : ((m-startM)/(state.nMax-startM));
+            if (ringSpacing !== 1) radNorm = Math.pow(radNorm, 1/ringSpacing);
+            const rad = Math.max(radNorm, 0.05) * maxR;
+            ctx.beginPath();
+            ctx.arc(cx, cy, rad, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+    }
+    
+    // Draw radial grid (spokes from center)
+    const showRadialGrid = document.getElementById('showRadialGrid')?.checked || false;
+    if (showRadialGrid) {
+        const numSpokes = 24; // Every 15 degrees
+        ctx.strokeStyle = 'rgba(100,116,139,0.12)';
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < numSpokes; i++) {
+            const angle = (i / numSpokes) * 2 * Math.PI;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + maxR * Math.cos(angle), cy - maxR * Math.sin(angle));
+            ctx.stroke();
+        }
+    }
+    
+    // Draw sector shading (background color per sector)
+    const showSectorShading = document.getElementById('showSectorShading')?.checked || false;
+    if (showSectorShading && showAll) {
+        const maxSector = Math.min(25, state.sectorMax || 10);
+        for (let n = 1; n <= maxSector; n++) {
+            const angle1 = 2 * Math.PI / (n + 1);
+            const angle2 = 2 * Math.PI / n;
+            const color = getSectorColor(n);
+            ctx.fillStyle = color + '0D'; // 5% opacity
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, maxR, -angle2, -angle1, false);
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+    
+    // Draw gap lines (to Farey neighbors) - done later with point data
+    // Draw mediant lines (parent-child in Stern-Brocot) - done later with point data
+    
     // Draw points
     const labeledPoints = [];
     residues.forEach(res => {
@@ -7865,6 +8126,50 @@ function drawMainRing() {
             ctx.fillStyle = trackerColor;
             ctx.beginPath(); ctx.arc(p.x,p.y,trackerSize,0,2*Math.PI); ctx.fill();
             ctx.shadowBlur = 0;
+        });
+    }
+    
+    // Draw gap lines (to Farey neighbors)
+    const showGapLines = document.getElementById('showGapLines')?.checked || false;
+    if (showGapLines && state.ringPoints.length > 0) {
+        ctx.strokeStyle = 'rgba(34,197,94,0.15)';
+        ctx.lineWidth = 0.5;
+        state.ringPoints.slice(0, 200).forEach(p => { // Limit to 200 for performance
+            // Find Farey neighbors (adjacent in sorted order on same ring)
+            const sameRing = state.ringPoints.filter(pt => pt.m === p.m);
+            const sorted = sameRing.sort((a,b) => a.angle - b.angle);
+            const idx = sorted.findIndex(pt => pt.r === p.r);
+            if (idx >= 0 && idx < sorted.length - 1) {
+                const neighbor = sorted[idx + 1];
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(neighbor.x, neighbor.y);
+                ctx.stroke();
+            }
+        });
+    }
+    
+    // Draw mediant lines (Stern-Brocot parent-child)
+    const showMediantLines = document.getElementById('showMediantLines')?.checked || false;
+    if (showMediantLines && state.ringPoints.length > 0) {
+        ctx.strokeStyle = 'rgba(139,92,246,0.15)';
+        ctx.lineWidth = 0.8;
+        const drawn = new Set();
+        state.ringPoints.slice(0, 150).forEach(p => { // Limit for performance
+            // For r/m, parents are typically at lower m values
+            // Find potential parents using mediant property: r/m = (r1+r2)/(m1+m2)
+            state.ringPoints.forEach(parent => {
+                if (parent.m >= p.m) return; // Parent must be earlier (lower m)
+                // Check if p could be mediant of parent and another fraction
+                const key = `${parent.r},${parent.m}->${p.r},${p.m}`;
+                if (!drawn.has(key) && p.m - parent.m <= 20) { // Reasonable m difference
+                    ctx.beginPath();
+                    ctx.moveTo(parent.x, parent.y);
+                    ctx.lineTo(p.x, p.y);
+                    ctx.stroke();
+                    drawn.add(key);
+                }
+            });
         });
     }
     
@@ -13872,7 +14177,7 @@ const tabGroups = {
     analysis: { subtabs: 'subtabs-analysis', default: 'stats', tabs: ['stats', 'primes', 'gaps'] },
     theory: { subtabs: 'subtabs-theory', default: 'theory', tabs: ['theory', 'theoryviz'] },
     geometry: { subtabs: 'subtabs-geometry', default: '3d', tabs: ['3d', 'hyperbolic', 'smith'] },
-    connections: { subtabs: 'subtabs-connections', default: 'franel', tabs: ['franel', 'dedekind', 'cf', 'euler', 'harmonic'] },
+    connections: { subtabs: 'subtabs-connections', default: 'franel', tabs: ['franel', 'dedekind', 'cf', 'euler', 'harmonic', 'maxwell'] },
     advanced: { subtabs: 'subtabs-advanced', default: 'modular', tabs: ['modular', 'psl', 'primorial', 'numtheory', 'horizon', 'animation', 'research'] },
     references: { subtabs: null, default: 'references' }
 };
